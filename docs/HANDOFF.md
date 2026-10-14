@@ -18,7 +18,7 @@ New confirmed accounts start Unassigned to category, group and unit and see only
 
 Six migrations are now applied on the actual new project. The older three were not replayed; all definitions match the repository under the documented normalization. Production origin is configured. The earlier template update used an ignored management API field; the corrected *_content field is now applied and strictly verified by readback. The Before User Created hook enforces app-issued signup tickets. Owner designation is private. Confirmed-email enrollment is enabled after verified SMTP delivery. Before configuration there were zero Auth users, members and linked accounts.
 
-128 application tests, 182 PostgreSQL assertions, 32 phone Chromium tests, 44 local signup checks and 42 invitation/recovery checks passed. The real local hook also rejected a direct signup bypass and allowed app-issued tickets. External security review was waived by Anthony. Physical-device and hosted owner confirmation are not yet claimed.
+128 application tests, 182 PostgreSQL assertions, 32 phone Chromium tests, 44 local signup checks and 42 invitation/recovery checks passed. The real local hook also rejected a direct signup bypass and allowed app-issued tickets. External security review was waived by Anthony. Hosted owner confirmation and first sign-in were verified privately. Physical-device testing is not yet claimed.
 
 ## Current production and email
 
