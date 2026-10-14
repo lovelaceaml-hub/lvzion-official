@@ -1,0 +1,50 @@
+{
+  "milestone": "R6 autonomous member-foundation readiness",
+  "date": "2026-10-14",
+  "source_commit": "4f9b452d8cc562c3bca677c50be97f48de7507c3",
+  "branch": "feature/member-system-secure-r1",
+  "deployment": {
+    "id": "dpl_12Q35Py4ddw7gay1R1LsW5Fhdcsw",
+    "target": "preview",
+    "status": "READY",
+    "url": "https://lvzion-official-gxvla6c4w-lvzion.vercel.app",
+    "build_seconds_reported": 23
+  },
+  "checks": {
+    "strict_typescript": "passed in Git-backed build",
+    "node_tests": {"passed": 110, "failed": 0, "skipped": 0},
+    "postgresql_assertions": {"passed": 111, "environment": "disposable PGlite in Git-backed build"},
+    "nextjs_build": "passed",
+    "hosted_browser_tests": {"passed": 25, "failed": 0, "browser": "Chromium", "viewport": "phone / iPhone 13 emulation, plus 320px narrow case", "base_url": "https://lvzion-official-gxvla6c4w-lvzion.vercel.app", "duration_seconds_reported": 9.9},
+    "real_offline_navigation": "passed; public fallback and exactly four static cached assets",
+    "physical_safari_or_android": "not tested in this increment",
+    "hosted_authenticated_sign_in": "not activated or tested; guard remains enabled"
+  },
+  "hosted_read_only_verification": {
+    "project_ref": "otecqlkqirncotytbfns",
+    "members": 0,
+    "auth_users": 0,
+    "linked_accounts": 0,
+    "invitations": 0,
+    "rls_protected_application_tables": 17,
+    "unprotected_application_tables": 0,
+    "applied_migrations": 3,
+    "normalized_migration_definition_matches": 3,
+    "history_rewritten": false,
+    "schema_changed_in_increment": false
+  },
+  "production_promoted": false,
+  "real_members_imported": false,
+  "external_invitations_sent": false,
+  "new_paid_provider_added": false,
+  "previously_blocked_hosted_identity_operation_retried": false,
+  "historical_local_auth_tests": "47 assertions were reported by the preceding onboarding milestone; not rerun as hosted Auth in R6.",
+  "limitations": [
+    "Browser tests used an authorized temporary Vercel preview session, not Supabase member authentication.",
+    "Source fingerprints explain migration formatting differences but do not replace an independent security or semantic review.",
+    "Future migration deployment must account for the recorded hosted/repository version mapping.",
+    "The roster preview and CLI perform no import and require a separate approved import workflow.",
+    "The time utility is prepared and unit-tested; existing My Week UI is not claimed to have integrated it.",
+    "Official individual applications, hosted email setup, real-member pilot and hosted backup restore remain gated."
+  ]
+}

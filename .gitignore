@@ -1,0 +1,16 @@
+# Generated output, credentials and local state
+node_modules/
+.next/
+.vercel/
+.env
+.env.*
+!.env.example
+*.log
+.DS_Store
+*.pem
+*.key
+*.tsbuildinfo
+playwright-report/
+test-results/
+supabase/.temp/
+supabase/.branches/

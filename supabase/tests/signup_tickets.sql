@@ -1,0 +1,18 @@
+begin;
+create function pg_temp.ticket_ok(v boolean,label text) returns void language plpgsql as $$begin if v is distinct from true then raise exception 'FAIL: %',label;end if;raise notice 'PASS: %',label;end$$;
+update app_private.enrollment_settings set enabled=true,allowed_email_domains=array['example.invalid'];
+create temporary table ticket_context(token uuid);
+grant all on ticket_context to service_role;
+set local role service_role;
+insert into ticket_context select public.issue_signup_ticket('ticket@example.invalid');
+reset role;
+select pg_temp.ticket_ok((app_private.before_user_created('{"user":{"email":"ticket@example.invalid","user_metadata":{"role":"technical_admin"}}}'::jsonb)->'error'->>'http_code')='403','direct public Auth signup cannot forge ticket');
+select pg_temp.ticket_ok((app_private.before_user_created(jsonb_build_object('user',jsonb_build_object('email','wrong@example.invalid','user_metadata',jsonb_build_object('lvz_signup_ticket',(select token from ticket_context))))) ? 'error'),'ticket is bound to exact email');
+update app_private.signup_tickets set expires_at=clock_timestamp()-interval '1 second';
+select pg_temp.ticket_ok((app_private.before_user_created(jsonb_build_object('user',jsonb_build_object('email','ticket@example.invalid','user_metadata',jsonb_build_object('lvz_signup_ticket',(select token from ticket_context))))) ? 'error'),'expired ticket rejected');
+update app_private.signup_tickets set expires_at=clock_timestamp()+interval '1 minute';
+select pg_temp.ticket_ok(app_private.before_user_created(jsonb_build_object('user',jsonb_build_object('email','ticket@example.invalid','user_metadata',jsonb_build_object('lvz_signup_ticket',(select token from ticket_context)))))='{}'::jsonb,'valid server ticket accepted once');
+select pg_temp.ticket_ok((app_private.before_user_created(jsonb_build_object('user',jsonb_build_object('email','ticket@example.invalid','user_metadata',jsonb_build_object('lvz_signup_ticket',(select token from ticket_context))))) ? 'error'),'consumed ticket cannot be replayed');
+select pg_temp.ticket_ok((select count(*)=0 from app_private.signup_tickets),'accepted ticket removed');
+select pg_temp.ticket_ok((select count(*)=0 from app_private.role_assignments),'signup ticket confers no member authority');
+rollback;

@@ -1,0 +1,37 @@
+{
+  "name": "lvzion-official",
+  "version": "0.2.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "npm run check && next build",
+    "start": "next start",
+    "typecheck": "next typegen && tsc --noEmit",
+    "test": "node --experimental-strip-types --test tests/*.test.ts",
+    "test:db": "node scripts/test-db.mjs",
+    "test:browser": "playwright test",
+    "check": "npm run typecheck && npm test && npm run test:db"
+  },
+  "dependencies": {
+    "@supabase/ssr": "0.12.7",
+    "@supabase/supabase-js": "2.117.3",
+    "botid": "1.5.11",
+    "next": "16.4.0",
+    "nodemailer": "10.1.0",
+    "react": "19.3.0",
+    "react-dom": "19.3.0",
+    "server-only": "0.0.1"
+  },
+  "devDependencies": {
+    "@electric-sql/pglite": "0.5.9",
+    "@playwright/test": "1.64.0",
+    "@types/node": "24.10.1",
+    "@types/nodemailer": "8.0.2",
+    "@types/react": "19.3.0",
+    "@types/react-dom": "19.2.3",
+    "typescript": "5.9.3"
+  },
+  "engines": {
+    "node": "24.x"
+  }
+}
