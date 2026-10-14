@@ -1,34 +1,37 @@
 # LV Zion Official
 
-A **new, independent LV Zion application**. The former LV Zion project and the existing church apps remain untouched and serve only as references.
+A **fresh, independent LV Zion application**, designed from scratch. The former LV Zion project and other church apps remain operational and untouched; they are references only.
 
-## Current milestone
+## Status
+- **Live design prototype:** https://lvzion-official.vercel.app (Vercel deployment built from inline source)
+- **Git-backed development preview:** https://lvzion-official-git-feature-mobile-foundation-v1-lvzion.vercel.app
+- **Repository:** https://github.com/lovelaceaml-hub/lvzion-official (private)
+- **Draft review:** https://github.com/lovelaceaml-hub/lvzion-official/pull/1
+- **Vercel project:** `lvzion-official`, team `lvzion` (independent of previous project).
+- **Supabase Pro organization:** Las Vegas Zion, ID `ypidsvtopuiqvbvvucbp`
+- **Supabase project:** `lvzion-official`, ID `otecqlkqirncotytbfns`, US West (Northern California), healthy with no public application tables.
+- **Supabase public configuration:** project URL and publishable key set in Vercel environment settings for development, preview, and production. No service-role key or database password stored in the repository.
 
-The [phone-first interactive UI preview](https://lvzion-official.vercel.app) is deployed on the new [Vercel project](https://vercel.com/lvzion/lvzion-official). It has *no* real accounts, member data, schedules, or backend integration. Every sample app, member role and activity is fictional. The production domain currently shows this design prototype, **not** a church-ready product.
+Both previews use **fictional sample content only**. Neither is ready for members. There is no real login, membership data, imported schedule, or database interaction.
 
-Source on `feature/mobile-foundation-v1` matches the successfully built Vercel preview. Integration with Vercel Git is pending; the previous deployment was supplied through Vercel's deployment API.
+The development branch has a successful Vercel build and has not been merged to `main`. The release should await a reproducible dependency lockfile and reviews.
 
-## Run locally
+## Local development
+Use Node.js 22+.
 
 ```bash
 npm install
 npm run dev
+npm run build
 ```
 
-Use Node.js 22+; `npm run build` builds production output. A lockfile and automated tests must be added before promoting the branch as the deployment source.
+A dependency lockfile, TypeScript migration, and automated checks are planned. The starting preview is JavaScript/JSX. Official runtime and data-layer code will use TypeScript.
 
-## Proposed stack
+## Product direction
+- Phone-first hybrid personalized home with **My Week / Manage**, Today / Week / Calendar.
+- Raised center Apps switcher, up to eight favorites, Notifications and app-specific management views.
+- Organizational leadership and department management are **independent** roles.
+- Ordinary member directory: own group names only, without other members' phone/email details.
+- **No official app lineup has been confirmed.** The numbered spaces are deliberately generic.
 
-- Next.js 16, React 19, TypeScript planned for production. This initial UI preview is JavaScript/JSX.
-- Vercel project `lvzion-official` in team `lvzion`.
-- Supabase Pro organization **Las Vegas Zion** (distinct from the existing personal Free organization); new project provisioning remains pending cost confirmation.
-- Supabase Auth, Postgres with RLS, Realtime and Storage for the real application.
-
-## Product principles
-
-- Phone first, adaptive layouts later. The UI draws on the Study Room Reservation app's rounded, spacious appearance.
-- My Week and contextual Manage; Today / Week / Calendar; central Apps sheet; up to 8 synchronized favorites; notifications with Needs Action first; separate app-specific bottom navigation and authorized Manage.
-- Member, Unit leader, Group leader, Pastoral Staff, Admin; independent department management permissions.
-- The official app lineup has **not been selected**. All app slots in the preview are placeholders.
-
-Read [the mobile product brief](docs/PRODUCT-DECISIONS.md) and [release gates](docs/RELEASE-GATES.md) before adding functionality.
+Read [product decisions](docs/PRODUCT-DECISIONS.md) and [release gates](docs/RELEASE-GATES.md). Do not treat the demo position switcher as authorization.
