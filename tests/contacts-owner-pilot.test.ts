@@ -37,7 +37,7 @@ test('Contacts private owner release: authorized reads, mutations, DNC and isola
   await db.query("insert into app_private.account_links(member_id,auth_user_id,username) values($1,$2,'test_owner')",[owner,auth]);
   await db.query("insert into app_private.bootstrap_receipts(auth_user_id) values($1)",[auth]);
   await db.query("insert into app_private.role_assignments(member_id,role_key,appointed_by) values($1,'member_administrator',$1)",[owner]);
-  await db.exec(await readFile('docs/contacts/owner-pilot-schema.sql','utf8'));
+  await db.exec(await readFile('supabase/migrations/20261014224708_contacts_private_owner_pilot_v1.sql','utf8'));
   const tabs=(await db.query<{tablename:string,rowsecurity:boolean}>(
     "select tablename,rowsecurity from pg_tables where schemaname='contacts_private' order by tablename")).rows;
   must(tabs.length===6&&tabs.every(t=>t.rowsecurity),'all private tables are protected');
