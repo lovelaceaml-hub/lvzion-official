@@ -39,3 +39,9 @@ Personal credentials use Apple Passwords or Keychain only. No credentials or des
 ## Password policy update
 
 Anthony requested six characters as the minimum on 2026-10-14. The signup, invitation-activation and recovery forms and their server validation now agree. Supabase Auth and the actual signup, invitation and recovery pages were verified at six in production deployment dpl_5XtZ7FjKqF71w3unp8z59Vqd2722, commit 9ac33961ad37c433e41cf256dbd3dfe2d9479b78. The earlier twelve-character rule is superseded by this direct instruction.
+
+## Contacts module — verified owner-only production release
+
+Contacts is deployed as the real LV Zion module at [lvz.app/modules/contacts](https://lvz.app/modules/contacts), using verified LV Zion authentication and explicit one-owner-only module access. Vercel deployment `dpl_2qdE7XJTTJjvG2V6p8sXkQqTG6VZ` is READY at `7aec7b5c1a777828ddace44c498ac90e2c9a5995`. Supabase migration `20261014224708_contacts_private_owner_pilot_v1` is applied; six private Contacts tables are RLS/FORCE RLS protected. No real contacts were imported. The owner remains Unassigned without inventing a group/unit. Production flag `LVZ_CONTACTS_OWNER_PILOT=true` is explicitly scoped to this verified release. Anonymous access is denied. The owner-only interface includes contact entry, author notes, follow-ups, do-not-contact, archival and audit history; sharing/leader access/export/messages are disabled. Full build: 241 tests, 182 foundation SQL assertions. The owner's browser-authenticated save/reload should still be confirmed manually, and full cross-member workflow approval is separate.
+
+**Detailed release evidence, verified denials and rollback:** [Contacts Live Owner Release](contacts/LIVE-OWNER-RELEASE.md). Original LV Zion applications and other module branches were unchanged.
