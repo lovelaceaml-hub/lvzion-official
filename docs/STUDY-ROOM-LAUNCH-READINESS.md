@@ -1,10 +1,13 @@
 # Study Room launch continuation — October 14, 2026
 
+> **Historical checkpoint — not the current production state.** This page captures the earlier development checkpoint; its 'unapplied', 'draft', 'not implemented' and 'not deployed' statements reflect that past date, not the current R4 state. Booking is still closed pending Firebase migration. See the [current Study Room status](study-rooms/README.md), [R4 production evidence](STUDY-ROOM-R4-LIVE.md) and [cutover runbook](study-rooms/CUTOVER-RUNBOOK.md).
+
+
 Canonical reconciliation is **PR #9**, branch `feature/study-rooms-reconciliation-r3`. PR #8 is the separate Continuous Display workstream; earlier Study Room prose pointing to #8 is a documentation error, not a different release branch.
 
 ## Status
 
-The user requested progression through launch. **The real application has not launched.** Release remains blocked by unmet hosted authentication, restore, operational-policy and physical-device gates. Launch intent is not evidence these checks passed, nor authorization to guess named manager/member grants or override an existing access safeguard.
+The user requested progression through launch. **At this earlier R3 checkpoint the real Study Room module had not launched.** The current owner-only production module and R4 management controls have since launched at `lvz.app`; live member booking cutover is still blocked. Release remains blocked by unmet hosted authentication, restore, operational-policy and physical-device gates. Launch intent is not evidence these checks passed, nor authorization to guess named manager/member grants or override an existing access safeguard.
 
 ## Implemented in this continuation
 
