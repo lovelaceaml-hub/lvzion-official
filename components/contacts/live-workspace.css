@@ -1,1 +1,13 @@
 .ct-live-form{display:grid;gap:12px}.ct-live-form label{font-size:13px;font-weight:700;color:#365440}.ct-live-form input,.ct-live-form select,.ct-live-form textarea{box-sizing:border-box;width:100%;min-height:48px;padding:12px;border:1px solid #c9d8c3;border-radius:12px;background:#fffefb;color:#294838;font:inherit;font-size:16px}.ct-live-form textarea{resize:vertical;min-height:118px}.ct-live-form input:focus-visible,.ct-live-form select:focus-visible,.ct-live-form textarea:focus-visible{outline:3px solid #72986e;outline-offset:2px}.ct-live-form h2{margin-bottom:5px}.ct-live-form .ct-small{margin:0 0 5px}.ct-live-form .ct-secondary{margin:0}.ct-error a{color:inherit;display:inline-flex;align-items:center;min-height:44px;font-weight:700}.ct-stage p,.ct-stage h3{overflow-wrap:anywhere}
+
+.ct-search-explain{margin:-6px 0 18px!important;font-size:11px!important}
+.ct-activity{display:flex;align-items:center;justify-content:space-between;gap:12px}
+.ct-activity strong{font-size:13px;color:#355840}
+.ct-activity span{color:#718574;font-size:11px}
+.ct-app-link{font-weight:650;text-decoration:none}
+.ct-app-link span{font-size:20px;color:#75977b}
+.ct-stage .ct-share-row{border-top:1px solid #e4ebde;padding:8px 0;gap:14px}
+.ct-stage .ct-share-row strong{font-size:13px;overflow-wrap:anywhere}
+.ct-stage .ct-share-row button{flex:none}
+.ct-stage .ct-metrics{margin-bottom:18px}
+@media (max-width:360px){.ct-stage .ct-metrics{gap:9px}.ct-stage .ct-metrics .ct-card{padding:13px;min-height:105px}}

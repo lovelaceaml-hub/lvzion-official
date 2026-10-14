@@ -9,19 +9,24 @@ export async function POST(request:Request){
  try{
   await verifyHuman();
   const input=await body(request);if(input.website)return reply({message:signupMessage});
-  const p=parseSignup(input);
+  let p:ReturnType<typeof parseSignup>;
+  try{p=parseSignup(input);}catch{return reply({error:'Enter a valid first name, last name, email and password.'},400);}
   const admin=await consumeLoginLimit(request,'signup:'+p.email);
   const readiness=await admin.rpc('self_service_signup_enabled');
-  if(readiness.error||readiness.data!==true)return reply({error:'Member signup is not activated yet.'},503);
+  if(readiness.error||readiness.data!==true)return reply({error:'Account creation is temporarily unavailable. Please try again shortly.'},503);
   if(!allowedSignupEmail(p.email,process.env,c.local))throw new Error('Eligible email address required.');
   if(!c.local&&!c.production&&!p.captchaToken)throw new Error('Verification required.');
   let signupTicket:string|undefined;
-  if(c.production||(c.local&&process.env.LVZ_LOCAL_SIGNUP_HOOK==='true')){const ticket=await admin.rpc('issue_signup_ticket',{p_email:p.email,p_mode:'signup'});if(ticket.error||typeof ticket.data!=='string')throw new Error('Signup unavailable.');signupTicket=ticket.data;}
+  if(c.production||(c.local&&process.env.LVZ_LOCAL_SIGNUP_HOOK==='true')){const ticket=await admin.rpc('issue_signup_ticket',{p_email:p.email,p_mode:'signup'});if(ticket.error||typeof ticket.data!=='string')return reply({error:'Account creation is temporarily unavailable. Please try again shortly.'},503);signupTicket=ticket.data;}
   const client=await userClient();
-  const result=await client.auth.signUp({email:p.email,password:p.password,options:{data:{display_name:p.name,...(signupTicket?{lvz_signup_ticket:signupTicket}:{})},captchaToken:p.captchaToken,emailRedirectTo:c.origin+'/signup/confirm'}});
+  const result=await client.auth.signUp({email:p.email,password:p.password,options:{data:{display_name:p.name,first_name:p.firstName,last_name:p.lastName,...(signupTicket?{lvz_signup_ticket:signupTicket}:{})},captchaToken:p.captchaToken,emailRedirectTo:c.origin+'/signup/confirm'}});
   // Misconfigured auto-confirm is never allowed to create a membership record.
   if(result.data.session){await client.auth.signOut({scope:'local'});return reply({error:'Email confirmation setup needs review. Signup is temporarily unavailable.'},503);}
-  // Do not reveal duplicate emails, account existence, provider errors or delivery details.
+  // Existing/duplicate identity responses remain deliberately generic.
+  // Only operational failures may surface without revealing account existence.
+  if(result.error?.status===429)return reply({error:'Confirmation email rate limit reached. Please try again later.'},429);
+  if(result.error?.status && result.error.status>=500)return reply({error:'Confirmation email delivery is temporarily unavailable. Please try again shortly.'},503);
+  // Do not reveal duplicate emails, account existence or provider delivery details.
  }catch{/* Never log signup inputs or Auth responses. */}
  await new Promise(r=>setTimeout(r,Math.max(0,700-(Date.now()-started))));
  return reply({message:signupMessage});

@@ -5,6 +5,7 @@ import {parseModuleFeed} from '../../../lib/app-runtime';
 import DisplayManager from '../../../components/display-manager';
 import '../../../components/display-visual.css';
 import '../../../components/display-manager.css';
+import '../../../components/display-operations.css';
 export const dynamic='force-dynamic';
 export const metadata={title:'Church Display · LV Zion Official'};
 export default async function ChurchDisplayModule(){

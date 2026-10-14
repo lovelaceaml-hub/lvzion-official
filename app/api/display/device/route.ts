@@ -1,7 +1,7 @@
 import type {NextRequest} from 'next/server';
 import {authAdminClient} from '../../../../lib/server/supabase';
 import {body,reply} from '../../../../lib/server/http';
-import {parseDisplaySnapshot} from '../../../../lib/continuous-display/live-contract';
+import {parseDisplaySnapshotR2} from '../../../../lib/continuous-display/operations';
 import {createDeviceSecret,DEVICE_COOKIE,deviceDigest,normalizePairCode} from '../../../../lib/server/display';
 import {settings} from '../../../../lib/server/config';
 export const runtime='nodejs';
@@ -11,9 +11,9 @@ export async function GET(request:NextRequest){
  if(!token||token.length>128)return reply({paired:false});
  try{
   const admin=authAdminClient();
-  const {data,error}=await admin.rpc('display_device_snapshot',{p_token_digest:deviceDigest(token)});
+  const {data,error}=await admin.rpc('display_device_snapshot_r2',{p_token_digest:deviceDigest(token)});
   if(error||!data)return reply({paired:false});
-  return reply(parseDisplaySnapshot(data));
+  return reply(parseDisplaySnapshotR2(data));
  }catch{return reply({paired:false});}
 }
 export async function POST(request:NextRequest){

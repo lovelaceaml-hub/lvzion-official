@@ -26,6 +26,8 @@ try{
  sql('update app_private.enrollment_settings set enabled=false');check('database activation switch blocks signup',(await post(c,'/api/auth/sign-up',signup)).status===503);sql('update app_private.enrollment_settings set enabled=true');
  let result=await post(c,'/api/auth/sign-up',signup);check('real email/password signup returns generic confirmation',result.status===200&&result.data.message.includes('confirmation email'));
   check('real signup saves the correctly joined first and last names in Auth metadata',sql("select raw_user_meta_data->>'display_name' from auth.users where email='signup-integration@example.invalid'")==='Jamie Integration');
+  check('signup preserves individually supplied first name in Auth metadata',sql("select raw_user_meta_data->>'first_name' from auth.users where email='signup-integration@example.invalid'")==='Jamie');
+  check('signup preserves individually supplied last name in Auth metadata',sql("select raw_user_meta_data->>'last_name' from auth.users where email='signup-integration@example.invalid'")==='Integration');
  check('signup response is private and never cached',result.headers['cache-control'].includes('no-store'));
  check('unconfirmed signup cannot read workspace',(await workspace(c)).status===401);
  check('unconfirmed signup creates no member',sql("select count(*) from public.members where display_name='Jamie Integration'")==='0');
@@ -34,6 +36,8 @@ try{
  c=await context();check('email confirmation succeeds without the signup browser cookies',(await c.storageState()).cookies.length===0);
  const confirmation=await post(c,'/api/auth/confirm',otp);check('real signup OTP creates Unassigned profile',confirmation.status===200&&confirmation.data.next==='/members');
  let w=await workspace(c);check('own profile has intake status and null placement',w.status===200&&w.data.self.status==='intake'&&w.data.self.groupId===null&&w.data.self.unitId===null);
+  check('own confirmed profile contains separate submitted names',w.data.self.firstName==='Jamie'&&w.data.self.lastName==='Integration');
+  check('member names persist atomically in a private database record',sql("select first_name||' '||last_name from app_private.member_signup_names join app_private.member_private_contacts using(member_id) where email='signup-integration@example.invalid'")==='Jamie Integration');
  const mid=w.data.self.id;check('Unassigned cannot enumerate groups or member directory',w.data.groups.length===0&&w.data.directory.length===0&&w.data.unassignedMembers.length===0);
  check('Unassigned owns only their verified contact',w.data.contacts.email===signup.email);
  check('real Auth session cookies are HttpOnly',(await c.storageState()).cookies.every(x=>x.httpOnly));

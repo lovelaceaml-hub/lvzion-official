@@ -1,0 +1,36 @@
+{
+  "feature": "organization-and-member-placement",
+  "releaseDate": "2026-10-14",
+  "pullRequest": "https://github.com/lovelaceaml-hub/lvzion-official/pull/24",
+  "organizationRelease": "ce41310e3ef932af58d51e7c4c66af985146c23f",
+  "releaseDeployment": "dpl_URciYVcPXdq5cJTURF9DpfAaSFZU",
+  "subsequentVerifiedProduction": "87c5a8573ca01f7216f2c78df1da5b827b7380d2",
+  "releaseRetainedByGitAncestry": true,
+  "counts": {
+    "ageCategories": 4,
+    "groups": 8,
+    "units": 16,
+    "currentMemberPlacements": 0,
+    "unitCreationAudits": 16
+  },
+  "localPreflight": {
+    "appTests": 244,
+    "coreSqlAssertions": 198,
+    "browserChecks": 77
+  },
+  "liveChecks": {
+    "signedInHierarchy": true,
+    "fullPlacementPath": true,
+    "selectionClearedWithoutSubmission": true,
+    "anonymousPrivateApi": 401,
+    "noStore": true
+  },
+  "screenshot": {
+    "path": "docs/screenshots/organization-live.jpg",
+    "sha256": "a75fa252fb9065ad5f4d4f9c4d50a45ab216adcd60f70f0b99500a34ce906e66",
+    "containsContactDetails": false
+  },
+  "hostedTestIdentitiesCreated": 0,
+  "previewPublished": false,
+  "physicalDeviceTested": false
+}
