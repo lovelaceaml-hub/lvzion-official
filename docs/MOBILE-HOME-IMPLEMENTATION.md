@@ -1,5 +1,7 @@
 # LV Zion Official — Phone-first Home and My Week
 
+> **Historical development/preview record (not current production).** This file describes earlier proposed or disabled routes, previews, and verification performed at its original date. The real member platform now supports confirmed email signup, separate first/last-name storage and a limited set of approved owner-only modules. Read [CURRENT-STATUS.md](CURRENT-STATUS.md) and [INDEX.md](INDEX.md) before interpreting any old ‘unapplied’ or ‘not activated’ statement as the present live state.
+
 Development-only implementation. Matches the recorded mobile decisions in docs/PRODUCT-DECISIONS.md and does **not** approve any individual application module.
 
 ## Routes and behavior
