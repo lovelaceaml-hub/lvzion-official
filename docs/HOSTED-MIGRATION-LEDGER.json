@@ -1,1 +1,45 @@
-{"project_ref":"otecqlkqirncotytbfns","applied_via":"Supabase MCP apply_migration","verified_at":"2026-10-14T05:30:00Z","entries":[{"name":"member_system_foundation","hosted_version":"20261014051733","repository_version":"20261014020617"},{"name":"member_command_hardening","hosted_version":"20261014051804","repository_version":"20261014043055"},{"name":"member_onboarding","hosted_version":"20261014051924","repository_version":"20261014045521"}],"warning":"Reconcile the applied ledger against these names and reviewed schema before CLI db push. Do not run duplicate CREATE migrations or edit history blindly."}
+{
+  "project_ref": "otecqlkqirncotytbfns",
+  "applied_via": "Supabase MCP apply_migration",
+  "verified_on": "2026-10-14",
+  "verification_mode": "read_only; no hosted schema or history mutation",
+  "entries": [
+    {
+      "name": "member_system_foundation",
+      "hosted_version": "20261014051733",
+      "repository_version": "20261014020617",
+      "hosted_statement_count": 1,
+      "hosted_raw_md5": "105feee1655614884706025cec0eadf9",
+      "normalized_characters": 34491,
+      "normalized_md5": "19a7f6018c35e0329c22a5fc7e3031e2",
+      "repository_normalized_match": true
+    },
+    {
+      "name": "member_command_hardening",
+      "hosted_version": "20261014051804",
+      "repository_version": "20261014043055",
+      "hosted_statement_count": 1,
+      "hosted_raw_md5": "3930da87add5d14d5657e207d2f12bed",
+      "normalized_characters": 2858,
+      "normalized_md5": "e4b22adb8e5ecb00a7e467d49531d83b",
+      "repository_normalized_match": true
+    },
+    {
+      "name": "member_onboarding",
+      "hosted_version": "20261014051924",
+      "repository_version": "20261014045521",
+      "hosted_statement_count": 1,
+      "hosted_raw_md5": "3b134fed267a4a8b3fbda14d398aea89",
+      "normalized_characters": 17956,
+      "normalized_md5": "0a24114044ee6cdcad5890a49ad7c33d",
+      "repository_normalized_match": true
+    }
+  ],
+  "normalization": {
+    "repository": "Strip block and line comments, remove whitespace, remove outer begin; and commit; only.",
+    "hosted": "Remove whitespace from each stored statement; these stored statements already omit comments and outer transaction wrappers.",
+    "purpose": "Comparison of known migration definitions, not cryptographic attestation or a full semantic/security review."
+  },
+  "unapplied_repository_migrations": ["20261014074214_module_runtime_foundation.sql"],
+  "warning": "The three definition fingerprints match, but hosted IDs still differ from repository filenames. Reconcile the deployment ledger deliberately before CLI db push. Do not replay duplicate CREATE migrations or rewrite hosted history blindly."
+}
