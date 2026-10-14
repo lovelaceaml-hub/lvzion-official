@@ -6,9 +6,11 @@
 
 The domain pause in older implementation notes is superseded by the completed registration on October 14, 2026. Do not purchase or register it again.
 
-## Development is not production
+## Current production (supersedes earlier domain pause)
 
-The public domain still serves the earlier synthetic prototype. The member-system branch has implemented sign-in/onboarding code and test suites, but hosted account activation remains disabled. The domain does not authorize a production merge, live member imports, email delivery, or broad directory exposure.
+**As of October 14, 2026, `https://lvz.app` serves the real LV Zion Official member application**, not the original fictional landing prototype. The platform has verified production sign-in and confirmed-email self-service signup, the owner-only authenticated module system, and the 4 / 8 / 16 organization hierarchy. The canonical live source, current Vercel deployment and hosted database status are recorded in [CURRENT-STATUS.md](CURRENT-STATUS.md). Previous domain/setup notes referring to a paused registration, unused public domain, synthetic production prototype, or disabled member activation are historical and no longer describe the current runtime.
+
+Registration and custom domain verification alone never authorize member imports, new email charges, module-wide permissions or live bookings. Keep the original systems independent, protect credentials, and deploy deliberately after reviewed testing.
 
 ## Remaining activation work
 
