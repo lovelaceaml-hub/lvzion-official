@@ -1,5 +1,7 @@
 # Contacts — first live owner-only release
 
+> **Owner-only scope remains current.** The original Contacts launch documented here has since gained the [R5 owner workspace](OWNER-EXPERIENCE-R5.md). Read-only audit on October 14, 2026 found **zero contact records** and one owner module grant. No sharing/export/outbound messages are enabled. Signed-in owner save-and-reload on the actual browser remains an acceptance check. [Current production snapshot](../CURRENT-STATUS.md).
+
 **Status: production deployed, private owner pilot.** Date: October 14, 2026.
 
 ## Canonical entry point
