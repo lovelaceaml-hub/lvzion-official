@@ -1,5 +1,8 @@
 # Study Room Reservation R2 — changes and manager controls
 
+> **Historical checkpoint — not the current production state.** This page captures the earlier development checkpoint; its 'unapplied', 'draft', 'not implemented' and 'not deployed' statements reflect that past date, not the current R4 state. Booking is still closed pending Firebase migration. See the [current Study Room status](study-rooms/README.md), [R4 production evidence](STUDY-ROOM-R4-LIVE.md) and [cutover runbook](study-rooms/CUTOVER-RUNBOOK.md).
+
+
 This increment continues PR #3, feature/study-room-reservations-v1, from commit 8623294183777dd58ffb22b5ac41888e858c980f. The separate Study Room UI proposal (PR #4), Worship Duty branch, original Firebase scheduler, production deployment and domain configuration are not changed. This document supersedes R1's statement that reservation editing and all manager scheduling controls are unimplemented.
 
 ## Implemented behavior

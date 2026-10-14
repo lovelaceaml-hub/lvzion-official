@@ -1,31 +1,26 @@
 # LV Zion Official domain status
 
-## Registered and connected
+## Actual production app
 
-`lvz.app` is registered under the existing Vercel team `lvzion`. The canonical apex is attached to project `lvzion-official`; `www.lvz.app` redirects to it with HTTP 308. Domain auto-renew is on. Vercel previously verified both host mappings, DNS and automatic TLS certificates. The original application and its database remain separate.
+[lvz.app](https://lvz.app) serves the real member application. The former synthetic-prototype-only and signup-disabled status is superseded. Current production source and verification are in the [handoff](HANDOFF.md); domain ownership alone never activates a module or grants access.
 
-The domain pause in older implementation notes is superseded by the completed registration on October 14, 2026. Do not purchase or register it again.
+The apex and www.lvz.app belong to the existing Vercel `lvzion-official` project under team `lvzion`. Registration, DNS, TLS and the www redirect were verified during the completed October 14 setup. The October 14 documentation audit confirmed both aliases on the READY deployment. Registration, renewal settings and DNS were not changed or re-audited by this documentation task. Do not register the domain again.
 
-## Development is not production
+## Authentication email
 
-The public domain still serves the earlier synthetic prototype. The member-system branch has implemented sign-in/onboarding code and test suites, but hosted account activation remains disabled. The domain does not authorize a production merge, live member imports, email delivery, or broad directory exposure.
+Confirmed signup, sign-in, invitation and recovery are implemented at the actual app. Sending uses the approved Resend free plan with the dedicated auth.lvz.app sender and restricted credential in Keychain/provider stores. Sender DNS, SMTP/TLS and provider delivery were verified during actual setup; see [setup receipts](ACTUAL-APP-SETUP.md). The previously pending email-provider selection is complete.
 
-## Remaining activation work
+Transactional sending does not establish a receiving mailbox or forwarding service for @lvz.app. No personal inbox or new receiving service is claimed or requested. Do not change DNS, account settings or billing as part of documentation maintenance.
 
-- Complete approved hosted test-account provisioning and a reviewed server identity configuration. A prior safety-blocked provisioning attempt must not be retried through another path.
-- Verify the implemented confirmation, activation and recovery routes and their intended origin before enabling them. Use exact callback URLs required by the actual implemented flow, not assumed route names.
-- Verify the new Supabase project's Site URL and redirect allowlist against `https://lvz.app`; these settings have not been confirmed by this development increment.
-- Configure and verify an outbound mail provider and a receiving mailbox/forwarding service. No MX/SPF/DKIM/DMARC or operational `@lvz.app` inbox is claimed here.
-- Conduct controlled hosted tests using approved test recipients, then obtain pilot approval. No real invitations are sent automatically.
+## Phone installation
 
-## Phone installation work
+The app provides [installation instructions](https://lvz.app/install), a manifest, generic icons and an opt-in offline fallback. Only a public notice and generic assets are cached; private member/API responses are excluded. Physical iOS/Android certification and native App Store distribution are not claimed.
 
-The development branch provides a manifest, generic app icons, `/install`, and an opt-in offline fallback. Only a public notice and generic icons are cached; private member/API responses are never stored by that worker. This is not a native App Store release and does not bypass account gating.
+## Targets and release boundary
 
-## Targets
-
-- Vercel team: `team_8gejhZ8EQEvRv6A4rdBUXTW4`
+- Actual website: https://lvz.app
 - Vercel project: `prj_4icc6S1jw8OVKWD9AOI1oiB5fwYe`
-- Supabase organization: Las Vegas Zion (`ypidsvtopuiqvbvvucbp`)
-- Supabase project: `otecqlkqirncotytbfns`
-- Review: https://github.com/lovelaceaml-hub/lvzion-official/pull/2
+- Vercel team: `lvzion`
+- Supabase project: `otecqlkqirncotytbfns`, Las Vegas Zion
+- [Release controls](RELEASE-GATES.md): no new previews unless explicitly requested; automatic Git deployments remain disabled.
+- Original LV Zion apps and databases remain independent and untouched.

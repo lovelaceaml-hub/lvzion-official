@@ -1,5 +1,7 @@
 # Morning Prayer — corrected legacy-app workstream R2
 
+> Historical R2 development record. Current actual-app setup is in [LIVE-SETUP](LIVE-SETUP.md), with the verified hosted snapshot in the [handoff](../HANDOFF.md). Preview links and unapplied-schema statements below describe the older milestone only.
+
 ## Scope correction and boundaries
 
 This module is based on `lovelaceaml-hub/morning-prayer-app`, the older **Morning Prayer Gathering — Las Vegas Work Mission** application at `lv-wm-prayer.web.app`. The user explicitly corrected the earlier recap direction and asked to continue. The Zoom recap prototype PR #7 stays on hold, unmerged, outside this branch. No recap generator, Gmail ingestion, educational graphics, attendance/PWP completion tracking, prayer journals, rankings or distribution is introduced here.

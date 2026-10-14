@@ -1,5 +1,7 @@
 # LV Zion Official self-service signup
 
+> Historical milestone record. Test counts, preview links and pending gates below describe that milestone. For the actual app and current release boundaries, read the [handoff](HANDOFF.md) and [documentation index](README.md). This record does not authorize a new preview.
+
 Anthony requested implementation in this continuing chat, with autonomous execution. This is a bounded development increment, with no production release or hosted activation.
 
 ## Section 1: Email signup and verified Unassigned member lifecycle

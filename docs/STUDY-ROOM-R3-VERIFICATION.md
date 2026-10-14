@@ -1,12 +1,15 @@
 # R3 Git-backed and deployed verification — October 14, 2026
 
+> **Historical checkpoint — not the current production state.** This page captures the earlier development checkpoint; its 'unapplied', 'draft', 'not implemented' and 'not deployed' statements reflect that past date, not the current R4 state. Booking is still closed pending Firebase migration. See the [current Study Room status](study-rooms/README.md), [R4 production evidence](STUDY-ROOM-R4-LIVE.md) and [cutover runbook](study-rooms/CUTOVER-RUNBOOK.md).
+
+
 This supplements `STUDY-ROOM-R3.md` with results inspected after the complete UI commit. It does not authorize production activation.
 
 ## Pinned implementation and preview
 
 - Runtime implementation commit: `8aa90576801aa8c500fefec90ba9738a75270457`.
 - Tested implementation plus regression/evidence commit: `19dec2ffcffe80461b7782db6e1e3768556ce589`. Application runtime is unchanged from the implementation commit.
-- Draft reconciliation PR: https://github.com/lovelaceaml-hub/lvzion-official/pull/8.
+- Draft reconciliation PR: https://github.com/lovelaceaml-hub/lvzion-official/pull/9.
 - Latest verified deployment: `dpl_8aTAUW62RxLgMY63AziAZza9XF6u`, Git SHA `19dec2ffcffe80461b7782db6e1e3768556ce589`.
 - Exact verified preview: https://lvzion-official-aepf9a6am-lvzion.vercel.app/study-rooms-preview.
 - Actual branch alias returned by Vercel: https://lvzion-official-git-feature-study-rooms-reconcili-c76302-lvzion.vercel.app/study-rooms-preview.
