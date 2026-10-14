@@ -104,6 +104,14 @@
       "status": "applied",
       "verification": "migration accepted; hosted list_migrations and read-only checks verified six RLS/FORCE RLS tables, zero anonymous function grants, zero direct authenticated reads, one owner grant, zero real contacts. Dedicated PGlite tests exercise identity-aware setup. No live-contact fixture inserted.",
       "source": "supabase/migrations/20261014224708_contacts_private_owner_pilot_v1.sql"
+    },
+    {
+      "name": "member_signup_names",
+      "hosted_version": "20261014225857",
+      "repository_version": "20261014223500",
+      "applied_via": "Supabase MCP apply_migration",
+      "status": "applied",
+      "verification": "Additive RLS-enabled private signup-names table; three-argument enrollment RPC granted only to authenticated; anonymous/direct client table access denied; existing member and enrollment counts unchanged. Production Next build and disposable SQL checks completed."
     }
   ],
   "normalization": {
