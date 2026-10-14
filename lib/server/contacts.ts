@@ -7,7 +7,13 @@ import {settings} from './config';
  * The independent SQL gate, app approval and member grant checks must ALSO pass.
  * Public R3 RPC wrappers are not installed in the hosted project.
  */
-export function contactsReleaseEnabled():boolean{return false;}
+export function contactsReleaseEnabled():boolean{
+ try{
+  const c=settings();
+  return c.production===true && process.env.VERCEL_ENV==='production'
+   && process.env.LVZ_CONTACTS_OWNER_PILOT==='true';
+ }catch{return false;}
+}
 
 export async function contactsRequest(request:Request):Promise<Response>{
  return handleContactsRequest(request,{
