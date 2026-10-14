@@ -14,3 +14,5 @@
 | [3: Verify and release](lanes/ST3.md) | Complete | Build: 244 app tests and 198 SQL assertions; browser: 77 passed; PR #24 live and signed-in owner verified |
 
 No separate lane board or rule diagram is needed for this single-writer feature. The established production rollback remains compatible and preserves the requested structure.
+
+Documentation follow-up: [audit record](../../DOCUMENTATION-AUDIT.md) and [complete documentation index](../../README.md). All three organization steps remain complete; the follow-up changes documentation only.

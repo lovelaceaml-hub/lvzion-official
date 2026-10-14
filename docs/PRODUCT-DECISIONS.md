@@ -2,6 +2,10 @@
 
 Recorded 2026-10-13 from the design interview. This is a new application, *not* a migration of the old app architecture. The previous six app concepts and demo slots are not an approved official app lineup.
 
+## Current implementation status
+
+This file retains the original design decisions and proposals. Current implementation is documented in the [handoff](HANDOFF.md) and [member guide](USER-MANUAL.md). The actual app, confirmed-email signup and requested 4/8/16 hierarchy are live; older prototype-only, unconfigured-email and unknown-label statements below are historical. The current auth routes are /sign-in, /sign-up and /auth/continue; do not configure callbacks from the earlier proposed route names. No design proposal here independently authorizes migration, module activation or a member import.
+
 ## Mobile experience
 - Personalized hybrid home with **My Week** and **Manage** tabs; default is My Week.
 - Today, Week and Calendar inside My Week; prominently show next activity, then smaller upcoming items. Tapping an activity opens a bottom sheet with context and quick actions.
@@ -28,18 +32,18 @@ Recorded 2026-10-13 from the design interview. This is a new application, *not* 
 - Supabase PostgreSQL/RLS/Auth/Realtimes/Storage, Vercel Next.js, private GitHub repository.
 - No real personal data in prototype or repository; no permanent deletion, migration, purchase, or bulk invitation without explicit authorization.
 
-## Decisions confirmed: member-system interview 61–66
+## Decisions confirmed: member-system interview 61-66
 
 Confirmed on 2026-10-13; these supersede any conflicting recommendations, but do not automatically authorize production migrations.
 
-- **61 A — Organizational hierarchy:** Age Category → Group → Unit → Member. The actual names of age categories and groups still need confirmation. Administrators will manage organizational entries, not hard-code their labels into UI logic.
-- **62 C — Placement:** A member has one active primary group/unit placement (the unit is part of that group) and may hold multiple department memberships or independent department-management assignments.
-- **63 C — Sign-in:** Username **or** email plus password. Supabase Auth does not natively support username/password sign-in, so username resolution and account recovery must be designed securely; a login UI alone does not satisfy this requirement. Do not create fake shared email addresses or expose whether a username exists.
-- **64 C — Initial membership population:** Start with fictional accounts and fixtures; use a controlled, reviewed import of the real congregation only after explicit authorization, duplicate review, security tests, and documented backup/recovery.
-- **65 A — Delegated member management:** Unit leaders manage members within assigned units; group leaders oversee members in their groups; Pastoral Staff have broader specifically granted organizational authority. Cross-group transfers retain the established request/receiving-acceptance workflow; this answer does not remove transfer controls.
-- **66 B — Technical vs church authority:** App administrators manage technical settings/account operations without automatic access to ministry records, confidential member fields, or organizational decision-making. Such access requires a separately granted, scoped church role.
+- **61 A: Organizational hierarchy:** Age Category → Group → Unit → Member. The later approved age categories are Adult Male, Adult Female, Young Adult Male and Young Adult Female; each now has Group 1 and Group 2, each with Unit 1 and Unit 2. Administrators will manage organizational entries, not hard-code their labels into UI logic.
+- **62 C: Placement:** A member has one active primary group/unit placement (the unit is part of that group) and may hold multiple department memberships or independent department-management assignments.
+- **63 C: Sign-in:** Username **or** email plus password. Supabase Auth does not natively support username/password sign-in, so username resolution and account recovery must be designed securely; a login UI alone does not satisfy this requirement. Do not create fake shared email addresses or expose whether a username exists.
+- **64 C: Initial membership population:** Start with fictional accounts and fixtures; use a controlled, reviewed import of the real congregation only after explicit authorization, duplicate review, security tests, and documented backup/recovery.
+- **65 A: Delegated member management:** Unit leaders manage members within assigned units; group leaders oversee members in their groups; Pastoral Staff have broader specifically granted organizational authority. Cross-group transfers retain the established request/receiving-acceptance workflow; this answer does not remove transfer controls.
+- **66 B: Technical vs church authority:** App administrators manage technical settings/account operations without automatic access to ministry records, confidential member fields, or organizational decision-making. Such access requires a separately granted, scoped church role.
 
-### Registered primary domain (2026-10-14)
+### Historical registration-stage snapshot (2026-10-14)
 
 - **`lvz.app` is owned and verified** under Vercel team `lvzion`; annual renewal is enabled. This is the canonical production address for the new LV Zion Official application, not the former LV Zion app.
 - The apex domain `lvz.app` is attached to Vercel project `prj_4icc6S1jw8OVKWD9AOI1oiB5fwYe`. Vercel reports clean DNS configuration and an issued auto-renewing TLS certificate.
@@ -49,9 +53,9 @@ Confirmed on 2026-10-13; these supersede any conflicting recommendations, but do
 - **Email is not yet configured:** Vercel DNS has no MX, SPF, DKIM, or DMARC records, and no chosen mail provider. Choose transactional sending provider and inbox/forwarding provider, then add provider-issued DNS records and verify them before using `@lvz.app`.
 - See `docs/DOMAIN-SETUP.md` for current verified status, remaining tasks and separation boundaries.
 
-## Proposed member-system data architecture (design only)
+## Original proposed member-system data architecture (design record)
 
-This section is a blueprint; **no database migration or real member data has been applied**.
+This section records the original blueprint before hosted implementation. Current applied migrations are in [the ledger](HOSTED-MIGRATION-LEDGER.json); the old unapplied status does not describe today's production.
 
 | Entity | Purpose and essential constraint |
 | --- | --- |

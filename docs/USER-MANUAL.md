@@ -68,3 +68,14 @@ For an authorized Study Room manager, the page offers:
 The booking backend supports combined room + board + TV reservations with atomic release and private history, but those actions are **not enabled for real members**. When a future approved cutover activates them, members will choose an available resource/time and one of the Contact / New Member / Other purposes; the server rechecks availability and My Week is updated without revealing private purpose details to other groups. Do not promise this workflow is already active.
 
 The [current Study Room status](study-rooms/README.md) and [cutover runbook](study-rooms/CUTOVER-RUNBOOK.md) explain precisely what remains before bookings can open.
+
+## Open an authorized app
+
+Use **Apps** to see modules explicitly assigned to your account. Signing up or receiving a placement does not automatically grant every app.
+
+- [Contacts](https://lvz.app/modules/contacts): the current workspace is private to the authorized owner. Sharing, export and messages are unavailable.
+- [Study Rooms](https://lvz.app/modules/study-rooms): manager setup is available, but new bookings remain closed while the original scheduler is still the booking authority.
+- [Continuous Display](https://lvz.app/modules/continuous-display): owner setup is available. Review and approve the exact content before publishing, and pair a real screen only when authorized. No screen was paired during setup.
+- [Work Mission Morning Prayer](https://lvz.app/modules/work-mission-prayer): owner setup starts with empty schedules and materials. Check the real dates and approved wording before publishing. Member meeting-link access remains unavailable.
+
+See [all documentation](README.md) for each module's release evidence and remaining limits.

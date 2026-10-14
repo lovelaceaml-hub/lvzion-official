@@ -1,5 +1,7 @@
 # Work Mission Morning Prayer — live LV Zion integration
 
+> Live setup contract. The [current handoff](../HANDOFF.md) confirms the applied schema, approved module, one active module grant and enabled series with no occurrences or published materials. Historical R2 verification is separate; broader member activation remains gated.
+
 ## Production target
 This module is part of the actual LV Zion Official member application, **https://lvz.app**, at `/modules/work-mission-prayer`. It is based on the legacy `lovelaceaml-hub/morning-prayer-app` workflow and **not** the Zoom meeting-recap/educational-graphic prototype. The earlier recap PR #7 remains on hold. The old Firebase site and its GroupMe companion are neither migrated nor modified.
 
