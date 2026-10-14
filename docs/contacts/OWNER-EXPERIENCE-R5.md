@@ -1,5 +1,7 @@
 # Contacts R5 — live owner workspace expansion
 
+> **R5 historical release evidence.** For current owner-only behavior use [Contacts overview](README.md), [user guide](USER-GUIDE.md) and [verification](VERIFICATION.md). The recorded R5 deployment is a verified milestone, not automatically the latest site deployment.
+
 Verified October 14, 2026. This release extends the actual Contacts module at **https://lvz.app/modules/contacts**. No separate website or new review preview was published.
 
 ## Production

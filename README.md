@@ -8,6 +8,7 @@
 - **Study Room module:** [Current status](docs/study-rooms/README.md) and [cutover runbook](docs/study-rooms/CUTOVER-RUNBOOK.md)
 - **Completed workflow:** [Organization completion](docs/ORGANIZATION-WORKFLOW.md)
 - **All documentation:** [Guides, release evidence and historical records](docs/README.md)
+- **Contacts owner instructions:** [How to use Contacts](docs/contacts/USER-GUIDE.md) · [Privacy and operational scope](docs/contacts/README.md)
 - **Repository:** [Private GitHub repository](https://github.com/lovelaceaml-hub/lvzion-official)
 - **Handoff:** [Current status](docs/HANDOFF.md)
 - **Setup:** [Behavior, validation and rollback](docs/ACTUAL-APP-SETUP.md)

@@ -7,6 +7,7 @@
 - [Current setup and Build log](ACTUAL-APP-SETUP.md)
 - [Release controls](RELEASE-GATES.md)
 - [Hosted migration mapping](HOSTED-MIGRATION-LEDGER.json)
+- [Contacts owner guide](contacts/USER-GUIDE.md) · [Current scope](contacts/README.md) · [Runbook](contacts/OPERATIONS.md)
 - [Study Room current status](study-rooms/README.md)
 - [Study Room cutover runbook](study-rooms/CUTOVER-RUNBOOK.md)
 
