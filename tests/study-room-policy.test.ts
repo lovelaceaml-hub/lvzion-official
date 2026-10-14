@@ -28,9 +28,13 @@ test('back-to-back reservations do not overlap',()=>{
  assert.equal(overlaps('12:00','13:00','13:00','14:00'),false);
  assert.equal(overlaps('12:00','13:01','13:00','14:00'),true);
 });
-test('Wednesday evening service is excluded',()=>{
- assert.deepEqual(serviceBlocks(today).map(s=>s.start),['19:30']);
- assert.equal(check({start:'19:00',end:'20:00'}).ok,false);
+test('Tuesday evening service is excluded',()=>{
+ const tuesday='2026-10-13';
+ assert.deepEqual(serviceBlocks(tuesday).map(s=>s.start),['19:30']);
+ const request={...defaultReq,date:tuesday,start:'19:00',end:'20:00'};
+ const result=checkBooking(request,[],{today:tuesday,localTime:'10:00'});
+ assert.equal(result.ok,false);
+ if(!result.ok)assert.equal(result.code,'service');
 });
 test('Saturday service times are excluded',()=>{
  const date='2026-10-17';

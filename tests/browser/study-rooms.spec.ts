@@ -37,15 +37,16 @@ test('simulated multi-resource booking is visible and cancellable but never post
  expect(mutations).toHaveLength(0);
 });
 
-test('service exclusions prevent a Wednesday evening booking',async({page})=>{
+test('service exclusions prevent a Saturday morning booking',async({page})=>{
  await page.goto('/study-rooms-preview');
+ await page.getByRole('button',{name:/Sat 17/}).click();
  await page.getByRole('button',{name:'Reserve now'}).click();
  await page.getByRole('textbox',{name:'Contact name'}).fill('Demo contact');
- await page.getByLabel('Start').selectOption('19:30');
- await page.getByLabel('End').selectOption('20:30');
- await expect(page.getByText(/cannot overlap evening service/)).toBeVisible();
+ await page.getByLabel('Start').selectOption('10:00');
+ await page.getByLabel('End').selectOption('11:00');
+ await expect(page.getByText(/cannot overlap morning service/)).toBeVisible();
  await page.getByRole('button',{name:'Add fictional reservation'}).click();
- await expect(page.getByRole('alert')).toContainText('cannot overlap evening service');
+ await expect(page.getByRole('alert')).toContainText('cannot overlap morning service');
 });
 
 test('priority overrides are explicitly unavailable until access rules are approved',async({page})=>{
