@@ -97,6 +97,7 @@ export default function SignupForm({enabled,local,siteKey}:{enabled:boolean;loca
    <h1>Create your account.</h1>
    <p>Use your personal email. After confirmation, your age category, group, and unit will be <strong>Unassigned</strong> until an authorized leader verifies and places you.</p>
    {!enabled&&<p role="status">Account signup will open once email delivery is ready. Please check back soon.</p>}
+   <p className="fine-print">First and last name are both required and will appear together on your member profile.</p>
    <form onSubmit={submit}>
     <fieldset disabled={!enabled||busy} className="signup-fields">
      <label htmlFor="signup-first-name">First name</label>
