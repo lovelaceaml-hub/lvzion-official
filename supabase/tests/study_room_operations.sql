@@ -65,31 +65,39 @@ select pg_temp.denied($q$select public.study_room_operations(pg_temp.operation(2
 select set_config('ops.created',(public.study_room_operations(pg_temp.operation(3,'resource.add',1)||'{"kind":"whiteboard","name":"Board 6"}'))::text,true);
 select pg_temp.pass(current_setting('ops.created')::jsonb->>'version'='2','new resource increments policy version');
 select pg_temp.pass(public.study_room_operations(pg_temp.operation(3,'resource.add',1)||'{"kind":"whiteboard","name":"Board 6"}')=current_setting('ops.created')::jsonb,'exact retry returns same receipt');
+reset role;
 select pg_temp.pass((select count(*)=6 from app_private.study_resources where kind='whiteboard'),'new board added exactly once');
+set local role authenticated;
 select pg_temp.denied($q$select public.study_room_operations(pg_temp.operation(3,'resource.add',1)||'{"kind":"whiteboard","name":"Board 7"}')$q$,'22023','same request key cannot change resource');
 select pg_temp.denied($q$select public.study_room_operations(pg_temp.operation(4,'resource.add',1)||'{"kind":"room","name":"Room 7"}')$q$,'40001','stale manager revision rejected');
 select pg_temp.denied($q$select public.study_room_operations(pg_temp.operation(5,'weekly.replace',2)||jsonb_build_object('blocks',jsonb_build_array(
  jsonb_build_object('weekday',2,'start',1170,'end',1230,'label','Evening service'),
  jsonb_build_object('weekday',2,'start',1200,'end',1260,'label','Overlaps service'))))$q$,'22023','overlapping weekly intervals rejected');
-select pg_temp.pass((select version=2 from app_private.study_policy_state),'failed operations do not advance revision');
+select pg_temp.pass(public.study_room_operations(null)->>'version'='2','failed operations do not advance revision');
 select public.study_room_operations(pg_temp.operation(6,'weekly.replace',2)||jsonb_build_object('blocks',jsonb_build_array(
  jsonb_build_object('weekday',2,'start',1170,'end',1230,'label','Evening service'),
  jsonb_build_object('weekday',6,'start',600,'end',660,'label','Morning service'),
  jsonb_build_object('weekday',6,'start',870,'end',930,'label','Afternoon service'),
  jsonb_build_object('weekday',6,'start',1170,'end',1230,'label','Evening service'))));
 select pg_temp.pass(public.study_room_operations(null)->>'version'='3','weekly replacement increments revision');
+reset role;
 select pg_temp.pass((select count(*)=1 from app_private.study_effective_service_blocks('2026-10-20'::date)),'weekly rules drive effective Tuesday service');
+set local role authenticated;
 select public.study_room_operations(pg_temp.operation(7,'day.replace',3)||jsonb_build_object('day',pg_temp.tomorrow()::text,'blocks',jsonb_build_array(
  jsonb_build_object('start',960,'end',1020,'label','Special service'))));
 select pg_temp.pass(jsonb_array_length(public.study_room_operations(null)->'specialDays')=1,'special date listed for manager');
+reset role;
 select pg_temp.pass((select count(*)=1 from app_private.study_effective_service_blocks(pg_temp.tomorrow())),'special date replaces weekdays');
+set local role authenticated;
 select public.study_room_operations(pg_temp.operation(8,'day.reset',4)||jsonb_build_object('day',pg_temp.tomorrow()::text));
+reset role;
 select pg_temp.pass((select count(*)=0 from app_private.study_special_days),'reset returns to weekly service');
 select pg_temp.pass((select version=5 from app_private.study_policy_state),'reset advances revision');
+set local role authenticated;
 select public.study_room_operations(pg_temp.operation(9,'day.replace',5)||jsonb_build_object('day',pg_temp.tomorrow()::text,'blocks','[]'::jsonb));
-select pg_temp.pass((select count(*)=0 from app_private.study_effective_service_blocks(pg_temp.tomorrow())),'empty special override means zero service restrictions');
-select pg_temp.pass((select count(*)=4 from app_private.study_change_history where action in ('resource.add','weekly.replace','day.replace','day.reset'))=false,'audit counts do not silently collapse separate manager actions');
 reset role;
+select pg_temp.pass((select count(*)=0 from app_private.study_effective_service_blocks(pg_temp.tomorrow())),'empty special override means zero service restrictions');
+
 select pg_temp.pass((select count(*)=5 from app_private.study_change_history where action in ('resource.add','weekly.replace','day.replace','day.reset')),'five successful operations have five audit records');
 select pg_temp.pass((select count(*)=5 from app_private.study_request_receipts),'operation retries do not create phantom receipts');
 select pg_temp.pass((select bookings_open=false from app_private.study_booking_activation),'manager operations never open the booking gate');
