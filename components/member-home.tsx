@@ -12,9 +12,14 @@ import {
  reorderFavorite,toggleFavorite,weekDays
 } from '../lib/member-experience';
 import type{MemberActivity,ModuleEntry}from'../lib/member-experience';
+import type{ModuleFeed,ModuleNotice}from'../lib/app-runtime';
 import './member-home.css';
 
-type Props={workspace:Workspace;demo?:boolean;manageHref:string};
+type Props={
+ workspace:Workspace;demo?:boolean;manageHref:string;experience?:ModuleFeed;
+ onFavoriteUpdate?:(ids:string[],version:number)=>Promise<{favorites:string[];favoriteVersion:number}>;
+ onModuleNoticeRead?:(noticeId:string)=>Promise<void>;
+};
 type Section='home'|'manage'|'notifications';
 type Period='today'|'week'|'calendar';
 const labels=['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
@@ -26,28 +31,37 @@ function nextMonth(day:string,offset:number){
  return d.toISOString().slice(0,10);
 }
 function initials(name:string){return name.split(/\s+/).filter(Boolean).slice(0,2).map(x=>x[0]).join('').toUpperCase();}
-export default function MemberHome({workspace:w,demo=false,manageHref}:Props){
+export default function MemberHome({workspace:w,demo=false,manageHref,experience,onFavoriteUpdate,onModuleNoticeRead}:Props){
  const[section,setSection]=useState<Section>('home');
  const[period,setPeriod]=useState<Period>('today');
  const[today,setToday]=useState('2026-10-13');
  const[anchor,setAnchor]=useState('2026-10-13');
  const[selectedDay,setSelectedDay]=useState('2026-10-13');
  const[appsEditing,setAppsEditing]=useState(false);
- const[favorites,setFavorites]=useState<string[]>(demo?['concept-a','concept-b']:[]);
+ const[favorites,setFavorites]=useState<string[]>(demo?['concept-a','concept-b']:experience?.favorites??[]);
+ const[favoriteVersion,setFavoriteVersion]=useState(experience?.favoriteVersion??0);
+ const[favoritesSaving,setFavoritesSaving]=useState(false);
+ const[favoritesMessage,setFavoritesMessage]=useState('');
  const[selectedEvent,setSelectedEvent]=useState<MemberActivity|null>(null);
  const[selectedApp,setSelectedApp]=useState<ModuleEntry|null>(null);
  const appSheet=useRef<HTMLDialogElement>(null);
  const activitySheet=useRef<HTMLDialogElement>(null);
  const moduleSheet=useRef<HTMLDialogElement>(null);
  useEffect(()=>{const day=localDay();setToday(day);setAnchor(day);setSelectedDay(day);},[]);
+ useEffect(()=>{if(!demo){setFavorites(experience?.favorites??[]);setFavoriteVersion(experience?.favoriteVersion??0);}},[demo,experience?.favorites,experience?.favoriteVersion]);
  useEffect(()=>{if(selectedEvent&&!activitySheet.current?.open)activitySheet.current?.showModal();},[selectedEvent]);
  useEffect(()=>{if(selectedApp&&!moduleSheet.current?.open)moduleSheet.current?.showModal();},[selectedApp]);
- const allActivities=useMemo(()=>demo?activitiesForPreview(today):[],[demo,today]);
+ const allActivities=useMemo(()=>demo?activitiesForPreview(today):experience?.activities??[],[demo,today,experience?.activities]);
  // Future module services MUST scope this list server-side; no unapproved module is live.
- const apps=useMemo(()=>demo?conceptModules():[],[demo]);
+ const apps=useMemo(()=>demo?conceptModules():experience?.modules??[],[demo,experience?.modules]);
  const saved=cleanFavorites(favorites,apps);
  const favoriteApps=saved.map(x=>apps.find(a=>a.id===x)).filter((a):a is ModuleEntry=>Boolean(a));
- const notices=actionNotices(w);
+ const moduleActions=(experience?.notifications??[]).filter(n=>n.requiresAction).map(n=>({
+  id:'module-'+n.id,title:n.title,description:n.description,
+  destination:'module' as const,source:'module' as const,route:n.route
+ }));
+ const notices=[...actionNotices(w),...moduleActions];
+ const recentNotices=(experience?.notifications??[]).filter(n=>!n.requiresAction||n.readAt!==null);
  const userManages=canManage(w);
  const group=w.groups.find(g=>g.id===w.self.groupId)?.name??'My Group';
  const unit=w.units.find(u=>u.id===w.self.unitId)?.name??'My Unit';
@@ -64,7 +78,25 @@ export default function MemberHome({workspace:w,demo=false,manageHref}:Props){
  function closeActivity(){activitySheet.current?.close();setSelectedEvent(null);}
  function closeModule(){moduleSheet.current?.close();setSelectedApp(null);}
  function openApps(){appSheet.current?.showModal();}
- function openModule(module:ModuleEntry){appSheet.current?.close();setSelectedApp(module);}
+ function openModule(module:ModuleEntry){appSheet.current?.close();
+  if(!demo && module.status==='approved' && module.route?.startsWith('/modules/')){window.location.assign(module.route);return;}
+  if(demo)setSelectedApp(module);
+ }
+ async function saveFavorites(nextIds:string[]){
+  if(demo){setFavorites(nextIds);return;}
+  if(!onFavoriteUpdate || favoritesSaving)return;
+  setFavoritesSaving(true);setFavoritesMessage('');
+  try{
+   const response=await onFavoriteUpdate(nextIds,favoriteVersion);
+   setFavorites(response.favorites);setFavoriteVersion(response.favoriteVersion);
+   setFavoritesMessage('Favorites synced to your member account.');
+  }catch{setFavoritesMessage('Favorites were not changed. Refresh the page and try again.');}
+  finally{setFavoritesSaving(false);}
+ }
+ async function openNotice(notice:ModuleNotice){
+  if(onModuleNoticeRead && notice.readAt===null)await onModuleNoticeRead(notice.id).catch(()=>{});
+  window.location.assign(notice.route);
+ }
  function switchSection(view:Section){setSection(view);window.scrollTo({top:0,behavior:'instant'});}
  function dateCell(date:string,inMonth:boolean){
   const hasActivity=allActivities.some(a=>a.date===date);
@@ -170,11 +202,15 @@ export default function MemberHome({workspace:w,demo=false,manageHref}:Props){
     <p className="lvz-eyebrow">INBOX</p><h1>Notifications<span className="lvz-notice-dot">.</span></h1>
     <p className="lvz-notice-intro">Items here come only from your authorized management view. Push notifications are not active.</p>
     <div className="lvz-section-heading"><h2>Needs action</h2><span className="lvz-count-label">{notices.length}</span></div>
-    {notices.length?<div className="lvz-notice-list">{notices.map(n=><button key={n.id} onClick={()=>{if(userManages)switchSection('manage');}}>
+    {notices.length?<div className="lvz-notice-list">{notices.map(n=><button key={n.id} onClick={()=>{if(n.source==='module' && n.route?.startsWith('/modules/'))window.location.assign(n.route);else if(userManages)switchSection('manage');}}>
       <div className="lvz-notice-icon"><Bell size={18}/></div><div><strong>{n.title}</strong><p>{n.description}</p><small>Open the authorized management screen</small></div><ChevronRight size={18}/></button>)}</div>:
      <div className="lvz-no-notices"><Check size={24}/><h3>All clear here</h3><p>No pending approvals or transfer decisions in this view.</p></div>}
     <div className="lvz-section-heading lvz-recent-heading"><h2>Recent</h2></div>
-    <div className="lvz-no-history"><Info size={21}/><p>Individual app notifications are not connected. No notification history has been imported.</p></div>
+     {recentNotices.length?<div className="lvz-notice-list">{recentNotices.map(n=><button key={n.id}
+      onClick={()=>{void openNotice(n);}}><div className="lvz-notice-icon"><Bell size={18}/></div>
+      <div><strong>{n.title}</strong><p>{n.description}</p><small>{n.readAt?'Read':'Unread update'}</small></div>
+      <ChevronRight size={18}/></button>)}</div>:
+      <div className="lvz-no-history"><Info size={21}/><p>Individual app notifications are not connected. No notification history has been imported.</p></div>}
    </section>}
   </main>
   <nav className="lvz-bottom-nav" aria-label="Main navigation">
@@ -187,20 +223,21 @@ export default function MemberHome({workspace:w,demo=false,manageHref}:Props){
    <div className="lvz-sheet-heading"><div><span className="lvz-eyebrow">SWITCHER</span><h2>Applications</h2></div>
     <button className="lvz-sheet-close" onClick={()=>appSheet.current?.close()} aria-label="Close applications"><X size={22}/></button></div>
    <p className="lvz-sheet-description">{demo?'These tiles are fictional navigation concepts, not approved official apps.':'Official applications have not been selected or assigned yet.'}</p>
-   {apps.length?<><div className="lvz-apps-sheet-header"><h3>Available in this concept</h3><button className="lvz-edit-link" onClick={()=>setAppsEditing(v=>!v)}><Pencil size={15}/>{appsEditing?'Done':'Edit favorites'}</button></div>
+   {apps.length?<><div className="lvz-apps-sheet-header"><h3>{demo?'Available in this concept':'Available to you'}</h3><button className="lvz-edit-link" onClick={()=>setAppsEditing(v=>!v)}><Pencil size={15}/>{appsEditing?'Done':'Edit favorites'}</button></div>
     <div className="lvz-apps-list">{apps.map(a=>{
      const inFavorites=saved.includes(a.id);
      return <div className="lvz-apps-row" key={a.id}>
-       <button className="lvz-app-row-main" onClick={()=>openModule(a)}><span className="lvz-app-row-icon" style={{backgroundColor:a.accent}}>{a.shortName}</span><span><strong>{a.name}</strong><small>Fictional concept</small></span><ChevronRight size={18}/></button>
+       <button className="lvz-app-row-main" onClick={()=>openModule(a)}><span className="lvz-app-row-icon" style={{backgroundColor:a.accent}}>{a.shortName}</span><span><strong>{a.name}</strong><small>{demo?'Fictional concept':'Authorized module'}</small></span><ChevronRight size={18}/></button>
        <button className={'lvz-pin-button '+(inFavorites?'lvz-pin-on':'')} aria-label={(inFavorites?'Unpin ':'Pin ')+a.name} aria-pressed={inFavorites}
-         onClick={()=>setFavorites(current=>toggleFavorite(current,a.id,apps))}><Pin size={19}/></button>
+         disabled={favoritesSaving} onClick={()=>{void saveFavorites(toggleFavorite(favorites,a.id,apps));}}><Pin size={19}/></button>
       </div>;
     })}</div>
     {appsEditing&&<div className="lvz-reorder-box"><h3>Reorder your favorites</h3><p>Pin up to eight concepts. Use the arrows to change their order.</p>
-      {favoriteApps.map((a,i)=><div key={a.id} className="lvz-reorder-row"><span>{i+1}. {a.name}</span><button disabled={i===0} aria-label={'Move '+a.name+' up'} onClick={()=>setFavorites(x=>reorderFavorite(x,a.id,-1,apps))}><ArrowUp size={17}/></button><button disabled={i===favoriteApps.length-1} aria-label={'Move '+a.name+' down'} onClick={()=>setFavorites(x=>reorderFavorite(x,a.id,1,apps))}><ArrowDown size={17}/></button></div>)}
+      {favoriteApps.map((a,i)=><div key={a.id} className="lvz-reorder-row"><span>{i+1}. {a.name}</span><button disabled={i===0} aria-label={'Move '+a.name+' up'} onClick={()=>{void saveFavorites(reorderFavorite(favorites,a.id,-1,apps));}}><ArrowUp size={17}/></button><button disabled={i===favoriteApps.length-1} aria-label={'Move '+a.name+' down'} onClick={()=>{void saveFavorites(reorderFavorite(favorites,a.id,1,apps));}}><ArrowDown size={17}/></button></div>)}
      </div>}
    </>:<div className="lvz-no-apps"><Grid2X2 size={30}/><strong>No applications published</strong><p>Modules will be shown only after they are officially approved and authorized.</p></div>}
-   <p className="lvz-sheet-footnote">{demo?'Favorites reset with the demo. No cross-device sync is claimed.':'No access has been granted to any unapproved module.'}</p>
+    {favoritesMessage&&<p role="status" className="lvz-sheet-footnote">{favoritesMessage}</p>}
+   <p className="lvz-sheet-footnote">{demo?'Favorites reset with the demo. No cross-device sync is claimed.':'Only explicitly authorized modules appear. Favorites synchronize between your signed-in devices.'}</p>
   </dialog>
   <dialog className="lvz-detail-dialog" ref={activitySheet} onClose={()=>setSelectedEvent(null)} aria-label="Activity details">
    {selectedEvent&&<><div className="lvz-sheet-heading"><div><span className="lvz-eyebrow">{selectedEvent.source==='fictional'?'FICTIONAL ACTIVITY':'ACTIVITY DETAILS'}</span><h2>{selectedEvent.title}</h2></div>

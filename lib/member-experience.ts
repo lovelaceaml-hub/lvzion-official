@@ -7,11 +7,11 @@ export type MemberActivity = {
 };
 export type ModuleEntry = {
  id:string; name:string; shortName:string; description:string; accent:string;
- status:'fictional-concept'|'approved';
+ status:'fictional-concept'|'approved'; route?:string; canManage?:boolean;
 };
 export type ActionNotice = {
- id:string; title:string; description:string; destination:'manage';
- source:'transfer'|'access-request';
+ id:string; title:string; description:string; destination:'manage'|'module';
+ source:'transfer'|'access-request'|'module'; route?:string;
 };
 export function localDay(now:Date=new Date(),timeZone='America/Los_Angeles'):string{
  const format=new Intl.DateTimeFormat('en-US',{timeZone,year:'numeric',month:'2-digit',day:'2-digit'});
