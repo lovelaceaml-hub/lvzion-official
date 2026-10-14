@@ -3,6 +3,8 @@ import {useCallback,useEffect,useState} from 'react';
 import Link from 'next/link';
 import type {Action} from '../../lib/morning-prayer/domain';
 import styles from './morning-prayer.module.css';
+import MorningPrayerOperations from './MorningPrayerOperations';
+import MorningPrayerVolunteer from './MorningPrayerVolunteer';
 type Capability='view_schedule'|'join_gathering'|'volunteer_host'|'review_requests'|'manage_schedule'|'view_materials'|'edit_materials'|'publish_materials';
 type Occ={id:string;date:string;originalDate:string;startsAt:string;endsAt:string;timezone:string;kind:'gathering'|'app_day'|'cancelled';host:string;isMine:boolean;hostConfirmed:boolean;verified:boolean;revision:number;readingKey?:string|null};
 type Req={id:string;occurrenceId:string;kind:'volunteer'|'change';status:string;revision:number;isMine:boolean;requester:string;note:string};
