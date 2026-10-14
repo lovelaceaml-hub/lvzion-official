@@ -1,0 +1,15 @@
+import test from 'node:test';import assert from 'node:assert/strict';
+import {parseDisplaySlides,parseDisplaySnapshot,activeDisplaySlides,churchTimeToUtc,churchLocal} from '../lib/continuous-display/live-contract.ts';
+const slide={id:'welcome',kind:'announcement',style:'editorial',title:'Welcome',body:'Approved example text',duration:12} as const;
+test('display live: basic anonymous-free text slide validates',()=>assert.equal(parseDisplaySlides([slide]).length,1));
+test('display live: unknown private records and HTML-bearing keys never pass',()=>assert.throws(()=>parseDisplaySlides([{...slide,privatePrayer:'x'}])));
+test('display live: invalid February date rejected',()=>assert.throws(()=>parseDisplaySlides([{...slide,date:'2026-02-30'}])));
+test('display live: duplicate slide IDs rejected',()=>assert.throws(()=>parseDisplaySlides([slide,slide])));
+test('display live: oversized copy and videos not accepted',()=>{assert.throws(()=>parseDisplaySlides([{...slide,title:'x'.repeat(75)}]));assert.throws(()=>parseDisplaySlides([{...slide,kind:'video'}]));});
+test('display live: three activities are supported but four rejected',()=>{const rows=Array.from({length:3},(_,i)=>({time:'10 AM',label:'Activity '+i}));assert.equal(parseDisplaySlides([{...slide,kind:'schedule',date:'2026-10-18',rows}]).length,1);assert.throws(()=>parseDisplaySlides([{...slide,kind:'schedule',date:'2026-10-18',rows:[...rows,rows[0]]}]));});
+test('display live: per-slide exclusive expiry enforced',()=>{const s={...slide,startsAt:'2026-10-14T12:00:00.000Z',endsAt:'2026-10-14T13:00:00.000Z'};assert.equal(activeDisplaySlides([s],Date.parse(s.startsAt)).length,1);assert.equal(activeDisplaySlides([s],Date.parse(s.endsAt)).length,0);});
+test('display live: DST spring gap and offset mismatch rejected',()=>assert.throws(()=>churchTimeToUtc('2026-03-08T02:30','-08:00')));
+test('display live: DST fallback ambiguity resolved with explicit offset',()=>{const a=churchTimeToUtc('2026-11-01T01:30','-07:00'),b=churchTimeToUtc('2026-11-01T01:30','-08:00');assert.equal(Date.parse(b)-Date.parse(a),3600000);});
+test('display live: Pacific midnight unaffected by UTC date',()=>assert.equal(churchLocal('2026-10-15T06:59:00Z'),'2026-10-14T23:59'));
+test('display live: screen projection cannot add private fields',()=>assert.throws(()=>parseDisplaySnapshot({paired:true,screen:'TV',version:1,serverTime:'2026-10-14T12:00:00.000Z',leaseUntil:'2026-10-14T12:00:30.000Z',slides:[{...slide,memberId:'private'}]})));
+test('display live: snapshot must have bounded verification lease',()=>assert.throws(()=>parseDisplaySnapshot({paired:true,screen:'TV',version:1,serverTime:'2026-10-14T12:00:00.000Z',leaseUntil:'2026-10-14T12:12:30.000Z',slides:[slide]})));

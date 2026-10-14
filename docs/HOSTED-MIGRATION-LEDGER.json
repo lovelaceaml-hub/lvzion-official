@@ -63,6 +63,47 @@
       "normalized_md5": "faa797d5da869aebe92a0509815efe01",
       "repository_normalized_match": true,
       "normalization": "Whitespace removed only; this hosted batch preserves comments and transaction wrappers."
+    },
+    {
+      "name": "study_rooms_core_live",
+      "hosted_version": "20261014221429",
+      "repository_version": "20261014221015",
+      "applied_via": "Supabase MCP apply_migration",
+      "status": "applied",
+      "verification": "migration success, hosted list_migrations, RLS table list; no canonical digest attestation for this entry"
+    },
+    {
+      "name": "study_rooms_changes_live",
+      "hosted_version": "20261014221435",
+      "repository_version": "20261014221018",
+      "applied_via": "Supabase MCP apply_migration",
+      "status": "applied",
+      "verification": "migration success, hosted list_migrations, RLS table list; no canonical digest attestation for this entry"
+    },
+    {
+      "name": "study_rooms_bundles_live",
+      "hosted_version": "20261014221437",
+      "repository_version": "20261014221021",
+      "applied_via": "Supabase MCP apply_migration",
+      "status": "applied",
+      "verification": "migration success, hosted list_migrations, RLS table list; no canonical digest attestation for this entry"
+    },
+    {
+      "name": "study_rooms_owner_review_gate",
+      "hosted_version": "20261014222303",
+      "repository_version": "20261014221636",
+      "applied_via": "Supabase MCP apply_migration",
+      "status": "applied",
+      "verification": "migration success, hosted list_migrations, RLS table list; no canonical digest attestation for this entry"
+    },
+    {
+      "name": "contacts_private_owner_pilot_v1",
+      "hosted_version": "20261014224708",
+      "repository_version": "20261014224708",
+      "applied_via": "Supabase MCP apply_migration",
+      "status": "applied",
+      "verification": "migration accepted; hosted list_migrations and read-only checks verified six RLS/FORCE RLS tables, zero anonymous function grants, zero direct authenticated reads, one owner grant, zero real contacts. Dedicated PGlite tests exercise identity-aware setup. No live-contact fixture inserted.",
+      "source": "supabase/migrations/20261014224708_contacts_private_owner_pilot_v1.sql"
     }
   ],
   "normalization": {
@@ -71,5 +112,5 @@
     "purpose": "Comparison of known migration definitions, not cryptographic attestation or a full semantic/security review."
   },
   "unapplied_repository_migrations": [],
-  "warning": "The three definition fingerprints match, but hosted IDs still differ from repository filenames. Reconcile the deployment ledger deliberately before CLI db push. Do not replay duplicate CREATE migrations or rewrite hosted history blindly."
+  "warning": "Hosted migration IDs differ from repository filenames for all historical generations; do not blindly replay or rewrite ledger or run db push. Study Room migrations were individually applied via connector. Reservation cutover activation is separate and intentionally closed until original Firebase bookings are reconciled."
 }
