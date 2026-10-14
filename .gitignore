@@ -1,0 +1,11 @@
+# Never commit generated output, local credentials, or dependency folders
+node_modules/
+.next/
+.vercel/
+.env
+.env.*
+!.env.example
+*.log
+.DS_Store
+*.pem
+*.key
