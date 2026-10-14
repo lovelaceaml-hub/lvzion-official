@@ -109,9 +109,11 @@
       "name": "continuous_display_live_schema",
       "hosted_version": "20261014224840",
       "repository_version": "20261014223341",
-      "applied_via": "Supabase MCP apply_migration",
       "status": "applied",
-      "verification": "Hosted list_migrations entry observed October 14; no new definition hash computed in this documentation pass. Separate Continuous Display release documentation records module-specific testing."
+      "verified_on": "2026-10-14",
+      "verification": "Read-only hosted migration metadata confirms version and name; no definition digest or new migration execution claimed by documentation audit.",
+      "source": "supabase/migrations/20261014223341_continuous_display_live_schema.sql",
+      "applied_via": "Supabase MCP apply_migration"
     },
     {
       "name": "study_room_policy_operations",
@@ -126,9 +128,11 @@
       "name": "morning_prayer_live_core",
       "hosted_version": "20261014225825",
       "repository_version": "20261014224129",
-      "applied_via": "Supabase MCP apply_migration",
       "status": "applied",
-      "verification": "Hosted list_migrations entry observed October 14; no new definition hash computed in this documentation pass. Consult Morning Prayer module-specific verification."
+      "verified_on": "2026-10-14",
+      "verification": "Read-only hosted migration metadata confirms version and name; no definition digest or new migration execution claimed by documentation audit.",
+      "source": "supabase/migrations/20261014224129_morning_prayer_live_core.sql",
+      "applied_via": "Supabase MCP apply_migration"
     },
     {
       "name": "member_signup_names",
@@ -142,9 +146,13 @@
       "name": "continuous_display_operations",
       "hosted_version": "20261014232519",
       "repository_version": "20261014230147",
-      "applied_via": "Supabase MCP apply_migration",
       "status": "applied",
-      "verification": "Hosted list_migrations entry verified on October 14; no independent hash or semantic migration audit performed in this Study Room documentation task. Refer to the separate Continuous Display Operations R2 release review."
+      "verified_on": "2026-10-14",
+      "verification": "Read-only hosted migration metadata confirms version and name; no definition digest or new migration execution claimed by documentation audit.",
+      "source": "supabase/migrations/20261014230147_continuous_display_operations.sql",
+      "repository_state": "PR #32 merged during audit at de5dcdede5fc740873fddfa36467d9d47f318fd6. Repository source now exists on main. Refreshed Vercel alias lookup verified READY production from that SHA; no new runtime or hardware acceptance is claimed.",
+      "source_pr": "https://github.com/lovelaceaml-hub/lvzion-official/pull/32",
+      "applied_via": "Supabase MCP apply_migration"
     }
   ],
   "normalization": {
@@ -158,6 +166,8 @@
     "20261014224325_worship_duty_live_activation.sql",
     "20261014224327_worship_duty_live_setup.sql"
   ],
-  "warning": "Hosted migration IDs differ from repository filenames for some releases. Never blindly replay existing CREATE migrations, rewrite hosted history, or run an unreviewed supabase db push. All 16 recorded repository migrations appeared in hosted list_migrations on October 14, 2026. Study Room booking remains CLOSED pending a separately approved Firebase cutover; migration presence alone does not authorize booking activation. Draft PR #25 includes four unapplied Worship Duty migrations. No blanket db push or premature activation.",
+  "warning": "Hosted versions differ from repository filenames. Never replay applied migrations or use blind db push. Display operations is applied and its code merged in PR #32; fetch current state before release. Study Room booking gate remains closed. Draft PR #25 includes four unapplied Worship Duty migrations. Never blanket db push or prematurely enable that module.",
+  "metadata_reconciled_at": "2026-10-14T23:26:33Z",
+  "metadata_reconciliation": "16 hosted versions/names observed. Existing digest attestations remain historical; added metadata entries do not assert definition equivalence.",
   "draft_workstream_note": "On draft PR #25 ONLY, these four Worship Duty migrations are present in the feature branch but NOT applied to hosted Supabase. The owner-setup SQL remains untested and corresponding UI/API are not committed. This is not a deployment authorization. See docs/worship-duty/MIGRATION-STATUS.md. Other concurrent workstreams may apply further migrations after this snapshot."
 }
