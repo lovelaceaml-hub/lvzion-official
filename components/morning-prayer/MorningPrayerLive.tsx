@@ -92,6 +92,7 @@ export default function MorningPrayerLive(){
     </>}
     {tab==='schedule'&&<>
       <div className={styles.monthNav}><button aria-label="Previous month" onClick={()=>{setMonth(nextMonth(month,-1));setFocus(null);}}>‹</button><h2>{new Intl.DateTimeFormat('en-US',{month:'long',year:'numeric',timeZone:'UTC'}).format(new Date(month+'-01T12:00:00Z'))}</h2><button aria-label="Next month" onClick={()=>{setMonth(nextMonth(month,1));setFocus(null);}}>›</button></div>
+      <MorningPrayerVolunteer month={month} rows={rows} today={today} selected={focus} onSelect={setFocus} canVolunteer={cap('volunteer_host')} busy={busy} onSubmit={async ids=>{await post({type:'volunteer',occurrenceIds:ids});}}/>
       {rows.length===0?<section className={styles.empty}><h2>No gatherings entered for this month</h2><p>This is the real app; only authorized records will appear here.</p></section>:rows.map(o=><button key={o.id} className={styles.scheduleRow} onClick={()=>setFocus(o.id)} aria-pressed={focus===o.id}>
        <span className={styles.dateBlock}><small>{pretty(o.date).split(',')[0]}</small><strong>{+o.date.slice(-2)}</strong></span>
        <span><b>{o.kind==='app_day'?'Pray Daily app day':o.kind==='cancelled'?'Cancelled':o.host}</b><small>{o.kind==='gathering'?time(o.startsAt)+' · '+(o.verified?'Schedule verified':'Pending verification'):'No live Zoom gathering'}</small></span><b>›</b>
@@ -135,6 +136,7 @@ export default function MorningPrayerLive(){
        <button className={styles.primary} disabled={busy} onClick={()=>void post({type:'create_material',key:materialKey,kind:materialKind,body:{title,summary,items:items.split('\n').map(s=>s.trim()).filter(Boolean).slice(0,5),sourceLabel},sourceChecked},true)}>Save as an unpublished draft →</button>
       </section>}
       {cap('publish_materials')&&<section className={styles.card}><h2>Material publication review</h2>{data.drafts.length?data.drafts.map(m=><div key={m.id} className={styles.requestRow}><strong>{m.body.title}</strong><p>{m.key} · Revision {m.revision} · Source {m.sourceState}</p><p>{m.body.summary}</p><button className={styles.primary} disabled={busy||m.sourceState!=='checked'} onClick={()=>void post({type:'material_publish',materialId:m.id})}>Publish reviewed revision →</button></div>):<p className={styles.muted}>No material drafts awaiting publication.</p>}</section>}
+      <MorningPrayerOperations data={data} onReload={loader} onNotice={setMessage}/>
       <p className={styles.boundary}>No automatic sheet synchronization, external messages, attendance tracking, or old Firebase database access.</p>
       </>}
     </>}
