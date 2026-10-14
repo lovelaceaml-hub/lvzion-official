@@ -57,6 +57,18 @@ export default function MorningPrayerLive(){
   }catch(e){setMessage(e instanceof Error?e.message:'Unable to save.');await loader();}
   finally{setBusy(false);}
  }
+ async function joinGathering(id:string){
+  if(busy)return;setBusy(true);setMessage('');
+  try{
+   const value=await json<{joinUrl:string}>('/api/morning-prayer/join',
+    {method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({occurrenceId:id})});
+   const url=new URL(value.joinUrl);
+   if(url.protocol!=='https:'||!(/(^|[.])zoom[.]us$/.test(url.hostname))||
+      !(/^[/]j[/][0-9]{8,12}$/.test(url.pathname)))
+     throw new Error('The verified Zoom meeting URL is unavailable.');
+   window.location.assign(url.toString());
+  }catch(e){setMessage(e instanceof Error?e.message:'Joining is currently unavailable.');setBusy(false);}
+ }
  const rows=[...(data?.occurrences||[])].sort((a,b)=>a.date.localeCompare(b.date));
  const today=localDay(),future=rows.filter(o=>o.date>=today&&o.kind==='gathering');
  const upcoming=(data?.upcoming||[]).filter(o=>o.date>=today&&o.kind==='gathering');
@@ -82,6 +94,7 @@ export default function MorningPrayerLive(){
       {next?<section className={styles.hero}><div className={styles.heroTop}><span>{pretty(next.date).toUpperCase()}</span><span>{next.verified?'SCHEDULED':'NEEDS VERIFICATION'}</span></div>
        <div className={styles.heroTime}>{time(next.startsAt)}<small>Las Vegas time</small></div>
        <h2>{next.host}</h2><p>{next.hostConfirmed?'Confirmed host':'Host and meeting details may need confirmation'}</p>
+       {joinable(next.id)&&<button onClick={()=>void joinGathering(next.id)}>Join verified gathering ↗</button>}
        <button onClick={()=>{setFocus(next.id);setMonth(next.date.slice(0,7));setTab('schedule');}}>Gathering details →</button>
       </section>:<section className={styles.empty}><h2>No upcoming gatherings scheduled</h2><p>An authorized coordinator can add actual dates in Manage. No dates or meeting links are guessed.</p></section>}
       {cap('view_materials')&&<section className={styles.card}><div className={styles.cardTop}><h2>PWP · {new Intl.DateTimeFormat('en-US',{month:'long',year:'numeric',timeZone:'UTC'}).format(new Date(month+'-01T12:00:00Z'))}</h2><span className={styles.tag}>Approved sources only</span></div>
@@ -103,7 +116,7 @@ export default function MorningPrayerLive(){
       {active&&active.date.slice(0,7)===month&&<section className={styles.card} data-testid="actual-gathering"><h2>{pretty(active.date)}</h2><p><strong>{active.kind==='gathering'?active.host:active.kind==='app_day'?'Pray Daily app day':'Cancelled'}</strong></p>
        <p>{time(active.startsAt)} – {time(active.endsAt)} · America/Los_Angeles</p>
        {!active.verified&&<p className={styles.warning}>Schedule has not been verified by a coordinator.</p>}
-       {active.kind==='gathering'&&<p className={styles.muted}>Join access remains unavailable until this occurrence has an authorized, verified meeting link.</p>}
+       {active.kind==='gathering'&&(joinable(active.id)?<button className={styles.primary} disabled={busy} onClick={()=>void joinGathering(active.id)}>Join verified gathering ↗</button>:<p className={styles.muted}>Join access opens only with a verified date and encrypted link, during the authorized meeting window.</p>)}
        {canVolunteer(active)&&<button className={styles.primary} disabled={busy} onClick={()=>void post({type:'volunteer',occurrenceIds:[active.id]})}>Request to host this date →</button>}
        {cap('view_materials')&&published.filter(m=>m.kind==='reading'&&m.key===active.readingKey).map(m=><p key={m.key}><strong>{m.body.title}</strong> — {m.body.summary}</p>)}
       </section>}
