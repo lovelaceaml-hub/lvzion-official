@@ -1,5 +1,7 @@
 # Work Mission Morning Prayer — live LV Zion integration
 
+> **Live integration status verified October 14, 2026.** Work Mission Morning Prayer exists as an owner-only approved module at [lvz.app/modules/work-mission-prayer](https://lvz.app/modules/work-mission-prayer). Hosted `morning_prayer_live_core` version `20261014225825` corresponds to repository `20261014224129_morning_prayer_live_core.sql`; `mpg_private` has 14 tables. Read-only database audit: **one series, zero actual occurrences and one owner module grant**. This is live *owner setup*, **not** verified current meeting schedules, member join access or legacy automatic synchronization. See [current production status](../CURRENT-STATUS.md); earlier steps below are the setup runbook, not evidence of real gatherings.
+
 ## Production target
 This module is part of the actual LV Zion Official member application, **https://lvz.app**, at `/modules/work-mission-prayer`. It is based on the legacy `lovelaceaml-hub/morning-prayer-app` workflow and **not** the Zoom meeting-recap/educational-graphic prototype. The earlier recap PR #7 remains on hold. The old Firebase site and its GroupMe companion are neither migrated nor modified.
 
