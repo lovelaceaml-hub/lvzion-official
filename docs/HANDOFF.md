@@ -12,7 +12,7 @@
 
 change/actual-app-setup contains the main application release. Anthony explicitly requested the actual app at lvz.app and no additional previews. Automatic preview publication is disabled in Vercel; automatic Git deployments are disabled in vercel.json. The app's actual front door is sign-in. Fictional routes redirect on production. Other module draft branches and original LV Zion apps remain outside scope.
 
-New confirmed accounts start Unassigned to category, group and unit and see only their own records. Authorized member administration verifies membership and places each person, retaining history/audit. The designated first owner confirms the privately configured email, receives independent organization/department/technical administration, and remains Unassigned. No hierarchy names or real records are imported.
+New confirmed accounts start Unassigned to category, group and unit and see only their own records. Authorized member administration verifies membership and places each person, retaining history/audit. The designated first owner confirms the privately configured email, receives independent organization/department/technical administration, and remains Unassigned. Organization entries are created only from Anthony's supplied instructions. No member roster is imported.
 
 ## Applied and verified
 
@@ -39,3 +39,7 @@ Personal credentials use Apple Passwords or Keychain only. No credentials or des
 ## Password policy update
 
 Anthony requested six characters as the minimum on 2026-10-14. The signup, invitation-activation and recovery forms and their server validation now agree. Supabase Auth and the actual signup, invitation and recovery pages were verified at six in production deployment dpl_5XtZ7FjKqF71w3unp8z59Vqd2722, commit 9ac33961ad37c433e41cf256dbd3dfe2d9479b78. The earlier twelve-character rule is superseded by this direct instruction.
+
+## Organization and placement completion
+
+The current bounded workflow is docs/ORGANIZATION-WORKFLOW.md, with plain-language instructions in docs/USER-MANUAL.md. Anthony requested two empty units in each existing group and completion of this management flow. The actual structure is verified at four age categories, eight groups and sixteen units, all empty, with sixteen audited unit creations. The current branch adds a nested hierarchy, parent-bound creation, rename/archive controls, shared placement choices and clear leadership scope. Backend authorization and schema are unchanged. The final build passed 131 application tests and 182 SQL assertions; all 42 phone Chromium checks passed. The controller reviewed the complete scoped change. The previous production deployment remains live until the new release and signed-in view are verified.
