@@ -1,4 +1,3 @@
-// The identity-bound Contacts migration is covered by its dedicated verified-owner suite.
 import test from'node:test';import assert from'node:assert/strict';import{readFile,readdir}from'node:fs/promises';import{PGlite}from'@electric-sql/pglite';
 test('study room SQL privacy, booking integrity and activity projection',async()=>{
  const db=new PGlite();let passed=0;

@@ -7,7 +7,7 @@ Baseline: 9f3911d66a12224fb710d217b278f1adcef8bbdb
 
 ## Result
 
-Final build passed 131 application tests and 182 disposable SQL assertions. All 42 phone Chromium tests passed. Production release and signed-in verification are next.
+Integrated final build passed 244 application tests and 182 disposable SQL assertions. All 42 phone Chromium tests passed. Production release and signed-in verification are next.
 
 ## Review
 
