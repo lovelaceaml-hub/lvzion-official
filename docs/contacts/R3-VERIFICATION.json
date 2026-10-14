@@ -1,0 +1,69 @@
+{
+  "revision": "R3",
+  "date": "2026-10-14",
+  "applicationCommit": "0fbc1707a59edd946187b262c62894f153923b43",
+  "foundationCommit": "5a0d435dc7dbf18401d0a77af89543bf9d9d9c4b",
+  "branch": "feature/contacts-r1",
+  "pullRequest": 6,
+  "productionLaunched": false,
+  "deployment": {
+    "id": "dpl_BQGBP9wRToJvFWM7hfNmXHVeR8uC",
+    "environment": "preview",
+    "state": "READY",
+    "url": "https://lvzion-official-nwekywg0k-lvzion.vercel.app/contacts-preview",
+    "buildDurationReportedSeconds": 19
+  },
+  "checks": {
+    "typecheck": "passed",
+    "optimizedBuild": "passed",
+    "nodeTests": {"passed": 201, "failed": 0, "skipped": 0},
+    "httpContractTestsIncludedInNodeTotal": {"passed": 27, "dependencyDoubles": true, "hostedAuthentication": false},
+    "restoreRetryTestsIncludedInNodeTotal": {"passed": 8},
+    "foundationPgliteAssertions": {"passed": 111},
+    "fictionalPreviewBrowser": {
+      "passed": 27,
+      "failed": 0,
+      "commandId": "cmd_46be99f57ac5472e81caf3d45591",
+      "startedAt": "2026-10-14T14:05:23.235Z",
+      "exitCode": 0,
+      "engine": "Chromium",
+      "viewportWidths": [320, 390, 430, 768, 1280],
+      "uncaughtPageErrors": 0,
+      "uiContactsOrSupabaseDataCalls": 0
+    },
+    "directApiDenialProbes": {"passed": 21, "status": 403, "noStore": true},
+    "nativePostgresContention": {
+      "status": "not_completed",
+      "successfulScenarios": 0,
+      "reason": "Fixture preparation failed the active-member primary-placement invariant; a corrective setup command was then safety-blocked and not retried through another mechanism."
+    },
+    "nativeBackupRestore": "not_completed",
+    "newGuardedSqlPermissionAcceptance": "not_completed",
+    "authenticatedHostedEndToEnd": "not_completed",
+    "realDataWorkspaceBrowserAcceptance": "not_completed",
+    "physicalDeviceAccessibilityAcceptance": "not_completed"
+  },
+  "hostedReadOnlyInspection": {
+    "project": "otecqlkqirncotytbfns",
+    "authUsers": 0,
+    "members": 0,
+    "contactsTables": 0,
+    "migrations": ["20261014051733", "20261014051804", "20261014051924"],
+    "schemaWritesPerformed": false
+  },
+  "releaseState": {
+    "initialAudienceApproved": false,
+    "operatorOnlyPilotQuestionAsked": true,
+    "operatorOnlyPilotAnswerReceived": false,
+    "foundationProductionGuardPreserved": true,
+    "contactsServerGateOpen": false,
+    "contactsSqlGateOpen": false,
+    "newRpcReviewApplied": false,
+    "realAccountProvisioned": false,
+    "realModuleGrantsIssued": false,
+    "realContactsImported": false,
+    "communicationsEnabled": false,
+    "exportsEnabled": false,
+    "productionPromoted": false
+  }
+}
