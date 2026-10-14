@@ -19,12 +19,13 @@ try{
   check('rejected direct signup creates no Auth identity',sql("select count(*) from auth.users where email='hook-bypass@example.invalid'")==='0');
  }
  let c=await context(),pastor=await context(),unit=await context(),declined=await context();
- const signup={name:'Jamie Integration',email:'signup-integration@example.invalid',password:'Synthetic-Signup-Password!'};
+ const signup={firstName:'Jamie',lastName:'Integration',email:'signup-integration@example.invalid',password:'Synthetic-Signup-Password!'};
  const forged=await request.newContext({baseURL:base,extraHTTPHeaders:{Origin:'https://untrusted.example'}});contexts.push(forged);
  const before=sql('select count(*) from auth.users');
  await post(forged,'/api/auth/sign-up',signup);check('cross-origin signup never reaches Auth',sql('select count(*) from auth.users')===before);
  sql('update app_private.enrollment_settings set enabled=false');check('database activation switch blocks signup',(await post(c,'/api/auth/sign-up',signup)).status===503);sql('update app_private.enrollment_settings set enabled=true');
  let result=await post(c,'/api/auth/sign-up',signup);check('real email/password signup returns generic confirmation',result.status===200&&result.data.message.includes('confirmation email'));
+  check('real signup saves the correctly joined first and last names in Auth metadata',sql("select raw_user_meta_data->>'display_name' from auth.users where email='signup-integration@example.invalid'")==='Jamie Integration');
  check('signup response is private and never cached',result.headers['cache-control'].includes('no-store'));
  check('unconfirmed signup cannot read workspace',(await workspace(c)).status===401);
  check('unconfirmed signup creates no member',sql("select count(*) from public.members where display_name='Jamie Integration'")==='0');
@@ -53,12 +54,12 @@ try{
  w=await workspace(c);check('existing session sees authorized assignment and history',w.data.self.status==='active'&&w.data.self.unitId===payload.unitId&&w.data.enrollment.placementHistory.length===1);
  check('assignment grants no leadership',Object.values(w.data.permissions).every(x=>x===false));
  check('stale rejection cannot undo placement',(await command(pastor,'enrollment.reject',{memberId:mid,reason:'Stale rejection attempt'})).status===409);
- const declinedSignup={...signup,name:'Declined Integration',email:'declined-integration@example.invalid'};await post(declined,'/api/auth/sign-up',declinedSignup);await post(declined,'/api/auth/confirm',await token(declinedSignup.email));const pending=(await workspace(declined)).data.self.id;
+ const declinedSignup={...signup,firstName:'Declined',lastName:'Integration',email:'declined-integration@example.invalid'};await post(declined,'/api/auth/sign-up',declinedSignup);await post(declined,'/api/auth/confirm',await token(declinedSignup.email));const pending=(await workspace(declined)).data.self.id;
  check('decline command records decision',(await command(pastor,'enrollment.reject',{memberId:pending,reason:'Verified synthetic duplicate signup'})).status===200);
  check('declined session immediately loses access',(await workspace(declined)).status===401);
  check('declined signup cannot sign in',(await post(declined,'/api/auth/sign-in',{identifier:declinedSignup.email,password:signup.password})).status===401);
  check('no automatic roles created for signup',sql("select count(*) from app_private.role_assignments where member_id='"+mid+"'")==='0');
- const orphan=await context(),recoveryBrowser=await context();const orphanSignup={...signup,email:'confirmed-unlinked@example.invalid',name:'Confirmed Unlinked Example'};
+ const orphan=await context(),recoveryBrowser=await context();const orphanSignup={...signup,email:'confirmed-unlinked@example.invalid',firstName:'Confirmed',lastName:'Unlinked Example'};
  await post(orphan,'/api/auth/sign-up',orphanSignup);const orphanOtp=await token(orphanSignup.email);
  const orphanRedirect=await fetch('http://127.0.0.1:54321/auth/v1/verify?'+new URLSearchParams({token:orphanOtp.token_hash,type:'signup',redirect_to:base+'/signup/confirm'}),{headers:{apikey:keys.anon},redirect:'manual'});
  const orphanLocation=orphanRedirect.headers.get('location');const orphanCode=orphanLocation?new URL(orphanLocation).searchParams.get('code'):null;
@@ -66,7 +67,7 @@ try{
  check('failed PKCE exchange creates no membership',sql("select count(*) from public.members where display_name='Confirmed Unlinked Example'")==='0');
  const repair=await post(recoveryBrowser,'/api/auth/sign-in',{identifier:orphanSignup.email,password:orphanSignup.password});check('password sign-in finishes a confirmed but unlinked profile',repair.status===200);
  const repaired=await workspace(recoveryBrowser);check('repaired profile stays Unassigned and cannot enumerate groups',repaired.data.self.status==='intake'&&repaired.data.groups.length===0&&Object.values(repaired.data.permissions).every(x=>x===false));
- const pkce=await context();const pkceSignup={...signup,email:'pkce-integration@example.invalid',name:'PKCE Example'};
+ const pkce=await context();const pkceSignup={...signup,email:'pkce-integration@example.invalid',firstName:'PKCE',lastName:'Example'};
  await post(pkce,'/api/auth/sign-up',pkceSignup);const pkceOtp=await token(pkceSignup.email);
  const redirect=await fetch('http://127.0.0.1:54321/auth/v1/verify?'+new URLSearchParams({token:pkceOtp.token_hash,type:'signup',redirect_to:base+'/signup/confirm'}),{headers:{apikey:keys.anon},redirect:'manual'});
  const next=redirect.headers.get('location');const code=next?new URL(next).searchParams.get('code'):null;
