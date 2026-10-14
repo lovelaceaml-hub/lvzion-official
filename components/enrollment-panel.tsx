@@ -13,7 +13,7 @@ export default function EnrollmentPanel({data:w,execute,demo=false}:{data:Worksp
  if(!w.permissions.organization)return null;
  return <section className="member-card"><h2>Unassigned members</h2><p>Confirm the person is a member and check for an existing record. Email confirmation proves ownership of the address. It does not verify church membership.</p>
  {message&&<p role="status" className="member-message">{message}</p>}
- {(w.unassignedMembers??[]).map(m=>{const category=categories[m.id]??'',group=groups[m.id]??'';return <article className="sub-card" key={m.id}><strong>{m.name}</strong><p>{m.email}</p><span className="badge">Unassigned</span>
+ {(w.unassignedMembers??[]).map(m=>{const category=categories[m.id]??'',group=groups[m.id]??'';return <article className="sub-card" key={m.id}><strong>{m.name}</strong>{m.firstName&&m.lastName&&<p>Submitted first name: <strong>{m.firstName}</strong><br/>Submitted last name: <strong>{m.lastName}</strong></p>}<p>{m.email}</p><span className="badge">Unassigned</span>
  <form onSubmit={e=>void submit(e,'enrollment.assign',m.id)}>
  <label>Age category<select required value={category} onChange={e=>{setCategories({...categories,[m.id]:e.target.value});setGroups({...groups,[m.id]:''});}}><option value="">Choose age category</option>{w.categories.map(c=><option key={c.id} value={c.id}>{c.name}</option>)}</select></label>
  <label>Group<select required value={group} disabled={!category} onChange={e=>setGroups({...groups,[m.id]:e.target.value})}><option value="">Choose group</option>{w.groups.filter(g=>g.parentId===category).map(g=><option key={g.id} value={g.id}>{g.name}</option>)}</select></label>
