@@ -31,4 +31,4 @@ Retain the old production deployment dpl_6xjt1qTmgXggJvQUNoeJAhvnwLCk for websit
 - Replaced the prototype front door with actual sign-in and redirected fictional routes in production.
 - Added explicit production safeguards, first-owner initialization without placement, free bot checks and a server-only signup ticket hook.
 - Applied tested additive database migrations and configured exact production confirmation links.
-- Created and verified public DNS entries for auth.lvz.app. Credential connection and actual deployment are in progress.
+- Created and verified public DNS entries for auth.lvz.app. The restricted credential connection is pending user confirmation. Actual app release is merged in PR #14 and production deployment dpl_9r1r6Gae4cRwtTnAtDmMunn9yqTX is READY at commit 3d4519856bebc322b27869d7dd3292258f54326f. Twelve actual production HTTP checks passed. Signup remains off until delivery is connected and verified.

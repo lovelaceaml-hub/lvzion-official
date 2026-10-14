@@ -3,7 +3,7 @@
 ## Quick links
 
 - **Actual app:** [lvz.app](https://lvz.app)
-- **Status:** Actual application setup in progress. Email connection and deliberate production release remain.
+- **Status:** Actual app is live. Signup remains closed while the restricted Resend credential connection is pending.
 - **Repository:** [Private GitHub repository](https://github.com/lovelaceaml-hub/lvzion-official)
 - **Handoff:** [Current status](docs/HANDOFF.md)
 - **Setup:** [Behavior, validation and rollback](docs/ACTUAL-APP-SETUP.md)
