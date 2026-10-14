@@ -39,12 +39,15 @@ Confirmed on 2026-10-13; these supersede any conflicting recommendations, but do
 - **65 A — Delegated member management:** Unit leaders manage members within assigned units; group leaders oversee members in their groups; Pastoral Staff have broader specifically granted organizational authority. Cross-group transfers retain the established request/receiving-acceptance workflow; this answer does not remove transfer controls.
 - **66 B — Technical vs church authority:** App administrators manage technical settings/account operations without automatic access to ministry records, confidential member fields, or organizational decision-making. Such access requires a separately granted, scoped church role.
 
-### Selected domain (registration deferred)
+### Registered primary domain (2026-10-14)
 
-- **`lvz.app`** is the selected **intended permanent domain**, not a purchased or configured domain. Registration requires the owner's submission of required registrant information and purchase authorization; do not represent ownership as completed.
-- Continue using the existing Vercel development preview while domain registration is outstanding. Do not change the established public prototype or previous apps as part of domain planning.
-- Once registration is actually complete: attach the domain to the correct Vercel project, verify TLS and redirects, update Supabase Auth site URL/allowed redirect URLs, verify invite/recovery callback paths, update PWA metadata/install scope, and configure mail sender authentication (SPF/DKIM/DMARC). Actual inboxes or forwarding and an outbound SMTP provider are independent choices.
-- No production mail should claim `@lvz.app` sender identity before the domain and sender are verified.
+- **`lvz.app` is owned and verified** under Vercel team `lvzion`; annual renewal is enabled. This is the canonical production address for the new LV Zion Official application, not the former LV Zion app.
+- The apex domain `lvz.app` is attached to Vercel project `prj_4icc6S1jw8OVKWD9AOI1oiB5fwYe`. Vercel reports clean DNS configuration and an issued auto-renewing TLS certificate.
+- `www.lvz.app` is also attached to the same project, Vercel-verified, with a permanent HTTP 308 redirect to `lvz.app` and its own TLS certificate.
+- **Current site is synthetic design prototype only**; no real member account/login, member data or organizational admin access is active. Domain registration does not make it ready for congregation rollout.
+- **Still pending:** deploy and verify functioning `/login` and `/auth/callback` routes. Only then set Supabase Auth site URL to `https://lvz.app` and allowed redirect callback(s) for the new project; confirm password reset and invitation flows.
+- **Email is not yet configured:** Vercel DNS has no MX, SPF, DKIM, or DMARC records, and no chosen mail provider. Choose transactional sending provider and inbox/forwarding provider, then add provider-issued DNS records and verify them before using `@lvz.app`.
+- See `docs/DOMAIN-SETUP.md` for current verified status, remaining tasks and separation boundaries.
 
 ## Proposed member-system data architecture (design only)
 
