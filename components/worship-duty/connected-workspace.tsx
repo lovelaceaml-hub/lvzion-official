@@ -6,6 +6,7 @@ import {WorshipError,departmentOf,isClosed} from '../../lib/worship-duty/api-con
 import type {CandidateList,Command,ProgramItem,ProgramView,RequestView,ServiceView,SongList,Workspace} from '../../lib/worship-duty/api-contract';
 import {createHttpTransport} from '../../lib/worship-duty/client-transport';
 import type {WorshipTransport} from '../../lib/worship-duty/client-transport';
+import {useUnsavedPlan} from './use-unsaved-plan';
 import './worship-duty.css';
 import './connected-workspace.css';
 const title=(d:Duty)=>CATALOG.find(x=>x.id===d)!.label;
@@ -17,6 +18,7 @@ const asError=(error:unknown)=>error instanceof WorshipError?error:new WorshipEr
 
 export default function ConnectedWorkspace({transport,rehearsal=false}:{transport?:WorshipTransport;rehearsal?:boolean}){
  const api=useMemo(()=>transport??createHttpTransport(),[transport]);
+ const {markDirty,permitNavigation}=useUnsavedPlan();
  const [data,setData]=useState<Workspace|null>(null),[tab,setTab]=useState<Tab>('mine'),[selected,setSelected]=useState('');
  const [loading,setLoading]=useState(true),[pending,setPending]=useState(false),[readOnly,setReadOnly]=useState(false),[message,setMessage]=useState(''),[issue,setIssue]=useState<WorshipError|null>(null);
  const generation=useRef(0),writeLock=useRef(false),alive=useRef(true);
@@ -24,22 +26,23 @@ export default function ConnectedWorkspace({transport,rehearsal=false}:{transpor
   if(!alive.current)return;
   const value=asError(e);setIssue(value);
   if(value.status===401||value.status===403){
-   // Invalidate late responses and clear prior identity data, but keep recovery usable.
-   generation.current++;setData(null);setSelected('');setTab('mine');setLoading(false);
+   // Confidentiality takes priority over draft retention when authorization ends.
+   markDirty(false);generation.current++;setData(null);setSelected('');setTab('mine');setLoading(false);
   }
   if(value.status!==422&&value.status!==400)setReadOnly(true);
- },[]);
+ },[markDirty]);
  const load=useCallback(async(clear=false)=>{
   const current=++generation.current;if(clear)setData(null);setLoading(true);
   try{const next=await api.workspace();if(current!==generation.current||!alive.current)return false;setData(next);setReadOnly(false);setIssue(null);setSelected(old=>next.services.some(s=>s.id===old)?old:next.services[0]?.id??'');return true;}
   catch(e){if(current===generation.current)error(e);return false;}finally{if(current===generation.current&&alive.current)setLoading(false);}
  },[api,error]);
- useEffect(()=>{alive.current=true;setTab('mine');setSelected('');setIssue(null);setMessage('');setReadOnly(false);void load(true);return()=>{alive.current=false;generation.current++;};},[load]);
+ useEffect(()=>{alive.current=true;markDirty(false);setTab('mine');setSelected('');setIssue(null);setMessage('');setReadOnly(false);void load(true);return()=>{alive.current=false;markDirty(false);generation.current++;};},[load,markDirty]);
  const act:Act=async command=>{
   if(writeLock.current||readOnly||loading)return false;writeLock.current=true;setPending(true);setIssue(null);setMessage('');let accepted=false;
   try{
    await api.command(command);accepted=true;
    if(!alive.current)return false;
+   markDirty(false);
    const refreshed=await load();
    if(!alive.current)return false;
    setMessage(refreshed?(rehearsal?'Saved in this fictional rehearsal.':'Saved.'):'Save was accepted, but the refreshed schedule is unavailable. Reload; do not submit it again.');
@@ -51,14 +54,15 @@ export default function ConnectedWorkspace({transport,rehearsal=false}:{transpor
  const upcoming=data?.services.filter(s=>s.status==='published'&&!isClosed(s,data.now)&&s.assignments.some(a=>a.isMine))??[];
  const canManage=!!data?.manageDepartments.length,canPreside=planServices.length>0;
  const safeTab=tab==='manage'&&!canManage||tab==='presider'&&!canPreside?'mine':tab;
- const changeTab=(next:Tab)=>{setTab(next);setMessage('');if(next==='presider'&&!planServices.some(s=>s.id===selected))setSelected(planServices[0]?.id??'');};
+ const changeTab=(next:Tab)=>{if(next===safeTab||!permitNavigation())return;setTab(next);setMessage('');if(next==='presider'&&!planServices.some(s=>s.id===selected))setSelected(planServices[0]?.id??'');};
+ const reload=()=>{if(permitNavigation()){setMessage('');void load(true);}};
  return <div className="wd-stage"><div className="wd-shell">
-  {rehearsal&&<div className="wd-demo"><span>FICTIONAL WORKFLOW REHEARSAL</span><a href="/worship-duty-preview">Original layouts</a></div>}
-  <header className="wd-header"><a className="wd-back" href={rehearsal?'/experience-preview':'/members'}>‹ LV Zion</a><button type="button" disabled={loading||pending} onClick={()=>{setMessage('');void load(true);}}>Reload</button></header>
+  {rehearsal&&<div className="wd-demo"><span>FICTIONAL WORKFLOW REHEARSAL</span><a href="/worship-duty-preview" onClick={e=>{if(!permitNavigation())e.preventDefault();}}>Original layouts</a></div>}
+  <header className="wd-header"><a className="wd-back" href={rehearsal?'/experience-preview':'/members'} onClick={e=>{if(!permitNavigation())e.preventDefault();}}>‹ LV Zion</a><button type="button" disabled={loading||pending} onClick={reload}>Reload</button></header>
   <main className="wd-main" aria-busy={loading||pending}>
    <div className="wd-heading"><span className="wd-kicker">WORSHIP DUTY</span><h1>{safeTab==='mine'?'My Duties':safeTab==='presider'?'Presider':'Manage'}</h1><p>{rehearsal?'The authenticated interface, using fictional records only.':'Your authorized services and assignments.'}</p></div>
    {message&&<p className="wd-notice" role="status">{message}</p>}
-   {issue&&<div className="wd-notice wd-error" role="alert"><p>{issue.message}</p>{(issue.status===401||issue.status===403)&&!rehearsal?<a href="/sign-in">Sign in</a>:<button type="button" disabled={pending||loading} onClick={()=>void load(true)}>Reload workspace</button>}</div>}
+   {issue&&<div className="wd-notice wd-error" role="alert"><p>{issue.message}</p>{(issue.status===401||issue.status===403)&&!rehearsal?<a href="/sign-in">Sign in</a>:<button type="button" disabled={pending||loading} onClick={reload}>Reload workspace</button>}</div>}
    {loading&&!data&&<p role="status">Loading your workspace…</p>}
    {!loading&&!data&&!issue&&<p>No workspace is available.</p>}
    {data&&<fieldset className="wc-controls" disabled={pending||readOnly||loading}>
@@ -67,18 +71,18 @@ export default function ConnectedWorkspace({transport,rehearsal=false}:{transpor
      {upcoming.length?upcoming.map((s,index)=><section className={index===0?'wd-card wc-next':'wd-card'} key={s.id}><span className="wd-kicker">{index===0?'NEXT SERVICE':'COMING UP'}</span><h2>{label(s)}</h2><p>{s.worship} · {s.period}</p>{s.assignments.filter(a=>a.isMine).map(a=>{const r=data.requests.find(r=>r.serviceId===s.id&&r.dutyId===a.dutyId&&r.isMine&&r.status==='pending');return <div className="wd-own-duty" key={a.dutyId}><h3>{title(a.dutyId)}</h3>{a.availabilityConflict&&<p className="wd-warning">You marked this time unavailable. You are still assigned.</p>}{r?<><p>You remain assigned until your leader answers.</p><button type="button" onClick={()=>void act({op:'withdraw',requestId:r.id})}>Withdraw {title(a.dutyId)} request</button></>:<button type="button" onClick={()=>void act({op:'request',serviceId:s.id,dutyId:a.dutyId,expectedVersion:s.version})}>Request change for {title(a.dutyId)}</button>}</div>;})}{s.assignments.filter(a=>a.isMine).length===2&&<p className="wd-approved">Two duties are recorded for this service. The server verifies the approved pairing.</p>}</section>):<section className="wd-card wd-empty"><h2>No upcoming duties</h2><p>Your published assignments will appear here.</p></section>}
      <h2>Service schedule</h2>
     </>}
-    <label className="wd-service-picker">Selected service<select aria-label="Selected service" value={selected} onChange={e=>setSelected(e.target.value)}><option value="" disabled>Choose a service</option>{(safeTab==='presider'?planServices:data.services).map(s=><option key={s.id} value={s.id}>{label(s)} · {s.period}</option>)}</select></label>
+    <label className="wd-service-picker">Selected service<select aria-label="Selected service" value={selected} onChange={e=>{if(permitNavigation())setSelected(e.target.value);else e.currentTarget.value=selected;}}><option value="" disabled>Choose a service</option>{(safeTab==='presider'?planServices:data.services).map(s=><option key={s.id} value={s.id}>{label(s)} · {s.period}</option>)}</select></label>
     {service&&safeTab==='mine'&&<><section className="wd-card"><h2>{service.worship} · {service.period}</h2><p>{label(service)} · Las Vegas</p>{service.assignments.map(a=><div key={a.dutyId} className="wd-schedule-line"><span>{title(a.dutyId)}</span><strong>{a.name}</strong></div>)}<p className="wd-muted">Other-group names remain hidden unless you manage the relevant duty department.</p></section>{!isClosed(service,data.now)&&<section className="wd-card"><h2>Your availability</h2><p>{localDate(service)} · all services on this Las Vegas date. Existing assignments are never removed by an availability change.</p><button type="button" onClick={()=>void act({op:'availability',day:localDate(service),unavailable:!data.daysOff.includes(localDate(service)),expectedVersion:data.availabilityVersion})}>{data.daysOff.includes(localDate(service))?'Remove day off':'Mark day unavailable'}</button></section>}</>}
     {service&&safeTab==='manage'&&<>
      {data.requests.filter(r=>r.status==='pending'&&data.manageDepartments.includes(departmentOf(r.dutyId))).length>0&&<section className="wd-card"><h2>Requests waiting</h2>{data.requests.filter(r=>r.status==='pending'&&data.manageDepartments.includes(departmentOf(r.dutyId))).map(r=>{const s=data.services.find(s=>s.id===r.serviceId);return s?<RequestEditor key={`${r.id}:${s.version}`} request={r} service={s} act={act} api={api} onError={error}/>:<p key={r.id}>A request is outside the displayed service window. It has not been changed.</p>;})}</section>}
      <p className="wd-muted">Authorized departments: {data.manageDepartments.join(', ')}.</p>
      {isClosed(service,data.now)?<p className="wd-warning">This service is closed to ordinary edits.</p>:CATALOG.filter(d=>data.manageDepartments.includes(d.department)&&(d.id!=='thanks_prayer'||hasThanks(service))&&(d.id!=='closing_prayer'||hasChoir(service.worship))).map(d=><CandidateEditor key={`${service.id}:${d.id}:${service.version}`} service={service} dutyId={d.id} api={api} act={act} onError={error}/>)}
     </>}
-    {service&&safeTab==='presider'&&service.canPlan&&<ProgramEditor key={`${service.id}:${service.version}:${data.programs.find(p=>p.serviceId===service.id)?.version??0}`} service={service} program={data.programs.find(p=>p.serviceId===service.id)} api={api} act={act} onError={error} now={data.now} rehearsal={rehearsal}/>}
+    {service&&safeTab==='presider'&&service.canPlan&&<ProgramEditor key={`${service.id}:${service.version}:${data.programs.find(p=>p.serviceId===service.id)?.version??0}`} service={service} program={data.programs.find(p=>p.serviceId===service.id)} api={api} act={act} onError={error} onDirty={markDirty} now={data.now} rehearsal={rehearsal}/>}
    </fieldset>}
    {rehearsal&&<p className="wd-footer-note">No live database, authentication account, original application, or messaging service is connected. Reloading the page resets the fictional records.</p>}
   </main>
-  {data&&<nav className="wd-nav" aria-label="Worship workspace sections">{([['mine','My Duties'],...(canPreside?[['presider','Presider']]:[]),...(canManage?[['manage','Manage']]:[])] as [Tab,string][]).map(([key,name])=><button type="button" disabled={pending} key={key} aria-current={safeTab===key?'page':undefined} onClick={()=>changeTab(key)}>{name}</button>)}</nav>}
+  {data&&<nav className="wd-nav" aria-label="Worship workspace sections">{([['mine','My Duties'],...(canPreside?[['presider','Presider']]:[]),...(canManage?[['manage','Manage']]:[])] as [Tab,string][]).map(([key,name])=><button type="button" disabled={pending||loading} key={key} aria-current={safeTab===key?'page':undefined} onClick={()=>changeTab(key)}>{name}</button>)}</nav>}
  </div></div>;
 }
 function useCandidates(api:WorshipTransport,service:ServiceView,dutyId:Duty,onError:(e:unknown)=>void){
@@ -99,12 +103,13 @@ function RequestEditor({request,service,act,api,onError}:{request:RequestView;se
  const resolve=(decision:'open'|'decline'|'close'|'replace',memberId?:string)=>act({op:'resolve',requestId:request.id,decision,expectedVersion:service.version,...(memberId?{memberId}:{})});
  return <div className="wd-request"><h3>{title(request.dutyId)} · {label(service)}</h3>{request.stale?<><p>This request no longer matches an editable assignment.</p><button type="button" onClick={()=>void resolve('close')}>Close stale request</button></>:<><p>The member remains assigned until the request is approved.</p>{replacement?<CandidateForm service={service} dutyId={request.dutyId} api={api} onError={onError} excludeId={service.assignments.find(a=>a.dutyId===request.dutyId)?.memberId??undefined} onSave={id=>id?resolve('replace',id):resolve('open')}/>:<button type="button" onClick={()=>setReplacement(true)}>Choose replacement</button>}<div className="wd-actions"><button type="button" onClick={()=>void resolve('open')}>Approve and leave open</button><button type="button" onClick={()=>void resolve('decline')}>Decline request</button></div></>}</div>;
 }
-function ProgramEditor({service,program,api,act,onError,now,rehearsal}:{service:ServiceView;program?:ProgramView;api:WorshipTransport;act:Act;onError:(e:unknown)=>void;now:string;rehearsal:boolean}){
+function ProgramEditor({service,program,api,act,onError,onDirty,now,rehearsal}:{service:ServiceView;program?:ProgramView;api:WorshipTransport;act:Act;onError:(e:unknown)=>void;onDirty:(value:boolean)=>void;now:string;rehearsal:boolean}){
  const [catalog,setCatalog]=useState<SongList|null>(null),[items,setItems]=useState<ProgramItem[]>(program?.items??[]),[share,setShare]=useState('');
  useEffect(()=>{let cancelled=false;api.songs(service.id).then(result=>{if(!cancelled)setCatalog(result);}).catch(e=>{if(!cancelled)onError(e);});return()=>{cancelled=true;};},[api,service.id,onError]);
  const locked=isClosed(service,now)||program?.status==='sung',preparation=items.filter(i=>i.section==='preparation').sort((a,b)=>a.position-b.position);
  const normalize=(value:ProgramItem[])=>JSON.stringify([...value].sort((a,b)=>a.section.localeCompare(b.section)||a.position-b.position));
  const dirty=normalize(items)!==normalize(program?.items??[]);
+ useEffect(()=>{onDirty(dirty);return()=>onDirty(false);},[dirty,onDirty]);
  const statusLabel=dirty?'Unsaved draft':program?.status??'draft';
  const name=(id:string)=>catalog?.songs.find(s=>s.id===id)?.title??'Song not available in current catalog';
  const update=(section:ProgramItem['section'],position:number,songId:string)=>{setItems(old=>[...old.filter(i=>!(i.section===section&&i.position===position)),...(songId?[{section,position,songId}]:[])]);setShare('');};
