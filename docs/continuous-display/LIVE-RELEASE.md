@@ -1,5 +1,7 @@
 # Continuous Church Display — production release sequence
 
+> Initial release contract. The [current handoff](../HANDOFF.md) confirms the installed schema and approved owner module, with one disabled screen, zero publications and zero active devices at audit. Display operations PR #32 subsequently merged and deployed; see [R2 operations](OPERATIONS-R2.md). An applied migration alone does not establish a deployed UI, and no physical TV acceptance is implied.
+
 This module is for **https://lvz.app**. It builds on the real member/Auth system rather than the fictional preview branch. The existing Mother’s Love and Study Room Scheduler remain independent and unchanged.
 
 ## Release boundary

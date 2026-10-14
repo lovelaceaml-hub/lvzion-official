@@ -1,5 +1,7 @@
 # Morning Prayer R2 — verification and release record
 
+> Historical R2 development record. Current actual-app setup is in [LIVE-SETUP](LIVE-SETUP.md), with the verified hosted snapshot in the [handoff](../HANDOFF.md). Preview links and unapplied-schema statements below describe the older milestone only.
+
 ## Verified initial implementation, October 14, 2026
 
 Initial application commit: `82def5050bce5dfed0f3c38bd8f8376d0b56ff67`.

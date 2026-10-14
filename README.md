@@ -5,17 +5,31 @@
 - **Actual app:** [lvz.app](https://lvz.app)
 - **Status:** Actual app and confirmed-email signup are live. The requested organization has 4 age categories, 8 groups and 16 empty units. Hierarchy management and member placement are live and verified.
 - **Member guide:** [Organization and member placement](docs/USER-MANUAL.md)
-- **Study Room module:** [Study Room Reservation on lvz.app](https://lvz.app/modules/study-rooms) · [current release status](docs/study-rooms/README.md) · [safe cutover runbook](docs/study-rooms/CUTOVER-RUNBOOK.md)
-- **Current workflow:** [Organization completion](docs/ORGANIZATION-WORKFLOW.md)
+- **Study Room module:** [Current status](docs/study-rooms/README.md) and [cutover runbook](docs/study-rooms/CUTOVER-RUNBOOK.md)
+- **Completed workflow:** [Organization completion](docs/ORGANIZATION-WORKFLOW.md)
+- **All documentation:** [Guides, release evidence and historical records](docs/README.md)
 - **Repository:** [Private GitHub repository](https://github.com/lovelaceaml-hub/lvzion-official)
 - **Handoff:** [Current status](docs/HANDOFF.md)
 - **Setup:** [Behavior, validation and rollback](docs/ACTUAL-APP-SETUP.md)
 
 Independent phone-first Next.js application, using its own Supabase project. Original LV Zion apps and databases are outside scope. No new previews are published without Anthony's explicit request.
 
-Confirmed email signup creates an Unassigned member profile. Age category, group and unit stay unset until an authorized leader verifies membership and assigns placement. Unassigned members can view only their own records. The designated first owner can configure the actual organization while still Unassigned. No fictitious hierarchy or imported real records are seeded.
+Confirmed email signup creates an Unassigned member profile. Age category, group and unit stay unset until an authorized leader verifies membership and assigns placement. Unassigned members can view only their own records. The designated first owner can configure the actual organization while still Unassigned. The four categories and empty Group 1/Group 2 and Unit 1/Unit 2 placeholders were created from Anthony's instructions. No real member roster was imported.
 
-The actual routes are [signup](https://lvz.app/sign-up), /sign-in, /sign-up, /members, /members/manage, /request-access, /reset-password and /install. Fictional development routes redirect on production. The private Contacts module is live for its verified owner at [lvz.app/modules/contacts](https://lvz.app/modules/contacts). Contact sharing, leader access, exports, and messaging remain disabled; see [Contacts release evidence](docs/contacts/LIVE-OWNER-RELEASE.md). Study Room Reservation is also integrated in this **real** app at [lvz.app/modules/study-rooms](https://lvz.app/modules/study-rooms). Its designated owner can manage inventory and service calendars, but **general member reservations are not open**: the Supabase booking switch remains closed until existing Firebase bookings are reconciled and the old booking endpoint is frozen. See [verified R4 evidence](docs/STUDY-ROOM-R4-LIVE.md).
+The actual routes include [signup](https://lvz.app/sign-up), [sign-in](https://lvz.app/sign-in), [members](https://lvz.app/members), [member management](https://lvz.app/members/manage), /request-access, /reset-password and /install. Fictional development routes redirect on production.
+
+## Current module boundaries
+
+Read-only hosted verification on October 14, 2026 at 23:26 UTC found four approved modules, each with one active grant. These setup grants do not grant access to every signup.
+
+| Module | Available scope and remaining limits | Evidence |
+|---|---|---|
+| [Contacts](https://lvz.app/modules/contacts) | Private owner workspace; sharing, exports and messages disabled. Real owner save/reload acceptance remains outstanding. | [R5 release](docs/contacts/OWNER-EXPERIENCE-R5.md) |
+| [Study Rooms](https://lvz.app/modules/study-rooms) | Manager setup; booking gate closed. Original scheduler remains booking authority until an approved cutover. | [R4 controls and cutover gates](docs/STUDY-ROOM-R4-LIVE.md) |
+| [Continuous Display](https://lvz.app/modules/continuous-display) | Owner setup; one disabled screen, zero publications and zero active devices at verification. Physical TV pilot remains outstanding. | [R2 operations and release](docs/continuous-display/OPERATIONS-R2.md) |
+| [Work Mission Morning Prayer](https://lvz.app/modules/work-mission-prayer) | Owner setup; enabled series has zero occurrences and zero published materials. Member join access and distribution remain gated. | [Live setup](docs/morning-prayer/LIVE-SETUP.md) |
+
+The production snapshot and repository main are distinct: documentation pushes do not deploy code. See the [handoff](docs/HANDOFF.md) and [documentation audit](docs/DOCUMENTATION-AUDIT.md) for exact source, hosted migration reconciliation and open work.
 
 ## Development
 

@@ -1,5 +1,7 @@
 # Autonomous foundation increment R6
 
+> Historical milestone record. Test counts, preview links and pending gates below describe that milestone. For the actual app and current release boundaries, read the [handoff](HANDOFF.md) and [documentation index](README.md). This record does not authorize a new preview.
+
 **Completed as a tested development increment on October 14, 2026. Not a production release.**
 
 ## Verified review build
