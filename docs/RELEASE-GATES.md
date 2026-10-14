@@ -1,23 +1,22 @@
-# LV Zion Official: Release Gates
+# LV Zion Official release gates
 
-## Current verified state
-- New private GitHub repository exists, and a draft pull request contains the mobile design prototype.
-- Fresh Vercel project exists; a Git-backed preview built successfully on `feature/mobile-foundation-v1`. The existing live design preview remains a separate inline-source deployment.
-- Supabase Pro organization: **Las Vegas Zion** (`ypidsvtopuiqvbvvucbp`).
-- New Supabase PostgreSQL project: **lvzion-official** (`otecqlkqirncotytbfns`), **us-west-1**, `ACTIVE_HEALTHY`.
-- Database public schema has zero application tables and its initial security advisory check reported no findings.
-- Vercel development, preview and production environment settings contain only the new project's public Supabase URL and publishable key. No service role key was installed.
-- **Not implemented:** login, data tables, RLS policies, server authorization, notifications, live directory, official modules, tested recovery, and true offline access.
+## Completed development checks
 
-## Before any real member launch
-1. Establish protected, reviewed Git-to-Vercel release workflow and confirm which branch drives production. Keep the working inline deployment until the replacement is verified.
-2. Pin dependencies with a reproducible npm lockfile. Migrate the prototype to TypeScript; add lint, typecheck, unit tests, permission integration tests, and mobile browser acceptance tests. Avoid excessive GitHub Actions usage.
-3. Approve the definitive user/account and group/unit/team model. Implement Supabase Auth, verified session management, RLS, and server-side authorization. Never rely solely on hidden UI.
-4. Implement own-group names-only directory, independent department/leadership assignment rights, transfers with history, suspended inactive users, and audit events.
-5. Establish encrypted backups of the new database with a real restore test, data-retention policy, and recovery instructions.
-6. Confirm the **official app lineup** before implementing or importing application-specific data. Never migrate existing member data without deliberate approval.
-7. Review private-detail handling in push previews, secure caches, PWA offline use, and accessible interactions.
-8. Pilot with fictional records and designated test accounts, then an explicitly approved small live cohort and documented go/no-go.
+The isolated member foundation includes pinned dependencies and lockfile, strict TypeScript for new member runtime code, 25 Node tests, 53 database permission assertions, five Chromium phone-viewport tests, a local production build and a fictional PostgreSQL dump/restore rehearsal. See MEMBER-SYSTEM-VERIFICATION.md for scope and limitations.
+
+The interactive original home remains a concept. `/member-preview` is a fictional in-memory management preview. Real member APIs stay off by default and reject the known production Supabase reference.
+
+## Required before any real-member launch
+
+1. Independent code/security review and approved merge/release sequence for draft PRs #1 and #2. Confirm protected branch rules and exact tested production commit.
+2. Approved isolated Supabase deployment; actual Auth/REST/refresh/recovery/invitation tests; hosted security/performance advisors. Test direct APIs as every role, not only UI controls.
+3. Verified first-admin/account bootstrap, no-email recovery procedure, access-request review and approved invitation delivery. No fake shared email identities.
+4. Broader mobile/Safari accessibility, concurrent-transfer and permission-revocation tests, operational monitoring, and hosted backup/PITR restore rehearsal.
+5. Confirm actual organization labels, department boundaries, allowed sensitive fields and the official app lineup. Prototype tiles are not approved modules.
+6. Explicit permission, duplicate review, backup and dry-run before importing real people or inviting a pilot cohort.
 
 ## Safety boundary
-The prior LV Zion projects and all existing church apps are read-only references. Do not reuse their source/database, delete them, or modify their production settings.
+
+No production migrations, real data, bulk invitations, domain purchases/configuration, or previous-application changes are authorized by a development preview. `lvz.app` is selected but remains paused. Original LV Zion applications are references only.
+
+Use only the two versioned migrations in `supabase/migrations`, in timestamp order. The superseded database/docs proposals must not be applied. Test bootstrap and fixture files are never production migrations.

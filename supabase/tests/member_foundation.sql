@@ -1,212 +1,128 @@
--- RUN ONLY on a disposable Supabase local/test database.
--- Precondition: member-system migration and seed/fictional_members.sql applied.
--- Tests synthetic Auth identities inside a transaction that always rolls back.
--- Recommended: psql -v ON_ERROR_STOP=1 -f supabase/tests/member_foundation.sql
-\set ON_ERROR_STOP on
+-- Rollback-only regression suite. Requires fictional seed and a disposable DB.
 begin;
-
--- Supabase Auth fixtures exist only during this test transaction; never create
--- fake Auth users in production. These addresses cannot receive email.
-insert into auth.users (
-  instance_id,id,aud,role,email,encrypted_password,email_confirmed_at,created_at,updated_at
-)
-select
-  '00000000-0000-0000-0000-000000000000'::uuid,
-  ('99999999-9999-4999-8999-' || lpad(n::text,12,'0'))::uuid,
-  'authenticated','authenticated',
-  'lvzion-test-' || n || '@example.invalid','',now(),now(),now()
-from generate_series(101,108) as n;
-
-insert into app_private.account_links(member_id,auth_user_id,username) values
- ('44444444-4444-4444-8444-000000000101','99999999-9999-4999-8999-000000000101','ava_demo'),
- ('44444444-4444-4444-8444-000000000102','99999999-9999-4999-8999-000000000102','ben_demo'),
- ('44444444-4444-4444-8444-000000000103','99999999-9999-4999-8999-000000000103','cara_demo'),
- ('44444444-4444-4444-8444-000000000104','99999999-9999-4999-8999-000000000104','devin_demo'),
- ('44444444-4444-4444-8444-000000000105','99999999-9999-4999-8999-000000000105','eira_demo'),
- ('44444444-4444-4444-8444-000000000106','99999999-9999-4999-8999-000000000106','finn_demo'),
- ('44444444-4444-4444-8444-000000000107','99999999-9999-4999-8999-000000000107','gina_demo'),
- ('44444444-4444-4444-8444-000000000108','99999999-9999-4999-8999-000000000108','hugo_demo');
-
--- Group A ordinary member: five active names from A and none from B.
-set local role authenticated;
-select set_config('request.jwt.claim.sub','99999999-9999-4999-8999-000000000107',true);
-do $$
-declare n integer;
-begin
-  select count(id) into n from public.members;
-  if n <> 5 then raise exception 'Group A ordinary user saw % member names, expected 5', n; end if;
-  if exists(select 1 from public.members where display_name = 'Cara Example') then
-    raise exception 'Cross-group name disclosure';
-  end if;
-  if public.my_membership_id() <> '44444444-4444-4444-8444-000000000107'::uuid then
-    raise exception 'Own identity mismatch';
-  end if;
-  begin
-    perform email from app_private.member_private_contacts;
-    raise exception 'Private contacts unexpectedly readable';
-  exception when insufficient_privilege then null;
-  end;
-  begin
-    update public.members set display_name = 'Unauthorized Update'
-      where id = '44444444-4444-4444-8444-000000000107';
-    raise exception 'Direct UPDATE unexpectedly allowed';
-  exception when insufficient_privilege then null;
-  end;
+insert into auth.users(id,email,email_confirmed_at) select ('99999999-9999-4999-8999-'||lpad(n::text,12,'0'))::uuid,'test-'||n||'@example.invalid',now()-interval '2 days' from generate_series(101,110) n;
+insert into auth.sessions(id,user_id,created_at) select ('aaaaaaaa-aaaa-4aaa-8aaa-'||lpad(n::text,12,'0'))::uuid,('99999999-9999-4999-8999-'||lpad(n::text,12,'0'))::uuid,now()-interval '1 day' from generate_series(101,110) n;
+insert into app_private.account_links(member_id,auth_user_id,username) select ('44444444-4444-4444-8444-'||lpad(n::text,12,'0'))::uuid,('99999999-9999-4999-8999-'||lpad(n::text,12,'0'))::uuid,'demo_'||n from generate_series(101,108) n;
+create function pg_temp.login(n integer) returns void language plpgsql as $$ begin
+ perform set_config('request.jwt.claim.sub',('99999999-9999-4999-8999-'||lpad(n::text,12,'0')),true);
+ perform set_config('request.jwt.claims',jsonb_build_object('session_id','aaaaaaaa-aaaa-4aaa-8aaa-'||lpad(n::text,12,'0'),'user_metadata',jsonb_build_object('role','pastoral_staff'))::text,true);
 end $$;
+create function pg_temp.ok(condition boolean,label text) returns void language plpgsql as $$ begin
+ if condition is distinct from true then raise exception 'FAIL: %',label; end if; raise notice 'PASS: %',label;
+end $$;
+create function pg_temp.denied(statement text,expected text,label text) returns void language plpgsql as $$
+ declare caught text; begin
+ begin execute statement; exception when others then get stacked diagnostics caught=returned_sqlstate; end;
+ if caught is distinct from expected then raise exception 'FAIL: % (expected %, got %)',label,expected,coalesce(caught,'success'); end if;
+ raise notice 'PASS: %',label;
+end $$;
+select pg_temp.login(107); set local role authenticated;
+select pg_temp.ok((select count(id)=5 from public.members),'ordinary member gets only five own-group names');
+select pg_temp.ok(not exists(select 1 from public.members where display_name='Cara Example'),'cross-group member cannot be enumerated');
+select pg_temp.denied('select status from public.members','42501','ordinary directory cannot select private status column');
+select pg_temp.denied('select * from app_private.member_private_contacts','42501','private contacts cannot be queried');
+select pg_temp.denied('select * from app_private.account_links','42501','account identifiers cannot be queried');
+select pg_temp.denied('select public.resolve_login_identifier(''demo_103'')','42501','username resolver not browser callable');
+select pg_temp.denied('update public.members set display_name=''Changed''','42501','direct writes denied');
+select pg_temp.denied('select app_private.org_authority(''44444444-4444-4444-8444-000000000105'')','42501','internal role oracle not callable');
+select pg_temp.ok(jsonb_array_length(public.member_workspace()->'managedMembers')=0,'forged metadata cannot enable management');
+select pg_temp.ok((select count(*)=1 from public.department_memberships),'own department read works without private-table privilege error');
+select pg_temp.denied($q$select public.member_command('member.rename','{"memberId":"44444444-4444-4444-8444-000000000107","name":"Changed","reason":"Unprivileged attempt"}',gen_random_uuid())$q$,'42501','member cannot rename official record');
 reset role;
-
--- Unit leader can rename own unit only. Inserts must atomically audit.
-set local role authenticated;
-select set_config('request.jwt.claim.sub','99999999-9999-4999-8999-000000000101',true);
-insert into public.member_name_changes(member_id,new_display_name,reason)
-values ('44444444-4444-4444-8444-000000000107','Gina Updated','Verified correction to demo name');
-do $$
-begin
-  begin
-    insert into public.member_name_changes(member_id,new_display_name,reason)
-    values ('44444444-4444-4444-8444-000000000102','Invalid Change','Wrong unit denial test');
-    raise exception 'Unit leader renamed another unit';
-  exception when insufficient_privilege then null;
-  end;
-  begin
-    insert into public.member_name_changes(member_id,new_display_name,reason)
-    values ('44444444-4444-4444-8444-000000000108','Invalid Change','Wrong group denial test');
-    raise exception 'Unit leader renamed another group';
-  exception when insufficient_privilege then null;
-  end;
-end $$;
+select pg_temp.login(101); set local role authenticated;
+select public.member_command('member.rename','{"memberId":"44444444-4444-4444-8444-000000000107","name":"Gina Updated","reason":"Approved fictional correction"}','bbbbbbbb-bbbb-4bbb-8bbb-000000000001');
+select pg_temp.ok(exists(select 1 from public.members where display_name='Gina Updated'),'unit leader updates own unit');
+select pg_temp.denied($q$select public.member_command('member.rename','{"memberId":"44444444-4444-4444-8444-000000000102","name":"Wrong Unit","reason":"Outside authorized unit"}',gen_random_uuid())$q$,'42501','unit leader cannot edit neighboring unit');
+select pg_temp.denied($q$select public.member_command('role.appoint','{"memberId":"44444444-4444-4444-8444-000000000101","role":"pastoral_staff","reason":"Escalation attempt"}',gen_random_uuid())$q$,'42501','self-appointment rejected');
+select public.member_command('member.rename','{"memberId":"44444444-4444-4444-8444-000000000107","name":"Gina Updated","reason":"Approved fictional correction"}','bbbbbbbb-bbbb-4bbb-8bbb-000000000001');
+select pg_temp.denied($q$select public.member_command('member.rename','{"memberId":"44444444-4444-4444-8444-000000000107","name":"Different","reason":"Approved fictional correction"}','bbbbbbbb-bbbb-4bbb-8bbb-000000000001')$q$,'22023','idempotency key cannot be repurposed');
 reset role;
-
-do $$
-begin
-  if not exists(select 1 from public.members where id = '44444444-4444-4444-8444-000000000107' and display_name='Gina Updated') then
-    raise exception 'Authorized name update did not apply';
-  end if;
-  if not exists(select 1 from app_private.audit_events
-    where operation='member.display_name.changed'
-      and actor_auth_user_id='99999999-9999-4999-8999-000000000101'::uuid
-      and target_member_id='44444444-4444-4444-8444-000000000107'::uuid) then
-    raise exception 'Audited member update missing';
-  end if;
-end $$;
-
--- Department management is independent from organization/units:
--- Ben can see Cara, a cross-group member of Ben's department, but cannot rename Gina.
-set local role authenticated;
-select set_config('request.jwt.claim.sub','99999999-9999-4999-8999-000000000102',true);
-do $$
-begin
-  if not exists(select 1 from public.members where display_name='Cara Example') then
-    raise exception 'Department manager cannot see assigned department member';
-  end if;
-  begin
-    insert into public.member_name_changes(member_id,new_display_name,reason)
-    values ('44444444-4444-4444-8444-000000000107','Invalid Change','Department manager scope denial');
-    raise exception 'Department management escalated to group edit';
-  exception when insufficient_privilege then null;
-  end;
-end $$;
+select pg_temp.ok((select count(*)=1 from app_private.audit_events where operation='member.rename'),'retry creates exactly one audit event');
+select pg_temp.login(102); set local role authenticated;
+select pg_temp.ok(exists(select 1 from public.members where display_name='Cara Example'),'department manager sees assigned cross-group roster names');
+select pg_temp.ok(jsonb_array_length(public.member_workspace()->'directory')=5,'group directory remains own-group even for department manager');
+select pg_temp.denied($q$select public.member_command('member.rename','{"memberId":"44444444-4444-4444-8444-000000000107","name":"Changed","reason":"Department-only authority"}',gen_random_uuid())$q$,'42501','department role does not confer member management');
+select public.member_command('department.membership','{"memberId":"44444444-4444-4444-8444-000000000102","departmentId":"66666666-6666-4666-8666-000000000001","operation":"add","reason":"Fictional department addition"}',gen_random_uuid());
 reset role;
-
--- Group leader can manage within Group B, not Group A.
-set local role authenticated;
-select set_config('request.jwt.claim.sub','99999999-9999-4999-8999-000000000103',true);
-insert into public.member_name_changes(member_id,new_display_name,reason)
-values ('44444444-4444-4444-8444-000000000108','Hugo Updated','Group B correction');
-do $$
-begin
-  begin
-    insert into public.member_name_changes(member_id,new_display_name,reason)
-    values ('44444444-4444-4444-8444-000000000101','Invalid Change','Wrong group');
-    raise exception 'Group leader edited Group A';
-  exception when insufficient_privilege then null;
-  end;
-end $$;
+select pg_temp.login(104); set local role authenticated;
+select pg_temp.ok((public.member_workspace()->'permissions'->>'organization')::boolean=false,'technical administration does not imply organization authority');
+select pg_temp.denied($q$select public.member_command('member.rename','{"memberId":"44444444-4444-4444-8444-000000000108","name":"Changed","reason":"Technical-only authority"}',gen_random_uuid())$q$,'42501','technical admin cannot edit members');
 reset role;
-
--- Technical admin is not a pastoral/member administrator.
-set local role authenticated;
-select set_config('request.jwt.claim.sub','99999999-9999-4999-8999-000000000104',true);
-do $$
-begin
-  if exists(select 1 from public.members where id='44444444-4444-4444-8444-000000000107') then
-    raise exception 'Technical admin accessed other group without a ministry role';
-  end if;
-  begin
-    insert into public.member_name_changes(member_id,new_display_name,reason)
-    values ('44444444-4444-4444-8444-000000000108','Invalid Change','No church management scope');
-    raise exception 'Technical admin edited ministry record';
-  exception when insufficient_privilege then null;
-  end;
-end $$;
+select pg_temp.login(105); set local role authenticated;
+select pg_temp.denied($q$select public.member_command('department.membership','{"memberId":"44444444-4444-4444-8444-000000000108","departmentId":"66666666-6666-4666-8666-000000000001","operation":"add","reason":"Organizational role only"}',gen_random_uuid())$q$,'42501','pastoral role does not implicitly confer department authority');
+select public.member_command('member.rename','{"memberId":"44444444-4444-4444-8444-000000000108","name":"Hugo Updated","reason":"Pastoral fictional correction"}',gen_random_uuid());
+select pg_temp.ok(exists(select 1 from public.members where display_name='Hugo Updated'),'explicit pastoral authority can edit across groups');
 reset role;
-
--- A separately granted pastoral appointment can manage across groups.
-set local role authenticated;
-select set_config('request.jwt.claim.sub','99999999-9999-4999-8999-000000000105',true);
-insert into public.member_name_changes(member_id,new_display_name,reason)
-values ('44444444-4444-4444-8444-000000000108','Hugo Pastoral Update','Pastoral demo correction');
+select pg_temp.login(101); set local role authenticated;
+select pg_temp.denied($q$select public.member_command('member.move','{"memberId":"44444444-4444-4444-8444-000000000107","unitId":"33333333-3333-4333-8333-000000000003","reason":"Cross group shortcut attempt"}',gen_random_uuid())$q$,'42501','direct cross-group transfer denied to unit leader');
+select public.member_command('transfer.request','{"memberId":"44444444-4444-4444-8444-000000000101","unitId":"33333333-3333-4333-8333-000000000003","reason":"Fictional group transfer"}',gen_random_uuid());
 reset role;
-
--- Inactive account retained in Auth but denied all member content.
-set local role authenticated;
-select set_config('request.jwt.claim.sub','99999999-9999-4999-8999-000000000106',true);
-do $$
-begin
-  if public.my_membership_id() is not null then
-    raise exception 'Inactive member activated';
-  end if;
-  if exists(select 1 from public.members) then
-    raise exception 'Inactive member could enumerate names';
-  end if;
-end $$;
+select pg_temp.login(103); set local role authenticated;
+select pg_temp.ok(not exists(select 1 from public.members where display_name='Ava Example'),'pending transfer does not grant destination directory access');
+select pg_temp.ok(jsonb_array_length(public.member_workspace()->'transfers')=1,'receiving leader can review scoped pending transfer');
+select public.member_command('transfer.decide',jsonb_build_object('id',public.member_workspace()->'transfers'->0->>'id','decision','accepted','reason','Receiving group accepts fictional member'),gen_random_uuid());
 reset role;
-
--- Move unit leader Ava away without ending appointment: old unit rights
--- must cease immediately. This is a TEST-ONLY direct privileged edit.
-update public.member_placements set ended_at = now()
-  where member_id='44444444-4444-4444-8444-000000000101' and ended_at is null;
-insert into public.member_placements(member_id,group_id,unit_id)
-values ('44444444-4444-4444-8444-000000000101',
-        '22222222-2222-4222-8222-000000000002',
-        '33333333-3333-4333-8333-000000000003');
-set local role authenticated;
-select set_config('request.jwt.claim.sub','99999999-9999-4999-8999-000000000101',true);
-do $$
-begin
-  begin
-    insert into public.member_name_changes(member_id,new_display_name,reason)
-    values ('44444444-4444-4444-8444-000000000107','Invalid Change','Old unit now inaccessible');
-    raise exception 'Departed leader still has old unit permission';
-  exception when insufficient_privilege then null;
-  end;
-end $$;
+select pg_temp.login(101); set local role authenticated;
+select pg_temp.denied($q$select public.member_command('member.rename','{"memberId":"44444444-4444-4444-8444-000000000107","name":"Changed","reason":"Former unit authority attempt"}',gen_random_uuid())$q$,'42501','departure revokes old unit authority');
 reset role;
+select pg_temp.ok(exists(select 1 from app_private.role_assignments where member_id='44444444-4444-4444-8444-000000000101' and ended_at is null),'appointment history is retained until manually ended');
+select pg_temp.ok(exists(select 1 from public.department_memberships where member_id='44444444-4444-4444-8444-000000000101' and ended_at is null),'group transfer retains independent departments');
+select pg_temp.ok((select count(*)=2 from public.member_placements where member_id='44444444-4444-4444-8444-000000000101'),'transfer retains historical placement');
+select pg_temp.login(105); set local role authenticated;
+select public.member_command('member.status','{"memberId":"44444444-4444-4444-8444-000000000108","status":"inactive","reason":"Fictional suspension test"}',gen_random_uuid());
+reset role;
+select pg_temp.login(108); set local role authenticated;
+select pg_temp.ok(public.my_membership_id() is null,'suspended member loses application identity');
+select pg_temp.ok(not exists(select 1 from public.members),'suspended session cannot enumerate names');
+reset role;
+select pg_temp.login(105); set local role authenticated;
+select public.member_command('member.status','{"memberId":"44444444-4444-4444-8444-000000000108","status":"active","reason":"Fictional reactivation test"}',gen_random_uuid());
+reset role;
+select pg_temp.login(108); set local role authenticated;
+select pg_temp.ok(public.my_membership_id() is null,'reactivation never resurrects old sessions');
+reset role;
+select pg_temp.login(107); select set_config('request.jwt.claims','{"session_id":"00000000-0000-4000-8000-000000000000"}',true); set local role authenticated;
+select pg_temp.ok(public.my_membership_id() is null,'invalid or revoked session ID denied');
+reset role;
+select pg_temp.login(109); set local role authenticated;
+select pg_temp.ok(public.my_membership_id() is null,'unlinked Auth identity has no membership access');
+reset role;
+select pg_temp.denied($q$insert into public.member_placements(member_id,group_id,unit_id) values('44444444-4444-4444-8444-000000000107','22222222-2222-4222-8222-000000000001','33333333-3333-4333-8333-000000000001')$q$,'23505','duplicate current placement rejected');
+select pg_temp.denied($q$insert into public.member_placements(member_id,group_id,unit_id) values('44444444-4444-4444-8444-000000000106','22222222-2222-4222-8222-000000000001','33333333-3333-4333-8333-000000000003')$q$,'23503','unit must belong to selected group');
+set constraints all immediate;
+select pg_temp.denied($q$insert into public.members(display_name,status) values('Unplaced Active','active')$q$,'23514','active member requires exactly one placement');
+set constraints all deferred;
+select pg_temp.ok(exists(select 1 from public.members where id='44444444-4444-4444-8444-000000000106'),'inactive member record retained');
+select pg_temp.login(105); set local role authenticated;
+select public.member_command('invitation.create','{"memberId":"44444444-4444-4444-8444-000000000109","email":"test-109@example.invalid","tokenDigest":"0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef","reason":"Fictional activation test"}',gen_random_uuid());
+reset role;
+select pg_temp.login(110); set local role authenticated;
+select pg_temp.denied($q$select public.activate_invitation('0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef','isla_example')$q$,'42501','invitation bound to verified mailbox');
+reset role;
+select pg_temp.login(109); set local role authenticated;
+select pg_temp.ok(public.activate_invitation('0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef','isla_example')='44444444-4444-4444-8444-000000000109'::uuid,'activation links existing member without duplicate');
+select pg_temp.denied($q$select public.activate_invitation('0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef','isla_again')$q$,'42501','invitation replay rejected');
+reset role;
+select pg_temp.ok((select count(*)=9 from public.members),'activation does not create duplicate people');
+set local role service_role;
+select pg_temp.ok(public.resolve_login_identifier('DEMO_107')='test-107@example.invalid','trusted username resolution normalizes casing');
+select pg_temp.ok(public.resolve_login_identifier('does_not_exist') is null,'unknown username returns no private data');
+select pg_temp.ok(public.consume_auth_limits(repeat('a',64),repeat('b',64)),'first login attempt allowed');
+select public.consume_auth_limits(repeat('a',64),repeat('b',64)) from generate_series(1,9);
+select pg_temp.ok(not public.consume_auth_limits(repeat('a',64),repeat('b',64)),'shared per-identifier rate limit enforced');
+reset role; set local role anon;
+select pg_temp.denied('select id from public.members','42501','anonymous directory denied');
+select pg_temp.denied('select public.member_workspace()','42501','anonymous workspace denied');
+reset role;
+set constraints all immediate;
+select pg_temp.ok(not exists(select 1 from pg_tables where schemaname in ('public','app_private') and not rowsecurity),'all application tables protected by RLS');
 
--- Structural constraints: duplicate active placement and unit/group mismatch.
-do $$
-begin
-  begin
-    insert into public.member_placements(member_id,group_id,unit_id)
-    values ('44444444-4444-4444-8444-000000000102',
-            '22222222-2222-4222-8222-000000000001',
-            '33333333-3333-4333-8333-000000000002');
-    raise exception 'Duplicate current placement accepted';
-  exception when unique_violation then null;
-  end;
-  begin
-    insert into public.member_placements(member_id,group_id,unit_id)
-    values ('44444444-4444-4444-8444-000000000109',
-            '22222222-2222-4222-8222-000000000002',
-            '33333333-3333-4333-8333-000000000001');
-    raise exception 'Unit from wrong group accepted';
-  exception when foreign_key_violation then null;
-  end;
-  if not exists (select 1 from public.member_placements
-      where member_id='44444444-4444-4444-8444-000000000106' and ended_at is not null) then
-    raise exception 'Inactive member history missing';
-  end if;
-end $$;
-
-select 'PASS: synthetic member scoping, audited changes, suspension and constraints' as result;
+select pg_temp.login(105); set local role authenticated;
+select pg_temp.denied($q$select public.member_command('member.rename','{"memberId":"44444444-4444-4444-8444-000000000107","name":"Invalid audit scope","departmentId":"66666666-6666-4666-8666-000000000001","reason":"Trying to retag organizational audit"}',gen_random_uuid())$q$,'22023','direct RPC rejects unrelated department audit scope');
+select pg_temp.denied($q$select app_private.apply_member_command('member.rename','{}',gen_random_uuid())$q$,'42501','unchecked internal command cannot bypass validation');
+reset role;
+update auth.sessions set not_after=now()-interval '1 second' where id='aaaaaaaa-aaaa-4aaa-8aaa-000000000107';
+select pg_temp.login(107); set local role authenticated;
+select pg_temp.ok(public.my_membership_id() is null,'expired Auth session denied even before cleanup');
+reset role;
 rollback;

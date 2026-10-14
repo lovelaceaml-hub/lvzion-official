@@ -1,4 +1,4 @@
-# Never commit generated output, local credentials, or dependency folders
+# Generated output, credentials and local state
 node_modules/
 .next/
 .vercel/
@@ -9,3 +9,8 @@ node_modules/
 .DS_Store
 *.pem
 *.key
+*.tsbuildinfo
+playwright-report/
+test-results/
+supabase/.temp/
+supabase/.branches/

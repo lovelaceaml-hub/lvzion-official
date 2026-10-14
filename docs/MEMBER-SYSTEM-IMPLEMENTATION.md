@@ -1,110 +1,49 @@
-# Member System: Implementation and Review Plan
+# Member system implementation
 
-Status: **first development slice staged in Git; NOT applied to Supabase.**
-Source: `database/member_system_foundation.sql`.
-Tests: `supabase/tests/member_foundation.sql`.
-Data: `supabase/seed/fictional_members.sql` (**disposable database only**).
-Branch: `feature/member-system-secure-r1`, stacked on draft mobile PR #1.
-Decision source: `docs/PRODUCT-DECISIONS.md` (2026-10-13, questions 61–66).
+Development branch: `feature/member-system-secure-r1`; draft PR #2, stacked on draft mobile PR #1. This is a tested development increment, not a production release.
 
-## Hard boundaries
+## Canonical schema
 
-- Independent GitHub / Vercel / Supabase project only. Do not touch original LV Zion apps.
-- Do not apply this SQL to Supabase production, merge it into `main`, or enable real login yet.
-- Never seed fixtures into production. Do not create fake shared email addresses for live authentication.
-- Do not import real membership, send invites, enroll real users, or register/configure `lvz.app`.
-- No official app modules are approved; numbered demo apps remain mockups.
-- Database DDL is **a candidate**, not a verified applied migration; reviewer must test and inspect it.
+Apply `supabase/migrations/20261014020617_member_system_foundation.sql`, then `supabase/migrations/20261014043055_member_command_hardening.sql` to an approved isolated database. Both names were created by Supabase CLI 2.120.0. The earlier database proposal and the separate docs/sql proposal are superseded, not additive. No hosted migration has been applied.
 
-## Delivery stages
+Sixteen application tables represent configurable Age Category → Group → Unit, durable members, intake/active/inactive status, one current primary placement for active members, placement history, independent department memberships, scoped leadership appointments, private contacts and account links, invitations, access requests, transfers, audit events, idempotency receipts, and shared authentication-rate buckets. Every application table has RLS and explicit privileges.
 
-| Stage | Engineering work | Exit requirement |
-|---|---|---|
-| 1 — Structural | Member/person, category/group/unit, placements, departments, separate role assignments, private contacts, account links, audit, transfer and invitation request models | Reviewer signs off; isolated DB receives migration and fixtures |
-| 2 — Identity | One approved member ↔ one Supabase Auth user; invited account activation; username/email password; private verified recovery | Account cannot link itself arbitrarily; no account enumeration |
-| 3 — Member operations | Scoped unit/group/global member edits; department-specific grants; transfers require receiving acceptance or authorized direct override | Cross-scope, race, audit and suspension integration tests pass |
-| 4 — Mobile integration | Personalized profile, own-group directory, role-appropriate Manage cards | UI uses authenticated RLS-backed data, not demo switches |
-| 5 — Release | Mobile testing, back-up and restore, threat review, approved pilot, monitoring | No real data before explicit launch approval |
+## Member experience
 
-### First slice: implemented in SQL (pending execution)
+`/member-preview` uses nine fictional people and switchable test identities. Changes are in-memory only, never saved to Supabase or localStorage. Reset restores sample records. The selector is never used as authentication.
 
-1. Dynamic age category → group → unit, and durable member record.
-2. Exactly one non-ended primary placement per member, with unit/group referential consistency and history retention.
-3. Separate many-to-many department memberships and scoped, non-expiring role appointments.
-4. Auth user–member link in a private schema; **no** implicit Auth sign-up creates a church member.
-5. Private contacts/credentials references/invitations/access requests/transfers/audit tables; no general client access.
-6. Current active account lookup rechecks member status and link enabled in PostgreSQL on each authorized query.
-7. RLS-only ordinary names directory, restricted to active people in caller's current group. Access to `members` grants only `id` and `display_name` columns.
-8. Group/unit leadership, explicit global pastoral/member administrator authority, and independent department-manager name lookup. Technical administrator carries no ministry-data authority.
-9. Audited member-display-name corrections through INSERT-only `member_name_changes` with RLS, a second locked scope check, and a private trigger. No blanket UPDATE privilege.
-10. On departure from a group/unit, old group/unit leadership rights stop being effective even when an appointment has not been manually ended. The appointment history is retained.
+The interface includes personalized My Week, own-group names-only directory, scoped Manage, profile contacts, member creation/name corrections, primary placement changes, receiving-group transfer review, active/inactive changes, independent department rosters, hierarchy creation, organizational appointments and manual ending, and authorized change history. No application-specific schedules or official modules are connected.
 
-**Not yet implemented**: transfer acceptance transaction; invitation activation; password recovery; role assignment / org catalog management UI; username login endpoint; general contact management; realtime; full dashboard connection. Placeholder tables are not functioning workflows.
+`/members` uses the same interface with authenticated server API calls. Real member access is disabled until the isolated target is explicitly configured. The existing home prototype remains intact.
 
-## Permission matrix (current first slice)
+## Authorization and writes
 
-| Action | Ordinary member | Unit leader | Group leader | Department manager | Pastoral/member admin appointment | Technical admin |
-|---|---|---|---|---|---|---|
-| Read own profile name | Yes | Yes | Yes | Yes | Yes | Yes |
-| Read active names in own group | Yes | Yes | Yes | Yes | Yes | Yes |
-| Read other group names | No | No | No | Only active members in assigned department | Yes | No |
-| Rename member in managed unit | No | Yes | Yes if inside managed group | No from department authority alone | Yes | No |
-| Rename member elsewhere | No | No | Only if inside managed group | No | Yes | No |
-| View other members' contact details | No | Not granted in this slice | Not granted | Not granted | Not granted | No |
-| Alter appointments, place members, transfer groups | No | Not yet | Not yet | Not yet | Not yet | No |
+Member-management calls use the caller's Supabase session, not an administrative bypass key. The database derives the actor from Auth, rechecks active membership, enabled account, a matching session and session expiry/cutoff, and enforces scope inside PostgreSQL.
 
-Appointments remain until a human ends them; active group/unit scope is separately checked for access. Global pastoral/member administrator is an explicit appointment, not an inferred title. Future department write operations require independent audited commands.
+All client writes enter `member_command`. A transaction-level advisory lock serializes consequential operations for this small organization. The authorized mutation, audit entry and idempotency receipt commit together. Retrying the same request does not duplicate an operation. Changing the payload for a used request identifier is rejected.
 
-## Authentication architecture — implementation contract for Stage 2
+The second migration validates allowed fields and payload size even for direct database RPC requests. It prevents caller-controlled unrelated department identifiers from changing audit scope. The unchecked internal command is not executable by authenticated or anonymous clients. Private SECURITY DEFINER helpers have an empty search path and explicit EXECUTE grants; exposed RPC wrappers use SECURITY INVOKER. Never expose `app_private` through the Data API.
 
-Supabase Auth supports **email/password**, not username/password natively. Use a **single server-side sign-in endpoint** for both inputs rather than a browser-visible username→email lookup.
+Ordinary directory reads expose only member identifiers and display names within the caller's own group. Private contacts stay separate, with only the caller's contacts in the workspace. Unit/group leaders manage current authorized scope. A department manager may read their separately assigned department roster across groups but receives no organizational edit authority. Pastoral/member administrators do not automatically receive department authority. Technical administration confers neither ministry-member access nor department management.
 
-1. Client submits `identifier` plus password to `POST /api/auth/sign-in` over HTTPS; do not log request bodies.
-2. Server enforces per-IP **and per-identifier** limits with a shared backend limiter (not in-process memory). Respond with one generic invalid-credentials message regardless of username/email existence; avoid materially different response times where feasible.
-3. If identifier is an email, normalize it and authenticate via Supabase Auth password sign-in.
-4. If identifier is a username, validate `^[a-z][a-z0-9._-]{2,31}$`, resolve `app_private.account_links.username` on a **trusted server only**, retrieve the associated Supabase Auth email using server-admin credentials, then call password sign-in. Never return the resolved email to the browser. Do **not** fabricate `@lvz.app` addresses.
-5. For either path, check the newly signed-in identity's `public.my_membership_id()`. A missing, unlinked, disabled or inactive member is denied. Do not grant member access merely because a Supabase Auth user exists.
-6. Issue secure, HttpOnly, SameSite cookies with appropriate CSRF defenses; refresh and verify identity on server request boundaries. Always authorize **inside the database** too.
-7. Support sign-out and session revocation. On suspension, RLS immediately denies member data; revoke outstanding refresh sessions through the trusted admin path. Auth access JWTs can outlive sign-out, hence the DB status check.
-8. Member invites are generated server-side with time-bound **hashed tokens**, connected to preexisting member identities after verification. Self-service access requests never self-approve.
-9. Password reset/recovery uses verified account-owned email and Supabase Auth's approved reset mechanism. Username-only members without a deliverable email require a separately approved **manual verification** procedure; no password disclosure.
-10. Keep publishable key public only; **never** expose secret/service-role credential under `NEXT_PUBLIC_`. Set server-only secrets and SMS/email providers only when the workflow is approved and protected.
+Transfers require source authority and receiving-group acceptance, except for an explicitly authorized organizational administrator's direct transfer. Pending requests do not grant destination directory access. Finalization closes the old placement, creates the new one and changes effective access atomically. Old unit/group leadership ceases to confer departed-scope access even though the appointment remains in history until manually ended. Unrelated department memberships remain.
 
-There is **no working username login UI or server resolver in this first slice**, and no privileged secret was added. Implementing a login form without the identity and rate-limit controls above would be misleading and unsafe.
+Suspension preserves history and advances an account session cutoff. Reactivation does not revive sessions created before suspension. Expired or missing Auth sessions are denied. No normal client hard-delete operation exists.
 
-## Management and transfer contract — Stage 3
+## Authentication architecture
 
-- Organizational hierarchy administration is distinct from technical administration.
-- Unit and group leaders may change only approved member fields within **current** scope. Every consequential write must include actor, reason, old/new state, and timestamp.
-- Cross-group move: source leader submits request → receiving group accepts → one transaction locks the member, closes active placement, inserts new placement, emits audit, and changes effective group directory access. Receiving privileges must not activate before acceptance.
-- Pastoral/member administrator may process a direct move only with an explicit role and rationale.
-- Department appointments remain independently effective through group moves, except when revoked intentionally.
-- Never hard-delete members, placements, appointments or audit history in normal operations. Suspending a person blocks application data while records remain.
-- Use transactional locking and unit/group composite constraints to reject stale or conflicting move requests. Recheck actor and scope **after** acquiring locks.
-- Technical admins only operate technical settings, not church-person data, unless separately appointed to church authority.
+`/sign-in` accepts username or email plus password. The trusted server resolves approved linked identities, enforces shared IP and identifier limits, authenticates with Supabase, verifies the linked member, and uses secure HttpOnly SameSite cookies. Generic failures avoid disclosing the resolved email or whether an account exists. The failure-response floor is not a constant-time guarantee.
 
-## Test strategy and cost boundary
+State-changing browser requests require an exact configured Origin, JSON content and a bounded streamed body. Member responses are private/no-store. User-editable JWT metadata never determines authorization. No request bodies, passwords or tokens are logged.
 
-1. Obtain approval for any additional **billable Supabase database branch**. Current Las Vegas Zion production project has no app tables and no DB branches; do not treat this as permission to apply DDL to it.
-2. After approved isolated branch/local Supabase setup, run the SQL file as an initial reviewed migration. If using Supabase CLI, run `supabase migration new member_system_foundation` using the installed CLI version, place the reviewed SQL in the CLI-generated migration, then run on the disposable database. Do not fabricate migration history.
-3. Apply `supabase/seed/fictional_members.sql` to disposable DB only. It intentionally does not create Auth identities.
-4. Execute `supabase/tests/member_foundation.sql` with `psql -v ON_ERROR_STOP=1`; test transaction generates temporary fictional Auth identities and always `ROLLBACK`s.
-5. Verify RLS enforcement for anonymous requests, group A/B isolation, unit/group management, department separation, technical admin, global authorization, suspension, old-scope revocation, unique placement, and auditable changes. Report actual outputs, not just expected assertions.
-6. Run Supabase security/performance advisors against the **isolated branch**; address findings before promotion.
-7. Build pinned dependency lockfile / TypeScript migration in the mobile foundation branch; add lightweight CI without exhausting GitHub Actions quota.
-8. Make PR review mandatory before merge. No production schema deployment, member pilot, invite campaign or real data import is part of this slice.
+Recovery uses the verified account email, generic responses, and the delivery feature flag. Verified recovery sessions can set a password and sign out globally. OTP and PKCE callbacks restrict redirect destinations. Invitation activation requires an unexpired, unconsumed digest bound to the signed-in identity's verified mailbox and links the existing member rather than inserting a duplicate.
 
-## Follow-on decisions (do not block safely isolated schema work)
+The member API gate requires `LVZ_MEMBER_SYSTEM_ENABLED=true`, `LVZ_DATABASE_ENV=isolated`, a matching expected Supabase reference and HTTPS origin. The known production reference `otecqlkqirncotytbfns` is explicitly blocked. Login additionally needs the server-only Supabase secret and a 32+-character HMAC secret for rate limits. No such live configuration was installed. Do not remove the production block as a shortcut.
 
-- Real age category/group/unit names and who is authorized to maintain each catalog.
-- Username account recovery where no personal email is available.
-- Exact fields each leader or department head may modify, especially contact information.
-- Whether broader pastor appointments need further per-operation capability grants.
-- Which official app launches first; keep demo tiles generic.
+## Verification and remaining work
 
-## Security references
+See MEMBER-SYSTEM-VERIFICATION.md for executed tests. The native/PGlite bootstrap uses Auth schema shims, not a running GoTrue or PostgREST service.
 
-- Supabase RLS (column grants and private helper functions): https://supabase.com/docs/guides/database/postgres/row-level-security
-- Supabase database-function privileges: https://supabase.com/docs/guides/database/functions
-- Supabase 2026 explicit Data API grants: https://supabase.com/changelog/45329-breaking-change-tables-not-exposed-to-data-and-graphql-api-automatically
-- Supabase password sign-in: https://supabase.com/docs/reference/javascript/auth-signinwithpassword
+Before real use: independent review; approved isolated hosted environment; genuine password/refresh/recovery/invitation/REST tests; hosted advisors; controlled first administrator bootstrap; approved verification for members without email; access-request review UI and approved invitation delivery; broader concurrency/load and real-device accessibility checks; hosted backup/PITR rehearsal; explicit approval for any real-data pilot/import.
+
+The invitation storage/activation boundary and access-request storage are implemented, but the complete invitation-delivery and request-review operating flow is not. App-specific modules remain unselected. Domain work remains paused. Production and original applications remain untouched.

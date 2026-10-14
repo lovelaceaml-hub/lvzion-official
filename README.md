@@ -1,37 +1,39 @@
 # LV Zion Official
 
-A **fresh, independent LV Zion application**, designed from scratch. The former LV Zion project and other church apps remain operational and untouched; they are references only.
+Independent phone-first application. The original LV Zion projects remain separate and untouched.
 
-## Status
-- **Live design prototype:** https://lvzion-official.vercel.app (Vercel deployment built from inline source)
-- **Git-backed development preview:** https://lvzion-official-git-feature-mobile-foundation-v1-lvzion.vercel.app
-- **Repository:** https://github.com/lovelaceaml-hub/lvzion-official (private)
-- **Draft review:** https://github.com/lovelaceaml-hub/lvzion-official/pull/1
-- **Vercel project:** `lvzion-official`, team `lvzion` (independent of previous project).
-- **Supabase Pro organization:** Las Vegas Zion, ID `ypidsvtopuiqvbvvucbp`
-- **Supabase project:** `lvzion-official`, ID `otecqlkqirncotytbfns`, US West (Northern California), healthy with no public application tables.
-- **Supabase public configuration:** project URL and publishable key set in Vercel environment settings for development, preview, and production. No service-role key or database password stored in the repository.
+## Development status
 
-Both previews use **fictional sample content only**. Neither is ready for members. There is no real login, membership data, imported schedule, or database interaction.
+Member foundation development lives on `feature/member-system-secure-r1`, reviewed through draft PR #2, stacked on mobile prototype PR #1. Neither PR has been merged to `main`.
 
-The development branch has a successful Vercel build and has not been merged to `main`. The release should await a reproducible dependency lockfile and reviews.
+- `/` preserves the original interactive mobile concept.
+- `/member-preview` is a working fictional member-management simulator: nine sample people, role-specific My Week / My Group / Manage / Profile, member editing, placements, transfers, departments, appointments, and audit.
+- `/members` uses authenticated server APIs. It remains disabled until a separately reviewed isolated Supabase target is configured.
+- `/sign-in`, `/activate`, `/reset-password`, and Auth callbacks implement the account-flow boundaries; real identity/email integration is not activated or fully verified.
 
-## Local development
-Use Node.js 22+.
+The fictional selector is not authentication. Preview edits stay in page memory and reset on reload. No real accounts, emails, member data, production schema changes, or official app-module selection are part of this increment. `lvz.app` remains paused.
 
-```bash
-npm install
-npm run dev
+## Reproducible checks
+
+Node 24.x; exact package versions and npm lockfile are committed.
+
+```sh
+npm ci --ignore-scripts
+npm run check
 npm run build
+npx playwright install chromium
+npm run test:browser
+npm run dev
 ```
 
-A dependency lockfile, TypeScript migration, and automated checks are planned. The starting preview is JavaScript/JSX. Official runtime and data-layer code will use TypeScript.
+`npm run check` runs strict TypeScript checking, 25 Node tests and 53 database assertions in disposable PGlite. The same 53 SQL assertions also passed in native PostgreSQL 17.10 and after a native dump/restore. Five Chromium phone-viewport tests passed. These results do not establish hosted Supabase Auth/PostgREST integration or real-device Safari behavior.
 
-## Product direction
-- Phone-first hybrid personalized home with **My Week / Manage**, Today / Week / Calendar.
-- Raised center Apps switcher, up to eight favorites, Notifications and app-specific management views.
-- Organizational leadership and department management are **independent** roles.
-- Ordinary member directory: own group names only, without other members' phone/email details.
-- **No official app lineup has been confirmed.** The numbered spaces are deliberately generic.
+## Database and safety
 
-Read [product decisions](docs/PRODUCT-DECISIONS.md) and [release gates](docs/RELEASE-GATES.md). Do not treat the demo position switcher as authorization.
+Apply the two files under `supabase/migrations/` in timestamp order only to an approved, empty isolated database. Supabase CLI generated both filenames. The old `database/member_system_foundation.sql` deliberately fails because it is superseded; do not apply the alternate `docs/sql` proposal.
+
+`supabase/tests/bootstrap.sql` creates test-only Auth shims. NEVER execute it on a hosted Supabase database. `supabase/seed/fictional_members.sql` is for disposable environments only.
+
+Real member APIs fail closed by default and explicitly reject the current production project reference. No new production secrets or Vercel environment changes were made. Do not use a service-role/secret client for member-management requests.
+
+Read [implementation](docs/MEMBER-SYSTEM-IMPLEMENTATION.md), [verification](docs/MEMBER-SYSTEM-VERIFICATION.md), [product decisions](docs/PRODUCT-DECISIONS.md), and [release gates](docs/RELEASE-GATES.md).

@@ -1,64 +1,20 @@
--- Explicitly fictional development-only records.
--- NEVER include this file in a production migration or execute in a live database.
--- Do not create Auth users, invitations, emails, or real member/contact records.
--- Apply only to a disposable local/Supabase branch database.
-
-insert into public.age_categories(id,name,sort_order) values
- ('11111111-1111-4111-8111-000000000001','Demo Age Category',1)
-on conflict do nothing;
-
-insert into public.church_groups(id,age_category_id,name) values
- ('22222222-2222-4222-8222-000000000001','11111111-1111-4111-8111-000000000001','Demo Group A'),
- ('22222222-2222-4222-8222-000000000002','11111111-1111-4111-8111-000000000001','Demo Group B')
-on conflict do nothing;
-
-insert into public.church_units(id,group_id,name) values
- ('33333333-3333-4333-8333-000000000001','22222222-2222-4222-8222-000000000001','Demo Unit A1'),
- ('33333333-3333-4333-8333-000000000002','22222222-2222-4222-8222-000000000001','Demo Unit A2'),
- ('33333333-3333-4333-8333-000000000003','22222222-2222-4222-8222-000000000002','Demo Unit B1')
-on conflict do nothing;
-
-insert into public.members(id,display_name,status) values
- ('44444444-4444-4444-8444-000000000101','Ava Example','active'),
- ('44444444-4444-4444-8444-000000000102','Ben Example','active'),
- ('44444444-4444-4444-8444-000000000103','Cara Example','active'),
- ('44444444-4444-4444-8444-000000000104','Devin Example','active'),
- ('44444444-4444-4444-8444-000000000105','Eira Example','active'),
- ('44444444-4444-4444-8444-000000000106','Finn Example','inactive'),
- ('44444444-4444-4444-8444-000000000107','Gina Example','active'),
- ('44444444-4444-4444-8444-000000000108','Hugo Example','active'),
- ('44444444-4444-4444-8444-000000000109','Isla Example','active')
-on conflict do nothing;
-
-insert into public.member_placements(id,member_id,group_id,unit_id,started_at,ended_at) values
- ('55555555-5555-4555-8555-000000000101','44444444-4444-4444-8444-000000000101','22222222-2222-4222-8222-000000000001','33333333-3333-4333-8333-000000000001',now()-interval '10 days',null),
- ('55555555-5555-4555-8555-000000000102','44444444-4444-4444-8444-000000000102','22222222-2222-4222-8222-000000000001','33333333-3333-4333-8333-000000000002',now()-interval '10 days',null),
- ('55555555-5555-4555-8555-000000000103','44444444-4444-4444-8444-000000000103','22222222-2222-4222-8222-000000000002','33333333-3333-4333-8333-000000000003',now()-interval '10 days',null),
- ('55555555-5555-4555-8555-000000000104','44444444-4444-4444-8444-000000000104','22222222-2222-4222-8222-000000000002','33333333-3333-4333-8333-000000000003',now()-interval '10 days',null),
- ('55555555-5555-4555-8555-000000000105','44444444-4444-4444-8444-000000000105','22222222-2222-4222-8222-000000000001','33333333-3333-4333-8333-000000000001',now()-interval '10 days',null),
- ('55555555-5555-4555-8555-000000000106','44444444-4444-4444-8444-000000000106','22222222-2222-4222-8222-000000000002','33333333-3333-4333-8333-000000000003',now()-interval '20 days',now()-interval '5 days'),
- ('55555555-5555-4555-8555-000000000107','44444444-4444-4444-8444-000000000107','22222222-2222-4222-8222-000000000001','33333333-3333-4333-8333-000000000001',now()-interval '10 days',null),
- ('55555555-5555-4555-8555-000000000108','44444444-4444-4444-8444-000000000108','22222222-2222-4222-8222-000000000002','33333333-3333-4333-8333-000000000003',now()-interval '10 days',null),
- ('55555555-5555-4555-8555-000000000109','44444444-4444-4444-8444-000000000109','22222222-2222-4222-8222-000000000001','33333333-3333-4333-8333-000000000002',now()-interval '10 days',null)
-on conflict do nothing;
-
-insert into public.departments(id,name) values
- ('66666666-6666-4666-8666-000000000001','Demo Hospitality'),
- ('66666666-6666-4666-8666-000000000002','Demo Education')
-on conflict do nothing;
-
-insert into public.department_memberships(id,member_id,department_id) values
- ('77777777-7777-4777-8777-000000000101','44444444-4444-4444-8444-000000000101','66666666-6666-4666-8666-000000000001'),
- ('77777777-7777-4777-8777-000000000103','44444444-4444-4444-8444-000000000103','66666666-6666-4666-8666-000000000001'),
- ('77777777-7777-4777-8777-000000000107','44444444-4444-4444-8444-000000000107','66666666-6666-4666-8666-000000000001'),
- ('77777777-7777-4777-8777-000000000109','44444444-4444-4444-8444-000000000109','66666666-6666-4666-8666-000000000002')
-on conflict do nothing;
-
--- Appointments are deliberately independent of department memberships.
-insert into app_private.role_assignments(id,member_id,role_key,unit_id,group_id,department_id) values
- ('88888888-8888-4888-8888-000000000101','44444444-4444-4444-8444-000000000101','unit_leader','33333333-3333-4333-8333-000000000001',null,null),
- ('88888888-8888-4888-8888-000000000102','44444444-4444-4444-8444-000000000102','department_manager',null,null,'66666666-6666-4666-8666-000000000001'),
- ('88888888-8888-4888-8888-000000000103','44444444-4444-4444-8444-000000000103','group_leader',null,'22222222-2222-4222-8222-000000000002',null),
- ('88888888-8888-4888-8888-000000000104','44444444-4444-4444-8444-000000000104','technical_admin',null,null,null),
- ('88888888-8888-4888-8888-000000000105','44444444-4444-4444-8444-000000000105','pastoral_staff',null,null,null)
-on conflict do nothing;
+-- FICTIONAL DATA ONLY. Disposable, empty development database; never production.
+begin;
+insert into public.age_categories(id,name) values('11111111-1111-4111-8111-000000000001','Demo Age Category');
+insert into public.church_groups(id,age_category_id,name) select ('22222222-2222-4222-8222-'||lpad(n::text,12,'0'))::uuid,'11111111-1111-4111-8111-000000000001','Demo Group '||case n when 1 then 'A' else 'B' end from generate_series(1,2) n;
+insert into public.church_units(id,group_id,name) select ('33333333-3333-4333-8333-'||lpad(n::text,12,'0'))::uuid,('22222222-2222-4222-8222-'||lpad((case n when 3 then 2 else 1 end)::text,12,'0'))::uuid,case n when 1 then 'Demo Unit A1' when 2 then 'Demo Unit A2' else 'Demo Unit B1' end from generate_series(1,3) n;
+insert into public.members(id,display_name,status) select ('44444444-4444-4444-8444-'||lpad(n::text,12,'0'))::uuid,(array['Ava','Ben','Cara','Devin','Eira','Finn','Gina','Hugo','Isla'])[n-100]||' Example',case n when 106 then 'inactive' else 'active' end from generate_series(101,109) n;
+insert into public.member_placements(id,member_id,group_id,unit_id,started_at,ended_at)
+select ('55555555-5555-4555-8555-'||lpad(n::text,12,'0'))::uuid,('44444444-4444-4444-8444-'||lpad(n::text,12,'0'))::uuid,
+('22222222-2222-4222-8222-'||lpad((case when n in (103,104,106,108) then 2 else 1 end)::text,12,'0'))::uuid,
+('33333333-3333-4333-8333-'||lpad((case when n in (103,104,106,108) then 3 when n in (102,109) then 2 else 1 end)::text,12,'0'))::uuid,
+now()-interval '10 days',case n when 106 then now()-interval '1 day' end from generate_series(101,109) n;
+insert into public.departments(id,name) values('66666666-6666-4666-8666-000000000001','Demo Hospitality'),('66666666-6666-4666-8666-000000000002','Demo Education');
+insert into public.department_memberships(member_id,department_id,started_at) select ('44444444-4444-4444-8444-'||lpad(n::text,12,'0'))::uuid,'66666666-6666-4666-8666-000000000001',now()-interval '1 day' from unnest(array[101,103,107]) n;
+insert into app_private.role_assignments(member_id,role_key,unit_id,group_id,department_id,appointed_at) values
+('44444444-4444-4444-8444-000000000101','unit_leader','33333333-3333-4333-8333-000000000001',null,null,now()-interval '1 day'),
+('44444444-4444-4444-8444-000000000102','department_manager',null,null,'66666666-6666-4666-8666-000000000001',now()-interval '1 day'),
+('44444444-4444-4444-8444-000000000103','group_leader',null,'22222222-2222-4222-8222-000000000002',null,now()-interval '1 day'),
+('44444444-4444-4444-8444-000000000104','technical_admin',null,null,null,now()-interval '1 day'),
+('44444444-4444-4444-8444-000000000105','pastoral_staff',null,null,null,now()-interval '1 day');
+commit;

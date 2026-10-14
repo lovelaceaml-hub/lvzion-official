@@ -1,0 +1,5 @@
+'use client';
+import {useEffect,useState} from 'react';
+import MemberWorkspace from '../../components/member-workspace';
+import type {Workspace} from '../../lib/contracts';
+export default function Members(){const[data,setData]=useState<Workspace|null>(null);const[error,setError]=useState('');async function load(){const r=await fetch('/api/members',{cache:'no-store'});const d=await r.json();if(!r.ok)throw new Error(d.error??'Workspace unavailable.');setData(d);}useEffect(()=>{void load().catch(e=>setError(e.message));},[]);if(!data)return <main className="auth-box"><h1>Member workspace</h1><p role="status">{error||'Loading your authorized workspace…'}</p>{error&&<><p><a href="/sign-in">Sign in</a></p><a href="/member-preview">Explore the fictional member preview</a></>}</main>;return <MemberWorkspace data={data} execute={async c=>{const r=await fetch('/api/members/command',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(c)});const d=await r.json();if(!r.ok)throw new Error(d.error??'Change rejected.');await load();}}/>;}
