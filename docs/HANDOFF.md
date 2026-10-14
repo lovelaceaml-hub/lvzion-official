@@ -1,5 +1,7 @@
 # LV Zion Official handoff
 
+> **Current production snapshot (October 14, 2026):** [CURRENT-STATUS.md](CURRENT-STATUS.md). The sections below preserve **historical milestone evidence and prior release IDs**. They are not a continuously current deployment listing. [Documentation index](INDEX.md) · [Member guide](USER-MANUAL.md) · [Release gates](RELEASE-GATES.md).
+
 ## Quick links
 
 - [Actual app](https://lvz.app)
@@ -8,7 +10,7 @@
 - [Release controls](RELEASE-GATES.md)
 - [Hosted migration mapping](HOSTED-MIGRATION-LEDGER.json)
 
-## Current work
+## Original platform setup (historical milestone)
 
 change/actual-app-setup contains the main application release. Anthony explicitly requested the actual app at lvz.app and no additional previews. Automatic preview publication is disabled in Vercel; automatic Git deployments are disabled in vercel.json. The app's actual front door is sign-in. Fictional routes redirect on production. Other module draft branches and original LV Zion apps remain outside scope.
 
@@ -20,7 +22,7 @@ The original member setup applied six migrations. Additional module and signup m
 
 128 application tests, 182 PostgreSQL assertions, 32 phone Chromium tests, 44 local signup checks and 42 invitation/recovery checks passed. The real local hook also rejected a direct signup bypass and allowed app-issued tickets. External security review was waived by Anthony. Hosted owner confirmation and first sign-in were verified privately. Physical-device testing is not yet claimed.
 
-## Current production and email
+## Earlier production and email verification (historical milestones)
 
 The actual app and self-service signup are live at https://lvz.app/sign-up. The organization release dpl_URciYVcPXdq5cJTURF9DpfAaSFZU is READY at ce41310e3ef932af58d51e7c4c66af985146c23f (PR #24). The subsequent verified production deployment dpl_35kWj2cAcYYNjHq2fhc5XpAcofrv at 87c5a8573ca01f7216f2c78df1da5b827b7380d2 retains that release by verified Git ancestry. The live signup form has a six-character minimum. Hosted confirmation failure returns the sign-in recovery path with no-store headers. Anonymous member API access is denied; the public member page contains only a loading shell. Signup, verified delivery and account-email switches are enabled only for production. Twelve production signup/access checks passed; fictional routes redirect, anonymous private records are denied and a forged-origin request created no Auth identity. The provider reports the SMTP test delivered to its own synthetic delivered@resend.dev inbox. TLS authentication was verified. No real account or personal record was created for testing.
 
@@ -59,3 +61,16 @@ A protected resend-confirmation action is available from the check-email screen;
 ## Contacts R5 verified private workspace
 
 The real Contacts module at [lvz.app/modules/contacts](https://lvz.app/modules/contacts) was expanded in merged PR #31. Production deployment `dpl_35kWj2cAcYYNjHq2fhc5XpAcofrv` is READY at commit `87c5a8573ca01f7216f2c78df1da5b827b7380d2`. It adds owner-only loaded-name search, status overview, accessible-record duplicate suggestions and the real shared Apps picker. The complete production build passed **322 app tests + 198 foundation SQL assertions**; five local Chromium widths passed. Signed-out and cross-origin Contacts requests were denied on the live domain. The existing owner-only database grant is unchanged, with zero contact records at verification. Confidential member sharing and richer database worklists are **not** enabled. Evidence and precise limitations: [Contacts owner experience R5](contacts/OWNER-EXPERIENCE-R5.md).
+
+## October 14 documentation reconciliation — current production state
+
+The repository documentation was reaudited against actual `lovelaceaml-hub/lvzion-official` `main`, Vercel, and Supabase `otecqlkqirncotytbfns`, without modifying runtime application code or hosted records. **Current source-of-truth snapshot:** [CURRENT-STATUS.md](CURRENT-STATUS.md). **Complete documentation listing:** [INDEX.md](INDEX.md).
+
+- Verified production application: `lvz.app`. Most recently verified READY production deployment in this audit: `dpl_FFquRhvQkTW1xv1gRVz1SuKBg66S` from main commit `de5dcdede5fc740873fddfa36467d9d47f318fd6`. An earlier deployment in the preceding paragraphs can remain READY without still being the live alias.
+- Confirmed **16 Supabase migration names**, all with source migration files on `main`; filled the three formerly missing entries in [HOSTED-MIGRATION-LEDGER.json](HOSTED-MIGRATION-LEDGER.json). Individual new mappings have not received a newly computed code-to-hosted SQL digest.
+- Organization: **4 age categories, 8 groups, 16 units**; **1 Auth user, 1 linked member/owner, 1 pending enrollment and 0 active placements**. The original owner's historical name is not blindly split into new signup-name fields. Members remain Unassigned until independently verified/placed.
+- Modules: Contacts, Study Rooms, Continuous Display and Work Mission Morning Prayer are registered as **approved**, each with **one individual active grant**. This is **not** broad member access. Worship Duty and Gospel Planning remain launch-gated development workstreams.
+- Contacts: private owner pilot, zero real contacts, no sharing or outbound messaging. Study Rooms: 12 configured resources, zero new bookings, booking activation **false** and original Firebase remains authoritative. Continuous Display: R2 control code and schema now on `main`, one screen, zero publications and zero paired devices; no real church content published. Morning Prayer: one series, zero actual occurrences; no automatic legacy syncing or authorized meeting join.
+- Historic automated checks are cited with their exact workstream and commit; this audit did not run a real non-owner signup/delivery or physical-device test, send email, apply a migration, grant access or activate bookings. Follow module release gates before wider church rollout.
+
+This handoff update is **documentation-only**; no production Vercel deployment is required or implied by pushing it to Git.
