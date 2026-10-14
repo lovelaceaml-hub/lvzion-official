@@ -126,7 +126,7 @@ export default function MemberHome({workspace:w,demo=false,manageHref,experience
   {section==='home'&&<>
    <section className="lvz-hero">
     <p className="lvz-eyebrow">YOUR PERSONAL HOME</p>
-    <h1>Welcome back,<br/><em>{w.self.name.split(' ')[0]}.</em></h1>
+    <h1>Welcome back,<br/><em>{w.self.firstName??w.self.name.split(' ')[0]}.</em></h1>
     <div className="lvz-placement"><span>{group}</span><span aria-hidden="true">·</span><span>{unit}</span></div>
     <div className="lvz-hero-decor" aria-hidden="true"><span/><span/><span/></div>
    </section>
