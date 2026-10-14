@@ -4,7 +4,7 @@ Independent Next.js application. The original LV Zion applications and databases
 
 ## Read first
 
-Read README.md, docs/HANDOFF.md, docs/ACTUAL-APP-SETUP.md and docs/RELEASE-GATES.md. The active setup and its Build log are docs/ACTUAL-APP-SETUP.md. The earlier hosted/repository migration mapping is docs/HOSTED-MIGRATION-LEDGER.json.
+Read README.md, docs/HANDOFF.md, docs/ACTUAL-APP-SETUP.md and docs/RELEASE-GATES.md. The active organization workflow and its Build log are docs/ORGANIZATION-WORKFLOW.md, with instructions in docs/USER-MANUAL.md. The completed actual setup and earlier Build log are docs/ACTUAL-APP-SETUP.md. The earlier hosted/repository migration mapping is docs/HOSTED-MIGRATION-LEDGER.json.
 
 ## Verification
 
