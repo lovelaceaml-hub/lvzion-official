@@ -1,5 +1,7 @@
 # Continuous Church Display — production release sequence
 
+> **R1 historical release record.** The owner-only Continuous Church Display base has since advanced to **R2 operations in production**. Do not repeat the activation/migration sequence below; hosted versions are recorded in [the ledger](../HOSTED-MIGRATION-LEDGER.json). Use [R2 Operations](OPERATIONS-R2.md) and [current production status](../CURRENT-STATUS.md) for actual state. No real church publication or TV pairing was present at the audited snapshot.
+
 This module is for **https://lvz.app**. It builds on the real member/Auth system rather than the fictional preview branch. The existing Mother’s Love and Study Room Scheduler remain independent and unchanged.
 
 ## Release boundary
