@@ -12,7 +12,7 @@
 
 change/actual-app-setup contains the main application release. Anthony explicitly requested the actual app at lvz.app and no additional previews. Automatic preview publication is disabled in Vercel; automatic Git deployments are disabled in vercel.json. The app's actual front door is sign-in. Fictional routes redirect on production. Other module draft branches and original LV Zion apps remain outside scope.
 
-New confirmed accounts start Unassigned to category, group and unit and see only their own records. Authorized member administration verifies membership and places each person, retaining history/audit. The designated first owner confirms the privately configured email, receives independent organization/department/technical administration, and remains Unassigned. No hierarchy names or real records are imported.
+New confirmed accounts start Unassigned to category, group and unit and see only their own records. Authorized member administration verifies membership and places each person, retaining history/audit. The designated first owner confirms the privately configured email, receives independent organization/department/technical administration, and remains Unassigned. Organization entries are created only from Anthony's supplied instructions. No member roster is imported.
 
 ## Applied and verified
 
@@ -39,3 +39,19 @@ Personal credentials use Apple Passwords or Keychain only. No credentials or des
 ## Password policy update
 
 Anthony requested six characters as the minimum on 2026-10-14. The signup, invitation-activation and recovery forms and their server validation now agree. Supabase Auth and the actual signup, invitation and recovery pages were verified at six in production deployment dpl_5XtZ7FjKqF71w3unp8z59Vqd2722, commit 9ac33961ad37c433e41cf256dbd3dfe2d9479b78. The earlier twelve-character rule is superseded by this direct instruction.
+
+## Organization and placement completion
+
+The current bounded workflow is docs/ORGANIZATION-WORKFLOW.md, with plain-language instructions in docs/USER-MANUAL.md. Anthony requested two empty units in each existing group and completion of this management flow. The actual structure is verified at four age categories, eight groups and sixteen units, all empty, with sixteen audited unit creations. The current branch adds a nested hierarchy, parent-bound creation, rename/archive controls, shared placement choices and clear leadership scope. Backend authorization and schema are unchanged. The integrated final build passed 244 application tests and 198 SQL assertions; all 77 browser checks passed. The controller reviewed the complete scoped change. The previous production deployment remains live until the new release and signed-in view are verified.
+
+## Contacts module: verified owner-only production release
+
+Contacts is deployed as the real LV Zion module at [lvz.app/modules/contacts](https://lvz.app/modules/contacts), using verified LV Zion authentication and explicit one-owner-only module access. Vercel deployment `dpl_2qdE7XJTTJjvG2V6p8sXkQqTG6VZ` is READY at `7aec7b5c1a777828ddace44c498ac90e2c9a5995`. Supabase migration `20261014224708_contacts_private_owner_pilot_v1` is applied; six private Contacts tables are RLS/FORCE RLS protected. No real contacts were imported. The owner remains Unassigned without inventing a group/unit. Production flag `LVZ_CONTACTS_OWNER_PILOT=true` is explicitly scoped to this verified release. Anonymous access is denied. The owner-only interface includes contact entry, author notes, follow-ups, do-not-contact, archival and audit history; sharing/leader access/export/messages are disabled. Full build: 241 tests, 182 foundation SQL assertions. The owner's browser-authenticated save/reload should still be confirmed manually, and full cross-member workflow approval is separate.
+
+**Detailed release evidence, verified denials and rollback:** [Contacts Live Owner Release](contacts/LIVE-OWNER-RELEASE.md). Original LV Zion applications and other module branches were unchanged.
+
+## Actual signup completion — live release
+
+Self-service signup was extended by [PR #27](https://github.com/lovelaceaml-hub/lvzion-official/pull/27), merged at `af3ec1ebed8cdf2036f383e314aa7938cb7d8849`. Vercel production deployment `dpl_oT4pR8hoP1j9QuvMiWqcw8N4RmaH` is READY, and `https://lvz.app/sign-up` serves required separate first and last name fields. The confirmed enrollment path now persists both name parts in a private, member-linked RLS-protected table without changing legacy names, original display_name behavior, Unassigned placement, owner bootstrap or existing approvals.
+
+A protected resend-confirmation action is available from the check-email screen; automatic email sends on refresh remain forbidden. Pending confirmation survives same-tab refresh. Supabase migration hosted version `20261014225857` is applied and reconciled in the ledger. Read-only hosted verification showed private direct-table access denied, anonymous enrollment denied, and old member counts unchanged. Production type/Node/disposable-database/build checks passed, and public authentication pages responded correctly. Separate mobile Playwright execution, actual new-member SMTP delivery and physical iOS/Android interaction tests were not performed for this release. See [Actual App Setup](ACTUAL-APP-SETUP.md) for verified scope, deployment and rollback.
