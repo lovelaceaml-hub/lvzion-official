@@ -1,6 +1,6 @@
 /* Fictional player shell only. No management, members, APIs, credentials, media or content packages. */
-const CACHE='lvzion-billboard-fictional-shell-r2';
-const FILES=['/billboard-preview/engine.mjs','/billboard-preview/demo.mjs','/billboard-preview/player.mjs','/billboard-preview/style.css'];
+const CACHE='lvzion-billboard-fictional-shell-r3';
+const FILES=['/billboard-preview/engine.mjs','/billboard-preview/demo.mjs','/billboard-preview/player.mjs','/billboard-preview/style.css','/billboard-preview/fit.css'];
 const PLAYER='/billboard-preview/player';
 self.addEventListener('install',event=>event.waitUntil((async()=>{const c=await caches.open(CACHE);await c.addAll(FILES);const r=await fetch(PLAYER,{cache:'no-store'});if(r.ok&&(r.headers.get('content-type')||'').includes('text/html')){const t=await r.text();if(t.includes('id="billboard-root"')&&t.includes('Development preview'))await c.put(PLAYER,new Response(t,{headers:{'Content-Type':'text/html','Content-Security-Policy':"default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' blob:; media-src 'self' blob:; connect-src 'self'; object-src 'none'; frame-src 'none'; base-uri 'none'"}}));}})()));
 // New application shells activate on restart, never through a mid-slide forced reload.

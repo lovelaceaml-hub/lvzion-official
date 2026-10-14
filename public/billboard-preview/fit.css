@@ -1,0 +1,3 @@
+/* Final playback/fit safeguards without changing any member-app stylesheet. */
+.stage[data-transition="cut"] .slide{animation:none}
+@supports not (font-size:1cqw){.tv-surface .slide-content{padding:6vw}.tv-surface .slide h1{font-size:7vw}.tv-surface .slide-body{font-size:2.3vw}.tv-surface .eyebrow{font-size:1.6vw}.tv-surface .schedule-row span{font-size:2.3vw}.tv-surface .schedule-row strong{font-size:1.6vw}.tv-surface .date-block b{font-size:16vw}.tv-surface .date-block span{font-size:1.7vw}.tv-surface .watermark{font-size:1vw}.stage.mini .slide h1{font-size:24px}.stage.mini .slide-body,.stage.mini .eyebrow{font-size:9px}}
