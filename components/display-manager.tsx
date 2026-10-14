@@ -2,8 +2,10 @@
 import {useEffect,useRef,useState} from 'react';
 import Link from 'next/link';
 import DisplayVisual from './display-visual';
-import type{DisplayKind,DisplaySlide,DisplayStyle,DisplayScreen}from'../lib/continuous-display/live-contract';
+import type{DisplayKind,DisplaySlide,DisplayStyle}from'../lib/continuous-display/live-contract';
 import {churchLocal,churchTimeToUtc,offsetForChurchTime,parseDisplaySlides}from'../lib/continuous-display/live-contract';
+import type {DisplayScreenR2} from '../lib/continuous-display/operations';
+import {OperatingHoursEditor,PublicationControls,NewScreenEditor,SlideEligibilityEditor} from './display-operations-controls';
 type Tab='content'|'playlist'|'publish'|'screens';
 const styles:DisplayStyle[]=['editorial','schedule','event','campaign'];
 const kinds:DisplayKind[]=['announcement','schedule','event','campaign'];
@@ -17,7 +19,9 @@ function newSlide(kind:DisplayKind):DisplaySlide{
   ...(kind==='event'?{date,time:'',location:''}:{})};
 }
 export default function DisplayManager(){
- const [screen,setScreen]=useState<DisplayScreen|null>(null);
+ const [screen,setScreen]=useState<DisplayScreenR2|null>(null);
+ const [allScreens,setAllScreens]=useState<DisplayScreenR2[]>([]);
+ const preferredScreen=useRef<string|null>(null);
  const [slides,setSlides]=useState<DisplaySlide[]>([]);
  const [tab,setTab]=useState<Tab>('content');
  const [selected,setSelected]=useState(0),[status,setStatus]=useState('Loading your authorized displays…');
@@ -33,8 +37,10 @@ export default function DisplayManager(){
   try{
    const r=await fetch('/api/display/manage',{cache:'no-store',credentials:'same-origin'});
    if(!r.ok){setStatus(r.status===401?'Sign in to manage the church display.':'Display management is not available for this account.');return;}
-   const payload=await r.json() as{screens?:DisplayScreen[]};
-   const next=payload.screens?.[0];if(!next){setStatus('No display has been assigned to your account.');return;}
+   const payload=await r.json() as{screens?:DisplayScreenR2[]};
+   setAllScreens(payload.screens??[]);
+   const next=(payload.screens??[]).find(candidate=>candidate.id===preferredScreen.current)??payload.screens?.[0];
+   if(next)preferredScreen.current=next.id;if(!next){setStatus('No display has been assigned to your account.');return;}
    setScreen(next);
    if(!editing.current){
     setSlides(next.items||[]);setSelected(0);setDirty(false);
@@ -51,12 +57,21 @@ export default function DisplayManager(){
   if(!screen||busy)return;
   setBusy(true);setStatus('');
   try{
-   const r=await fetch('/api/display/manage',{method:'POST',headers:{'Content-Type':'application/json'},credentials:'same-origin',body:JSON.stringify({action,screenId:screen.id,...extra})});
+   const r=await fetch('/api/display/manage',{method:'POST',headers:{'Content-Type':'application/json'},credentials:'same-origin',body:JSON.stringify(action==='createScreen'?{action,...extra}:{action,screenId:screen.id,...extra})});
    const data=await r.json() as Record<string,unknown>;
    if(!r.ok)throw Error(typeof data.error==='string'?data.error:'Display change was rejected.');
-   if(action==='pair'&&typeof data.code==='string'){setPairCode(data.code);setStatus('One-time pairing code created. It expires in five minutes.');}
-   else{setStatus(action==='save'?'Draft saved. Approval is still required.':action==='approve'?'Exact draft approved. Publishing is a separate action.':action==='publish'?'Approved version published. Paired screens update at a safe transition.':'Device access revoked.');}
-   editing.current=false;setDirty(false);await load();
+   if(action==='pair'&&typeof data.code==='string'){
+    setPairCode(data.code);setStatus('One-time pairing code created. It expires in five minutes.');
+   }else if(action==='createScreen'&&typeof data.screenId==='string'){
+    preferredScreen.current=data.screenId;setPairCode('');
+    setStatus('A new disabled screen has been created. Configure and approve it before pairing.');
+   }else if(action==='hours')setStatus('Operating hours saved. The screen will show a neutral state outside these hours.');
+   else if(action==='restore')setStatus('A previously approved publication was restored as a new version.');
+   else if(action==='override')setStatus('Temporary emphasis started for an already approved slide.');
+   else if(action==='clearOverride')setStatus('Temporary emphasis ended.');
+   else setStatus(action==='save'?'Draft saved. Approval is still required.':action==='approve'?'Exact draft approved. Publishing is a separate action.':action==='publish'?'Approved version published. Paired screens update at a safe transition.':'Device access revoked.');
+   if(['save','approve','publish','createScreen'].includes(action)){editing.current=false;setDirty(false);}
+   await load();
   }catch(e){setStatus(e instanceof Error?e.message:'Could not complete the change.');}
   finally{setBusy(false);}
  }
@@ -67,6 +82,9 @@ export default function DisplayManager(){
    const startsAt=churchTimeToUtc(startWall,startOffset);
    const endsAt=churchTimeToUtc(endWall,endOffset);
    if(Date.parse(endsAt)<=Date.now()||Date.parse(endsAt)<=Date.parse(startsAt))throw Error('The publication end must be after its start and in the future.');
+   for(const slide of content)if(slide.startsAt&&slide.endsAt&&
+    (Date.parse(slide.startsAt)<Date.parse(startsAt)||Date.parse(slide.endsAt)>Date.parse(endsAt)))
+    throw Error('A slide-specific window must stay within the overall approved publication window.');
    await command('save',{expectedVersion:screen.draftVersion,slides:content,startsAt,endsAt});
   }catch(e){setStatus(e instanceof Error?e.message:'Check the content before saving.');}
  }
@@ -78,6 +96,8 @@ export default function DisplayManager(){
   <label className="cd-span">Headline<input value={s.title} maxLength={74} onChange={e=>change(index,{title:e.target.value})}/></label>
   <label className="cd-span">Supporting message<textarea value={s.body} maxLength={160} rows={3} onChange={e=>change(index,{body:e.target.value})}/></label>
   <label>Duration (seconds)<input type="number" min={8} max={60} value={s.duration} onChange={e=>change(index,{duration:Number(e.target.value)})}/></label>
+  <div className="cd-span"><SlideEligibilityEditor slide={s}
+   onChange={patch=>change(index,patch)} onError={setStatus}/></div>
   {(s.kind==='schedule'||s.kind==='event')&&<label>Date<input type="date" value={s.date||''} onChange={e=>change(index,{date:e.target.value})}/></label>}
   {s.kind==='event'&&<><label>Event time<input value={s.time||''} maxLength={72} onChange={e=>change(index,{time:e.target.value})}/></label><label>Location<input value={s.location||''} maxLength={72} onChange={e=>change(index,{location:e.target.value})}/></label></>}
   {s.kind==='schedule'&&<div className="cd-span"><strong>Activities (up to three)</strong>{(s.rows??[]).map((r,i)=><div className="cd-row-fields" key={i}>
@@ -95,7 +115,15 @@ export default function DisplayManager(){
  </div></div>;
  return <main className="cd-manage">
   <header className="cd-head"><Link href="/members">← My Week</Link><p>LV ZION OFFICIAL · APPS</p><h1>Church Display</h1><span>Animated digital billboard · authorized management</span></header>
-  <div className="cd-screen-status"><strong>{screen?.label||'Continuous Church Display'}</strong><span>{screen?.enabled?'Paired playback enabled':'No active church TV paired'} · Published v{screen?.publishedVersion||0}</span></div>
+  <div className="cd-screen-status"><strong>{screen?.label||'Continuous Church Display'}</strong>
+    <span>{screen?.enabled?'Paired playback enabled':'No active church TV paired'} · Published v{screen?.publishedVersion||0}</span>
+    {allScreens.length>1&&<label className="cd-screen-picker">Choose display
+     <select aria-label="Choose display" value={screen?.id??''} onChange={e=>{
+      if(dirty&&!window.confirm('Discard unsaved slide changes before switching screens?'))return;
+      preferredScreen.current=e.target.value;editing.current=false;setDirty(false);setPairCode('');void load();
+     }}>{allScreens.map(candidate=><option key={candidate.id} value={candidate.id}>{candidate.label}</option>)}</select>
+    </label>}
+   </div>
   <nav className="cd-tabs" aria-label="Display management tabs">{(['content','playlist','publish','screens'] as const).map(t=><button key={t} aria-current={tab===t?'page':undefined} onClick={()=>setTab(t)}>{capital(t)}</button>)}</nav>
   {status&&<p className="cd-notice" role="status">{status}</p>}
   {!screen?<p className="cd-empty">The display management module requires an active, explicitly assigned manager grant.</p>:<>
@@ -125,7 +153,8 @@ export default function DisplayManager(){
     <button className="cd-button cd-primary" disabled={busy||!canPublish} onClick={()=>command('publish',{expectedVersion:screen.draftVersion})}>Publish approved playlist</button>
    </div>
    {dirty&&<p className="cd-subtle">There are unsaved changes. Save, review and approve the new revision before publishing.</p>}
-   <h3>Previous published versions</h3>{screen.history.length?<div>{screen.history.map(h=><p key={h.id} className="cd-history">v{h.generation} · {new Date(h.publishedAt).toLocaleString('en-US',{timeZone:'America/Los_Angeles'})}</p>)}</div>:<p>No publication history yet.</p>}
+   <h3>Previous published versions</h3>{screen.history.length?<div>{screen.history.map(h=><p key={h.id} className="cd-history">v{h.generation} · {new Date(h.publishedAt).toLocaleString('en-US',{timeZone:'America/Los_Angeles'})} · Expires {new Date(h.until).toLocaleString('en-US',{timeZone:'America/Los_Angeles'})}</p>)}</div>:<p>No publication history yet.</p>}
+   <PublicationControls key={screen.id} screen={screen} busy={busy} command={command} draftDirty={dirty}/>
   </section>}
   {tab==='screens'&&<section className="cd-panel"><h2>Screen pairing and health</h2>
    <p>A television never signs in with a member account. Open <strong>lvz.app/display</strong> on the screen, then enter a temporary code.</p>
@@ -133,8 +162,10 @@ export default function DisplayManager(){
     <button className="cd-button cd-primary" disabled={busy} onClick={()=>command('pair')}>Create one-time pairing code</button>
     {pairCode&&<div className="cd-pair-code" aria-live="polite"><span>Use on lvz.app/display · expires in five minutes</span><strong>{pairCode}</strong></div>}
    </div>
-   <h3>Paired devices</h3>{screen.devices.length?screen.devices.map(d=><div className="cd-device" key={d.id}><div><strong>{d.revoked?'Revoked':'Active device'}</strong><small>Last seen: {d.lastSeen?new Date(d.lastSeen).toLocaleString('en-US',{timeZone:'America/Los_Angeles'}):'Not yet checked in'}</small></div>{!d.revoked&&<button className="cd-button cd-danger" disabled={busy} onClick={()=>{if(window.confirm('Revoke this screen immediately when it next checks in?'))void command('revoke',{deviceId:d.id});}}>Revoke</button>}</div>):<p className="cd-empty">No device has been paired. An unpaired display cannot receive approved content.</p>}
+   <h3>Paired devices</h3>{screen.devices.length?screen.devices.map(d=><div className="cd-device" key={d.id}><div><strong>{d.revoked?'Revoked':d.lastSeen&&Date.now()-Date.parse(d.lastSeen)<45000?'Online · checking in':'Offline or not checking in'}</strong><small>Last seen: {d.lastSeen?new Date(d.lastSeen).toLocaleString('en-US',{timeZone:'America/Los_Angeles'}):'Not yet checked in'}</small></div>{!d.revoked&&<button className="cd-button cd-danger" disabled={busy} onClick={()=>{if(window.confirm('Revoke this screen immediately when it next checks in?'))void command('revoke',{deviceId:d.id});}}>Revoke</button>}</div>):<p className="cd-empty">No device has been paired. An unpaired display cannot receive approved content.</p>}
    <p className="cd-subtle">The player is silent and fails to a neutral screen when the network or publication expires. Device revocation is checked at the next poll.</p>
+   <OperatingHoursEditor key={screen.id} screen={screen} busy={busy} command={command}/>
+   <NewScreenEditor busy={busy} command={command}/>
   </section>}
   </>}
   <footer className="cd-foot">LV Zion Official · Approved TV content only · America/Los_Angeles</footer>
