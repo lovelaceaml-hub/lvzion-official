@@ -58,9 +58,9 @@ export function saveBatch(state:PlannerState,actor:PlannerActor,department:Depar
   const d=CATALOG.find(d=>d.id===c.dutyId),s=result.services.find(s=>s.id===c.serviceId);
   if(!d||d.department!==department)throw new Error('This duty is outside your department.');
   if(!s||closed(s,state.now))throw new Error('This service is closed to changes.');
-  checkVersion(c.expectedVersion,s.version);if(!hasDuty(s,c.dutyId))throw new Error('This duty does not apply to this service.');
+  checkVersion(c.expectedVersion,s.version);if(!hasDuty(s,d.id))throw new Error('This duty does not apply to this service.');
   if(c.memberId!==null&&typeof c.memberId!=='string')throw new Error('Choose a member or explicitly leave the duty open.');
-  if(c.memberId===null)delete s.assignments[c.dutyId];else s.assignments[c.dutyId]=c.memberId;touched.add(s.id);
+  if(c.memberId===null)delete s.assignments[d.id];else s.assignments[d.id]=c.memberId;touched.add(s.id);
  }
  for(const c of changes){if(c.memberId!==null){const problem=candidateProblem(result,result.services.find(s=>s.id===c.serviceId)!,c.dutyId,c.memberId);if(problem)throw new Error(`${meta(c.dutyId).label}: ${problem}`);}}
  for(const s of result.services)if(touched.has(s.id))s.version++;
