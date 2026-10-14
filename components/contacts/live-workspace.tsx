@@ -85,7 +85,7 @@ export default function ContactsLiveWorkspace(){
  {view==='followup'?<>
   <section className="ct-card ct-section">
    <p className="ct-eyebrow">PRIVATE ACTIVITY</p><h2>Your assigned follow-ups</h2>
-   <p className="ct-muted">{agenda.length?agenda.length+' authorized activity'+(agenda.length===1?'':'ies')+' are waiting.':'No active follow-ups are currently assigned to you.'}</p>
+   <p className="ct-muted">{agenda.length?agenda.length+' authorized '+(agenda.length===1?'activity is':'activities are')+' waiting.':'No active follow-ups are currently assigned to you.'}</p>
    <p className="ct-small">This shared activity projection intentionally contains no contact names, phone numbers or appointment details. Open a contact to review its next agreed action and due date.</p>
   </section>
   {agenda.map(item=><div className="ct-card ct-activity" key={item.id}><strong>{item.title}</strong><span>Private to Contacts</span></div>)}
