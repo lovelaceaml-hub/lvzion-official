@@ -1,5 +1,7 @@
 # Study Room Reservation R2 — changes and manager controls
 
+> **Historical Study Room development evidence.** These earlier review/preview/activation assertions apply to the commits and test environments named below. The actual module is now integrated at `lvz.app/modules/study-rooms` with owner setup, but the **production booking gate remains closed** and the original Firebase scheduler remains authoritative. Read [STUDY-ROOM-R4-LIVE.md](STUDY-ROOM-R4-LIVE.md) and [CURRENT-STATUS.md](CURRENT-STATUS.md) before any operational change.
+
 This increment continues PR #3, feature/study-room-reservations-v1, from commit 8623294183777dd58ffb22b5ac41888e858c980f. The separate Study Room UI proposal (PR #4), Worship Duty branch, original Firebase scheduler, production deployment and domain configuration are not changed. This document supersedes R1's statement that reservation editing and all manager scheduling controls are unimplemented.
 
 ## Implemented behavior
