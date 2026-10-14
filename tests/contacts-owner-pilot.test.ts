@@ -95,6 +95,7 @@ test('Contacts private owner release: authorized reads, mutations, DNC and isola
   await db.query("update app_private.module_access_grants set ended_at=clock_timestamp() where member_id=$1",[owner]);
   await actor();
   await deny(()=>db.exec('select public.contacts_workspace_r3(null)'));
+  await db.exec('reset role');
   must(Number((await db.query('select count(*) n from contacts_private.audit_events')).rows[0].n)===7,'audit exactly once per mutation');
   console.log('Contacts private pilot: '+checks+' assertions pass in disposable PGlite.');
  }finally{await db.close();}
