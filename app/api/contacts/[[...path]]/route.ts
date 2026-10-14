@@ -1,5 +1,4 @@
-import {NextResponse} from 'next/server';
+import {contactsRequest} from '../../../../lib/server/contacts';
 export const dynamic='force-dynamic';
-// Hard release lock. Never read request bodies, make backend calls or log contact input.
-function unavailable(){return NextResponse.json({error:'Contacts is not activated.'},{status:403,headers:{'Cache-Control':'private, no-store, max-age=0','Vary':'Cookie','X-Content-Type-Options':'nosniff'}});}
-export const GET=unavailable,POST=unavailable,PUT=unavailable,PATCH=unavailable,DELETE=unavailable,OPTIONS=unavailable,HEAD=unavailable;
+// The server-only release gate remains closed. No body/session/database is read until approval.
+export const GET=contactsRequest,POST=contactsRequest,PUT=contactsRequest,PATCH=contactsRequest,DELETE=contactsRequest,OPTIONS=contactsRequest,HEAD=contactsRequest;
