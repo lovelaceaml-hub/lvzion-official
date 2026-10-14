@@ -1,0 +1,20 @@
+{
+  "recordedDate": "2026-10-14",
+  "applicationCommit": "a7de9d92166e11455f7077360f408bdc5825b957",
+  "deploymentId": "dpl_6GwvkkeydscjsK6xaG4RUui7uqby",
+  "previewOrigin": "https://lvzion-official-msynhg9xr-lvzion.vercel.app",
+  "previewRoute": "/worship-duty-preview/connected",
+  "nodeTests": {"passed": 171, "failed": 0, "skipped": 0},
+  "foundationPostgresAssertions": 111,
+  "browser": {"checkedAt": "2026-10-14T11:44:32.312Z", "passed": 29, "succeeded": true, "exitCode": 0, "pageErrors": [], "unexpectedBackendRequests": [], "widths": [320,390,430,768,1280]},
+  "hostedOperationalApi": {"getStatus": 503, "postStatus": 503, "code": "disabled", "cacheControlPrivateNoStore": true},
+  "databaseExecution": "Disposable embedded PostgreSQL with synthetic Auth and sessions",
+  "browserExecution": "Shared interface with an explicitly fictional in-memory transport",
+  "hostedAuthEndToEndVerified": false,
+  "twoConnectionConcurrencyVerified": false,
+  "hostedWorshipMigrationsApplied": false,
+  "productionActivated": false,
+  "originalSystemsWritten": false,
+  "realMembersImported": false,
+  "messagesSent": false
+}
