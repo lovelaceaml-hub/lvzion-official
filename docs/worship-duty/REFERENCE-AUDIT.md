@@ -1,5 +1,7 @@
 # Worship Duty — reference audit and implementation boundaries
 
+> **Historical source audit, not a live-release report.** The original reference commit and legacy duty rules below remain valid audit inputs. The CURRENT real integration is [draft PR #25](https://github.com/lovelaceaml-hub/lvzion-official/pull/25) against the live `lvz.app` codebase; read [Worship Duty status](README.md), [implementation status](IMPLEMENTATION-STATUS.md), and [Work handoff](WORK-HANDOFF.md) before using this audit. The former prototype-only routes described below are **not** committed production routes in PR #25.
+
 Audit date: October 14, 2026. This is an independent application inside LV Zion Official, not a replacement deployment of the original app.
 
 ## Sources and reproducibility
@@ -8,7 +10,7 @@ Reference repository: `lovelaceaml-hub/worship-duty-app`, pinned to `b2d2f9c52a2
 
 Inspected source files: `README.md`, `app/config/duties.js`, `app/lib/conflicts.js`, `app/lib/worship.js`, `permissions.js` (configuration and pairing implementation), and `app/presider/access.js`. The public shell at `https://lv-zion-duties.web.app` was read without authentication or writes. Repository source is not proof of the exact deployed build. Runtime settings, real schedules, member records, Google Sheets and the original database were not queried or imported.
 
-Foundation: draft PR #2, branch `feature/member-system-secure-r1`, commit `5a0d435dc7dbf18401d0a77af89543bf9d9d9c4b`. Worship Duty is stacked on this branch, NOT on Study Room draft PR #4. Neither existing draft nor the original application is modified by this work.
+**Historical audit foundation:** draft PR #2, `feature/member-system-secure-r1`, commit `5a0d435dc7dbf18401d0a77af89543bf9d9d9c4b`. That describes the **old** PR #5 audit, **not** the current live integration. PR #25 has cherry-picked Worship-only R1/R2 files on the actual production `main` and is being reconciled with concurrent module work; no member foundation or original Firebase repository is replaced.
 
 ## Actual core experiences
 
@@ -43,7 +45,7 @@ Every service has a Glory song. Sabbath Day and Third Day have Choir and Closing
 
 ## Fill and integrations: do not falsely claim parity
 
-The original's Usual, Auto, Rotation and Random have historical workload/recency rules, manual-only exclusions, default assignees, prayer-first usher pairing, draft batch review and limited proposal rearrangement. This release provides bounded, reviewed candidate suggestions: compatible prayer pairing first, then fixture-month workload and stable name ordering. It does NOT implement the four historical Fill algorithms, saved batch repair, live-year generation or import-time acknowledgement UI. These require isolated parity fixtures and a separate review, not fabricated historical data.
+The original's Usual, Auto, Rotation and Random have historical workload/recency rules, manual-only exclusions, default assignees, prayer-first usher pairing, draft batch review and limited proposal rearrangement. **Historical fictional R3 only:** that prototype offered bounded, reviewed suggestions using prayer pairing, fixture-month workload and stable name ordering. This is **not** persisted in PR #25 or operational on `lvz.app`. Neither PR implements the four historical Fill methods, verified saved batch repair, year generation or import-time acknowledgement UI. These require isolated parity fixtures and a separate review, not fabricated historical data.
 
 The original uses Firebase name/PIN authentication and a Google Sheet master with read/write synchronization, name mapping and cell-level conflict handling. The README has inconsistent timed-import descriptions (10 minutes vs a later older two-hour bullet); no runtime cadence was verified. No such connector, credential, synchronization, import, PIN authentication or migration of real identities is included here. LV Zion Official's existing username/email + password session design remains authoritative.
 
@@ -57,7 +59,7 @@ The original uses Firebase name/PIN authentication and a Google Sheet master wit
 
 **Defer behind explicit verification:** source historical Fill parity; broad service lifecycle editor and year generation; durable weekly availability UI and leader keep-available overrides; song-library administration/history analytics and actual catalog import; push/email/calendar delivery; configurable-pair/override administration; accountable owner assignment; hosted end-to-end Auth/database activation; backups/restore; physical iPhone/Android acceptance. These are not claimed complete by the fictional preview.
 
-## Prototype review
+## Prototype review — archived R1/R3 work, not included in the real integration branch
 
 `/worship-duty-preview`: Focus cards, led by the next service.
 
@@ -65,4 +67,4 @@ The original uses Firebase name/PIN authentication and a Google Sheet master wit
 
 View options switches between fictional member, assigned presider, Worship leader with a separate song-editor grant, Usher leader, and technical-administrator-only views. It is a design/testing control, never an authentication mechanism. Both variants retain neutral sage/cream styling, readable touch controls, and My Duties / Presider / Manage only where authorized. Reload resets every fictional edit.
 
-`/modules/worship-duty` reserves the integrated route behind the existing member session and an explicit non-activated state. No production toggle is exposed in the browser.
+**Current integration (PR #25):** `/modules/worship-duty` and `/api/worship-duty` are implemented behind the actual member session and explicit server-side module flag; they remain unmerged and not activated. The historical `/worship-duty-preview` routes are not part of this branch. No production toggle or role selector is exposed in the browser. See [production release checklist](PRODUCTION-RELEASE-CHECKLIST.md).
