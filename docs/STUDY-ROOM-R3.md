@@ -1,5 +1,7 @@
 # Study Room Reservation — R3 reconciliation
 
+> **Historical Study Room development evidence.** These earlier review/preview/activation assertions apply to the commits and test environments named below. The actual module is now integrated at `lvz.app/modules/study-rooms` with owner setup, but the **production booking gate remains closed** and the original Firebase scheduler remains authoritative. Read [STUDY-ROOM-R4-LIVE.md](STUDY-ROOM-R4-LIVE.md) and [CURRENT-STATUS.md](CURRENT-STATUS.md) before any operational change.
+
 ## Scope and safety
 
 Development-only integrated module at `/modules/study-rooms`; fictional, in-memory review at `/study-rooms-preview`. This revision does not publish the module, grant member access, apply hosted migrations, import real records, change production aliases, or touch the original Firebase scheduler. Existing original applications remain independent.
