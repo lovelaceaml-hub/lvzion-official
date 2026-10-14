@@ -2,8 +2,8 @@
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { allows, applyEditorialCommand, changeSchedule, joinState, latestRecap, prepareExport, publishedRecaps, withSourceRevision, WMError } from '../../lib/wm-prayer/domain';
-import type { EditorialCommand, Occurrence, Recap, SafeExport } from '../../lib/wm-prayer/domain';
-import { DEMO_CONTENT, DEMO_NOW, DEMO_SOURCE_SECTIONS, PERSONAS, demoOccurrence, demoWorkspace, FRIENDLY_ERRORS } from '../../lib/wm-prayer/fixtures';
+import type { EditorialCommand, Recap, SafeExport } from '../../lib/wm-prayer/domain';
+import { DEMO_CONTENT, DEMO_NOW, PERSONAS, demoOccurrence, demoWorkspace, FRIENDLY_ERRORS } from '../../lib/wm-prayer/fixtures';
 import { cardSvg, type CardStyle } from '../../lib/wm-prayer/cards';
 import styles from './wm.module.css';
 
@@ -47,6 +47,8 @@ export default function WMPreview() {
   const canRead = allows(actor,'view_recap',workspace.seriesId);
   const now = scenario === 'completed' || scenario === 'pending' ? '2026-10-14T08:10:00-07:00' : DEMO_NOW;
   const join = joinState(occurrence,actor,now);
+  // One projection for both the displayed text and clipboard: preserve the occurrence date.
+  const shareText = share ? `${DATE_LABELS[selected]}, 2026 · FICTIONAL\n\n${share.text}` : '';
   const navigate = (next: Screen) => { setScreen(next);setShare(null);setMessage(''); };
   const readLesson = (id:string) => { setSelected(id);navigate('lesson'); };
   const errorMessage = (error:unknown) => error instanceof WMError ? FRIENDLY_ERRORS[error.code] || error.code : 'This preview action could not be completed.';
@@ -80,7 +82,7 @@ export default function WMPreview() {
   }
   async function copyText() {
     if(!share) return;
-    try {await navigator.clipboard.writeText(share.text);setMessage('Fictional explanation copied. Nothing was sent.');}
+    try {await navigator.clipboard.writeText(shareText);setMessage('Fictional explanation and gathering date copied. Nothing was sent.');}
     catch {setMessage('Clipboard is unavailable. Select the explanation below and copy it manually.');}
   }
   async function saveCard() {
@@ -110,9 +112,9 @@ export default function WMPreview() {
       <p className={styles.demoNotice}>Fictional content. No real gathering links, members, or messages.</p>
       <nav className={styles.tabs} aria-label="WM application"><button aria-current={screen==='home' ? 'page' : undefined} onClick={()=>navigate('home')}>Home</button><button aria-current={['archive','lesson'].includes(screen) ? 'page' : undefined} onClick={()=>navigate('archive')}>Lessons</button>{hasReview && <button aria-current={screen==='review' ? 'page' : undefined} onClick={()=>navigate('review')}>Manage</button>}</nav>
       <details className={styles.options}><summary>Preview controls <span>{persona.label}</span></summary><div className={styles.optionsBody}>
-        <label>Preview role<select value={personaKey} onChange={e=>{setPersonaKey(e.target.value);setShare(null);setPrivacyChecked(false);setSummaryAccepted(false);setMessage('');}}>{PERSONAS.map(p=><option key={p.key} value={p.key}>{p.label}</option>)}</select></label>
+        <label>Preview role<select aria-label="Preview role" value={personaKey} onChange={e=>{setPersonaKey(e.target.value);setShare(null);setPrivacyChecked(false);setSummaryAccepted(false);setMessage('');}}>{PERSONAS.map(p=><option key={p.key} value={p.key}>{p.label}</option>)}</select></label>
         <p>{persona.description} Role switching is not authentication.</p>
-        <label>Gathering scenario<select value={scenario} onChange={e=>setDemoScenario(e.target.value as Scenario)}><option value="upcoming">Upcoming — within join window</option><option value="completed">Completed — latest lesson first</option><option value="pending">Completed — source pending</option><option value="cancelled">Cancelled</option><option value="rescheduled">Rescheduled — verify access</option><option value="unverified">Schedule not verified</option></select></label>
+        <label>Gathering scenario<select aria-label="Gathering scenario" value={scenario} onChange={e=>setDemoScenario(e.target.value as Scenario)}><option value="upcoming">Upcoming — within join window</option><option value="completed">Completed — latest lesson first</option><option value="pending">Completed — source pending</option><option value="cancelled">Cancelled</option><option value="rescheduled">Rescheduled — verify access</option><option value="unverified">Schedule not verified</option></select></label>
         <p>Illustrative October 2026 dates, Pacific timezone and 30-minute duration. The real schedule is not verified.</p><button className={styles.secondary} onClick={reset}>Reset fictional changes</button>
       </div></details>
       {message && <p className={styles.message} role="status">{message}</p>}
@@ -136,7 +138,7 @@ export default function WMPreview() {
           <div className={styles.sourceLimit}><strong>Source limitation</strong><p>This fictional example models a summary-only recap. No recording or full transcript was reviewed. All wording is paraphrase, not a verbatim quotation.</p></div>
           <article className={styles.explanation}><p className={styles.eyebrow}>DETAILED EXPLANATION</p>{lesson.content.explanation.map(p=><section key={p.heading}><h2>{p.heading}</h2><p>{p.text}</p></section>)}</article>
           <section className={styles.provenance}><h2>About this version</h2><dl><dt>Gathering</dt><dd>{DATE_LABELS[selected]}, 2026 · Fictional</dd><dt>Source type</dt><dd>Fictional meeting summary</dd><dt>Generation time</dt><dd>{new Date(lesson.generatedAt).toLocaleString('en-US',{timeZone:'America/Los_Angeles'})} Pacific · Demo</dd><dt>Revision</dt><dd>{lesson.revision}</dd><dt>Review</dt><dd>Independent fictional reviewer</dd><dt>Publication</dt><dd>This preview only</dd></dl><p>Original sources require separate permission. Publication does not grant recording, transcript or meeting access.</p></section>
-          {allows(actor,'share_external',workspace.seriesId,selected) ? <section className={styles.sharing}><h2>Prepare for sharing</h2><p>Graphic and explanation are separate. No direct Signal posting.</p><button className={styles.primary} onClick={exportLesson}>Prepare approved outputs</button>{share && <div data-testid="share-output"><div className={styles.actions}><button onClick={saveCard}>Save fictional PNG</button><button onClick={copyText}>Copy explanation</button></div><label>Approved fictional text<textarea readOnly rows={12} value={`${DATE_LABELS[selected]}, 2026 · FICTIONAL\n\n${share.text}`} /></label></div>}</section> : <p className={styles.subtle}>External sharing requires its own permission.</p>}
+          {allows(actor,'share_external',workspace.seriesId,selected) ? <section className={styles.sharing}><h2>Prepare for sharing</h2><p>Graphic and explanation are separate. No direct Signal posting.</p><button className={styles.primary} onClick={exportLesson}>Prepare approved outputs</button>{share && <div data-testid="share-output"><div className={styles.actions}><button onClick={saveCard}>Save fictional PNG</button><button onClick={copyText}>Copy explanation</button></div><label>Approved fictional text<textarea readOnly rows={12} value={shareText} /></label></div>}</section> : <p className={styles.subtle}>External sharing requires its own permission.</p>}
         </> : <section className={styles.empty}><h2>Lesson unavailable</h2><p>This role cannot view this lesson, or it has not been published.</p></section>}
       </>}
       {screen==='review' && <>
@@ -144,7 +146,7 @@ export default function WMPreview() {
           <div className={styles.sectionHeader}><h2>Gathering workspace</h2><span>Fictional review</span></div>
           {canSchedule && <section className={styles.panel}><h2>Schedule changes</h2><p>The original occurrence identity is preserved. Changing the time invalidates meeting-access verification.</p><div className={styles.actions}><button onClick={()=>schedule('reschedule')}>Move to 7:30 AM</button><button onClick={()=>schedule('cancel')}>Cancel occurrence</button></div><p>Status: {occurrence.status} · Schedule revision {occurrence.version}</p></section>}
           {(canSource||canDraft||canApprove||canPublish) && <>
-            <label className={styles.field}>Fictional gathering<select value={reviewSelected} onChange={e=>{setReviewSelected(e.target.value);setPrivacyChecked(false);setSummaryAccepted(false);}}>{Object.entries(DATE_LABELS).reverse().map(([id,label])=><option key={id} value={id}>{label}</option>)}</select></label>
+            <label className={styles.field}>Fictional gathering<select aria-label="Fictional gathering" value={reviewSelected} onChange={e=>{setReviewSelected(e.target.value);setPrivacyChecked(false);setSummaryAccepted(false);}}>{Object.entries(DATE_LABELS).reverse().map(([id,label])=><option key={id} value={id}>{label}</option>)}</select></label>
             <div className={styles.flow} aria-label="Editorial stages"><span>Original source</span><span>Draft</span><span>Reviewed</span><span>Published</span></div>
             {canSource ? <section className={styles.panel} data-testid="source-panel"><div className={styles.sectionHeader}><h2>Protected source review</h2><span>Revision {source.revision}</span></div><p className={source.state==='ready' ? styles.subtle : styles.warning}>Source {source.state==='ready' ? 'available — fictional summary only' : `incomplete (${source.state})`}</p>{source.state==='ready' && <details><summary>Read the fictional source</summary><p>Central: Listen carefully, explain one point clearly, and leave room for a thoughtful response.</p>{DEMO_CONTENT.points.map(p=><p key={p.label}><strong>{p.sourceSection}:</strong> {p.text}</p>)}<p>Only these invented source sections support this preview. There is no transcript, recording, attendee list or live source link.</p></details>}<details><summary>Test source-import scenarios</summary><div className={styles.actions}><button onClick={()=>inspectSource('duplicate')}>Duplicate notification</button><button onClick={()=>inspectSource('updated')}>Updated summary</button><button onClick={()=>inspectSource('partial')}>Incomplete transcript</button><button onClick={()=>inspectSource('failed')}>Failed import</button></div><p>These controls simulate outcomes without reading Gmail or fetching an asset.</p></details></section> : <p className={styles.sourceLimit}>Source-asset access is not included with this role.</p>}
             {candidate && <section className={styles.panel} data-testid="review-panel"><div className={styles.sectionHeader}><h2>Lesson revision {candidate.revision}</h2><span>{candidate.state}</span></div><p>{candidate.content.title}</p><p>{candidate.content.centralMessage}</p><p className={styles.subtle}>Bound to source revision {candidate.sourceRevision}. Current workspace revision {workspace.version}.</p>
