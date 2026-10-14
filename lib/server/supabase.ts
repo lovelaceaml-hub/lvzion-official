@@ -6,11 +6,11 @@ import { settings } from './config';
 export async function userClient() {
  const c=settings(); const jar=await cookies();
  return createServerClient(c.url,c.key,{
-  cookieOptions:{httpOnly:true,secure:true,sameSite:'lax',path:'/'},
-  cookies:{getAll:()=>jar.getAll(),setAll:(items)=>{for(const {name,value,options} of items) jar.set(name,value,{...options,httpOnly:true,secure:true,sameSite:'lax',path:'/'});}}
+  cookieOptions:{httpOnly:true,secure:c.secureCookies,sameSite:'lax',path:'/'},
+  cookies:{getAll:()=>jar.getAll(),setAll:(items)=>{for(const {name,value,options} of items) jar.set(name,value,{...options,httpOnly:true,secure:c.secureCookies,sameSite:'lax',path:'/'});}}
  });
 }
-// Do not use this client to read or mutate member management data.
+// Privileged identity/delivery operations only. Member administration always uses the caller session.
 export function authAdminClient() {
  const c=settings();
  if (!c.secret || !c.rateSecret || c.rateSecret.length<32) throw new Error('Trusted authentication configuration required.');

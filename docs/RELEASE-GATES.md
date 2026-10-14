@@ -1,22 +1,15 @@
-# LV Zion Official release gates
+# Release gates
 
-## Completed development checks
+## Completed development work
 
-The isolated member foundation includes pinned dependencies and lockfile, strict TypeScript for new member runtime code, 25 Node tests, 53 database permission assertions, five Chromium phone-viewport tests, a local production build and a fictional PostgreSQL dump/restore rehearsal. See MEMBER-SYSTEM-VERIFICATION.md for scope and limitations.
+Member schema, scoped commands, own-group directory, history-preserving transfers/status, independent departments and technical controls, request review, invitation flow, recovery, one-time operator bootstrap, phone management UI, pinned dependencies and repeatable automated tests are implemented. See `ONBOARDING-COMPLETION.md` and `MEMBER-SYSTEM-VERIFICATION.md` for actual results.
 
-The interactive original home remains a concept. `/member-preview` is a fictional in-memory management preview. Real member APIs stay off by default and reject the known production Supabase reference.
+## Hosted activation gate
 
-## Required before any real-member launch
+The new Supabase schema is applied, but there are zero hosted members or Auth accounts. Tool safety checks blocked hosted test-account provisioning. The temporary identity function is closed, unused bridge/fixture credentials were cleared, and hosted login/email remain off. Complete the approved hosted identity and mail setup, reconcile migration versions, and verify a designated test sign-in before enabling. This block was not bypassed through another tool or database writes.
 
-1. Independent code/security review and approved merge/release sequence for draft PRs #1 and #2. Confirm protected branch rules and exact tested production commit.
-2. Approved isolated Supabase deployment; actual Auth/REST/refresh/recovery/invitation tests; hosted security/performance advisors. Test direct APIs as every role, not only UI controls.
-3. Verified first-admin/account bootstrap, no-email recovery procedure, access-request review and approved invitation delivery. No fake shared email identities.
-4. Broader mobile/Safari accessibility, concurrent-transfer and permission-revocation tests, operational monitoring, and hosted backup/PITR restore rehearsal.
-5. Confirm actual organization labels, department boundaries, allowed sensitive fields and the official app lineup. Prototype tiles are not approved modules.
-6. Explicit permission, duplicate review, backup and dry-run before importing real people or inviting a pilot cohort.
+## Before real people
 
-## Safety boundary
+Independent code/security review; physical iPhone/Safari and Android checks; hosted backup/PITR rehearsal; reviewed recovery procedure for members without personal email; approved organization labels; explicit authorization for any real-member pilot/import. Keep public production unchanged until a reviewed release. The official app lineup and `lvz.app` remain outside this milestone.
 
-No production migrations, real data, bulk invitations, domain purchases/configuration, or previous-application changes are authorized by a development preview. `lvz.app` is selected but remains paused. Original LV Zion applications are references only.
-
-Use only the two versioned migrations in `supabase/migrations`, in timestamp order. The superseded database/docs proposals must not be applied. Test bootstrap and fixture files are never production migrations.
+Neither PR #1 nor PR #2 should be merged automatically. No new GitHub Actions workflow was enabled; Vercel's build command runs the lightweight reproducible checks before building this review branch.
