@@ -102,9 +102,9 @@ test('Morning Prayer R4: verified owner, member grants, atomic dates and Vault j
    await owner();assert.equal(Number(await scalar('select count(*) from mpg_private.occurrences')),2);
    assert.equal(Number(await scalar('select count(*) from mpg_private.occurrences where schedule_verified')),0);
    const newVersion=await version();
-   await denied(()=>call(1,'mpg_bulk_schedule',[newVersion,randomUUID(),JSON.stringify([d1,d1])]),'22023');
+   await denied(()=>call(1,'mpg_bulk_schedule',[newVersion,randomUUID(),JSON.stringify([d1,d1])]),'23505');
   });
-  const occ=await scalar<string>('select id from mpg_private.occurrences order by starts_at limit 1');
+  await owner();const occ=await scalar<string>('select id from mpg_private.occurrences order by starts_at limit 1');
   await t.test('meeting setup blocked before schedule and window verified',async()=>{
    await denied(()=>write(1,'mpg_meeting_settings',{type:'configure_meeting',occurrenceId:occ,url:'https://us06web.zoom.us/j/12345678901?pwd=Fictional1'}),'22023');
   });
