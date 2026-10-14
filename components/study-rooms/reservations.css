@@ -19,3 +19,6 @@
 .sr-ops-grid{display:grid;gap:.65rem}
 .sr-ops-grid select,.sr-ops-grid input{max-width:100%;min-width:0}
 @media(max-width:440px){.sr-ops-row>label{flex-basis:45%}.sr-ops-row>label.sr-ops-name{flex-basis:100%}.sr-ops-row button{width:100%}}
+
+/* Closed booking CTA must never cover owner-manager touch targets. */
+.sr-sticky.sr-sticky-closed{position:static;bottom:auto;left:auto;transform:none;max-width:none;width:100%;background:transparent;padding:12px 0;border:0;backdrop-filter:none;z-index:auto}
