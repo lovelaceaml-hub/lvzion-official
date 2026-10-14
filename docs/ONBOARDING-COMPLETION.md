@@ -1,5 +1,7 @@
 # Member onboarding completion — October 13, 2026 Pacific
 
+> **Historical development snapshot — not current production status.** Statements below that `lvz.app` is paused, hosts only a prototype, has inactive sign-in or has no official modules describe the earlier phase when this page was written. The actual platform and owner-only Contacts app are live. See [current documentation](INDEX.md), [handoff](HANDOFF.md) and [Contacts scope](contacts/README.md). Keep this record for design decisions and test history; do not replay its superseded activation instructions.
+
 ## Implemented in this review branch
 
 The member foundation now includes access-request intake and verification review, invitation creation/delivery/retry/status/revocation, verified account activation linked to an existing person, username/email sign-in, verified password recovery, session revocation, separate technical account suspension, independent department administration, organizational entry rename/archive, and an audited one-time initial-administrator bootstrap tool. The phone interface exposes the associated management screens. All demonstration records are fictional and preview edits are in memory.

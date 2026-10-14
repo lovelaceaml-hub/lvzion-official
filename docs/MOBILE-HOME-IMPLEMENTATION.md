@@ -1,5 +1,7 @@
 # LV Zion Official — Phone-first Home and My Week
 
+> **Historical development snapshot — not current production status.** Statements below that `lvz.app` is paused, hosts only a prototype, has inactive sign-in or has no official modules describe the earlier phase when this page was written. The actual platform and owner-only Contacts app are live. See [current documentation](INDEX.md), [handoff](HANDOFF.md) and [Contacts scope](contacts/README.md). Keep this record for design decisions and test history; do not replay its superseded activation instructions.
+
 Development-only implementation. Matches the recorded mobile decisions in docs/PRODUCT-DECISIONS.md and does **not** approve any individual application module.
 
 ## Routes and behavior

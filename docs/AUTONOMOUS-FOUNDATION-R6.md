@@ -1,5 +1,7 @@
 # Autonomous foundation increment R6
 
+> **Historical development snapshot — not current production status.** Statements below that `lvz.app` is paused, hosts only a prototype, has inactive sign-in or has no official modules describe the earlier phase when this page was written. The actual platform and owner-only Contacts app are live. See [current documentation](INDEX.md), [handoff](HANDOFF.md) and [Contacts scope](contacts/README.md). Keep this record for design decisions and test history; do not replay its superseded activation instructions.
+
 **Completed as a tested development increment on October 14, 2026. Not a production release.**
 
 ## Verified review build

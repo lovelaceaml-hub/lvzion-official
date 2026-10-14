@@ -1,5 +1,7 @@
 # LV Zion Official — member-system implementation
 
+> **Historical development snapshot — not current production status.** Statements below that `lvz.app` is paused, hosts only a prototype, has inactive sign-in or has no official modules describe the earlier phase when this page was written. The actual platform and owner-only Contacts app are live. See [current documentation](INDEX.md), [handoff](HANDOFF.md) and [Contacts scope](contacts/README.md). Keep this record for design decisions and test history; do not replay its superseded activation instructions.
+
 Branch: `feature/member-system-secure-r1`; draft PR #2 stacked on the unmerged mobile prototype PR #1.
 
 Read [ONBOARDING-COMPLETION.md](ONBOARDING-COMPLETION.md) for current implemented features, executed tests, hosted state and the remaining activation blocker. This supersedes the earlier proposal-only status.

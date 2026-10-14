@@ -1,5 +1,7 @@
 # Contacts — first live owner-only release
 
+> **Historical R4 owner-only release record.** The deployment SHA and tests below belong to that specific initial release, not the expanded owner workspace. Use the [current Contacts overview](README.md), [R5 release](OWNER-EXPERIENCE-R5.md) and [latest verification](VERIFICATION.md) for current information.
+
 **Status: production deployed, private owner pilot.** Date: October 14, 2026.
 
 ## Canonical entry point
