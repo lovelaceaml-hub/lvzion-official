@@ -2,9 +2,13 @@
 import {useCallback,useEffect,useRef,useState} from 'react';
 import type {FormEvent} from 'react';
 import type {ContactsWorkspace,ContactDetail,ContactSummary,PreferredMethod} from '../../lib/contacts/server-contract';
+import {contactCounts,findLoadedContacts} from '../../lib/contacts/presentation';
+import type {ContactFilter} from '../../lib/contacts/presentation';
+import {parseModuleFeed} from '../../lib/app-runtime';
+import type {AuthorizedModule} from '../../lib/app-runtime';
 import './preview.css';import './workspace-r2.css';import './live-workspace.css';
 
-type View='mine'|'shared'|'followup';
+type View='mine'|'followup'|'overview';
 type Form='create'|'edit'|'note'|'schedule'|'reschedule'|null;
 type Packet={id:string;version:number;requestId:string;operation:string;data:Record<string,string|boolean>};
 class RequestFailure extends Error {status:number;constructor(status:number){super(status===401?'Please sign in again.':status===403?'This record or action is no longer available.':status===409?'This record changed. Reload it and review before saving.':'Contacts is unavailable. A submitted change may still have completed; reload before retrying.');this.status=status;}}
@@ -14,11 +18,13 @@ const labels={new:'New',active:'Active',paused:'Paused',closed:'Closed'};
 /** Authenticated data only. Not mounted by the fictional preview and has no simulated role controls. */
 export default function ContactsLiveWorkspace(){
  const [workspace,setWorkspace]=useState<ContactsWorkspace|null>(null),[detail,setDetail]=useState<ContactDetail|null>(null),[view,setView]=useState<View>('mine'),[form,setForm]=useState<Form>(null);
- const [busy,setBusy]=useState(false),[error,setError]=useState(''),[notice,setNotice]=useState(''),[apps,setApps]=useState(false),[filter,setFilter]=useState('open');
+ const [busy,setBusy]=useState(false),[error,setError]=useState(''),[notice,setNotice]=useState(''),[apps,setApps]=useState(false),[filter,setFilter]=useState<ContactFilter>('open'),[search,setSearch]=useState('');
+ const [authorizedApps,setAuthorizedApps]=useState<AuthorizedModule[]>([]),[appsError,setAppsError]=useState(''),[appsLoading,setAppsLoading]=useState(false);
+ const [duplicates,setDuplicates]=useState<{id:string;name:string}[]|null>(null),[duplicatesLoading,setDuplicatesLoading]=useState(false);
  const [name,setName]=useState(''),[phone,setPhone]=useState(''),[preferred,setPreferred]=useState<PreferredMethod>('unknown'),[note,setNote]=useState(''),[due,setDue]=useState(''),[taskId,setTaskId]=useState('');
  const [agenda,setAgenda]=useState<{id:string;title:string;href:string;deliveryEnabled:boolean}[]>([]);
  const requests=useRef(new Set<AbortController>()),epoch=useRef(0),pending=useRef<Packet|null>(null),submitting=useRef(false);
- const clearPrivate=useCallback(()=>{epoch.current++;for(const request of requests.current)request.abort();requests.current.clear();setWorkspace(null);setDetail(null);setAgenda([]);setForm(null);setName('');setPhone('');setNote('');setDue('');setPreferred('unknown');setTaskId('');pending.current=null;setBusy(false);},[]);
+ const clearPrivate=useCallback(()=>{epoch.current++;for(const request of requests.current)request.abort();requests.current.clear();setWorkspace(null);setDetail(null);setAgenda([]);setForm(null);setName('');setPhone('');setNote('');setDue('');setPreferred('unknown');setTaskId('');pending.current=null;setBusy(false);setApps(false);setAuthorizedApps([]);setDuplicates(null);},[]);
  const send=useCallback(async<T,>(endpoint:string,body:unknown):Promise<T>=>{
   const abort=new AbortController();requests.current.add(abort);
   try{const response=await fetch('/api/contacts/'+endpoint,{method:'POST',credentials:'same-origin',cache:'no-store',redirect:'error',referrerPolicy:'no-referrer',headers:{'Content-Type':'application/json'},body:JSON.stringify(body),signal:abort.signal});if(!response.ok)throw new RequestFailure(response.status);return await response.json() as T;}
@@ -27,7 +33,7 @@ export default function ContactsLiveWorkspace(){
  const failure=useCallback((e:unknown)=>{if(e instanceof DOMException&&e.name==='AbortError')return;if(e instanceof RequestFailure&&(e.status===401||e.status===403))clearPrivate();setError(e instanceof RequestFailure?e.message:'Contacts is unavailable. Reload before retrying a submitted change.');},[clearPrivate]);
  const load=useCallback(async()=>{const version=++epoch.current;setBusy(true);setError('');setDetail(null);setForm(null);pending.current=null;try{const value=await send<ContactsWorkspace>('workspace',{});if(epoch.current===version)setWorkspace(value);}catch(e){if(epoch.current===version){setWorkspace(null);failure(e);}}finally{if(epoch.current===version)setBusy(false);}},[send,failure]);
  useEffect(()=>{void load();const visibility=()=>{if(document.hidden)clearPrivate();else void load();};const online=()=>{if(!document.hidden)void load();};document.addEventListener('visibilitychange',visibility);window.addEventListener('online',online);return()=>{document.removeEventListener('visibilitychange',visibility);window.removeEventListener('online',online);epoch.current++;for(const request of requests.current)request.abort();requests.current.clear();};},[load,clearPrivate]);
- async function open(id:string){const version=++epoch.current;setBusy(true);setDetail(null);setError('');setNotice('');setForm(null);pending.current=null;try{const value=await send<ContactDetail>('detail',{id});if(epoch.current===version){setDetail(value);document.querySelector('.ct-main')?.scrollTo({top:0});}}catch(e){if(epoch.current===version)failure(e);}finally{if(epoch.current===version)setBusy(false);}}
+ async function open(id:string,preserveNotice=false){const version=++epoch.current;setBusy(true);setDetail(null);setDuplicates(null);setError('');if(!preserveNotice)setNotice('');setForm(null);pending.current=null;try{const value=await send<ContactDetail>('detail',{id});if(epoch.current===version){setDetail(value);document.querySelector('.ct-main')?.scrollTo({top:0});}}catch(e){if(epoch.current===version)failure(e);}finally{if(epoch.current===version)setBusy(false);}}
  async function more(){if(!workspace?.nextCursor||busy)return;const version=epoch.current;setBusy(true);try{const value=await send<ContactsWorkspace>('workspace',{after:workspace.nextCursor});if(epoch.current===version){if(value.memberId!==workspace.memberId){clearPrivate();throw new RequestFailure(401);}setWorkspace({...value,contacts:[...workspace.contacts,...value.contacts.filter(c=>!workspace.contacts.some(old=>old.id===c.id))]});}}catch(e){if(epoch.current===version)failure(e);}finally{if(epoch.current===version)setBusy(false);}}
  function edit(kind:Form,id=''){setError('');setNotice('');setForm(kind);setName(kind==='edit'?detail?.name??'':'');setPhone('');setPreferred(kind==='edit'?detail?.preferred??'unknown':'unknown');setNote('');setDue('');setTaskId(id);pending.current=null;}
  async function change(operation:string,data:Record<string,string|boolean>,record:ContactSummary|null=detail){
@@ -35,7 +41,7 @@ export default function ContactsLiveWorkspace(){
   const fingerprint=JSON.stringify({operation,data,id:record?.id??null,version:record?.version??0});
   if(!pending.current||JSON.stringify({operation:pending.current.operation,data:pending.current.data,id:record?.id??null,version:pending.current.version})!==fingerprint)pending.current={id:record?.id??crypto.randomUUID(),version:record?.version??0,requestId:crypto.randomUUID(),operation,data};
   const packet=pending.current;
-  try{const receipt=await send<{id:string;version:number}>('command',packet);if(epoch.current!==version)return;pending.current=null;setForm(null);setName('');setPhone('');setNote('');setDue('');setNotice('Saved.');if(operation==='archive'||operation==='reassign'){await load();}else await open(receipt.id);}
+  try{const receipt=await send<{id:string;version:number}>('command',packet);if(epoch.current!==version)return;pending.current=null;setForm(null);setName('');setPhone('');setNote('');setDue('');setNotice('Saved.');if(operation==='archive'||operation==='reassign'){await load();}else await open(receipt.id,true);}
   catch(e){if(epoch.current===version)failure(e);}finally{submitting.current=false;if(epoch.current===version)setBusy(false);}
  }
  async function submit(event:FormEvent<HTMLFormElement>){event.preventDefault();if(!workspace||busy)return;
@@ -46,7 +52,27 @@ export default function ContactsLiveWorkspace(){
  }
  async function showAgenda(){setView('followup');setDetail(null);setForm(null);setAgenda([]);setError('');const version=++epoch.current;setBusy(true);try{const value=await send<typeof agenda>('agenda',{});if(epoch.current===version)setAgenda(value);}catch(e){if(epoch.current===version)failure(e);}finally{if(epoch.current===version)setBusy(false);}}
  const owner=Boolean(detail&&workspace&&detail.ownerId===workspace.memberId);
- const cards=(workspace?.contacts??[]).filter(c=>(view==='mine'?c.ownerId===workspace?.memberId:c.ownerId!==workspace?.memberId)&&(filter==='archived'?c.archived:!c.archived&&(filter==='closed'?c.lifecycle==='closed':c.lifecycle!=='closed')));
+ const cards=workspace?findLoadedContacts(workspace.contacts,workspace.memberId,filter,search):[];
+ const counts=workspace?contactCounts(workspace.contacts,workspace.memberId):null;
+ async function toggleApps(){
+  if(apps){setApps(false);return;}
+  setApps(true);setAppsLoading(true);setAppsError('');
+  const controller=new AbortController();requests.current.add(controller);
+  try{
+   const r=await fetch('/api/members/experience',{credentials:'same-origin',cache:'no-store',signal:controller.signal,referrerPolicy:'no-referrer'});
+   if(!r.ok)throw new Error('Unavailable');
+   setAuthorizedApps(parseModuleFeed(await r.json()).modules);
+  }catch(e){if(!(e instanceof DOMException&&e.name==='AbortError'))setAppsError('App directory unavailable. Return Home to see your authorized apps.');}
+  finally{requests.current.delete(controller);setAppsLoading(false);}
+ }
+ async function showDuplicates(){
+  if(!detail)return;
+  setDuplicatesLoading(true);setError('');
+  const controllerVersion=epoch.current;
+  try{const list=await send<{id:string;name:string}[]>('duplicates',{id:detail.id});if(epoch.current===controllerVersion)setDuplicates(list);}
+  catch(e){if(epoch.current===controllerVersion)failure(e);}
+  finally{if(epoch.current===controllerVersion)setDuplicatesLoading(false);}
+ }
  return <div className="ct-stage"><div className="ct-shell"><header className="ct-top"><a className="ct-home-link" href="/members">‹ Home</a><span>LV ZION OFFICIAL</span><button className="ct-view" onClick={()=>void load()} disabled={busy}>Reload</button></header>
  <main className="ct-main"><div className="ct-intro"><p className="ct-eyebrow">PRIVATE CONTACT COORDINATION</p><h1>Contacts</h1><p className="ct-muted">One responsible person. A clear next step.</p></div>
  {error&&<div className="ct-error" role="alert"><p>{error}</p><button className="ct-secondary" onClick={()=>{pending.current=null;void load();}} disabled={busy}>Reload and review</button>{!workspace&&<a href="/sign-in">Sign in</a>}</div>}{notice&&<p className="ct-feedback" role="status">{notice}</p>}{busy&&<p className="ct-muted" role="status">Loading…</p>}
