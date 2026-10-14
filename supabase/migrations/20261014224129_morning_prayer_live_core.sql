@@ -276,7 +276,7 @@ begin
  reviewer=mpg_private.allowed(p_series,'review_requests',actor);manager=reviewer or mpg_private.allowed(p_series,'manage_schedule',actor);
  result=jsonb_build_object('version',(select version from mpg_private.series where id=p_series),'occurrences',coalesce((select jsonb_agg(jsonb_build_object(
  'id',o.id,'date',o.local_date,'originalDate',o.original_date,'startsAt',o.starts_at,'endsAt',o.ends_at,'timezone',o.timezone,'kind',o.kind,'revision',o.revision,'verified',o.schedule_verified,'isMine',o.host_id=actor,'hostConfirmed',o.host_confirmed,
- 'host',case when o.kind='app_day' then 'No live gathering' when o.kind='cancelled' then 'Cancelled' when o.host_id is null then 'Host needed' when o.host_id=actor then 'You'
+ 'readingKey',o.reading_key,'host',case when o.kind='app_day' then 'No live gathering' when o.kind='cancelled' then 'Cancelled' when o.host_id is null then 'Host needed' when o.host_id=actor then 'You'
  when manager or exists(select 1 from public.member_placements own join public.member_placements host on host.group_id=own.group_id where own.member_id=actor and host.member_id=o.host_id and own.ended_at is null and host.ended_at is null and own.started_at<=now() and host.started_at<=now())then m.display_name else 'Assigned host' end
  )order by o.starts_at)from mpg_private.occurrences o left join public.members m on m.id=o.host_id where o.series_id=p_series and o.local_date between p_from and p_to),'[]'::jsonb),
  'requests',coalesce((select jsonb_agg(jsonb_build_object('id',r.id,'occurrenceId',r.occurrence_id,'kind',r.kind,'status',r.status,'revision',r.revision,'isMine',r.member_id=actor,'requester',case when reviewer then m.display_name else 'You' end,'note',coalesce(n.note,''))order by r.created_at desc)
@@ -460,7 +460,7 @@ begin
    perform mpg_private.check_fields(p_action,array['type','occurrenceId','readingKey']);
    if coalesce(p_action->>'readingKey','')!~'^[a-z0-9-]{1,100}$'
       or not exists(select 1 from mpg_private.materials m where m.series_id=sid
-         and m.kind='reading' and m.material_key=p_action->>'readingKey')
+         and m.kind='reading' and m.material_key=p_action->>'readingKey' and exists(select 1 from mpg_private.material_publications p where p.material_id=m.id))
       then raise exception 'READING_NOT_FOUND' using errcode='22023';end if;
    update mpg_private.occurrences o set reading_key=p_action->>'readingKey',revision=o.revision+1
      where o.id=(p_action->>'occurrenceId')::uuid and o.series_id=sid;
