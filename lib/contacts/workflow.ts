@@ -25,9 +25,11 @@ export function applyWorkflow(s:State,actor:string,input:unknown,now:string):Sta
  if(!extraActions.has(q.action))return command(s,actor,q as Command,now);
  const x=q as ExtensionCommand,owner=owns(s,actor,c!);
  if(['edit','restore'].includes(x.action)&&!owner)throw new PolicyError('DENIED');
- if(x.action==='restore'?!c!.archived:c!.archived)throw new PolicyError('DENIED');
  const signature=JSON.stringify(x),prior=s.receipts.find(r=>r.actor===actor&&r.requestId===x.requestId);
+ // Reauthorize first, then recognize a completed retry before testing mutable state.
+ // A successful restore is no longer archived; its identical retry must not write again.
  if(prior){if(prior.signature!==signature)throw new PolicyError('CONFLICT');return s;}
+ if(x.action==='restore'?!c!.archived:c!.archived)throw new PolicyError('DENIED');
  if(c!.version!==x.expectedVersion)throw new PolicyError('CONFLICT');
  const next=structuredClone(s),record=next.contacts.find(v=>v.id===x.contactId)!;
  switch(x.action){
