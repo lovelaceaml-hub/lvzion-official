@@ -75,7 +75,7 @@ test('worship PostgreSQL boundary, invariants and projections',async t=>{
   });
   await t.test('compare-and-swap rejects stale saves and missing explicit clear values',async()=>{await as(102);await deny(()=>call({op:'assign',serviceId:first,dutyId:'usher_2',memberId:null,expectedVersion:0}),'40001');await deny(()=>call({op:'assign',serviceId:first,dutyId:'usher_2',expectedVersion:1}),'22023');});
   await t.test('self availability is versioned, flags duties and does not release assignments',async()=>{
-   await admin();const day=(await db.query<{day:string}>(`select to_char(begins_at at time zone 'America/Los_Angeles','YYYY-MM-DD') day from app_private.worship_services where id='${first}'`)).rows[0].day;
+   await admin();const day=(await db.query<{day:string}>(`select to_char(begins_at at time zone 'America/Los_Angeles','YYYY-MM-DD') AS "day" from app_private.worship_services where id='${first}'`)).rows[0].day;
    await as(109);await call({op:'availability',day,unavailable:true,expectedVersion:0});const s=(await home()).services.find(s=>s.id===first)!;assert.equal(s.assignments.filter(a=>a.isMine).length,2);assert.equal(s.assignments.filter(a=>a.isMine).every(a=>a.availabilityConflict),true);
    await deny(()=>call({op:'availability',day,unavailable:false,expectedVersion:0}),'40001');
    await as(102);await deny(()=>call({op:'assign',serviceId:first,dutyId:'usher_2',memberId:member(109),expectedVersion:1}),'23514');
