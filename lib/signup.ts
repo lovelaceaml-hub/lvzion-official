@@ -1,4 +1,5 @@
 import {normalizeIdentifier} from './contracts.ts';
+import {signupNames} from './signup-name.ts';
 import {resolveSettings} from './runtime-config.ts';
 export const signupMessage='If this address is eligible, a confirmation email will arrive. Confirm it to create your Unassigned profile. If you already have an account, sign in or recover your password.';
 export function signupSettings(env:Record<string,string|undefined>){
@@ -10,9 +11,10 @@ export function signupSettings(env:Record<string,string|undefined>){
 }
 export function parseSignup(input:Record<string,unknown>){
  const email=normalizeIdentifier(input.email);
- if(!email.includes('@')||typeof input.name!=='string'||input.name.trim().length<2||input.name.trim().length>120||typeof input.password!=='string'||input.password.length<6||input.password.length>128)throw new Error('Invalid signup.');
+ const names=signupNames(input);
+ if(!email.includes('@')||typeof input.password!=='string'||input.password.length<6||input.password.length>128)throw new Error('Invalid signup.');
  if(input.captchaToken!==undefined&&(typeof input.captchaToken!=='string'||input.captchaToken.length>4096))throw new Error('Invalid verification.');
- return {email,name:input.name.trim(),password:input.password,captchaToken:input.captchaToken as string|undefined};
+ return {...names,email,password:input.password,captchaToken:input.captchaToken as string|undefined};
 }
 export function allowedSignupEmail(email:string,env:Record<string,string|undefined>,local:boolean){
  if(env.LVZ_DATABASE_ENV==='production')return /^[^\s@<>]+@[^\s@<>]+\.[^\s@<>]+$/.test(email);
