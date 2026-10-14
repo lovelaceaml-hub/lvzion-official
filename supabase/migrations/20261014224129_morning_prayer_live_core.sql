@@ -330,7 +330,7 @@ begin
  into v_owner_count,v_owner_id
  from app_private.bootstrap_receipts b
  join app_private.account_links a on a.auth_user_id=b.auth_user_id
- join public.members m on m.id=a.member_id and m.status='active'
+ join public.members m on m.id=a.member_id and m.status in ('active','intake')
  where a.enabled and a.technical_enabled;
  -- Empty disposable/local databases must remain unactivated for regression tests.
  if v_owner_count=0 then return;end if;
