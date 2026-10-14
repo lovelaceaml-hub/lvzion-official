@@ -5,6 +5,8 @@ test('signup shows the activation boundary and accessible password manager field
  await expect(page.getByText('Account signup will open once email delivery is ready', {exact:false})).toBeVisible();
  await expect(page.getByLabel('Personal email',{exact:true})).toHaveAttribute('autocomplete','username');
  await expect(page.getByLabel('Password',{exact:true})).toHaveAttribute('autocomplete','new-password');
+ await expect(page.getByLabel('Password',{exact:true})).toHaveAttribute('minlength','6');
+ await expect(page.getByText('Use at least 6 characters.',{exact:false})).toBeVisible();
  await expect(page.getByRole('button',{name:'Create account',exact:true})).toBeDisabled();
  const response=await request.post('/api/auth/sign-up',{data:{email:'test@example.invalid',name:'Test Example',password:'SyntheticPassword!'}});expect(response.status()).toBe(503);
  expect(response.headers()['cache-control']).toContain('no-store');
