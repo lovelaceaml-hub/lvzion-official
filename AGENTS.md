@@ -4,7 +4,7 @@ Independent Next.js application. The original LV Zion applications and databases
 
 ## Read first
 
-Read README.md, docs/HANDOFF.md, docs/ACTUAL-APP-SETUP.md and docs/RELEASE-GATES.md. The active organization workflow and its Build log are docs/ORGANIZATION-WORKFLOW.md, with instructions in docs/USER-MANUAL.md. The completed actual setup and earlier Build log are docs/ACTUAL-APP-SETUP.md. The earlier hosted/repository migration mapping is docs/HOSTED-MIGRATION-LEDGER.json.
+Read README.md, docs/INDEX.md, docs/HANDOFF.md, docs/ACTUAL-APP-SETUP.md and docs/RELEASE-GATES.md. The active organization workflow and its Build log are docs/ORGANIZATION-WORKFLOW.md, with instructions in docs/USER-MANUAL.md. The completed actual setup and earlier Build log are docs/ACTUAL-APP-SETUP.md. The earlier hosted/repository migration mapping is docs/HOSTED-MIGRATION-LEDGER.json.
 
 ## Verification
 
@@ -22,3 +22,7 @@ Use Node 24. Run `npm ci --ignore-scripts`, `npm run build` and `npm run test:br
 - Do not purchase services or incur new costs without specific approval. Original applications, real member imports and unrelated draft module branches remain out of scope.
 
 Personal credentials for this project use Apple Passwords or macOS Keychain only. Do not access the user's work password store.
+
+## Contacts-specific live boundaries
+
+The actual Contacts module is an **owner-only** integration; see `docs/contacts/README.md`, `docs/contacts/OPERATIONS.md` and `docs/contacts/VERIFICATION.md`. Its applied migration is `20261014224708_contacts_private_owner_pilot_v1`. One verified bootstrap owner has an explicit module grant. Group, unit, leadership and technical roles do not inherit contact records. Do not enable general sharing, export, messaging, bulk import or DNC reversal based on historical proposals. Documentation-only commits do not require a production deployment. New features require fresh member/session authorization tests, SQL permission review and the deliberate production release path.

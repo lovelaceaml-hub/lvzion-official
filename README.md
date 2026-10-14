@@ -3,6 +3,8 @@
 ## Quick links
 
 - **Actual app:** [lvz.app](https://lvz.app)
+- **Documentation index:** [Current guides, module releases and runbooks](docs/INDEX.md)
+- **Contacts (authorized owner):** [Open module](https://lvz.app/modules/contacts) · [User guide](docs/contacts/USER-GUIDE.md) · [Current status](docs/contacts/README.md)
 - **Status:** Actual app and confirmed-email signup are live. The requested organization has 4 age categories, 8 groups and 16 empty units. Hierarchy management and member placement are live and verified.
 - **Member guide:** [Organization and member placement](docs/USER-MANUAL.md)
 - **Current workflow:** [Organization completion](docs/ORGANIZATION-WORKFLOW.md)

@@ -49,3 +49,13 @@ Organization, department and account administration are independent permissions.
 ## A change could not be saved
 
 Keep the form unchanged and retry after a connection failure. Organization changes reuse the same request receipt so an uncertain create does not create another entry. If the message says an entry still has members or children, finish the required moves first. Do not erase member history to remove an entry.
+
+## Contacts — private owner-only app
+
+Open [Contacts in LV Zion Official](https://lvz.app/modules/contacts) through normal verified sign-in and the authorized **Apps** menu. The initial module is available only to the specifically granted owner account, not to every signed-up member or church leader.
+
+Use **My Contacts** to add a name, optional phone number and preferred method. Existing records allow name/preference editing; **editing or clearing an already saved phone number is not yet supported**. Search and status filters cover names **already loaded** into your session, not every database record; select **Load next 100 authorized contacts** when offered. Overview counts include only loaded records.
+
+On a contact, write an **author-only interaction note**, schedule a next action, mark it complete, reschedule or cancel with history retained. **Follow-Ups** currently shows only generic authorized activity counts; open the contact to review the due date in Las Vegas time. **Possible duplicates** suggests accessible records without merging them. A do-not-contact request closes outreach and survives archive/restore. The app does not send calls, email, SMS, Signal or push alerts.
+
+For detailed instructions, privacy limitations and errors, read the [Contacts user guide](contacts/USER-GUIDE.md). Broad member sharing, contact exports, automatic member creation and address-book imports are not enabled.

@@ -3,14 +3,24 @@
 ## Quick links
 
 - [Actual app](https://lvz.app)
+- [Current documentation index](INDEX.md)
+- [Contacts status](contacts/README.md) · [User guide](contacts/USER-GUIDE.md) · [Operations](contacts/OPERATIONS.md)
 - [Private repository](https://github.com/lovelaceaml-hub/lvzion-official)
 - [Current setup and Build log](ACTUAL-APP-SETUP.md)
 - [Release controls](RELEASE-GATES.md)
 - [Hosted migration mapping](HOSTED-MIGRATION-LEDGER.json)
 
-## Current work
+## Current verified Contacts handoff — October 14, 2026
 
-change/actual-app-setup contains the main application release. Anthony explicitly requested the actual app at lvz.app and no additional previews. Automatic preview publication is disabled in Vercel; automatic Git deployments are disabled in vercel.json. The app's actual front door is sign-in. Fictional routes redirect on production. Other module draft branches and original LV Zion apps remain outside scope.
+The owner-only Contacts module is deployed on [lvz.app/modules/contacts](https://lvz.app/modules/contacts). Its tested production build is Vercel `dpl_35kWj2cAcYYNjHq2fhc5XpAcofrv`, application SHA `87c5a8573ca01f7216f2c78df1da5b827b7380d2`, **READY**. Documentation-only commits made later to `main` do not automatically redeploy code. The hosted Contacts migration is applied; the read-only check showed **zero contact rows, one explicit owner module grant, six private tables and five Contacts public RPCs**. Other members receive no inherited Contacts access.
+
+The latest owner interface provides loaded-name search, private status filters and counts, accessible-record duplicate suggestions, and the authorized shared Apps menu. Follow-Ups show generic activity counts, **not** a full dated worklist. Broad sharing, exports, messaging and detailed leader oversight remain disabled. Owner-authenticated browser create/save/reload, physical-device acceptance and a shared Contacts privacy policy remain open.
+
+**Current documentation:** [Contacts overview](contacts/README.md) · [How to use](contacts/USER-GUIDE.md) · [Runbook](contacts/OPERATIONS.md) · [Verification and pending gates](contacts/VERIFICATION.md).
+
+## Current work (historical foundation notes follow)
+
+The earlier `change/actual-app-setup` branch established the first live application release; `main` now includes subsequent production member and module workstreams. Anthony explicitly requested the actual app at lvz.app and no additional previews. Automatic preview publication is disabled in Vercel; automatic Git deployments are disabled in vercel.json. The app's actual front door is sign-in. Fictional routes redirect on production. Other module draft branches and original LV Zion apps remain outside scope.
 
 New confirmed accounts start Unassigned to category, group and unit and see only their own records. Authorized member administration verifies membership and places each person, retaining history/audit. The designated first owner confirms the privately configured email, receives independent organization/department/technical administration, and remains Unassigned. Organization entries are created only from Anthony's supplied instructions. No member roster is imported.
 
