@@ -11,7 +11,7 @@ type Req={id:string;occurrenceId:string;kind:'volunteer'|'change';status:string;
 type Material={key:string;kind:'pwp'|'reading';revision:number;body:{title:string;summary:string;items:string[];sourceLabel:string}};
 type Draft=Material&{id:string;sourceState:'checked'|'incomplete'};
 type Host={id:string;name:string};
-type Workspace={version:number;occurrences:Occ[];requests:Req[];materials?:Material[];capabilities:Capability[];drafts:Draft[];eligibleHosts:Host[];timezone:string;setupComplete:boolean;meetingAccessConfigured:boolean};
+type Workspace={version:number;occurrences:Occ[];requests:Req[];materials?:Material[];capabilities:Capability[];drafts:Draft[];eligibleHosts:Host[];timezone:string;setupComplete:boolean;meetingAccessConfigured:boolean;upcoming?:Occ[];joinWindowMinutes?:number|null;meetingStates?:{occurrenceId:string;ready:boolean;configured:boolean}[];};
 type Tab='home'|'schedule'|'me'|'manage';
 const zone='America/Los_Angeles';
 const pretty=(date:string)=>new Intl.DateTimeFormat('en-US',{weekday:'short',month:'short',day:'numeric',timeZone:'UTC'}).format(new Date(date+'T12:00:00Z'));
@@ -50,8 +50,9 @@ export default function MorningPrayerLive(){
   return()=>window.removeEventListener('focus',onFocus);},[loader]);
  async function post(action:Record<string,unknown>,setup=false){
   if(!data||busy)return;setBusy(true);setMessage('');
-  try{const result=await json<{version:number}>(setup?'/api/morning-prayer/setup':'/api/morning-prayer/command',
-   {method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({key:crypto.randomUUID(),expectedVersion:data.version,action})});
+  try{const one=action.type==='create_occurrence';const url=one?'/api/morning-prayer/batch':setup?'/api/morning-prayer/setup':'/api/morning-prayer/command';
+   const body=one?{key:crypto.randomUUID(),expectedVersion:data.version,occurrences:[Object.fromEntries(Object.entries(action).filter(([key])=>key!=='type'))]}:{key:crypto.randomUUID(),expectedVersion:data.version,action};
+   const result=await json<{version:number}>(url,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});
    await loader();setMessage('Saved in LV Zion Official. Version '+result.version+'.');
   }catch(e){setMessage(e instanceof Error?e.message:'Unable to save.');await loader();}
   finally{setBusy(false);}
