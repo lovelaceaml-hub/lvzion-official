@@ -93,7 +93,8 @@ test('Morning Prayer R4: verified owner, member grants, atomic dates and Vault j
    assert.deepEqual(await call(1,'mpg_bulk_schedule',[v,batchKey,JSON.stringify([d1,d2])]),result);
    await owner();assert.equal(Number(await scalar('select count(*) from mpg_private.occurrences')),2);
    assert.equal(Number(await scalar('select count(*) from mpg_private.occurrences where schedule_verified')),0);
-   await denied(()=>call(1,'mpg_bulk_schedule',[await version(),randomUUID(),JSON.stringify([d1,d1])]),'22023');
+   const newVersion=await version();
+   await denied(()=>call(1,'mpg_bulk_schedule',[newVersion,randomUUID(),JSON.stringify([d1,d1])]),'22023');
   });
   const occ=await scalar<string>('select id from mpg_private.occurrences order by starts_at limit 1');
   await t.test('meeting setup blocked before schedule and window verified',async()=>{
