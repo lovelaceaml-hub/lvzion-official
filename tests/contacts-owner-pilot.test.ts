@@ -46,7 +46,7 @@ test('Contacts private owner release: authorized reads, mutations, DNC and isola
     [role,'contacts_private.'+tab.tablename,'SELECT']);
    must(result.rows[0].allowed===false,'no direct client table grant');
   }
-  must((await db.query('select count(*) n from app_private.module_access_grants')).rows[0].n===1,'one explicit owner grant');
+  must((await db.query<{n:number}>('select count(*) n from app_private.module_access_grants')).rows[0].n===1,'one explicit owner grant');
   await actor();
   const workspace=await rpc<{member_id:string;can_create:boolean;contacts:unknown[]}>('select public.contacts_workspace_r3(null) result');
   must(workspace.member_id===owner&&workspace.can_create&&workspace.contacts.length===0,'verified unassigned bootstrap owner can use module');
@@ -96,7 +96,7 @@ test('Contacts private owner release: authorized reads, mutations, DNC and isola
   await actor();
   await deny(()=>db.exec('select public.contacts_workspace_r3(null)'));
   await db.exec('reset role');
-  must(Number((await db.query('select count(*) n from contacts_private.audit_events')).rows[0].n)===7,'audit exactly once per mutation');
+  must(Number((await db.query<{n:number}>('select count(*) n from contacts_private.audit_events')).rows[0].n)===7,'audit exactly once per mutation');
   console.log('Contacts private pilot: '+checks+' assertions pass in disposable PGlite.');
  }finally{await db.close();}
 });
