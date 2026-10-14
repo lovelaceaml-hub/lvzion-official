@@ -1,5 +1,7 @@
 # LV Zion Official self-service signup
 
+> **Historical development/preview record (not current production).** This file describes earlier proposed or disabled routes, previews, and verification performed at its original date. The real member platform now supports confirmed email signup, separate first/last-name storage and a limited set of approved owner-only modules. Read [CURRENT-STATUS.md](CURRENT-STATUS.md) and [INDEX.md](INDEX.md) before interpreting any old ‘unapplied’ or ‘not activated’ statement as the present live state.
+
 Anthony requested implementation in this continuing chat, with autonomous execution. This is a bounded development increment, with no production release or hosted activation.
 
 ## Section 1: Email signup and verified Unassigned member lifecycle
