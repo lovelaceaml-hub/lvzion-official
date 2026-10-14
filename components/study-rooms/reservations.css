@@ -8,3 +8,14 @@
 
 /* Prevent native date inputs from widening the mobile visual viewport. */
 .sr-two{grid-template-columns:repeat(2,minmax(0,1fr))}.sr-two>*{min-width:0}.sr-app input,.sr-app select{min-width:0;max-width:100%;font-size:16px}.sr-app summary{min-height:44px;scroll-margin-block:120px}@media(max-width:600px){.sr-card .sr-two{grid-template-columns:1fr}}
+
+/* Study Room R4 — operations settings remain usable on phone screens. */
+.sr-ops-row{display:flex;flex-wrap:wrap;gap:.65rem;align-items:flex-end;margin:.75rem 0;padding:.75rem;border:1px solid #d8e5df;border-radius:12px}
+.sr-ops-row>label{display:flex;flex-direction:column;flex:1 1 120px;min-width:0}
+.sr-ops-row>label.sr-ops-name{flex:2 1 160px}
+.sr-ops-row button{flex:0 0 auto}
+.sr-ops-actions{display:flex;flex-wrap:wrap;gap:.6rem;align-items:center;margin-top:.7rem}
+.sr-ops-note{font-size:.86rem;line-height:1.5;opacity:.9}
+.sr-ops-grid{display:grid;gap:.65rem}
+.sr-ops-grid select,.sr-ops-grid input{max-width:100%;min-width:0}
+@media(max-width:440px){.sr-ops-row>label{flex-basis:45%}.sr-ops-row>label.sr-ops-name{flex-basis:100%}.sr-ops-row button{width:100%}}
