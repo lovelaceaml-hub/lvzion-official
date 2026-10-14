@@ -1,0 +1,5 @@
+import test from 'node:test';import assert from 'node:assert/strict';
+import {signupEmailTemplate,signupEmailSettings,verifySignupEmailSettings} from '../lib/signup-email-template.ts';
+test('confirmation template goes directly to the explicit app confirmation with a fragment token',()=>{assert.ok(signupEmailTemplate.includes('/auth/continue#token_hash={{ .TokenHash }}&amp;type=signup'));assert.ok(!signupEmailTemplate.includes('ConfirmationURL'));});
+test('provider readback rejects the earlier ignored template setting and default browser-bound content',()=>{assert.throws(()=>verifySignupEmailSettings({mailer_templates_confirmation:signupEmailTemplate,mailer_autoconfirm:false}));assert.throws(()=>verifySignupEmailSettings({mailer_templates_confirmation_content:'<a href="{{ .ConfirmationURL }}">Confirm</a>',mailer_autoconfirm:false}));});
+test('only matching hosted content and required confirmation pass readback',()=>{assert.doesNotThrow(()=>verifySignupEmailSettings({...signupEmailSettings(),mailer_autoconfirm:false}));assert.throws(()=>verifySignupEmailSettings({...signupEmailSettings(),mailer_autoconfirm:true}));});

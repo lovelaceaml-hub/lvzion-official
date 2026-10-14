@@ -3,7 +3,7 @@
 ## Quick links
 
 - **Actual app:** [lvz.app](https://lvz.app)
-- **Status:** Actual app and confirmed-email signup are live. New members start Unassigned. First-owner email confirmation is pending.
+- **Status:** Actual app and confirmed-email signup are live. New members start Unassigned. Owner access is verified. Confirmation emails support a different browser from signup.
 - **Repository:** [Private GitHub repository](https://github.com/lovelaceaml-hub/lvzion-official)
 - **Handoff:** [Current status](docs/HANDOFF.md)
 - **Setup:** [Behavior, validation and rollback](docs/ACTUAL-APP-SETUP.md)
