@@ -1,5 +1,7 @@
 # R3 Git-backed and deployed verification — October 14, 2026
 
+> **Historical Study Room development evidence.** These earlier review/preview/activation assertions apply to the commits and test environments named below. The actual module is now integrated at `lvz.app/modules/study-rooms` with owner setup, but the **production booking gate remains closed** and the original Firebase scheduler remains authoritative. Read [STUDY-ROOM-R4-LIVE.md](STUDY-ROOM-R4-LIVE.md) and [CURRENT-STATUS.md](CURRENT-STATUS.md) before any operational change.
+
 This supplements `STUDY-ROOM-R3.md` with results inspected after the complete UI commit. It does not authorize production activation.
 
 ## Pinned implementation and preview
