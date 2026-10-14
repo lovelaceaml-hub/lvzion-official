@@ -102,3 +102,7 @@ This section is a blueprint; **no database migration or real member data has bee
 - Identity verification and password recovery for people with usernames but no deliverable personal email.
 - Which official application module launches first, its accountable owner, and its restricted data fields.
 - Whether `support@lvz.app` will receive via forwarding or a dedicated inbox; choice of transactional email provider.
+
+## Self-service signup update, 2026-10-14
+
+Anthony requires members to sign up themselves. They begin Unassigned to age category, group and unit. Email confirmation enables only their own pending profile. Independently authorized pastoral/member administration verifies church membership and sets the initial placement. The previous leaders-invite-only decision is superseded for new records. Verified invitations remain available for an existing record; names are never an automatic identity match. Email/password is the new-member login, with existing invitation usernames preserved. No real enrollment or production release is authorized by this development increment.

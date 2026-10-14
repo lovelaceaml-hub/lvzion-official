@@ -83,7 +83,8 @@ export function actionNotices(w:Workspace):ActionNotice[]{
  const requests=(w.permissions.organization?(w.onboarding?.requests??[]):[]).filter(x=>x.status==='pending').map(x=>({
   id:'request-'+x.id,title:'Account request needs verification',description:'Check the request and verify identity before approval.',destination:'manage' as const,source:'access-request' as const
  }));
- return [...transfers,...requests];
+ const enrollments=w.permissions.organization?(w.unassignedMembers??[]).map(x=>({id:'enrollment-'+x.id,title:'Unassigned member needs verification',description:'Verify membership and choose an initial placement.',destination:'manage' as const,source:'access-request' as const})):[];
+ return [...transfers,...requests,...enrollments];
 }
 export function canManage(w:Workspace):boolean{
  return w.permissions.organization||w.permissions.memberManagement||w.permissions.departmentAdmin||w.permissions.technical||

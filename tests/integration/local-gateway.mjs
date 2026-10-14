@@ -3,6 +3,7 @@ import http from 'node:http';import net from 'node:net';import {readFileSync,app
 const root=process.env.LVZ_INTEGRATION_DIR;if(!root?.startsWith('/tmp/lvz-')||process.env.VERCEL)throw new Error('Disposable local integration only.');
 const credentials=JSON.parse(readFileSync(root+'/credentials.json','utf8'));
 http.createServer((req,res)=>{
+ if(req.url==='/signup-template'){res.writeHead(200,{'Content-Type':'text/html'});res.end('<a href="http://127.0.0.1:3000/auth/continue#token_hash={{ .TokenHash }}&amp;type=signup">Confirm email</a>');return;}
  const auth=req.headers.apikey;
  if(![credentials.anon,credentials.service].includes(auth)){res.writeHead(401);res.end('{}');return;}
  const target=req.url.startsWith('/auth/v1/')?{port:9999,prefix:'/auth/v1'}:req.url.startsWith('/rest/v1/')?{port:3001,prefix:'/rest/v1'}:null;

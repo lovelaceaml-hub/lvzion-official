@@ -1,4 +1,5 @@
 'use client';
+import EnrollmentPanel from './enrollment-panel';
 import {useRef,useState} from 'react';
 import type {Action,Command,Workspace} from '../lib/contracts';
 export type InvitationInput={memberId:string;email:string;reason:string;requestId:string};
@@ -18,6 +19,7 @@ export default function OnboardingPanel({data:w,execute,invite,demo}:Props){
   setBusy(true);setMessage('');try{await invite({...p,requestId:retry.current.id});setMessage(demo?'Invitation delivery simulated. No email was sent.':'Invitation accepted by the mail server. Delivery status is recorded below.');retry.current=null;}catch(e){setMessage(e instanceof Error?e.message:'Delivery failed. Retry the unchanged form to reuse the same request.');}finally{setBusy(false);}
  }
  return <>
+ <EnrollmentPanel data={w} execute={execute} demo={demo}/>
  {message&&<p role="status" className="member-message">{message}</p>}
  {w.permissions.organization&&<section className="member-card"><h2>Account access requests</h2><p>Verify the person before matching an existing record. Approval alone never signs anyone in.</p>
  {data.requests.filter(r=>r.status==='pending').map(r=><form className="sub-card" key={r.id} onSubmit={e=>void submit(e,'access.review',{id:r.id})}><strong>{r.name}</strong><p>{r.email}</p>

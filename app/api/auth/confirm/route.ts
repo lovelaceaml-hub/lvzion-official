@@ -1,3 +1,4 @@
+import {completeEnrollment} from '../../../../lib/server/enrollment';
 import {cookies} from 'next/headers';import {body,reply} from '../../../../lib/server/http';import {userClient} from '../../../../lib/server/supabase';import {settings} from '../../../../lib/server/config';import {flowProof} from '../../../../lib/server/flow';
 export async function POST(request:Request){try{
  const input=await body(request);if(typeof input.token_hash!=='string'||!/^[a-zA-Z0-9_-]{20,512}$/.test(input.token_hash)||!['invite','magiclink','signup','email','recovery'].includes(String(input.type)))throw new Error('Invalid confirmation.');
@@ -10,5 +11,6 @@ export async function POST(request:Request){try{
   return reply({ok:true,next:'/reset-password'});
  }
  if(typeof input.ticket==='string'&&/^[0-9a-f]{64}$/.test(input.ticket)){jar.set('lvz-invitation',input.ticket,opts);return reply({ok:true,next:'/activate'});}
+ if(input.type==='signup'){try{await completeEnrollment(client);}catch{await client.auth.signOut({scope:'local'});return reply({error:'Profile creation is unavailable. Use your current invitation or contact your authorized leader.'},409);}}
  return reply({ok:true,next:'/members'});
  }catch{return reply({error:'Confirmation could not be completed. Use a current invitation or recovery email.'},400);}}

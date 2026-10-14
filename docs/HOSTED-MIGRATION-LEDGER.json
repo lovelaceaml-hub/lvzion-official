@@ -40,6 +40,9 @@
     "hosted": "Remove whitespace from each stored statement; these stored statements already omit comments and outer transaction wrappers.",
     "purpose": "Comparison of known migration definitions, not cryptographic attestation or a full semantic/security review."
   },
-  "unapplied_repository_migrations": ["20261014074214_module_runtime_foundation.sql"],
+  "unapplied_repository_migrations": [
+    "20261014074214_module_runtime_foundation.sql",
+    "20261014155148_self_service_unassigned_enrollment.sql"
+  ],
   "warning": "The three definition fingerprints match, but hosted IDs still differ from repository filenames. Reconcile the deployment ledger deliberately before CLI db push. Do not replay duplicate CREATE migrations or rewrite hosted history blindly."
 }

@@ -1,5 +1,13 @@
 # LV Zion Official
 
+## Quick links
+
+- **Website:** [Production design prototype](https://lvzion-official.vercel.app)
+- **Status:** Development member system and signup candidate, not released for members
+- **Repo:** [Private GitHub repository](https://github.com/lovelaceaml-hub/lvzion-official)
+- **Docs:** [Handoff](docs/HANDOFF.md), [signup plan](docs/PLAN-SELF-SERVICE-SIGNUP.md), [all documents](docs/)
+
+
 A new, independent phone-first application. Previous LV Zion apps and databases are references only and remain untouched.
 
 ## Development status
@@ -8,7 +16,14 @@ A new, independent phone-first application. Previous LV Zion apps and databases 
 
 The permanent domain **https://lvz.app is registered and connected** to the new Vercel project. `www.lvz.app` redirects to the apex. It still serves the earlier public design prototype, not the development branch. Email hosting and operational `@lvz.app` senders are not configured.
 
+## Self-service signup development
+
+The signup candidate is stacked on the member foundation in `feature/self-service-signup-r1`. New members confirm their personal email, then see only their own profile with age category, group and unit Unassigned. An authorized pastoral/member administrator verifies membership and chooses the initial placement. Existing-record invitations remain separate. All hosted activation switches and the database enrollment switch default off.
+
 ## Review routes
+
+- `/sign-up`: email signup, disabled until the isolated Auth configuration and database switch are verified.
+- `/enrollment-preview`: fictional Unassigned member and leader assignment/decline journey.
 
 - `/`: preserved original home concept.
 - `/experience-preview`: fictional phone-first My Week / Manage / Apps / Notifications.

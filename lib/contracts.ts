@@ -3,7 +3,9 @@ export type Entry = { id: string; name: string; parentId?: string; canManage?: b
 export type Onboarding = { requests: {id:string;name:string;email:string;status:string;memberId?:string;createdAt:string;reason?:string}[]; invitations:{id:string;memberId:string;email:string;delivery:string;expiresAt:string;consumedAt?:string;revokedAt?:string}[]; accounts:{memberId:string;username:string;enabled:boolean}[];linkedMemberIds:string[] };
 export type Workspace = {
  onboarding?:Onboarding;
- self: Person & { groupId: string; unitId: string };
+ self: Omit<Person,'groupId'|'unitId'> & { groupId: string | null; unitId: string | null };
+ enrollment?: {state:'unassigned'|'assigned';placementHistory:{id:string;startedAt:string;endedAt:string|null;reason:string|null}[]};
+ unassignedMembers?: {id:string;name:string;email:string|null;createdAt:string}[];
  permissions: { organization: boolean; memberManagement: boolean; departmentAdmin: boolean; technical: boolean };
  contacts: { email?: string | null; phone?: string | null };
  directory: Person[]; managedMembers: Person[]; categories: Entry[]; groups: Entry[]; units: Entry[];
@@ -12,7 +14,7 @@ export type Workspace = {
  transfers: { id: string; memberId: string; name: string; status: string; unitId: string; requestedBy: string; canDecide: boolean }[];
  audit: { id: number; at: string; action: string; memberId: string; reason: string }[];
 };
-export const actions = ['member.create','member.rename','member.status','member.move','transfer.request','transfer.decide','department.membership','role.appoint','role.end','organization.create','profile.contacts','invitation.create','access.review','invitation.revoke','account.access','organization.rename','organization.archive'] as const;
+export const actions = ['member.create','member.rename','member.status','member.move','transfer.request','transfer.decide','department.membership','role.appoint','role.end','organization.create','profile.contacts','invitation.create','access.review','invitation.revoke','account.access','organization.rename','organization.archive','enrollment.assign','enrollment.reject'] as const;
 export type Action = typeof actions[number];
 export type Command = { action: Action; payload: Record<string,string>; requestId: string };
 const uuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;

@@ -1,0 +1,18 @@
+{
+  "date": "2026-10-14",
+  "branch": "feature/self-service-signup-r1",
+  "baseline": "5a0d435dc7dbf18401d0a77af89543bf9d9d9c4b",
+  "checks": {"strict_types_and_build": "passed", "application_tests": 120, "postgresql_assertions": 156, "phone_browser_tests": 31, "real_local_signup_assertions": 37, "real_local_invitation_recovery_assertions": 42},
+  "review": {"controller_diff_review": "completed", "external_review": "waived by Anthony, not run"},
+  "hosted_inspection": {"members": 0, "auth_users": 0, "linked_accounts": 0, "application_tables": 17, "unprotected_tables": 0, "applied_migrations": 3},
+  "production_deployment": "dpl_6xjt1qTmgXggJvQUNoeJAhvnwLCk",
+  "production_source_sha": "unavailable in manual deployment metadata",
+  "existing_member_preview_sha": "5a0d435dc7dbf18401d0a77af89543bf9d9d9c4b",
+  "hosted_migration_applied": false,
+  "production_changed": false,
+  "hosted_accounts_created": false,
+  "external_email_sent": false,
+  "hosted_auth_provider_settings": "unverified, no changes",
+  "physical_device_tests": "not run",
+  "publication": "awaiting explicit preview approval"
+}
