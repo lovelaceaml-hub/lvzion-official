@@ -1,5 +1,7 @@
 # LV Zion Official — app integration framework (development review)
 
+> **Historical development/preview record (not current production).** This file describes earlier proposed or disabled routes, previews, and verification performed at its original date. The real member platform now supports confirmed email signup, separate first/last-name storage and a limited set of approved owner-only modules. Read [CURRENT-STATUS.md](CURRENT-STATUS.md) and [INDEX.md](INDEX.md) before interpreting any old ‘unapplied’ or ‘not activated’ statement as the present live state.
+
 This is an infrastructure milestone, **not selection, approval, launch, or publication of an official LV Zion application**. Previous LV Zion apps remain separate and read-only. No real member data, official activity feed, push campaign, app permission, mail delivery, or production rollout is implied.
 
 ## Review branch architecture
