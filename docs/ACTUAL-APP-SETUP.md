@@ -1,5 +1,7 @@
 # Actual LV Zion Official setup
 
+> **Production update, October 14, 2026:** the **real app is live** at [lvz.app](https://lvz.app). This file preserves the detailed setup chronology and verified historical checks. For the currently verified Git SHA, production deployment, 16 hosted migrations, module statuses, member counts and remaining release gates see [CURRENT-STATUS.md](CURRENT-STATUS.md) and [RELEASE-GATES.md](RELEASE-GATES.md). The earlier deployment IDs below document what was verified **at that stage**; they are not the latest production pointer.
+
 ## Authority and release
 
 Anthony requested the actual app at https://lvz.app on 2026-10-14, and prohibited additional previews unless explicitly requested. This supersedes the earlier development-only boundary. Release uses full replacement after automated validation. Automatic Vercel previews are disabled at project level and Git deployments are disabled in vercel.json. Independent external security review was waived by Anthony. Original apps, real-member imports and unrelated module draft branches remain outside scope.
@@ -60,3 +62,13 @@ Retain the old production deployment dpl_6xjt1qTmgXggJvQUNoeJAhvnwLCk for websit
 - Supabase migration `member_signup_names` was applied under hosted version `20261014225857` (repository file `20261014223500_member_signup_names.sql`). Verification confirmed RLS and role privileges, zero newly inserted name rows on release, and unchanged pre-existing member/enrollment counts. The prior owner record is intentionally not backfilled.
 - Vercel's complete production `npm run build` succeeded (strict types, Node tests, disposable PostgreSQL checks, Next compile). The live sign-up, sign-in, confirmation and continuation pages returned HTTP 200 from the new deployment; resend GET returned HTTP 405; no relevant runtime error cluster was reported. The separate phone Playwright suite and a real hosted end-to-end identity/signup/delivery run were not claimed executed in this release; no live test member or email was created.
 - No old migration was replayed, no other module branch was overwritten, no real roster was imported. Keep the previous READY deployment available for emergency rollback. The additive schema can remain in place if application code is rolled back; do not drop member/audit records.
+
+## Cross-module operational reconciliation — October 14, 2026
+
+The running production state has advanced beyond the original six member-system migrations. **Sixteen** migration names are now applied, including Contacts private owner pilot, all four Study Room baseline/owner migrations, Study Room policy operations, Continuous Display R1/R2, Work Mission Morning Prayer and structured signup names. All sixteen repository migration source files exist on current `main`; the validated hosted-version mapping is [HOSTED-MIGRATION-LEDGER.json](HOSTED-MIGRATION-LEDGER.json).
+
+Read-only audit: 4 categories / 8 groups / 16 units; one verified original member/owner, one pending enrollment, **zero active placements**; four approved, individually owner-granted modules. Study Rooms bookings gate `false` with zero new bookings. Contacts pilot has zero contact records. Display has one screen with zero publications and paired devices. Morning Prayer has one series but zero occurrences. These values are point-in-time counts rather than scheduled monitoring.
+
+The production release most recently verified in this audit was READY deployment `dpl_FFquRhvQkTW1xv1gRVz1SuKBg66S` from source `de5dcdede5fc740873fddfa36467d9d47f318fd6`. The current application integrates Contacts R5, Study Room R4 setup, Continuous Display R2 operations, and Morning Prayer owner setup; **Worship Duty is not released**. A module's approved row is not authorization for open booking, all-member access, content publication, an external feed or a real gathering. These require separate owner acceptance described in [RELEASE-GATES.md](RELEASE-GATES.md).
+
+Historical isolated test counts above remain true for the releases they describe. This **documentation-only** reconciliation performed no migration, runtime deployment, test identity signup, SMTP delivery, or physical-device test. Retain prior signed-off deployment IDs as rollback evidence and preserve all member/audit records.
