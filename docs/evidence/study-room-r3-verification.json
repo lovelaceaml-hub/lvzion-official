@@ -1,0 +1,52 @@
+{
+  "recordedDate": "2026-10-14",
+  "runtimeCommit": "8aa90576801aa8c500fefec90ba9738a75270457",
+  "integrationCommit": "734cd339f5e58249f0ac43ae79b8200f6ae28559",
+  "backendCommit": "1751e4be1f4e682d7f8c0803df41550d9170d055",
+  "pullRequest": 8,
+  "branch": "feature/study-rooms-reconciliation-r3",
+  "deployment": {
+    "id": "dpl_Hf318Sss8K86cL99MXMDbSGrrF7K",
+    "state": "READY",
+    "target": "preview",
+    "url": "https://lvzion-official-4crid1urd-lvzion.vercel.app/study-rooms-preview",
+    "gitShaVerified": true
+  },
+  "gitBackedBuild": {
+    "applicationTests": {"passed": 156, "failed": 0, "skipped": 0},
+    "foundationPostgreSQLAssertions": 111,
+    "typescript": "passed",
+    "nextProductionBuild": "passed"
+  },
+  "reservationSQLAssertions": {"R1": 41, "R2": 42, "R3": 57},
+  "nativePostgreSQL": {
+    "scope": "disposable loopback database, fictional identities only",
+    "recordedAssertions": {"member_foundation": 53, "onboarding_permissions": 14, "module_runtime": 36, "study_rooms": 41, "study_room_changes": 42, "study_room_bundles": 57},
+    "recordedTotal": 243,
+    "contentionPassed": ["shared-accessory booking", "concurrent bundle reschedule rejects stale revision", "accessory closure versus bundle creation"],
+    "backupRestore": "passed local pg_dump and pg_restore with count/RLS/anonymous-execute-denial comparisons"
+  },
+  "deployedBrowser": {
+    "engine": "Chromium",
+    "device": "phone emulation, additional widths 320 through 1280",
+    "passed": 27,
+    "failed": 0,
+    "skipped": 0,
+    "flaky": 0,
+    "studyRoomChecks": 22,
+    "genericModuleChecks": 5,
+    "syntheticTransportChecks": 3,
+    "physicalDeviceTested": false,
+    "genuineAuthenticatedHostedBookingTested": false
+  },
+  "verifiedRuntimeGitBlobs": {
+    "supabase/migrations/20261014115815_study_room_bundles.sql": "77ae42b4f9330c8f41225f7d2aeeff1c9d4470fe",
+    "supabase/tests/study_room_bundles.sql": "5e9c9cab27e37ac2f8224495daff504a5912be1d"
+  },
+  "hostedMigrationsAfterWork": ["20261014051733 member_system_foundation", "20261014051804 member_command_hardening", "20261014051924 member_onboarding"],
+  "productionActivated": false,
+  "hostedReservationMigrationsApplied": false,
+  "originalFirebaseModified": false,
+  "countingNote": "Node SQL wrapper tests, underlying SQL assertions and identical SQL assertions in multiple engines overlap and must not be summed into one unique-test total.",
+  "remaining": ["weekly service restriction management", "special-service overrides subject to approved policy", "additional inventory creation if needed", "hosted migration ledger reconciliation", "authorized isolated genuine Auth/PostgREST and hosted restore", "physical iPhone/Safari", "real multi-device authenticated refresh", "full accessibility/security review", "approved live scheduling rules/managers/pilot participants", "explicit production release authorization"]
+}

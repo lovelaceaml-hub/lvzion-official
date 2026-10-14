@@ -23,5 +23,7 @@ test('Reservation-manager actions are absent unless preview scope is explicitly 
 });
 test('Unknown reservation identity cannot read or write protected endpoints',async({request})=>{
  const response=await request.get('/api/study-rooms?day=2026-10-14');expect(response.status()).toBe(401);expect(response.headers()['cache-control']).toContain('no-store');expect(await response.text()).not.toContain('Example contact');
- const write=await request.post('/api/study-rooms/command',{data:{action:'reserve',memberId:'fake'}});expect(write.status()).toBe(400);
+ const write=await request.post('/api/study-rooms/command',{data:{action:'reserve',memberId:'fake'}});expect(write.status()).toBe(401); // Authentication now precedes body validation; no anonymous command processing.
+
 });
+
