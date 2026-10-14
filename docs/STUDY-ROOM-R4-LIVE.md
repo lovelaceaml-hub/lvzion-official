@@ -1,5 +1,7 @@
 # Study Room Reservation — production R4 management controls
 
+> **Current read-only production check, October 14, 2026:** the R4 management module remains installed with 12 resources and zero new-system bookings; the separate `app_private.study_booking_activation.bookings_open` flag is **false**. The original Firebase system remains booking authority. No real cutover/legacy export is authorized. [Current status](CURRENT-STATUS.md) · [Release gates](RELEASE-GATES.md). This document's earlier test counts remain tied to their original development source.
+
 ## Release scope
 Live module: **https://lvz.app/modules/study-rooms**. Source: `lovelaceaml-hub/lvzion-official`, current main; feature work developed in `feature/study-rooms-operations-r4`. This document tracks actual repository and hosted changes. It is not a claim of booking cutover.
 
