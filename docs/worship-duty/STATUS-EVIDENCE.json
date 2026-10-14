@@ -1,0 +1,45 @@
+{
+  "snapshot_date": "2026-10-14",
+  "scope": "lvzion_official_worship_duty_integrated_module",
+  "status": "not_launched",
+  "production_domain": "https://lvz.app",
+  "module_route": "/modules/worship-duty",
+  "source_repository": "lovelaceaml-hub/lvzion-official",
+  "workstream_branch": "feature/worship-duty-live",
+  "workstream_pr": 25,
+  "pr_draft": true,
+  "production_deployment_observed": "dpl_FFquRhvQkTW1xv1gRVz1SuKBg66S",
+  "production_commit_observed": "de5dcdede5fc740873fddfa36467d9d47f318fd6",
+  "supabase_project": "otecqlkqirncotytbfns",
+  "hosted_inspection": {
+    "worship_module_count": 0,
+    "worship_tables": 0,
+    "worship_public_rpcs": 0,
+    "worship_access_grants": 0,
+    "hosted_migrations_total_at_inspection": 16
+  },
+  "pending_migrations": [
+    "20261014103007_worship_duty_review.sql",
+    "20261014112521_worship_duty_authenticated_queries.sql",
+    "20261014224325_worship_duty_live_activation.sql",
+    "20261014224327_worship_duty_live_setup.sql"
+  ],
+  "last_migration_is_draft": true,
+  "owner_setup_ui_implemented": false,
+  "owner_setup_api_implemented": false,
+  "production_worship_flag_enabled": false,
+  "verified_real_worship_auth_db_roundtrip": false,
+  "current_branch_tests_run_as_part_of_documentation_update": false,
+  "known_historical_test_results": "PR #5 old R1/R2/R3 development; not a production verification result",
+  "historical_r3_month_planner_persistent": false,
+  "legacy_original_app_changed": false,
+  "other_production_modules_changed_by_this_workstream": false,
+  "action_taken": "documentation-only branch update; no migration, external messaging, production merge or deployment",
+  "references": [
+    "docs/worship-duty/WORK-HANDOFF.md",
+    "docs/worship-duty/IMPLEMENTATION-STATUS.md",
+    "docs/worship-duty/MIGRATION-STATUS.md",
+    "docs/worship-duty/PRODUCTION-RELEASE-CHECKLIST.md",
+    "docs/worship-duty/VERIFICATION-PLAN.md"
+  ]
+}
