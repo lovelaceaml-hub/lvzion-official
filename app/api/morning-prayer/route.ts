@@ -1,0 +1,16 @@
+import {requireMember} from '../../../lib/server/supabase';
+import {NextResponse} from 'next/server';
+export const dynamic='force-dynamic';
+const headers={'Cache-Control':'private, no-store, max-age=0','Referrer-Policy':'no-referrer','X-Content-Type-Options':'nosniff'};
+const dateOk=(s:string)=>/^\d{4}-\d{2}-\d{2}$/.test(s)&&!Number.isNaN(Date.parse(s))&&new Date(s+'T12:00:00Z').toISOString().slice(0,10)===s;
+export async function GET(request:Request){
+ const p=new URL(request.url).searchParams;
+ const from=p.get('from')??'',to=p.get('to')??'';
+ if(!dateOk(from)||!dateOk(to)||Date.parse(to)<Date.parse(from)||Date.parse(to)-Date.parse(from)>62*86400000)
+  return NextResponse.json({error:'Select a valid range of up to 62 days.'},{status:400,headers});
+ let client;
+ try{client=await requireMember();}catch{return NextResponse.json({error:'Sign in to LV Zion Official to continue.'},{status:401,headers});}
+ const {data,error}=await client.rpc('mpg_live_home',{p_from:from,p_to:to});
+ if(error)return NextResponse.json({error:error.code==='42501'?'Morning Prayer has not been assigned to your account.':'Morning Prayer cannot load right now.'},{status:error.code==='42501'?403:503,headers});
+ return NextResponse.json(data,{headers});
+}
