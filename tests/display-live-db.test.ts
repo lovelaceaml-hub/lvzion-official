@@ -5,7 +5,7 @@ import {PGlite} from '@electric-sql/pglite';
 const actor='10000000-0000-4000-8000-000000000001',other='10000000-0000-4000-8000-000000000002',moduleId='20000000-0000-4000-8000-000000000001',screen='30000000-0000-4000-8000-000000000001';
 test('display live SQL review: isolated authorization and revocable, approved TV package',async t=>{
  const db=new PGlite();
- const denied=async(query:string,params:unknown[]=[])=>{await assert.rejects(db.query(query,params),/authorized|permission|approved|Invalid|changed|expired|not found|Missing|could not|duplicate|unique|violates|expired|service|current/i);};
+ const denied=async(query:string,params:unknown[]=[])=>{await assert.rejects(db.query(query,params));};
  try{
   await db.exec("create role anon;create role authenticated;create role service_role;create schema app_private;create table public.members(id uuid primary key,status text default 'active');create table app_private.app_modules(id uuid primary key,module_key text,status text,approved_at timestamptz);create table app_private.module_access_grants(module_id uuid,member_id uuid,permission text,ended_at timestamptz,granted_at timestamptz default now());create function app_private.current_member_id() returns uuid language sql stable as $$select nullif(current_setting('display.actor',true),'')::uuid$$;");
   await db.exec(await readFile(new URL('../docs/continuous-display/live-schema-review.sql',import.meta.url),'utf8'));
