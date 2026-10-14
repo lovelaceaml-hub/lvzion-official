@@ -324,30 +324,34 @@ and not exists(select 1 from mpg_private.series s where s.module_id=app_private.
 
 -- Reuse exactly the already-confirmed owner bootstrap; no new user or Auth account.
 do $owner$
-declare owner_id uuid; owner_count integer; module_id uuid; series_id uuid;
+declare v_owner_id uuid; v_owner_count integer; v_module_id uuid; v_series_id uuid;
 begin
  select count(*),(array_agg(a.member_id order by a.member_id))[1]
- into owner_count,owner_id
+ into v_owner_count,v_owner_id
  from app_private.bootstrap_receipts b
  join app_private.account_links a on a.auth_user_id=b.auth_user_id
  join public.members m on m.id=a.member_id and m.status='active'
  where a.enabled and a.technical_enabled;
- if owner_count<>1 then raise exception 'One verified active owner required for Morning Prayer installation';end if;
- select id into module_id from app_private.app_modules where module_key='work-mission-prayer';
- -- Avoid parameter/column ambiguity: select the row using its primary module identity.
- select id into series_id from mpg_private.series s where s.module_id=module_id limit 1;
- if series_id is null or module_id is null then raise exception 'Morning Prayer module registration failed';end if;
- update app_private.app_modules set status='approved',approved_at=clock_timestamp(),approved_by=owner_id,updated_at=clock_timestamp()
- where id=module_id and status='draft';
+ -- Empty disposable/local databases must remain unactivated for regression tests.
+ if v_owner_count=0 then return;end if;
+ if v_owner_count<>1 then raise exception 'Exactly one verified owner required for Morning Prayer';end if;
+ select id into v_module_id from app_private.app_modules where module_key='work-mission-prayer';
+ select s.id into v_series_id from mpg_private.series s where s.module_id=v_module_id limit 1;
+ if v_series_id is null or v_module_id is null then raise exception 'Morning Prayer module registration failed';end if;
+ update app_private.app_modules set status='approved',approved_at=clock_timestamp(),
+   approved_by=v_owner_id,updated_at=clock_timestamp()
+ where id=v_module_id and status='draft';
  insert into app_private.module_access_grants(member_id,module_id,permission,reason,granted_by)
- select owner_id,module_id,'manager','Named owner-only Morning Prayer setup; no automatic member access',owner_id
- where not exists(select 1 from app_private.module_access_grants
-  where member_id=owner_id and module_id=module_id and ended_at is null);
+ select v_owner_id,v_module_id,'manager','Named owner-only Morning Prayer setup; no automatic member access',v_owner_id
+ where not exists(select 1 from app_private.module_access_grants g
+  where g.member_id=v_owner_id and g.module_id=v_module_id and g.ended_at is null);
  insert into mpg_private.grants(series_id,member_id,capability,reason,granted_by)
- select series_id,owner_id,g.capability,'Named owner-only Morning Prayer management capability',owner_id
- from (values('view_schedule'),('join_gathering'),('review_requests'),('manage_schedule'),('view_materials'),('edit_materials'),('publish_materials'))g(capability)
- where not exists(select 1 from mpg_private.grants x where x.series_id=series_id and x.member_id=owner_id and x.capability=g.capability and x.ended_at is null);
- update mpg_private.series set enabled=true where id=series_id;
+ select v_series_id,v_owner_id,c.capability,'Named owner-only Morning Prayer management capability',v_owner_id
+ from (values('view_schedule'),('join_gathering'),('review_requests'),('manage_schedule'),
+ ('view_materials'),('edit_materials'),('publish_materials')) c(capability)
+ where not exists(select 1 from mpg_private.grants g
+  where g.series_id=v_series_id and g.member_id=v_owner_id and g.capability=c.capability and g.ended_at is null);
+ update mpg_private.series set enabled=true where id=v_series_id;
 end $owner$;
 
 -- Setup and member projections may not return private source references or credentials.
