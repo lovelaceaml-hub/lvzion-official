@@ -112,6 +112,15 @@
       "applied_via": "Supabase MCP apply_migration",
       "status": "applied",
       "verification": "Additive RLS-enabled private signup-names table; three-argument enrollment RPC granted only to authenticated; anonymous/direct client table access denied; existing member and enrollment counts unchanged. Production Next build and disposable SQL checks completed."
+    },
+    {
+      "name": "study_room_policy_operations",
+      "hosted_version": "20261014225514",
+      "repository_version": "20261014224006",
+      "applied_via": "Supabase MCP apply_migration",
+      "status": "applied",
+      "verified_on": "2026-10-14",
+      "verification": "Hosted version, closed gate, original weekly rules, RLS/anonymous-execute verified."
     }
   ],
   "normalization": {
@@ -120,5 +129,5 @@
     "purpose": "Comparison of known migration definitions, not cryptographic attestation or a full semantic/security review."
   },
   "unapplied_repository_migrations": [],
-  "warning": "Hosted migration IDs differ from repository filenames for all historical generations; do not blindly replay or rewrite ledger or run db push. Study Room migrations were individually applied via connector. Reservation cutover activation is separate and intentionally closed until original Firebase bookings are reconciled."
+  "warning": "Hosted migration versions differ from repository filenames. R4 operations already applied and booking gate remains closed; never replay or manually rewrite ledger or run unreviewed db push."
 }
