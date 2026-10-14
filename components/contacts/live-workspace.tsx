@@ -76,8 +76,49 @@ export default function ContactsLiveWorkspace(){
  return <div className="ct-stage"><div className="ct-shell"><header className="ct-top"><a className="ct-home-link" href="/members">‹ Home</a><span>LV ZION OFFICIAL</span><button className="ct-view" onClick={()=>void load()} disabled={busy}>Reload</button></header>
  <main className="ct-main"><div className="ct-intro"><p className="ct-eyebrow">PRIVATE CONTACT COORDINATION</p><h1>Contacts</h1><p className="ct-muted">One responsible person. A clear next step.</p></div>
  {error&&<div className="ct-error" role="alert"><p>{error}</p><button className="ct-secondary" onClick={()=>{pending.current=null;void load();}} disabled={busy}>Reload and review</button>{!workspace&&<a href="/sign-in">Sign in</a>}</div>}{notice&&<p className="ct-feedback" role="status">{notice}</p>}{busy&&<p className="ct-muted" role="status">Loading…</p>}
- {workspace&&!detail&&!form&&<><nav className="ct-tabs" aria-label="Contact views"><button aria-pressed={view==='mine'} className={view==='mine'?'selected':''} onClick={()=>setView('mine')}>My Contacts</button><button aria-pressed={view==='shared'} className={view==='shared'?'selected':''} onClick={()=>setView('shared')}>Shared</button><button aria-pressed={view==='followup'} className={view==='followup'?'selected':''} onClick={()=>void showAgenda()}>Follow-Up</button></nav>
- {view==='followup'?<><h2>Your assigned follow-ups</h2><p className="ct-muted">{agenda.length?`${agenda.length} private activities. Open the relevant contact to view or complete its next action.`:'No authorized assigned activities.'}</p><button className="ct-secondary" onClick={()=>setView('mine')}>Open My Contacts</button></>:<><label className="ct-field" htmlFor="contacts-status">Show</label><select className="ct-select" id="contacts-status" value={filter} onChange={e=>setFilter(e.target.value)}><option value="open">Open contacts</option><option value="closed">Closed contacts</option><option value="archived">Archived contacts</option></select><div className="ct-spaced"/>{cards.map(c=><button className="ct-card ct-contact" key={c.id} onClick={()=>void open(c.id)} disabled={busy}><div className="ct-contact-top"><div><h3>{c.name}</h3><small>{c.ownerId===workspace.memberId?'You are responsible':'Explicitly shared with you'}</small></div><span className={'ct-pill '+c.lifecycle}>{c.archived?'Archived':c.doNotContact?'Do not contact':labels[c.lifecycle]}</span></div></button>)}{!cards.length&&<p className="ct-muted">No contacts in this view.</p>}{workspace.nextCursor&&<button className="ct-secondary" disabled={busy} onClick={()=>void more()}>Load more contacts</button>}{workspace.canCreate&&view==='mine'&&<button className="ct-primary" disabled={busy} onClick={()=>edit('create')}>Add contact</button>}</>}
+ {workspace&&!detail&&!form&&<>
+ <nav className="ct-tabs" aria-label="Contact views">
+  <button aria-pressed={view==='mine'} className={view==='mine'?'selected':''} onClick={()=>setView('mine')}>My Contacts</button>
+  <button aria-pressed={view==='followup'} className={view==='followup'?'selected':''} onClick={()=>void showAgenda()}>Follow-Ups</button>
+  <button aria-pressed={view==='overview'} className={view==='overview'?'selected':''} onClick={()=>setView('overview')}>Overview</button>
+ </nav>
+ {view==='followup'?<>
+  <section className="ct-card ct-section">
+   <p className="ct-eyebrow">PRIVATE ACTIVITY</p><h2>Your assigned follow-ups</h2>
+   <p className="ct-muted">{agenda.length?agenda.length+' authorized activity'+(agenda.length===1?'':'ies')+' are waiting.':'No active follow-ups are currently assigned to you.'}</p>
+   <p className="ct-small">This shared activity projection intentionally contains no contact names, phone numbers or appointment details. Open a contact to review its next agreed action and due date.</p>
+  </section>
+  {agenda.map(item=><div className="ct-card ct-activity" key={item.id}><strong>{item.title}</strong><span>Private to Contacts</span></div>)}
+  <button className="ct-secondary" onClick={()=>setView('mine')}>Review My Contacts</button>
+ </>:view==='overview'?<>
+  <section className="ct-card ct-section"><p className="ct-eyebrow">PERSONAL WORKSPACE</p><h2>Your private contact overview</h2>
+   <p className="ct-muted">These counts describe contacts loaded in your current session, not another member's records.</p>
+  </section>
+  <div className="ct-metrics">
+   {([['Loaded contacts',counts?.loaded??0],['Open',counts?.open??0],['New',counts?.new??0],['Active',counts?.active??0],['Paused',counts?.paused??0],['Closed',counts?.closed??0],['Archived',counts?.archived??0]] as [string,number][]).map(([label,count])=><div className="ct-card" key={label}><strong>{count}</strong><span>{label}</span></div>)}
+  </div>
+  {workspace.nextCursor&&<p className="ct-small">More contacts exist. Load additional pages in My Contacts to include them in these counts.</p>}
+  <button className="ct-secondary" onClick={()=>setView('mine')}>Back to My Contacts</button>
+ </>:<>
+  <div className="ct-section-title"><h2>Your responsibility</h2><small>{cards.length} loaded results</small></div>
+  <div className="ct-filters">
+   <label htmlFor="contacts-search" className="ct-sr-only">Search loaded contact names</label>
+   <input id="contacts-search" type="search" maxLength={120} autoComplete="off" value={search} placeholder="Search loaded names" onChange={e=>setSearch(e.target.value)}/>
+   <label htmlFor="contacts-status" className="ct-sr-only">Contact status filter</label>
+   <select id="contacts-status" value={filter} onChange={e=>setFilter(e.target.value as ContactFilter)}>
+    <option value="open">Open</option><option value="new">New</option><option value="active">Active</option><option value="paused">Paused</option><option value="closed">Closed</option><option value="archived">Archived</option><option value="all">All</option>
+   </select>
+  </div>
+  <p className="ct-small ct-search-explain">Search uses only names from your loaded, authorized records. Load more pages to search additional contacts. Phone numbers and notes are not searched here.</p>
+  {cards.map(c=><button className="ct-card ct-contact" key={c.id} onClick={()=>void open(c.id)} disabled={busy}>
+   <div className="ct-contact-top"><div><h3>{c.name}</h3><small>You are responsible</small></div>
+    <span className={'ct-pill '+c.lifecycle}>{c.archived?'Archived':c.doNotContact?'Do not contact':labels[c.lifecycle]}</span>
+   </div><div className="ct-next"><span>{c.archived?'History retained':c.lifecycle==='closed'?'No active outreach':'Open record & next step'}</span><span aria-hidden="true">›</span></div>
+  </button>)}
+  {!cards.length&&<section className="ct-empty"><h2>No matching loaded contacts</h2><p>Adjust your search or filter, or load the next page of private contacts.</p></section>}
+  {workspace.nextCursor&&<button className="ct-secondary" disabled={busy} onClick={()=>void more()}>Load next 100 authorized contacts</button>}
+  {workspace.canCreate&&<button className="ct-primary" disabled={busy} onClick={()=>edit('create')}>Add contact</button>}
+ </>}
  </>}
  {detail&&!form&&<><button className="ct-back" onClick={()=>void load()}>‹ Back to contacts</button><div className="ct-detail-head"><h1>{detail.name}</h1><span className={'ct-pill '+detail.lifecycle}>{detail.archived?'Archived':detail.doNotContact?'Do not contact':labels[detail.lifecycle]}</span><p className="ct-muted">{owner?'You are responsible':'Shared access'}</p></div>
  <section className="ct-card ct-section"><h2>Contact information</h2><p className="ct-muted">Preferred method: {detail.preferred==='unknown'?'Not confirmed':detail.preferred}</p>{detail.methods.map((m,i)=><p key={i}>{m.value}</p>)}{!detail.methods.length&&<p className="ct-muted">No communication details available to you.</p>}{owner&&!detail.archived&&<button className="ct-text-button" onClick={()=>edit('edit')}>Edit details</button>}<p className="ct-small">No calls or messages are sent from Contacts.</p></section>
