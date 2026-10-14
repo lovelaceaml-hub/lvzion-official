@@ -1,20 +1,23 @@
-# Before Any Real Member Launch
+# LV Zion Official: Release Gates
 
-## Present status
-- Working mobile-only synthetic visual preview is deployed independently on Vercel.
-- Production login, database project, notification sending, live directory, admin access and app integrations are **not implemented**.
-- This feature branch is awaiting code review and Git-link setup; do not represent the preview as a production church service.
+## Current verified state
+- New private GitHub repository exists, and a draft pull request contains the mobile design prototype.
+- Fresh Vercel project exists; a Git-backed preview built successfully on `feature/mobile-foundation-v1`. The existing live design preview remains a separate inline-source deployment.
+- Supabase Pro organization: **Las Vegas Zion** (`ypidsvtopuiqvbvvucbp`).
+- New Supabase PostgreSQL project: **lvzion-official** (`otecqlkqirncotytbfns`), **us-west-1**, `ACTIVE_HEALTHY`.
+- Database public schema has zero application tables and its initial security advisory check reported no findings.
+- Vercel development, preview and production environment settings contain only the new project's public Supabase URL and publishable key. No service role key was installed.
+- **Not implemented:** login, data tables, RLS policies, server authorization, notifications, live directory, official modules, tested recovery, and true offline access.
 
-## Gates
-1. Verify paid Las Vegas Zion Supabase organization and create the independently billed project only after provider cost confirmation; use US West region.
-2. Connect the new private GitHub repo to the new Vercel project; review PR on a protected, nonproduction preview before changing default production source.
-3. Establish TypeScript, reproducible lockfile, lint/typecheck, unit and integration tests, a mobile browser acceptance test and CI on changed code only. Avoid excessive GitHub Actions minutes.
-4. Define and test member/account provisioning, verified Auth flows, session recovery and role/department permissions. Enforce RLS plus server-side authorization with adversarial role tests.
-5. Implement member directory restrictions (own group, names only), contact-data privacy, audited changes, and explicit appointment terminations.
-6. Back up the new database independently with encryption and restore verification; record retention and recovery objectives before real use.
-7. Confirm official app list/features and data ownership before implementing or importing an existing application's data.
-8. Review detailed push preview privacy; verify offline data cache excludes sensitive records; accessibility, reduced-motion, iOS PWA and device testing.
-9. Pilot with synthetic data first, then a small opted-in member cohort, with written go/no-go before general invitation.
+## Before any real member launch
+1. Establish protected, reviewed Git-to-Vercel release workflow and confirm which branch drives production. Keep the working inline deployment until the replacement is verified.
+2. Pin dependencies with a reproducible npm lockfile. Migrate the prototype to TypeScript; add lint, typecheck, unit tests, permission integration tests, and mobile browser acceptance tests. Avoid excessive GitHub Actions usage.
+3. Approve the definitive user/account and group/unit/team model. Implement Supabase Auth, verified session management, RLS, and server-side authorization. Never rely solely on hidden UI.
+4. Implement own-group names-only directory, independent department/leadership assignment rights, transfers with history, suspended inactive users, and audit events.
+5. Establish encrypted backups of the new database with a real restore test, data-retention policy, and recovery instructions.
+6. Confirm the **official app lineup** before implementing or importing application-specific data. Never migrate existing member data without deliberate approval.
+7. Review private-detail handling in push previews, secure caches, PWA offline use, and accessible interactions.
+8. Pilot with fictional records and designated test accounts, then an explicitly approved small live cohort and documented go/no-go.
 
-## Do not touch
-Do not change the existing LV Zion app, its database, any old member data, or independent church apps under this new project.
+## Safety boundary
+The prior LV Zion projects and all existing church apps are read-only references. Do not reuse their source/database, delete them, or modify their production settings.
