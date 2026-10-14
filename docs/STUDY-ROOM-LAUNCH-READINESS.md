@@ -1,5 +1,7 @@
 # Study Room launch continuation — October 14, 2026
 
+> **Historical launch-readiness review, NOT the current production launch status.** The real Study Room module and R4 owner management controls are now integrated in `lvz.app`, but new booking activation remains **closed** pending original Firebase booking reconciliation and a separately approved cutover. Earlier statements below about missing hosted member/Auth activation or no Study Room schema reflect the original R3 workstream only. See [STUDY-ROOM-R4-LIVE.md](STUDY-ROOM-R4-LIVE.md) and [CURRENT-STATUS.md](CURRENT-STATUS.md).
+
 Canonical reconciliation is **PR #9**, branch `feature/study-rooms-reconciliation-r3`. PR #8 is the separate Continuous Display workstream; earlier Study Room prose pointing to #8 is a documentation error, not a different release branch.
 
 ## Status
