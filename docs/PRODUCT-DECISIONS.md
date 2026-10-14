@@ -27,3 +27,75 @@ Recorded 2026-10-13 from the design interview. This is a new application, *not* 
 - Use efficient queries, incremental changes and realtime subscriptions where warranted; do not full-poll every few seconds.
 - Supabase PostgreSQL/RLS/Auth/Realtimes/Storage, Vercel Next.js, private GitHub repository.
 - No real personal data in prototype or repository; no permanent deletion, migration, purchase, or bulk invitation without explicit authorization.
+
+## Decisions confirmed: member-system interview 61–66
+
+Confirmed on 2026-10-13; these supersede any conflicting recommendations, but do not automatically authorize production migrations.
+
+- **61 A — Organizational hierarchy:** Age Category → Group → Unit → Member. The actual names of age categories and groups still need confirmation. Administrators will manage organizational entries, not hard-code their labels into UI logic.
+- **62 C — Placement:** A member has one active primary group/unit placement (the unit is part of that group) and may hold multiple department memberships or independent department-management assignments.
+- **63 C — Sign-in:** Username **or** email plus password. Supabase Auth does not natively support username/password sign-in, so username resolution and account recovery must be designed securely; a login UI alone does not satisfy this requirement. Do not create fake shared email addresses or expose whether a username exists.
+- **64 C — Initial membership population:** Start with fictional accounts and fixtures; use a controlled, reviewed import of the real congregation only after explicit authorization, duplicate review, security tests, and documented backup/recovery.
+- **65 A — Delegated member management:** Unit leaders manage members within assigned units; group leaders oversee members in their groups; Pastoral Staff have broader specifically granted organizational authority. Cross-group transfers retain the established request/receiving-acceptance workflow; this answer does not remove transfer controls.
+- **66 B — Technical vs church authority:** App administrators manage technical settings/account operations without automatic access to ministry records, confidential member fields, or organizational decision-making. Such access requires a separately granted, scoped church role.
+
+### Selected domain (registration deferred)
+
+- **`lvz.app`** is the selected **intended permanent domain**, not a purchased or configured domain. Registration requires the owner's submission of required registrant information and purchase authorization; do not represent ownership as completed.
+- Continue using the existing Vercel development preview while domain registration is outstanding. Do not change the established public prototype or previous apps as part of domain planning.
+- Once registration is actually complete: attach the domain to the correct Vercel project, verify TLS and redirects, update Supabase Auth site URL/allowed redirect URLs, verify invite/recovery callback paths, update PWA metadata/install scope, and configure mail sender authentication (SPF/DKIM/DMARC). Actual inboxes or forwarding and an outbound SMTP provider are independent choices.
+- No production mail should claim `@lvz.app` sender identity before the domain and sender are verified.
+
+## Proposed member-system data architecture (design only)
+
+This section is a blueprint; **no database migration or real member data has been applied**.
+
+| Entity | Purpose and essential constraint |
+| --- | --- |
+| `age_categories`, `church_groups`, `church_units` | Administrator-configured Age Category → Group → Unit hierarchy; units belong to one group and groups to one category. |
+| `members` | Durable church-person record separate from authentication, including status and non-sensitive display information. Keep contact information in restricted storage. |
+| `member_placements` | Auditable group/unit history with start/end timestamps; **at most one active primary placement** per member. |
+| `member_private_contacts` | Private email/phone and sensitive preferences; no exposure through ordinary group directory. |
+| `account_links` | Links an activated Supabase Auth user to exactly one approved member record; members can exist before login is created. |
+| `departments`, `department_memberships` | Multiple department associations independent from the primary church group/unit. |
+| `role_assignments` | Explicit, time-bounded-by-manual-end responsibility and scope (unit, group, department, app, or broad pastoral scope); technical administrator is a separate authorization concern. |
+| `invitations`, `access_requests` | Reviewed account activation; both leader-initiated invites and member access requests are supported without creating duplicate members. |
+| `transfer_requests` | Source/destination group and unit, requested-by, approved/accepted-by, and status; preserve placement history, block premature privilege changes. |
+| `audit_events` | Actor, operation, scoped target, time, rationale and minimal safe before/after metadata. Never store passwords or tokens. |
+
+### Authorization invariants
+
+1. PostgreSQL RLS and trusted server authorization enforce permissions; never trust role switches, query filters, or hidden navigation alone.
+2. Ordinary members can view their own allowed profile information and a **names-only directory restricted to their own group**. They cannot enumerate members' private contacts.
+3. Unit and group leaders can change authorized member records **only within their active assignment scope**. Broad access must be explicitly assigned to Pastoral Staff.
+4. Department managers' permissions apply **only to their assigned departments and application functions**; group leadership alone does not confer those permissions.
+5. App administrator privileges for deployments, configuration, or troubleshooting do not confer ministry-data access.
+6. Group transfer commits, role changes, invitations and contact changes must be transactionally validated and audited; departure revokes the former group/unit access while unrelated department rights are retained until independently changed.
+7. Suspended accounts lose session/application access while historical member records and audit history remain. No hard deletion by default.
+8. Restrict private data in notifications and offline caches. Do not place Supabase service-role keys in a client bundle, Git repository, or public environment variables.
+
+### Implementation order and acceptance checks
+
+1. **Stabilize existing prototype:** reproducible lockfile, TypeScript conversion, lint/type checks, selective lightweight CI (mind the GitHub Actions budget), tested phone/PWA navigation. Keep the existing public deployment unchanged.
+2. **Model hierarchy and memberships:** reviewed migration on new Supabase project, seeded fictional categories/groups/units/members, one-primary-placement constraints, placement-change history, and deny-by-default RLS.
+3. **Identity and onboarding:** member/invitation matching, username-or-email sign-in and verified recovery, verified activation flow, suspension and sign-out/session revocation. Do not bulk invite real people.
+4. **Scoped leadership tools:** unit/group/pastoral and technical-admin views using a shared server-side permission engine; request-and-accept transfer workflow; auditable role appointments.
+5. **Connect member dashboard:** real authorized member profile, group label, department badges, role-specific Manage sections, and privacy-safe notifications; retain fictional sample events until app data sources exist.
+6. **Approve first official app modules:** only after the app lineup and each module's owner/data-access rules are confirmed. Earlier legacy apps and prototype numbered tiles are not automatically in scope.
+7. **Pilot then launch:** automated permission-denial/privilege-escalation tests, duplicate-import dry run, data-backup/restore rehearsal, mobile accessibility checks, and a limited, authorized member pilot before any larger rollout.
+
+### Specific checks for first acceptance test
+
+- A member in Group A cannot see Group B's members or private contact details in either UI or direct API requests.
+- A unit leader can edit their own unit's authorized fields but cannot change another unit or grant themself a role.
+- A department manager cannot obtain group-wide administrative privileges, and a technical admin cannot read ministry data.
+- A group transfer does not grant destination permissions before acceptance and removes old group permissions when finalized.
+- A member without an activated login remains one durable person record; activating the invited account links the existing record instead of inserting a duplicate.
+- Suspending an account blocks access; audit and placement history remain intact.
+
+### Open items to answer without holding up safe prototype work
+
+- Exact age-category labels and the group/unit naming system used by Las Vegas Zion.
+- Identity verification and password recovery for people with usernames but no deliverable personal email.
+- Which official application module launches first, its accountable owner, and its restricted data fields.
+- Whether `support@lvz.app` will receive via forwarding or a dedicated inbox; choice of transactional email provider.
