@@ -3,7 +3,7 @@
 ## Quick links
 
 - **Actual app:** [lvz.app](https://lvz.app)
-- **Status:** Actual app is live. Signup remains closed while the restricted Resend credential connection is pending.
+- **Status:** Actual app and confirmed-email signup are live. New members start Unassigned. First-owner email confirmation is pending.
 - **Repository:** [Private GitHub repository](https://github.com/lovelaceaml-hub/lvzion-official)
 - **Handoff:** [Current status](docs/HANDOFF.md)
 - **Setup:** [Behavior, validation and rollback](docs/ACTUAL-APP-SETUP.md)
@@ -12,7 +12,7 @@ Independent phone-first Next.js application, using its own Supabase project. Ori
 
 Confirmed email signup creates an Unassigned member profile. Age category, group and unit stay unset until an authorized leader verifies membership and assigns placement. Unassigned members can view only their own records. The designated first owner can configure the actual organization while still Unassigned. No fictitious hierarchy or imported real records are seeded.
 
-The actual routes are /sign-in, /sign-up, /members, /members/manage, /request-access, /reset-password and /install. Fictional development routes redirect on production. No official module has been released in this main-app increment.
+The actual routes are [signup](https://lvz.app/sign-up), /sign-in, /sign-up, /members, /members/manage, /request-access, /reset-password and /install. Fictional development routes redirect on production. No official module has been released in this main-app increment.
 
 ## Development
 
