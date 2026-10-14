@@ -1,4 +1,8 @@
-# LV Zion Official — app integration framework (development review)
+# LV Zion Official — app integration framework (historical development review)
+
+> **Historical platform design, not the current launch status.** The member application at [lvz.app](https://lvz.app) and the module registry were subsequently deployed. Study Room Reservation is now an approved owner-only module with R4 manager tools on the real site, but its independent booking gate remains **closed**. The current source of truth is [Study Room status](study-rooms/README.md), [R4 evidence](STUDY-ROOM-R4-LIVE.md) and [cutover runbook](study-rooms/CUTOVER-RUNBOOK.md). The dated review rules below describe the initial unlaunched phase.
+
+> Historical milestone record. Test counts, preview links and pending gates below describe that milestone. For the actual app and current release boundaries, read the [handoff](HANDOFF.md) and [documentation index](README.md). This record does not authorize a new preview.
 
 This is an infrastructure milestone, **not selection, approval, launch, or publication of an official LV Zion application**. Previous LV Zion apps remain separate and read-only. No real member data, official activity feed, push campaign, app permission, mail delivery, or production rollout is implied.
 
@@ -21,7 +25,7 @@ This is an infrastructure milestone, **not selection, approval, launch, or publi
 4. Personalization and notification policies: title confidentiality, opt-in push content, retention, timezone and reminder behavior.
 5. Independent application security review, database advisors, hosted migration ledger reconciliation, test accounts, backup/restore, real browser/device testing and an authorized limited pilot.
 
-**Do not apply the proposed new migration to any production or hosted database merely because this code is merged or the preview builds.** The LV Zion Official hosted login is still disabled, and the selected lvz.app domain remains paused.
+**Historical review warning (superseded):** This warning originally prohibited automatic promotion of the initial module-runtime proposal; at that time the hosted login/domain were inactive. They were subsequently activated through approved releases. The modern rule is still to apply only approved, pending, tested migrations and to avoid confusing an integrated module with authorization to activate its booking backend.
 
 ## Tests
 
@@ -30,4 +34,4 @@ This is an infrastructure milestone, **not selection, approval, launch, or publi
 - tests/browser/app-runtime.spec.ts: anonymous route denial, POST validation, disallowed module route denial and fictional preview independence.
 - Existing member-foundation/onboarding tests remain unchanged in behavior. npm run build runs typecheck and unit/database suites; npm run test:browser verifies phone interaction.
 
-The real local GoTrue/PostgREST suite was previously exercised for onboarding; this module migration's security assertions run in disposable PostgreSQL/PGlite only. Hosted module migrations and live module integration have **not** been executed.
+The real local GoTrue/PostgREST suite was previously exercised for onboarding; this module migration's security assertions run in disposable PostgreSQL/PGlite only. At the time of this earlier review, hosted module migrations and live module integration **had not** been executed. The module runtime and Study Room R1–R4 migrations were subsequently installed; current hosted IDs are in [the ledger](HOSTED-MIGRATION-LEDGER.json).

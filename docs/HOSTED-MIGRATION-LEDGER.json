@@ -2,7 +2,7 @@
   "project_ref": "otecqlkqirncotytbfns",
   "applied_via": "Supabase MCP apply_migration",
   "verified_on": "2026-10-14",
-  "verification_mode": "read-only definition comparison after individually applied additive migrations",
+  "verification_mode": "The original six foundation/runtime/owner entries have stored normalized definition comparisons. Later module entries are recorded from connected Supabase list_migrations plus the entry-specific read-only checks, not a complete new semantic audit or definition-hash comparison.",
   "entries": [
     {
       "name": "member_system_foundation",
@@ -106,12 +106,14 @@
       "source": "supabase/migrations/20261014224708_contacts_private_owner_pilot_v1.sql"
     },
     {
-      "name": "member_signup_names",
-      "hosted_version": "20261014225857",
-      "repository_version": "20261014223500",
-      "applied_via": "Supabase MCP apply_migration",
+      "name": "continuous_display_live_schema",
+      "hosted_version": "20261014224840",
+      "repository_version": "20261014223341",
       "status": "applied",
-      "verification": "Additive RLS-enabled private signup-names table; three-argument enrollment RPC granted only to authenticated; anonymous/direct client table access denied; existing member and enrollment counts unchanged. Production Next build and disposable SQL checks completed."
+      "verified_on": "2026-10-14",
+      "verification": "Read-only hosted migration metadata confirms version and name; no definition digest or new migration execution claimed by documentation audit.",
+      "source": "supabase/migrations/20261014223341_continuous_display_live_schema.sql",
+      "applied_via": "Supabase MCP apply_migration"
     },
     {
       "name": "study_room_policy_operations",
@@ -121,6 +123,36 @@
       "status": "applied",
       "verified_on": "2026-10-14",
       "verification": "Hosted version, closed gate, original weekly rules, RLS/anonymous-execute verified."
+    },
+    {
+      "name": "morning_prayer_live_core",
+      "hosted_version": "20261014225825",
+      "repository_version": "20261014224129",
+      "status": "applied",
+      "verified_on": "2026-10-14",
+      "verification": "Read-only hosted migration metadata confirms version and name; no definition digest or new migration execution claimed by documentation audit.",
+      "source": "supabase/migrations/20261014224129_morning_prayer_live_core.sql",
+      "applied_via": "Supabase MCP apply_migration"
+    },
+    {
+      "name": "member_signup_names",
+      "hosted_version": "20261014225857",
+      "repository_version": "20261014223500",
+      "applied_via": "Supabase MCP apply_migration",
+      "status": "applied",
+      "verification": "Additive RLS-enabled private signup-names table; three-argument enrollment RPC granted only to authenticated; anonymous/direct client table access denied; existing member and enrollment counts unchanged. Production Next build and disposable SQL checks completed."
+    },
+    {
+      "name": "continuous_display_operations",
+      "hosted_version": "20261014232519",
+      "repository_version": "20261014230147",
+      "status": "applied",
+      "verified_on": "2026-10-14",
+      "verification": "Read-only hosted migration metadata confirms version and name; no definition digest or new migration execution claimed by documentation audit.",
+      "source": "supabase/migrations/20261014230147_continuous_display_operations.sql",
+      "repository_state": "PR #32 merged during audit at de5dcdede5fc740873fddfa36467d9d47f318fd6. Repository source now exists on main. Refreshed Vercel alias lookup verified READY production from that SHA; no new runtime or hardware acceptance is claimed.",
+      "source_pr": "https://github.com/lovelaceaml-hub/lvzion-official/pull/32",
+      "applied_via": "Supabase MCP apply_migration"
     }
   ],
   "normalization": {
@@ -129,5 +161,7 @@
     "purpose": "Comparison of known migration definitions, not cryptographic attestation or a full semantic/security review."
   },
   "unapplied_repository_migrations": [],
-  "warning": "Hosted migration versions differ from repository filenames. R4 operations already applied and booking gate remains closed; never replay or manually rewrite ledger or run unreviewed db push."
+  "warning": "Hosted versions differ from repository filenames. Never replay applied migrations or use blind db push. Display operations is applied and its code merged in PR #32; fetch current state before release. Study Room booking gate remains closed.",
+  "metadata_reconciled_at": "2026-10-14T23:26:33Z",
+  "metadata_reconciliation": "16 hosted versions/names observed. Existing digest attestations remain historical; added metadata entries do not assert definition equivalence."
 }

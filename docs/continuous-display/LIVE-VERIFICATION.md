@@ -1,5 +1,7 @@
 # Live Continuous Display integration verification — October 14, 2026
 
+> Initial implementation verification. Counts and required release steps below belong to that milestone. See the [current handoff](../HANDOFF.md) for hosted state and continuing device/pilot limits.
+
 ## Target
 New owner-only module on **lvz.app**, not another prototype website. The production app keeps its existing member sign-in, self-registration, Unassigned intake policy, and its general Apps system. No existing Mother's Love or lobby display code or database was modified.
 

@@ -1,5 +1,7 @@
 # Actual LV Zion Official setup
 
+Current actual-app status and module gates are in the [handoff](HANDOFF.md). This document preserves setup behavior and chronological release receipts. Older pending statements in the Build log describe their milestone and are superseded by later completion entries.
+
 ## Authority and release
 
 Anthony requested the actual app at https://lvz.app on 2026-10-14, and prohibited additional previews unless explicitly requested. This supersedes the earlier development-only boundary. Release uses full replacement after automated validation. Automatic Vercel previews are disabled at project level and Git deployments are disabled in vercel.json. Independent external security review was waived by Anthony. Original apps, real-member imports and unrelated module draft branches remain outside scope.
@@ -16,7 +18,7 @@ Production requires the exact approved Supabase project, https://lvz.app, actual
 
 BotID uses explicit basic checks on client/server. Paid deep analysis is not enabled. Resend uses a dedicated auth.lvz.app sender on the approved free plan. Never enable overages without permission. Confirmation links keep tokens in fragments and require an explicit POST. Email confirmation remains enabled, anonymous signup disabled, password minimum six characters. Recovery and invitation messages use the same verified SMTP provider.
 
-## Validation
+## Original setup validation
 
 128 application tests, 182 disposable PostgreSQL permission assertions, 32 phone Chromium checks, 44 local signup/Auth/PostgREST/SMTP checks and 42 existing invitation/recovery checks passed. These local checks use fictional identities and a loopback mail sink. Hosted SMTP/TLS delivery is now verified. The owner's real email confirmation and completed sign-in were verified privately. Physical-device checks remain unclaimed.
 
@@ -24,9 +26,11 @@ BotID uses explicit basic checks on client/server. Paid deep analysis is not ena
 
 The existing three foundation migrations were compared before release and were not replayed. Three additive migrations were applied individually: module runtime, self-service enrollment, production owner setup. Before application the hosted database had zero Auth users, members and account links. Enrollment remained disabled during configuration. See HOSTED-MIGRATION-LEDGER.json for differing hosted and repository IDs.
 
-Retain the old production deployment dpl_6xjt1qTmgXggJvQUNoeJAhvnwLCk for website rollback. The additive schema is compatible with that static prototype. If real enrollment needs to stop, disable the database enrollment setting and the production signup/email flags. Do not drop tables or erase existing enrollment/audit records. Do not blindly run db push because older hosted migration IDs differ.
+The original static prototype fallback was dpl_6xjt1qTmgXggJvQUNoeJAhvnwLCk. It predates current modules and is historical evidence, not the default current rollback. Select a verified compatible release, preserve hosted records and module gates, and recheck the actual app before promotion. If real enrollment needs to stop, disable the database enrollment setting and the production signup/email flags. Do not drop tables or erase existing enrollment/audit records. Do not blindly run db push because older hosted migration IDs differ.
 
 ## Build log
+
+Entries below are chronological milestone receipts, not an instruction to repeat completed setup. Current organization completion and the latest documentation reconciliation are in [Organization workflow](ORGANIZATION-WORKFLOW.md) and [Documentation audit](DOCUMENTATION-AUDIT.md).
 
 - Replaced the prototype front door with actual sign-in and redirected fictional routes in production.
 - Added explicit production safeguards, first-owner initialization without placement, free bot checks and a server-only signup ticket hook.
@@ -50,7 +54,7 @@ Retain the old production deployment dpl_6xjt1qTmgXggJvQUNoeJAhvnwLCk for websit
 
 - PR #18 merged confirmation recovery at main commit 85ec8e63626ce7bf62d449e396e79bd46b907f93. Actual production deployment dpl_HPHS62hL45xLa65yELUNNLt2gzRK is READY and aliased to lvz.app. Public signup, confirmation and continuation pages respond successfully. The actual signup minimum remains six. A synthetic invalid confirmation returns the sign-in recovery path with private no-store headers. Anonymous member API access returns 401; the public member page contains only a loading shell. No hosted test identities or emails were created. Disposable local services were stopped.
 
-## Signup first/last-name and refresh completion — October 14, 2026
+## Signup first/last-name and refresh completion: October 14, 2026
 
 - Merged [PR #27](https://github.com/lovelaceaml-hub/lvzion-official/pull/27), production commit `af3ec1ebed8cdf2036f383e314aa7938cb7d8849`. Deliberate Vercel production deployment `dpl_oT4pR8hoP1j9QuvMiWqcw8N4RmaH` is READY and assigned `lvz.app`.
 - The first and last name fields are required and validated separately. The real signup route submits `display_name`, `first_name` and `last_name` to Auth while retaining the existing app-issued, one-use signup ticket, verified email and bot/rate protections.
@@ -60,3 +64,9 @@ Retain the old production deployment dpl_6xjt1qTmgXggJvQUNoeJAhvnwLCk for websit
 - Supabase migration `member_signup_names` was applied under hosted version `20261014225857` (repository file `20261014223500_member_signup_names.sql`). Verification confirmed RLS and role privileges, zero newly inserted name rows on release, and unchanged pre-existing member/enrollment counts. The prior owner record is intentionally not backfilled.
 - Vercel's complete production `npm run build` succeeded (strict types, Node tests, disposable PostgreSQL checks, Next compile). The live sign-up, sign-in, confirmation and continuation pages returned HTTP 200 from the new deployment; resend GET returned HTTP 405; no relevant runtime error cluster was reported. The separate phone Playwright suite and a real hosted end-to-end identity/signup/delivery run were not claimed executed in this release; no live test member or email was created.
 - No old migration was replayed, no other module branch was overwritten, no real roster was imported. Keep the previous READY deployment available for emergency rollback. The additive schema can remain in place if application code is rolled back; do not drop member/audit records.
+
+## Study Room Reservation in the actual production app — October 14, 2026
+
+The previous development-only Study Room prototype was reconciled with live signup/member identity and released **within** the real `lvz.app` application, not as a separate site. [PR #22](https://github.com/lovelaceaml-hub/lvzion-official/pull/22) installed the protected module and additive R1–R3 reservation schema, and [PR #30](https://github.com/lovelaceaml-hub/lvzion-official/pull/30) added auditable inventory/weekly/special-day management using the shared PostgreSQL booking validator. The R4 production merge is `7237109e46315a726cc88fa2069db0d58fbc69b1` and its READY Vercel deployment is `dpl_2CkfiSr2EM1tQaAEj5ff3gMcRNEq`. Newer production builds retain these changes.
+
+At last read-only verification, the module was approved for **one designated owner-manager only**, with **12 resources**, **zero new reservations** and `bookings_open=false` enforced by the database. Booking creation, hold and rescheduling stay disabled. The original `lvrooms.web.app` Firebase system has not been changed or migrated, and its reservation writes have not been frozen. The R4 deployment passed **317 app tests, 198 disposable PostgreSQL assertions** and six synthetic mobile Chromium browser checks; direct anonymous schedule/history/admin/operations requests and an operations POST were denied. These tests are not a signed-in hosted booking or recovery rehearsal. Consult [current status](study-rooms/README.md), [R4 evidence](STUDY-ROOM-R4-LIVE.md), [migration mapping](HOSTED-MIGRATION-LEDGER.json) and [cutover requirements](study-rooms/CUTOVER-RUNBOOK.md).
