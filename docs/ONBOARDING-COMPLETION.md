@@ -1,5 +1,7 @@
 # Member onboarding completion — October 13, 2026 Pacific
 
+> Historical milestone record. Test counts, preview links and pending gates below describe that milestone. For the actual app and current release boundaries, read the [handoff](HANDOFF.md) and [documentation index](README.md). This record does not authorize a new preview.
+
 ## Implemented in this review branch
 
 The member foundation now includes access-request intake and verification review, invitation creation/delivery/retry/status/revocation, verified account activation linked to an existing person, username/email sign-in, verified password recovery, session revocation, separate technical account suspension, independent department administration, organizational entry rename/archive, and an audited one-time initial-administrator bootstrap tool. The phone interface exposes the associated management screens. All demonstration records are fictional and preview edits are in memory.

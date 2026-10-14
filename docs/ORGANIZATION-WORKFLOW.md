@@ -1,5 +1,7 @@
 # Organization and member placement completion
 
+Status: all three steps complete. No active organization implementation remains. Current module boundaries and later documentation checks are in the [handoff](HANDOFF.md) and [documentation audit](DOCUMENTATION-AUDIT.md).
+
 ## Scope and authority
 
 Anthony requested four named age categories, two empty placeholder groups in each, then two empty placeholder units in each group, and authorized autonomous completion of the organization and member-assignment workflow in the actual app. No preview is authorized. Full replacement is the established release mode.
@@ -42,3 +44,5 @@ Rollback: the previous actual deployment dpl_HPHS62hL45xLa65yELUNNLt2gzRK remain
 
 - Completed actual release: PR #24 merged at ce41310e3ef932af58d51e7c4c66af985146c23f. Vercel dpl_URciYVcPXdq5cJTURF9DpfAaSFZU became READY and served lvz.app. The subsequent READY production source 87c5a8573ca01f7216f2c78df1da5b827b7380d2 was checked by Git ancestry and retains this release. Live native-browser verification confirmed 4/8/16, the nested Adult Male groups/units and the full Adult Female / Group 2 / Unit 2 placement path. The selection was cleared without an assignment. Read-only hosted verification confirmed zero current member placements and sixteen audited unit creations. Public pages returned 200 and anonymous private API access returned 401/no-store.
 - Final evidence: local preflight passed 244 application tests, 198 core SQL assertions and 77 browser checks. Vercel built the merged production source including other concurrently approved modules. Phone layout was checked in Chromium; the live desktop screenshot contains no contact details. The user guide and private backup are complete. Temporary browser test services exited and the temporary proof tab was closed. There is no remaining setup action for Anthony.
+
+- Documentation follow-up on October 14, 2026: refreshed current guides, labeled earlier milestone records, indexed all documents and reconciled all 16 observed hosted migration versions. Read-only hosted hierarchy remains 4/8/16 with zero placements. No application code, access grant, deployment or hosted setting was changed. See [Documentation audit](DOCUMENTATION-AUDIT.md) for scope and validation.

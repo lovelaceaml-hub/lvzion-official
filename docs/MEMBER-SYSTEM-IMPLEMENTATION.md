@@ -1,5 +1,7 @@
 # LV Zion Official — member-system implementation
 
+> Historical milestone record. Test counts, preview links and pending gates below describe that milestone. For the actual app and current release boundaries, read the [handoff](HANDOFF.md) and [documentation index](README.md). This record does not authorize a new preview.
+
 Branch: `feature/member-system-secure-r1`; draft PR #2 stacked on the unmerged mobile prototype PR #1.
 
 Read [ONBOARDING-COMPLETION.md](ONBOARDING-COMPLETION.md) for current implemented features, executed tests, hosted state and the remaining activation blocker. This supersedes the earlier proposal-only status.

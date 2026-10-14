@@ -2,6 +2,8 @@
 
 > **Historical platform design, not the current launch status.** The member application at [lvz.app](https://lvz.app) and the module registry were subsequently deployed. Study Room Reservation is now an approved owner-only module with R4 manager tools on the real site, but its independent booking gate remains **closed**. The current source of truth is [Study Room status](study-rooms/README.md), [R4 evidence](STUDY-ROOM-R4-LIVE.md) and [cutover runbook](study-rooms/CUTOVER-RUNBOOK.md). The dated review rules below describe the initial unlaunched phase.
 
+> Historical milestone record. Test counts, preview links and pending gates below describe that milestone. For the actual app and current release boundaries, read the [handoff](HANDOFF.md) and [documentation index](README.md). This record does not authorize a new preview.
+
 This is an infrastructure milestone, **not selection, approval, launch, or publication of an official LV Zion application**. Previous LV Zion apps remain separate and read-only. No real member data, official activity feed, push campaign, app permission, mail delivery, or production rollout is implied.
 
 ## Review branch architecture
