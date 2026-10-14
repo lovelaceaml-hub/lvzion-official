@@ -129,9 +129,9 @@ test('Morning Prayer R4: verified owner, member grants, atomic dates and Vault j
    await as(3);
    await denied(()=>db.query('select public.mpg_live_join($1)',[occ]));
   });
-  await t.test('join is denied outside meeting window and after revocation',async()=>{
-   await as(2);await denied(()=>db.query('select public.mpg_live_join($1)',[occ]));
+  await t.test('revoking verified Zoom access blocks even an eligible in-window member',async()=>{
    await write(1,'mpg_meeting_settings',{type:'revoke_meeting',occurrenceId:occ});
+   await as(2);await denied(()=>db.query('select public.mpg_live_join($1)',[occ]));
    await owner();assert.equal(Number(await scalar('select count(*) from mpg_private.access_references where verified_at is not null')),0);
   });
   await t.test('revoking member removes grants and host eligibility, not history',async()=>{
