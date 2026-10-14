@@ -6,9 +6,11 @@
 
 ## Sign up and sign in
 
-Create an account with your own first and last names, personal email and a password of at least six characters. Open the confirmation email and confirm your account. If an older confirmation link says it could not finish, sign in with the password you chose.
+Create an account with your **first name** and **last name in their separate required boxes**, your personal email and a password of at least **six** characters. The names remain separate for newly confirmed profiles; your displayed full name combines them in the correct order. Keep multiword family names (for example, "de la Cruz") together in the **Last name** box. Do not guess or split an existing person's name when importing or updating old records.
 
-New accounts start Unassigned to age category, group and unit. An authorized member administrator verifies the person and places them. Unassigned accounts can see only their own records.
+Select **Create account**, then open the email sent to the address you entered. Confirm the latest message and complete the explicit **Confirm and continue** step. The **Check your email** screen is retained if you refresh the same tab. If no message arrives, look in spam and use **Didn't receive the email? → Resend confirmation**; this is a deliberate button action and is rate limited. A confirmation link that was already used or expired may require the newest email. If you already verified your address, sign in with your chosen password instead of registering again.
+
+New accounts start **Unassigned** to age category, group and unit. An authorized member administrator verifies the person and places them. Ordinary Unassigned accounts can see only their own records. The existing one-time verified original owner is a special administrative exception; it does not grant every new signup leadership access.
 
 ## Manage age categories, groups and units
 
@@ -49,3 +51,19 @@ Organization, department and account administration are independent permissions.
 ## A change could not be saved
 
 Keep the form unchanged and retry after a connection failure. Organization changes reuse the same request receipt so an uncertain create does not create another entry. If the message says an entry still has members or children, finish the required moves first. Do not erase member history to remove an entry.
+
+## Which official applications can I access?
+
+Open **Apps** after signing in. You see only modules for which your account has an active individual grant. Currently approved, owner-scoped integrations include **Contacts**, **Study Rooms**, **Church Display** and **Work Mission Morning Prayer**; that does **not** mean all members can open them or that all workflows are activated.
+
+**Study Rooms:** Owner setup exists, but **Reserve Now remains closed** until the original booking system is reconciled and a separate activation is approved. Continue using the existing designated room-booking process.
+
+**Contacts:** Currently an owner-only private pilot. Do not import, share, export or send outreach messages through unapproved workflows.
+
+**Church Display:** Phone management and TV player are real, but no church content or TV device should be published/paired without the designated owner's explicit review.
+
+**Morning Prayer:** The module exists for owner setup, but dates, sources, host eligibility and protected access must be verified before use. The old Work Mission Prayer app is not automatically synchronized.
+
+**Worship Duty and Gospel Planning:** Not yet live modules in the real shared Apps menu. Keep using the existing approved systems until separately launched.
+
+For the precise status and current owner instructions see [Current production status](CURRENT-STATUS.md). For security/release policy see [Release gates](RELEASE-GATES.md).
