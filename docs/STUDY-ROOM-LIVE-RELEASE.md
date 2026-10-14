@@ -1,8 +1,13 @@
 # LV Zion Official — Study Room module, production setup
 
+> **Historical checkpoint — not the current production state.** This page captures the earlier development checkpoint; its 'unapplied', 'draft', 'not implemented' and 'not deployed' statements reflect that past date, not the current R4 state. Booking is still closed pending Firebase migration. See the [current Study Room status](study-rooms/README.md), [R4 production evidence](STUDY-ROOM-R4-LIVE.md) and [cutover runbook](study-rooms/CUTOVER-RUNBOOK.md).
+
+
 **Real host:** https://lvz.app/modules/study-rooms  
 **Live GitHub:** lovelaceaml-hub/lvzion-official; integrate only through production main.  
 **Original scheduler:** https://lvrooms.web.app (unchanged, remains booking authority).
+
+This file is the initial R3 **installation receipt**, not the latest R4 release. R4 adds the fifth hosted migration `study_room_policy_operations` (`20261014225514`) and was released via merged PR #30. Current evidence and cutover requirements are linked above.
 
 ## Production database installation (October 14, 2026)
 The connected production Supabase project is `otecqlkqirncotytbfns` under the Las Vegas Zion organization. All of the following additive SQL migrations were individually applied successfully, and their presence was verified by the hosted migration ledger:
