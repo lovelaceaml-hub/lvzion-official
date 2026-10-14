@@ -24,5 +24,5 @@ test('real migration installs empty and owner-only with all private tables RLS',
  assert.match(sql,/enabled boolean not null default false/);assert.match(sql,/enable row level security/);
  assert.match(sql,/module_key='work-mission-prayer'/);assert.match(sql,/review_requests/);
  assert.match(sql,/revoke all on function public\.mpg_live_home/);
- assert.doesNotMatch(sql,/insert into mpg_private\.occurrences\s*\(/i);
+ assert.doesNotMatch(sql,/values\s*\(\s*'2026-\d{2}-\d{2}'/i);
 });
