@@ -30,3 +30,9 @@ test('Contacts overdue/today labels use the Las Vegas calendar',()=>{
  assert.equal(dateLabel('2026-10-14T20:00:00.000Z','2026-10-14T18:00:00.000Z'),'Today');
  assert.equal(dateLabel('2026-10-15T08:00:00.000Z','2026-10-14T20:00:00.000Z'),'Upcoming');
 });
+
+test('Malformed workspace missing owner identifiers fails closed',()=>{
+ const malformed={...record(9,'Should remain hidden','active'),ownerId:undefined};
+ assert.deepEqual(findLoadedContacts([malformed as unknown as ContactSummary],undefined as unknown as string,'all',''),[]);
+ assert.equal(contactCounts([malformed as unknown as ContactSummary],undefined as unknown as string).loaded,0);
+});
