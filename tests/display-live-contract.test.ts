@@ -1,6 +1,6 @@
 import test from 'node:test';import assert from 'node:assert/strict';
 import {parseDisplaySlides,parseDisplaySnapshot,activeDisplaySlides,churchTimeToUtc,churchLocal} from '../lib/continuous-display/live-contract.ts';
-const slide={id:'welcome',kind:'announcement',style:'editorial',title:'Welcome',body:'Approved example text',duration:12};
+const slide={id:'welcome',kind:'announcement',style:'editorial',title:'Welcome',body:'Approved example text',duration:12} as const;
 test('display live: basic anonymous-free text slide validates',()=>assert.equal(parseDisplaySlides([slide]).length,1));
 test('display live: unknown private records and HTML-bearing keys never pass',()=>assert.throws(()=>parseDisplaySlides([{...slide,privatePrayer:'x'}])));
 test('display live: invalid February date rejected',()=>assert.throws(()=>parseDisplaySlides([{...slide,date:'2026-02-30'}])));
