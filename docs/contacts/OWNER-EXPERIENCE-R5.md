@@ -1,5 +1,7 @@
 # Contacts R5 — live owner workspace expansion
 
+> **Current release scope verified October 14, 2026:** live Contacts UI remains an explicitly owner-only pilot, with one module grant and zero saved contacts at the read-only audit. A UI/list feature does not broaden database access. Owner-real-browser save/reload and multi-member governance remain separate acceptance decisions. [Current production snapshot](../CURRENT-STATUS.md) · [Release gates](../RELEASE-GATES.md).
+
 Verified October 14, 2026. This release extends the actual Contacts module at **https://lvz.app/modules/contacts**. No separate website or new review preview was published.
 
 ## Production
