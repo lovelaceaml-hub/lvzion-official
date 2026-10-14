@@ -46,7 +46,7 @@ test('service exclusions prevent a Saturday morning booking',async({page})=>{
  await page.getByLabel('End').selectOption('11:00');
  await expect(page.getByText(/cannot overlap morning service/)).toBeVisible();
  await page.getByRole('button',{name:'Add fictional reservation'}).click();
- await expect(page.getByRole('alert')).toContainText('cannot overlap morning service');
+ await expect(page.getByRole('dialog',{name:'Reserve a study space'}).getByRole('alert')).toContainText('cannot overlap morning service');
 });
 
 test('priority overrides are explicitly unavailable until access rules are approved',async({page})=>{
