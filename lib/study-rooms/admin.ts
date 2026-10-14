@@ -1,4 +1,4 @@
-import {dayKey,addDay,overlap} from './domain.ts';
+import {dayKey,addDay,overlap,bookingResources} from './domain.ts';
 import type {Resource,Schedule} from './domain.ts';
 export type Closure={id:string;resourceId:string|null;day:string;start:number;end:number;reason:string;active:boolean;version:number};
 export type AdminData={resources:(Resource&{active:boolean;version:number})[];closures:Closure[]};
@@ -26,12 +26,12 @@ export function simulateAdmin(data:AdminData,s:Schedule,raw:unknown):AdminData{
  const future=s.bookings.filter(b=>b.state!=='cancelled'&&(b.day>s.today||(b.day===s.today&&b.end>s.nowMinute)));
  if(p.action==='resource.update'){
   const r=next.resources.find(x=>x.id===p.resourceId);if(!r)throw Error('Resource unavailable.');if(r.version!==p.expectedVersion)throw Error('Resource changed; refresh first.');
-  if(!p.active&&future.some(b=>b.resourceId===r.id))throw Error('Resource has reservations. Cancel or move them explicitly first.');
+  if(!p.active&&future.some(b=>bookingResources(b).includes(r.id)))throw Error('Resource has reservations. Cancel or move them explicitly first.');
   r.name=p.name!.trim();r.active=p.active!;r.version++;
  }else if(p.action==='closure.add'){
   if(p.day!<s.today||p.day!>addDay(s.today,365))throw Error('Choose a date within the next year.');
   if(p.resourceId&&!next.resources.some(r=>r.id===p.resourceId&&r.active))throw Error('Resource unavailable.');
-  if(future.some(b=>b.day===p.day&&(!p.resourceId||b.resourceId===p.resourceId)&&overlap(b.start,b.end,p.start!,p.end!)))throw Error('Closure conflicts with existing reservations.');
+  if(future.some(b=>b.day===p.day&&(!p.resourceId||bookingResources(b).includes(p.resourceId))&&overlap(b.start,b.end,p.start!,p.end!)))throw Error('Closure conflicts with existing reservations.');
   next.closures.push({id:crypto.randomUUID(),resourceId:p.resourceId||null,day:p.day!,start:p.start!,end:p.end!,reason:p.reason.trim(),active:true,version:1});
  }else{
   const c=next.closures.find(x=>x.id===p.id&&x.active);if(!c)throw Error('Closure unavailable.');if(c.version!==p.expectedVersion)throw Error('Closure changed; refresh first.');c.active=false;c.version++;
