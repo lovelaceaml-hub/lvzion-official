@@ -4,7 +4,7 @@ import Link from 'next/link';
 import type {Action} from '../../lib/morning-prayer/domain';
 import styles from './morning-prayer.module.css';
 type Capability='view_schedule'|'join_gathering'|'volunteer_host'|'review_requests'|'manage_schedule'|'view_materials'|'edit_materials'|'publish_materials';
-type Occ={id:string;date:string;originalDate:string;startsAt:string;endsAt:string;timezone:string;kind:'gathering'|'app_day'|'cancelled';host:string;isMine:boolean;hostConfirmed:boolean;verified:boolean;revision:number};
+type Occ={id:string;date:string;originalDate:string;startsAt:string;endsAt:string;timezone:string;kind:'gathering'|'app_day'|'cancelled';host:string;isMine:boolean;hostConfirmed:boolean;verified:boolean;revision:number;readingKey?:string|null};
 type Req={id:string;occurrenceId:string;kind:'volunteer'|'change';status:string;revision:number;isMine:boolean;requester:string;note:string};
 type Material={key:string;kind:'pwp'|'reading';revision:number;body:{title:string;summary:string;items:string[];sourceLabel:string}};
 type Draft=Material&{id:string;sourceState:'checked'|'incomplete'};
@@ -40,7 +40,7 @@ export default function MorningPrayerLive(){
  const [hostSelection,setHostSelection]=useState(''),[readingSelection,setReadingSelection]=useState(''),[myWeek,setMyWeek]=useState(1);
  const cap=(key:Capability)=>!!data?.capabilities?.includes(key);
  const loader=useCallback(async()=>{
-  const first=month+'-01',last=new Date(Date.UTC(+month.slice(0,4),+month.slice(5,7)+1,0)).toISOString().slice(0,10);
+  const first=month+'-01',last=new Date(Date.UTC(+month.slice(0,4),+month.slice(5,7),0)).toISOString().slice(0,10);
   try{const result=await json<Workspace>('/api/morning-prayer?from='+first+'&to='+last);setData(result);setError('');}
   catch(e){setData(null);setError(e instanceof Error?e.message:'Morning Prayer unavailable.');}
  },[month]);
@@ -98,7 +98,7 @@ export default function MorningPrayerLive(){
        {!active.verified&&<p className={styles.warning}>Schedule has not been verified by a coordinator.</p>}
        {active.kind==='gathering'&&<p className={styles.muted}>Join access remains unavailable until this occurrence has an authorized, verified meeting link.</p>}
        {canVolunteer(active)&&<button className={styles.primary} disabled={busy} onClick={()=>void post({type:'volunteer',occurrenceIds:[active.id]})}>Request to host this date →</button>}
-       {cap('view_materials')&&published.filter(m=>m.kind==='reading').map(m=><p key={m.key}><strong>{m.body.title}</strong> — {m.body.summary}</p>)}
+       {cap('view_materials')&&published.filter(m=>m.kind==='reading'&&m.key===active.readingKey).map(m=><p key={m.key}><strong>{m.body.title}</strong> — {m.body.summary}</p>)}
       </section>}
     </>}
     {tab==='me'&&<>
@@ -117,7 +117,7 @@ export default function MorningPrayerLive(){
        <button disabled={busy} className={styles.primary} onClick={()=>{try{void post({type:'create_occurrence',date,startsAt:laInstant(date,start),endsAt:laInstant(date,end),timezone:zone,kind},true);}catch(e){setMessage(e instanceof Error?e.message:'Check the time.');}}}>Save date, pending verification →</button>
       </section>}
       {cap('manage_schedule')&&rows.length>0&&<section className={styles.card}><h2>Manage entered dates</h2>{rows.filter(o=>o.date>=today).map(o=><div key={o.id} className={styles.requestRow}><strong>{pretty(o.date)} · {o.host}</strong><p>{o.verified?'Schedule verified':'Unverified'} · Version {o.revision}</p>
-       <div className={styles.actions}><button disabled={busy||o.verified} onClick={()=>void post({type:'schedule',occurrenceId:o.id,mode:'verify'})}>Verify date/time</button><button disabled={busy||o.kind!=='gathering'} onClick={()=>void post({type:'schedule',occurrenceId:o.id,mode:'app_day'})}>App day</button><button disabled={busy||o.kind!=='gathering'} onClick={()=>void post({type:'schedule',occurrenceId:o.id,mode:'cancel'})}>Cancel</button></div>
+       {published.some(m=>m.kind==='reading')&&<div><label>Reading for this date<select value={readingSelection} onChange={e=>setReadingSelection(e.target.value)}><option value="">Choose approved reading</option>{published.filter(m=>m.kind==='reading').map(m=><option key={m.key} value={m.key}>{m.body.title}</option>)}</select></label><button className={styles.secondary} disabled={busy||!readingSelection} onClick={()=>void post({type:'link_reading',occurrenceId:o.id,readingKey:readingSelection},true)}>Link reading</button></div>}<div className={styles.actions}><button disabled={busy||o.verified} onClick={()=>void post({type:'schedule',occurrenceId:o.id,mode:'verify'})}>Verify date/time</button><button disabled={busy||o.kind!=='gathering'} onClick={()=>void post({type:'schedule',occurrenceId:o.id,mode:'app_day'})}>App day</button><button disabled={busy||o.kind!=='gathering'} onClick={()=>void post({type:'schedule',occurrenceId:o.id,mode:'cancel'})}>Cancel</button></div>
        {data.eligibleHosts.length>0&&o.verified&&o.kind==='gathering'&&<div><label>Eligible host<select value={hostSelection} onChange={e=>setHostSelection(e.target.value)}><option value="">Choose an eligible host</option>{data.eligibleHosts.map(h=><option key={h.id} value={h.id}>{h.name}</option>)}</select></label><button className={styles.secondary} disabled={!hostSelection||busy} onClick={()=>void post({type:'assign',occurrenceId:o.id,memberId:hostSelection})}>Assign host</button></div>}
       </div>)}</section>}
       {cap('review_requests')&&<section className={styles.card}><h2>Hosting requests awaiting approval</h2>{requests.filter(r=>r.status==='pending').length?requests.filter(r=>r.status==='pending').map(r=><div key={r.id} className={styles.requestRow}><strong>{r.requester} · {r.kind==='volunteer'?'Volunteer':'Change'}</strong><p>{pretty(rows.find(o=>o.id===r.occurrenceId)?.date||today)}{r.note?' · Private note: '+r.note:''}</p><div className={styles.actions}><button disabled={busy} onClick={()=>void post({type:'review',requestId:r.id,decision:'approve'})}>Approve</button><button disabled={busy} onClick={()=>void post({type:'review',requestId:r.id,decision:'decline'})}>Decline</button></div></div>):<p className={styles.muted}>No pending requests.</p>}</section>}
