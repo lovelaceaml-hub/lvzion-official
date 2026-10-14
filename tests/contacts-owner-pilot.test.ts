@@ -20,7 +20,7 @@ test('Contacts private owner release: authorized reads, mutations, DNC and isola
   rpc<{id:string;version:number}>('select public.contacts_command_r3($1,$2,$3,$4,$5::jsonb) result',
    [contact,version,id(request),op,JSON.stringify(data)]);
  try {
-  await db.exec('create role supabase_auth_admin nologin');
+  // Shared synthetic bootstrap defines the auth administrator role.
   for(const p of [
    'supabase/tests/bootstrap.sql',
    'supabase/migrations/20261014020617_member_system_foundation.sql',
