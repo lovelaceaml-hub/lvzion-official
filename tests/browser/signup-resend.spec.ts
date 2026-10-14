@@ -35,7 +35,7 @@ test('confirmation resend keeps user on the email step when delivery is unavaila
  await page.getByText("Didn't receive the email?").click();
  await page.getByLabel('Email used to sign up').fill('test@example.invalid');
  await page.getByRole('button',{name:'Resend confirmation'}).click();
- await expect(page.getByRole('alert')).toContainText('temporarily unavailable');
+ await expect(page.getByRole('alert').filter({hasText:'Confirmation emails are temporarily unavailable.'})).toBeVisible();
  await expect(page.getByRole('button',{name:'Resend confirmation'})).toBeEnabled();
  await expect(page.getByRole('heading',{name:'Check your email.'})).toBeVisible();
 });

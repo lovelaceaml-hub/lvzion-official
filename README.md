@@ -3,7 +3,9 @@
 ## Quick links
 
 - **Actual app:** [lvz.app](https://lvz.app)
-- **Status:** Actual app and confirmed-email signup are live. New members start Unassigned. Owner access is verified. Confirmation emails support a different browser from signup.
+- **Status:** Actual app and confirmed-email signup are live. The requested organization has 4 age categories, 8 groups and 16 empty units. Hierarchy management and member placement are live and verified.
+- **Member guide:** [Organization and member placement](docs/USER-MANUAL.md)
+- **Current workflow:** [Organization completion](docs/ORGANIZATION-WORKFLOW.md)
 - **Repository:** [Private GitHub repository](https://github.com/lovelaceaml-hub/lvzion-official)
 - **Handoff:** [Current status](docs/HANDOFF.md)
 - **Setup:** [Behavior, validation and rollback](docs/ACTUAL-APP-SETUP.md)
