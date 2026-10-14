@@ -2,7 +2,7 @@ import type {ContactSummary} from './server-contract.ts';
 export type ContactFilter='open'|'new'|'active'|'paused'|'closed'|'archived'|'all';
 export type ContactCounts={loaded:number;open:number;new:number;active:number;paused:number;closed:number;archived:number};
 export function contactCounts(records:readonly ContactSummary[],memberId:string):ContactCounts {
- const own=records.filter(c=>c.ownerId===memberId);
+ const own=records.filter(c=>Boolean(memberId)&&Boolean(c.ownerId)&&c.ownerId===memberId);
  return {
   loaded:own.length,
   open:own.filter(c=>!c.archived&&c.lifecycle!=='closed').length,
@@ -16,7 +16,7 @@ export function contactCounts(records:readonly ContactSummary[],memberId:string)
 export function findLoadedContacts(records:readonly ContactSummary[],memberId:string,filter:ContactFilter,query:string):ContactSummary[] {
  const needle=query.normalize('NFKC').trim().toLocaleLowerCase('en-US').slice(0,120);
  return records.filter(c=>{
-  if(c.ownerId!==memberId)return false;
+  if(!memberId||!c.ownerId||c.ownerId!==memberId)return false;
   if(needle&&!c.name.normalize('NFKC').toLocaleLowerCase('en-US').includes(needle))return false;
   if(filter==='all')return true;
   if(filter==='archived')return c.archived;
