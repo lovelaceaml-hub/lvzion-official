@@ -33,3 +33,7 @@ The designated owner must choose their own password on the real signup page and 
 Retain dpl_9r1r6Gae4cRwtTnAtDmMunn9yqTX for immediate website rollback to signup-closed actual app, and the earlier static dpl_6xjt1qTmgXggJvQUNoeJAhvnwLCk for full prototype fallback. To halt enrollment, disable the database enrollment switch and production signup flag. Never erase audit/history or drop the additive schema as a rollback shortcut.
 
 Personal credentials use Apple Passwords or Keychain only. No credentials or designated personal email are in Git.
+
+## Password policy update
+
+Anthony requested six characters as the minimum on 2026-10-14. The signup, invitation-activation and recovery forms and their server validation now agree. Supabase Auth must be verified at the same minimum before the deliberate production release. The earlier twelve-character rule is superseded by this direct instruction.

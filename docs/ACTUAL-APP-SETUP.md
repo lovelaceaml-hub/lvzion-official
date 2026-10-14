@@ -14,7 +14,7 @@ A privately designated first owner receives member, department and account admin
 
 Production requires the exact approved Supabase project, https://lvz.app, actual Vercel production and explicit activation. Isolated/local credentials cannot activate that backend. Public signup also requires confirmed mail readiness and BotID Basic. The app checks bot signals and durable keyed rate buckets. A single-use, email-bound ticket expires after five minutes; Supabase's Before User Created hook rejects direct signup without it. Browser roles cannot issue tickets or read private settings. Invitations receive tickets only for existing verified invitation records. Tickets grant no member permissions.
 
-BotID uses explicit basic checks on client/server. Paid deep analysis is not enabled. Resend uses a dedicated auth.lvz.app sender on the approved free plan. Never enable overages without permission. Confirmation links keep tokens in fragments and require an explicit POST. Email confirmation remains enabled, anonymous signup disabled, password minimum twelve characters. Recovery and invitation messages use the same verified SMTP provider.
+BotID uses explicit basic checks on client/server. Paid deep analysis is not enabled. Resend uses a dedicated auth.lvz.app sender on the approved free plan. Never enable overages without permission. Confirmation links keep tokens in fragments and require an explicit POST. Email confirmation remains enabled, anonymous signup disabled, password minimum six characters. Recovery and invitation messages use the same verified SMTP provider.
 
 ## Validation
 
@@ -38,3 +38,5 @@ Retain the old production deployment dpl_6xjt1qTmgXggJvQUNoeJAhvnwLCk for websit
 - Automatic approval review rejected an unapproved email-rate increase from two to thirty per hour. The existing cap was retained while the approved connection was completed. A specific capacity decision is pending.
 - Real database enrollment and production signup/email switches are now enabled. Production deployment dpl_8aR37Y4qqZRfvfJbT9sMLA2MY7VK is READY at c33bcb638e28822c24c5695ce5f610c535406e01. Twelve production signup/access checks passed, and all app tables retain RLS.
 - The real signup form is available for the owner to choose a password and confirm their own email. No real account or imported record was created by the agent.
+
+- Anthony requested a six-character password minimum on 2026-10-14. Signup, invitation activation, password recovery and Supabase Auth use the same six-character minimum. Longer passwords remain accepted up to 128 characters.

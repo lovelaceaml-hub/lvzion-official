@@ -10,7 +10,7 @@ export function signupSettings(env:Record<string,string|undefined>){
 }
 export function parseSignup(input:Record<string,unknown>){
  const email=normalizeIdentifier(input.email);
- if(!email.includes('@')||typeof input.name!=='string'||input.name.trim().length<2||input.name.trim().length>120||typeof input.password!=='string'||input.password.length<12||input.password.length>128)throw new Error('Invalid signup.');
+ if(!email.includes('@')||typeof input.name!=='string'||input.name.trim().length<2||input.name.trim().length>120||typeof input.password!=='string'||input.password.length<6||input.password.length>128)throw new Error('Invalid signup.');
  if(input.captchaToken!==undefined&&(typeof input.captchaToken!=='string'||input.captchaToken.length>4096))throw new Error('Invalid verification.');
  return {email,name:input.name.trim(),password:input.password,captchaToken:input.captchaToken as string|undefined};
 }
