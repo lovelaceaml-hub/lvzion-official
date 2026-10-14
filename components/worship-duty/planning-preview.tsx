@@ -1,10 +1,10 @@
 'use client';
 import {useEffect,useRef,useState} from 'react';
 import type {FormEvent,ReactNode} from 'react';
-import {CATALOG,DEMO_NOW,available,dateKey,hasDuty,meta} from '../../lib/worship-duty/domain';
+import {CATALOG,available,dateKey,hasDuty,meta} from '../../lib/worship-duty/domain';
 import type {Department,Duty,Member,Period,Service} from '../../lib/worship-duty/domain';
 import {PLANNER_ACTORS,calendarDays,candidateProblem,changeService,closed,configureDefault,configureRoster,coverage,createServices,departmentRoster,isServing,localInput,localToInstant,monthKey,monthServices,planningAllowed,planningFixture,proposeOpenSlots,regularDrafts,rosterKey,saveBatch,serviceCaption,shiftMonth} from '../../lib/worship-duty/planning-domain';
-import type {Change,PlannerActor,PlannerState,RosterChange,ServiceDraft} from '../../lib/worship-duty/planning-domain';
+import type {Change,PlannerState,RosterChange,ServiceDraft} from '../../lib/worship-duty/planning-domain';
 import './worship-duty.css';
 import './planning.css';
 type Tab='month'|'services'|'department';
@@ -24,7 +24,6 @@ export default function PlanningPreview(){
  const changeMonth=(next:string)=>{try{monthKey(next);if(leave()){setMonth(next);setDay('');setNotice('');}}catch(e){say((e as Error).message,true);}};
  const switchPersona=(index:number)=>{if(!leave())return;const a=PLANNER_ACTORS[index].actor;setPersona(index);setDepartment(a.manageDepartments[0]??'Usher Brothers');setTab(a.manageDepartments.length?'month':'services');setNotice('');setDefaultChoice(state.openingDefault??'');};
  const chooseTab=(next:Tab)=>{if(leave()){setTab(next);setNotice('');setDay('');setDefaultChoice(state.openingDefault??'');}};
- const staged=(s:Service,d:Duty)=>changes.find(c=>c.serviceId===s.id&&c.dutyId===d)?.memberId??s.assignments[d]??'';
  const proposedValue=(s:Service,d:Duty)=>{const c=changes.find(c=>c.serviceId===s.id&&c.dutyId===d);return c?c.memberId??'':s.assignments[d]??'';};
  const stage=(s:Service,duty:Duty,value:string)=>{const next=changes.filter(c=>c.serviceId!==s.id||c.dutyId!==duty);if(value!==(s.assignments[duty]??''))next.push({serviceId:s.id,dutyId:duty,memberId:value||null,expectedVersion:s.version});if(next.length>40){say('Save or discard the current 40 changes before adding more.',true);return;}setChanges(next);say('Draft updated. The saved schedule has not changed.');};
  const active=services.filter(s=>s.status!=='cancelled'),stats=canManage?active.map(s=>coverage(state,s,department)):[];
@@ -41,7 +40,11 @@ export default function PlanningPreview(){
   {notice&&<div className={`wd-notice ${bad?'wd-error':''}`} role={bad?'alert':'status'}>{notice}</div>}
   {!canPlan?<section className="wd-card wd-empty"><h2>Planning access is not assigned</h2><p>Member or technical-administrator access alone does not permit scheduling, roster changes, or service-wide edits.</p><a href="/worship-duty-preview/connected">Return to the member workflow</a></section>:<>
    <nav className="wp-tabs" aria-label="Planning sections">{actor.manageDepartments.length>0&&<button type="button" aria-current={tab==='month'?'page':undefined} onClick={()=>chooseTab('month')}>Month planner</button>}<button type="button" aria-current={tab==='services'?'page':undefined} onClick={()=>chooseTab('services')}>Services</button>{actor.manageDepartments.length>0&&<button type="button" aria-current={tab==='department'?'page':undefined} onClick={()=>chooseTab('department')}>Department</button>}</nav>
-   <div className="wp-toolbar"><label>Planning month<input type="month" aria-label="Planning month" value={month} min="2020-01" max="2099-12" onChange={e=>changeMonth(e.target.value)}/></label><div className="wp-month-arrows"><button type="button" aria-label="Previous month" onClick={()=>changeMonth(shiftMonth(month,-1))}>‹</button><button type="button" aria-label="Next month" onClick={()=>changeMonth(shiftMonth(month,1))}>›</button></div>{actor.manageDepartments.length>0&&<label>Scheduling department<select aria-label="Scheduling department" value={department} onChange={e=>{if(leave())setDepartment(e.target.value as Department);}}>{actor.manageDepartments.map(d=><option key={d}>{d}</option>)}</select>}</div>
+   <div className="wp-toolbar">
+    <label>Planning month<input type="month" aria-label="Planning month" value={month} min="2020-01" max="2099-12" onChange={e=>changeMonth(e.target.value)}/></label>
+    <div className="wp-month-arrows"><button type="button" aria-label="Previous month" onClick={()=>changeMonth(shiftMonth(month,-1))}>‹</button><button type="button" aria-label="Next month" onClick={()=>changeMonth(shiftMonth(month,1))}>›</button></div>
+    {actor.manageDepartments.length>0&&<label>Scheduling department<select aria-label="Scheduling department" value={department} onChange={e=>{if(leave())setDepartment(e.target.value as Department);}}>{actor.manageDepartments.map(d=><option key={d}>{d}</option>)}</select></label>}
+   </div>
    {tab==='month'&&canManage&&<>
     <div className="wp-metrics"><div><strong>{active.length}</strong><span>services</span></div><div><strong>{stats.reduce((n,s)=>n+s.open,0)}</strong><span>open slots</span></div><div><strong>{stats.reduce((n,s)=>n+s.problems,0)}</strong><span>need review</span></div></div>
     <p className="wp-fine">Open slots are unassigned catalog positions, not a claim that every position is required at every service.</p>
