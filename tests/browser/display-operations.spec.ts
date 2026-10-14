@@ -15,7 +15,7 @@ const baseScreen=()=>({
  devices:[],history:[
   {id:'50000000-0000-4000-8000-000000000001',generation:2,publishedAt:date(-10000),until:date(604800000)},
   {id:'50000000-0000-4000-8000-000000000002',generation:1,publishedAt:date(-86400000),until:date(604800000)}
- ],configVersion:0,operatingHours:[],publishedItems:[intro,event],overrideSlideId:null,overrideUntil:null
+ ],configVersion:0,operatingHours:[],publishedItems:[intro,event],overrideSlideId:null as string|null,overrideUntil:null as string|null
 });
 test('fictional phone editor supports screen switching and versioned operating hours',async({page})=>{
  await page.setViewportSize({width:390,height:844});
