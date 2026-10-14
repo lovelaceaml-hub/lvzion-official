@@ -11,13 +11,16 @@ const isoFromWall=(wall:string,current:string)=> {
  try{return churchTimeToUtc(wall,preferred);}
  catch{return churchTimeToUtc(wall,preferred==='-07:00'?'-08:00':'-07:00');}
 };
-export function SlideEligibilityEditor({slide,onChange,onError}:{
- slide:DisplaySlide;onChange:(patch:Partial<DisplaySlide>)=>void;onError:(message:string)=>void;
+export function SlideEligibilityEditor({slide,overallStartsAt,overallEndsAt,onChange,onError}:{
+ slide:DisplaySlide;overallStartsAt?:string;overallEndsAt?:string;onChange:(patch:Partial<DisplaySlide>)=>void;onError:(message:string)=>void;
 }){
  const active=Boolean(slide.startsAt&&slide.endsAt);
  const toggle=(checked:boolean)=>{
   if(!checked){onChange({startsAt:undefined,endsAt:undefined});return;}
-  const n=Date.now()+60000;onChange({startsAt:new Date(n).toISOString(),endsAt:new Date(n+86400000).toISOString()});
+  const start=Math.max(Date.now()+60000,overallStartsAt?Date.parse(overallStartsAt):0);
+  const end=Math.min(start+86400000,overallEndsAt?Date.parse(overallEndsAt):Number.POSITIVE_INFINITY);
+  if(!Number.isFinite(start)||!Number.isFinite(end)||end<=start){onError('The overall publication window must include a future interval.');return;}
+  onChange({startsAt:new Date(start).toISOString(),endsAt:new Date(end).toISOString()});onError('');
  };
  const update=(field:'startsAt'|'endsAt',value:string,offset?:'-07:00'|'-08:00')=>{
   if(!value)return;

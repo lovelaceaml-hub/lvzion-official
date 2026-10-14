@@ -96,7 +96,7 @@ export default function DisplayManager(){
   <label className="cd-span">Headline<input value={s.title} maxLength={74} onChange={e=>change(index,{title:e.target.value})}/></label>
   <label className="cd-span">Supporting message<textarea value={s.body} maxLength={160} rows={3} onChange={e=>change(index,{body:e.target.value})}/></label>
   <label>Duration (seconds)<input type="number" min={8} max={60} value={s.duration} onChange={e=>change(index,{duration:Number(e.target.value)})}/></label>
-  <div className="cd-span"><SlideEligibilityEditor slide={s}
+  <div className="cd-span"><SlideEligibilityEditor slide={s} overallStartsAt={screen?.startsAt||undefined} overallEndsAt={screen?.endsAt||undefined}
    onChange={patch=>change(index,patch)} onError={setStatus}/></div>
   {(s.kind==='schedule'||s.kind==='event')&&<label>Date<input type="date" value={s.date||''} onChange={e=>change(index,{date:e.target.value})}/></label>}
   {s.kind==='event'&&<><label>Event time<input value={s.time||''} maxLength={72} onChange={e=>change(index,{time:e.target.value})}/></label><label>Location<input value={s.location||''} maxLength={72} onChange={e=>change(index,{location:e.target.value})}/></label></>}
