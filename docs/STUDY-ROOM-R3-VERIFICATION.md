@@ -4,16 +4,19 @@ This supplements `STUDY-ROOM-R3.md` with results inspected after the complete UI
 
 ## Pinned implementation and preview
 
-- Runtime commit: `8aa90576801aa8c500fefec90ba9738a75270457`.
+- Runtime implementation commit: `8aa90576801aa8c500fefec90ba9738a75270457`.
+- Tested implementation plus regression/evidence commit: `19dec2ffcffe80461b7782db6e1e3768556ce589`. Application runtime is unchanged from the implementation commit.
 - Draft reconciliation PR: https://github.com/lovelaceaml-hub/lvzion-official/pull/8.
-- Vercel deployment: `dpl_Hf318Sss8K86cL99MXMDbSGrrF7K`.
-- Exact preview: https://lvzion-official-4crid1urd-lvzion.vercel.app/study-rooms-preview.
-- Branch preview: https://lvzion-official-git-feature-study-rooms-reconciliation-r3-lvzion.vercel.app/study-rooms-preview.
-- Verified deployment target: preview; READY. Git source SHA matches the runtime commit above.
+- Latest verified deployment: `dpl_8aTAUW62RxLgMY63AziAZza9XF6u`, Git SHA `19dec2ffcffe80461b7782db6e1e3768556ce589`.
+- Exact verified preview: https://lvzion-official-aepf9a6am-lvzion.vercel.app/study-rooms-preview.
+- Actual branch alias returned by Vercel: https://lvzion-official-git-feature-study-rooms-reconcili-c76302-lvzion.vercel.app/study-rooms-preview.
+- Verified deployment source: Git; state READY; not a production-target deployment.
+
+The earlier implementation deployment `dpl_Hf318Sss8K86cL99MXMDbSGrrF7K` at https://lvzion-official-4crid1urd-lvzion.vercel.app/study-rooms-preview was also verified. The structured JSON evidence pins that initial implementation milestone. The latest deployment above independently passed the same full build and all 27 selected browser checks. The previous long-form branch URL was corrected to Vercel's actual shortened alias; do not construct branch aliases from the branch name.
 
 ## Actual Git-backed checks
 
-Vercel build logs report **156 application tests passed, zero failures/skips**, followed by **111 PostgreSQL foundation permission assertions passed** and successful optimized Next.js compilation/TypeScript/page generation. These are results from the full repository at the pinned Git commit, not from the older sandbox snapshot.
+Vercel build logs for both pinned deployments report **156 application tests passed, zero failures/skips**, followed by **111 PostgreSQL foundation permission assertions passed** and successful optimized Next.js compilation/TypeScript/page generation. These are results from the full repository at the pinned Git commits, not from the older sandbox snapshot.
 
 Reservation SQL regression is R1 **41**, R2 **42**, R3 **57** assertions. The R3 migration and regression SQL in the native workspace were checked against their committed Git blob hashes. The new R3 assertions cover entire-bundle rollback, one identity/activity/receipt, access boundaries, private history, stale editors, accessory closure/disable conflicts and all-resource release.
 
@@ -21,7 +24,7 @@ Native PostgreSQL additionally passed **243 recorded SQL assertions**, three rea
 
 ## Deployed browser checks
 
-**27 passed, zero failed/skipped/flaky**, against the pinned Vercel deployment in Chromium with iPhone-sized emulation. The selected suite comprises 22 Study Room checks and five generic module-runtime checks. It reruns the earlier reservation flows and adds combined-resource booking/edit/cancel, private history, explicit manager separation, responsive layout, keyboard focus and history-endpoint denial.
+**27 passed, zero failed/skipped/flaky**, against each pinned Vercel deployment in Chromium with iPhone-sized emulation. The selected suite comprises 22 Study Room checks and five generic module-runtime checks. It reruns the earlier reservation flows and adds combined-resource booking/edit/cancel, private history, explicit manager separation, responsive layout, keyboard focus and history-endpoint denial.
 
 Three refresh checks deliberately use browser-intercepted synthetic API responses to verify focus/access-loss clearing, BroadcastChannel invalidation and stale-cancellation feedback. They test the deployed client implementation, not hosted authentication or real cross-device persistence. The other preview interactions use fictional in-memory records. Unauthenticated endpoint denial tests reached the actual deployed application endpoints after authorized Vercel preview access.
 
