@@ -19,7 +19,9 @@ test('signup shows the activation boundary and accessible password manager field
 test('Unassigned member shows own profile and no group navigation at phone size',async({page})=>{
  await page.setViewportSize({width:320,height:740});await page.goto('/enrollment-preview');
  await expect(page.getByRole('heading',{name:'My placement'})).toBeVisible();
- await expect(page.locator('dd')).toHaveText(['Unassigned','Unassigned','Unassigned']);
+ await expect(page.locator('.unassigned-placement').first().locator('dd')).toHaveText(['Unassigned','Unassigned','Unassigned']);
+ await expect(page.getByText('First name',{exact:true})).toBeVisible();
+ await expect(page.getByText('Last name',{exact:true})).toBeVisible();
  await expect(page.getByRole('button',{name:'Manage',exact:true})).toHaveCount(0);
  await expect(page.getByRole('link',{name:'Open your group directory'})).toHaveCount(0);
  expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);

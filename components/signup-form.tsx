@@ -15,6 +15,10 @@ export default function SignupForm({enabled,local,siteKey}:{enabled:boolean;loca
  const [message,setMessage]=useState(CHECK_EMAIL);
  const [submitted,setSubmitted]=useState(false);
  const [show,setShow]=useState(false);
+ const [resendBusy,setResendBusy]=useState(false);
+ const [resendStatus,setResendStatus]=useState('');
+ const [resendError,setResendError]=useState('');
+ const [resendCooldown,setResendCooldown]=useState(false);
  const [captcha,setCaptcha]=useState('');
  const [resetVersion,setResetVersion]=useState(0);
  const inFlight=useRef(false);
@@ -75,6 +79,29 @@ export default function SignupForm({enabled,local,siteKey}:{enabled:boolean;loca
   }
  }
 
+ async function resend(e:FormEvent<HTMLFormElement>){
+  e.preventDefault();
+  if(resendBusy||resendCooldown)return;
+  const form=e.currentTarget;
+  const email=new FormData(form).get('resendEmail');
+  if(typeof email!=='string'||!email.trim())return;
+  setResendBusy(true);setResendError('');setResendStatus('');
+  try{
+   const response=await fetch('/api/auth/resend-confirmation',{
+    method:'POST',headers:{'Content-Type':'application/json'},
+    credentials:'same-origin',cache:'no-store',
+    body:JSON.stringify({email:email.trim()})
+   });
+   const data=await response.json() as {message?:string;error?:string};
+   if(!response.ok)throw new Error(data.error||'Resend unavailable. Try again later.');
+   setResendStatus(data.message||'Check your inbox for the newest confirmation email.');
+   setResendCooldown(true);
+   window.setTimeout(()=>setResendCooldown(false),60000);
+   form.reset();
+  }catch(e){setResendError(e instanceof Error?e.message:'Connection unavailable. Please try again.');}
+  finally{setResendBusy(false);}
+ }
+
  function startOver(){
   try{sessionStorage.removeItem(SUBMITTED_KEY);}catch{}
   setSubmitted(false);
@@ -91,6 +118,17 @@ export default function SignupForm({enabled,local,siteKey}:{enabled:boolean;loca
    <p role="status">{message}</p>
    <p>Your age category, group, and unit will remain <strong>Unassigned</strong> until an authorized leader verifies and places you.</p>
    <p>Check your inbox and spam folder. Open the newest confirmation link and choose <strong>Confirm and continue</strong>.</p>
+   <details className="signup-resend">
+    <summary>Didn't receive the email?</summary>
+    <p>Delivery can take a few minutes. Enter your signup email to request another link. Your account must still be awaiting email confirmation.</p>
+    <form onSubmit={resend}>
+     <label htmlFor="signup-resend-email">Email used to sign up</label>
+     <input id="signup-resend-email" type="email" name="resendEmail" autoComplete="email" autoCapitalize="none" maxLength={254} required disabled={resendBusy||resendCooldown}/>
+     <button type="submit" disabled={resendBusy||resendCooldown}>{resendBusy?'Requesting…':resendCooldown?'Please wait one minute':'Resend confirmation'}</button>
+    </form>
+    {resendStatus&&<p role="status">{resendStatus}</p>}
+    {resendError&&<p role="alert">{resendError}</p>}
+   </details>
    <p><a href="/sign-in">Already confirmed? Sign in</a></p>
    <button type="button" className="secondary" onClick={startOver}>Create another account</button>
   </section>:<>
