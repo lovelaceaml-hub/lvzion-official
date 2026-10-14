@@ -4,7 +4,7 @@ A new, independent phone-first application. Previous LV Zion apps and databases 
 
 ## Development status
 
-`feature/member-system-secure-r1` contains the member and organizational foundation, independent department/technical permissions, history-preserving management, verified invitation and recovery workflows, and a module integration framework. Draft PR #2 is stacked on mobile prototype PR #1; neither is a member-launch approval.
+`feature/member-system-secure-r1` contains the member and organizational foundation, independent department/technical permissions, history-preserving management, verified invitation and recovery workflows, and a module integration framework. Draft PR #2 is stacked on mobile prototype PR #1; new Study Room Reservation draft PR #4 is stacked on PR #2. None is a member-launch approval.
 
 The permanent domain **https://lvz.app is registered and connected** to the new Vercel project. `www.lvz.app` redirects to the apex. It still serves the earlier public design prototype, not the development branch. Email hosting and operational `@lvz.app` senders are not configured.
 
@@ -13,12 +13,13 @@ The permanent domain **https://lvz.app is registered and connected** to the new 
 - `/`: preserved original home concept.
 - `/experience-preview`: fictional phone-first My Week / Manage / Apps / Notifications.
 - `/member-preview`: fictional member, leadership, department and technical-administrator management. Demo mutations are in-memory only.
+- `/study-rooms-preview`: the selected first official app's fictional room/whiteboard/TV scheduling and reservation preview.
 - `/roster-preview`: fixed fictional import rehearsal with duplicate and placement review. No uploads, accounts or database writes.
 - `/install`: phone-installation guidance, manifest and opt-in public-only offline fallback.
 - `/members` and `/members/manage`: session-authorized workspace; hosted activation remains deliberately gated.
 - `/request-access`, `/sign-in`, `/auth/continue`, `/activate`, `/reset-password`: account workflows implemented in code, not activated for real members.
 
-The new hosted Supabase project contains three applied foundation migrations and seventeen RLS-protected tables, with zero Auth users or member records at the last inspection. The module-runtime migration remains **unapplied**. No official individual application has been selected or published.
+The new hosted Supabase project contains three applied foundation migrations and seventeen RLS-protected tables, with zero Auth users or member records at the last inspection. The module-runtime migration remains **unapplied**. **Study Room Reservation is the first selected official application; its implementation is still preview-only and has not been published for real members.**
 
 Hosted test identity provisioning was previously blocked by tool safety checks. It is not retried through another mechanism; the known hosted-reference guard and disabled delivery remain. Existing local real-service Auth test results are not evidence of hosted sign-in success.
 

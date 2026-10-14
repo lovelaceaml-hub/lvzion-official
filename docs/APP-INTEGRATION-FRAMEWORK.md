@@ -1,6 +1,6 @@
 # LV Zion Official — app integration framework (development review)
 
-This is an infrastructure milestone, **not selection, approval, launch, or publication of an official LV Zion application**. Previous LV Zion apps remain separate and read-only. No real member data, official activity feed, push campaign, app permission, mail delivery, or production rollout is implied.
+This document describes the generic infrastructure milestone, not publication of any application. **The first official module has since been selected: Study Room Reservation.** Its separate preview remains fictional and not ready for member use. Previous LV Zion apps remain separate and read-only. No real member data, official activity feed, push campaign, app permission, mail delivery, or production rollout is implied.
 
 ## Review branch architecture
 
@@ -15,13 +15,13 @@ This is an infrastructure milestone, **not selection, approval, launch, or publi
 
 ## What requires approval before any official app
 
-1. Exact first official app, its accountable owner, allowed module users/managers, and department/group relationships.
+1. For the selected Study Room Reservation module: confirm accountable owner, allowed users/managers, departmental authority, the priority/Force override policy and group relationships.
 2. Real per-module activity and notification contracts; no assumptions about worship duty, room reservations, attendance, or other previous applications.
 3. Audited publishing and grant workflows with owner authorization and migration/rollback procedures. These privileged mutation paths are intentionally **not** added to the general member API.
 4. Personalization and notification policies: title confidentiality, opt-in push content, retention, timezone and reminder behavior.
 5. Independent application security review, database advisors, hosted migration ledger reconciliation, test accounts, backup/restore, real browser/device testing and an authorized limited pilot.
 
-**Do not apply the proposed new migration to any production or hosted database merely because this code is merged or the preview builds.** The LV Zion Official hosted login is still disabled, and the selected lvz.app domain remains paused.
+**Do not apply the proposed new migration to any production or hosted database merely because this code is merged or the preview builds.** The LV Zion Official hosted login is still disabled; the registered `lvz.app` domain is connected to the existing design prototype and has not been switched to this branch.
 
 ## Tests
 

@@ -1,6 +1,14 @@
 # LV Zion Mobile Product Decisions
 
-Recorded 2026-10-13 from the design interview. This is a new application, *not* a migration of the old app architecture. The previous six app concepts and demo slots are not an approved official app lineup.
+Recorded 2026-10-13 from the design interview, and updated October 14. This is a new application, *not* a migration of the old app architecture. The previous six app concepts and demo slots are not an approved official app lineup.
+
+## First official individual app selected
+
+**Study Room Reservation** is the selected first official module of LV Zion Official. The existing Firebase Study Room Scheduler is a **read-only reference** for rules and user experience and stays authoritative for current live reservations. The new module lives in the independent new Next.js/Supabase platform.
+
+The initial fictional `/study-rooms-preview` demonstrates the current reference inventory (4 rooms, 5 boards, 3 TVs), a four-day booking window, half-hour slots, resource-specific schedules and multi-resource booking. **No real bookings or membership data are connected.** Priority displacement, admin holds, Force override, public lobby display and manager authorization require detailed review before implementation. Selecting the module does not authorize production publication, migrations, or copying old data.
+
+See `docs/STUDY-ROOM-OFFICIAL-MODULE.md` for exact scope and open decisions.
 
 ## Mobile experience
 - Personalized hybrid home with **My Week** and **Manage** tabs; default is My Week.
@@ -84,7 +92,7 @@ This section is a blueprint; **no database migration or real member data has bee
 3. **Identity and onboarding:** member/invitation matching, username-or-email sign-in and verified recovery, verified activation flow, suspension and sign-out/session revocation. Do not bulk invite real people.
 4. **Scoped leadership tools:** unit/group/pastoral and technical-admin views using a shared server-side permission engine; request-and-accept transfer workflow; auditable role appointments.
 5. **Connect member dashboard:** real authorized member profile, group label, department badges, role-specific Manage sections, and privacy-safe notifications; retain fictional sample events until app data sources exist.
-6. **Approve first official app modules:** only after the app lineup and each module's owner/data-access rules are confirmed. Earlier legacy apps and prototype numbered tiles are not automatically in scope.
+6. **Implement selected first module:** Study Room Reservation is chosen; confirm its accountable owner, access scopes, booking-change authorization and data contract before publishing. Earlier legacy apps and prototype numbered tiles are not automatically in scope.
 7. **Pilot then launch:** automated permission-denial/privilege-escalation tests, duplicate-import dry run, data-backup/restore rehearsal, mobile accessibility checks, and a limited, authorized member pilot before any larger rollout.
 
 ### Specific checks for first acceptance test
@@ -100,5 +108,5 @@ This section is a blueprint; **no database migration or real member data has bee
 
 - Exact age-category labels and the group/unit naming system used by Las Vegas Zion.
 - Identity verification and password recovery for people with usernames but no deliverable personal email.
-- Which official application module launches first, its accountable owner, and its restricted data fields.
+- Study Room Reservation launches first, but its accountable owner, manager roles, allowable overrides, and restricted data fields still need confirmation.
 - Whether `support@lvz.app` will receive via forwarding or a dedicated inbox; choice of transactional email provider.

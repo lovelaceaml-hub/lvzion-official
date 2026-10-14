@@ -64,3 +64,17 @@ These are legacy facts, **not automatically approved future policy**. The new ac
 - The generic module registry and authenticated Supabase login remain gated until separately verified.
 
 **Related code:** `lib/study-room-policy.ts`, `app/study-rooms-preview/page.tsx`, `tests/study-room-policy.test.ts`.
+
+## Initial development verification (October 14, 2026)
+
+- The Study Room Reservation preview was committed on an isolated branch, stacked on the secure member foundation. Draft PR #4 remains unmerged.
+- A new Git-backed Vercel build passed with **READY** status. No original Firebase system or the new hosted Supabase reservation schema was changed.
+- Pure TypeScript policy tests now verify the original inventory and booking window, Tuesday evening and Saturday service exclusions, grid validation, future-only starts, all-resource availability, active conflicts, admin holds, and deliberately disabled priority displacement.
+- The initial build detected a mislabeled Tuesday/Wednesday test; this was corrected. A browser test was also scoped to the reservation dialog to avoid Next.js' separate announcement element.
+- **Six hosted phone-sized Chromium browser tests passed** on the deployed review build, including an actual fictional multi-resource create-and-cancel flow and a check that it made **no non-GET network requests**. Saturday morning blocks show zero free resources for the selected service period.
+- The resource-availability counter and month labels were corrected, and the Vercel build was verified READY again.
+- This is a browser review with synthetic data, **not** hosted Supabase sign-in, external email, physical-device verification, a production reservation, or a real-module publication.
+
+Preview: https://lvzion-official-git-feature-study-room-reservations-r1-lvzion.vercel.app/study-rooms-preview
+
+Pull request: https://github.com/lovelaceaml-hub/lvzion-official/pull/4
