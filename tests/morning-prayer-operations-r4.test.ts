@@ -119,6 +119,16 @@ test('Morning Prayer R4: verified owner, member grants, atomic dates and Vault j
    const receipts=await db.query('select result from mpg_private.command_receipts');
    assert.doesNotMatch(JSON.stringify(receipts.rows),/Fictional1|us06web.zoom.us/);
   });
+  await t.test('inside window, only authorized member obtains Vault link',async()=>{
+   await owner();
+   await db.query("update mpg_private.occurrences set starts_at=clock_timestamp()+interval '5 minutes',ends_at=clock_timestamp()+interval '35 minutes',local_date=(clock_timestamp() at time zone 'America/Los_Angeles')::date where id=$1",[occ]);
+   await db.query("update mpg_private.access_references set expires_at=clock_timestamp()+interval '35 minutes' where occurrence_id=$1",[occ]);
+   await as(2);
+   const result=await scalar<{joinUrl:string}>('select public.mpg_live_join($1)',[occ]);
+   assert.match(result.joinUrl,/^https:\/\/us06web[.]zoom[.]us\/j\//);
+   await as(3);
+   await denied(()=>db.query('select public.mpg_live_join($1)',[occ]));
+  });
   await t.test('join is denied outside meeting window and after revocation',async()=>{
    await as(2);await denied(()=>db.query('select public.mpg_live_join($1)',[occ]));
    await write(1,'mpg_meeting_settings',{type:'revoke_meeting',occurrenceId:occ});
