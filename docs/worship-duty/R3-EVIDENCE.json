@@ -1,0 +1,18 @@
+{
+  "date": "2026-10-14",
+  "testedApplicationCommit": "54015837858a5f5b4d8fd7fb117f385089e273cf",
+  "baseR2Commit": "5042e4dda19a3209167af28686f1c102cfca7d23",
+  "previewDeployment": "dpl_82u7saTKnAtVs2tuHaVYLJL8qZLf",
+  "previewOrigin": "https://lvzion-official-ige7mfps7-lvzion.vercel.app",
+  "route": "/worship-duty-preview/planning",
+  "deploymentState": "READY",
+  "nodeTests": {"passed":198,"failed":0,"skipped":0,"newR3Tests":27},
+  "foundationDatabaseAssertions": {"passed":111},
+  "browser": {"passed":40,"succeeded":true,"command":"cmd_001131275c264b929bf8a531be38","checkedAt":"2026-10-14T13:03:05.682Z","widths":[320,390,430,768,1280],"pageErrors":[],"unexpectedBackendRequests":[]},
+  "r3DatabaseMigration": {"repositoryWrite":"blocked_by_tool_safety_check","committed":false,"applied":false,"retriedByAnotherMethod":false},
+  "r3DataMode": "fictional_in_memory_only",
+  "productionActivated": false,
+  "realDataImported": false,
+  "originalApplicationModified": false,
+  "limitations": ["No R3 operational database persistence or server authorization proof","No new hosted Auth/PostgREST or separate-session concurrency proof","R1 and R2 entry screens smoke-tested; full older browser suites not rerun","No physical-device or full visual/accessibility certification","Historical Fill algorithms remain incomplete"]
+}
