@@ -33,11 +33,14 @@ test('Morning Prayer R4: verified owner, member grants, atomic dates and Vault j
   return{date:d,startsAt:d+'T16:00:00Z',endsAt:d+'T16:30:00Z',timezone:'America/Los_Angeles',kind:'gathering'};
  };
  try{
+  await db.exec('create role supabase_auth_admin nologin;');
   for(const path of ['supabase/tests/bootstrap.sql',
    'supabase/migrations/20261014020617_member_system_foundation.sql',
    'supabase/migrations/20261014043055_member_command_hardening.sql',
    'supabase/migrations/20261014045521_member_onboarding.sql',
-   'supabase/migrations/20261014074214_module_runtime_foundation.sql'])
+   'supabase/migrations/20261014074214_module_runtime_foundation.sql',
+   'supabase/migrations/20261014155148_self_service_unassigned_enrollment.sql',
+   'supabase/migrations/20261014190128_production_owner_setup.sql'])
    await db.exec(await readFile(path,'utf8'));
   await db.exec('create schema vault;create table vault.decrypted_secrets(id uuid primary key default gen_random_uuid(),decrypted_secret text not null);');
   await db.exec('create function vault.create_secret(new_secret text,new_name text default null,new_description text default null,new_key_id uuid default null) returns uuid language plpgsql as $$declare v uuid;begin insert into vault.decrypted_secrets(decrypted_secret)values(new_secret) returning id into v;return v;end$$;');
