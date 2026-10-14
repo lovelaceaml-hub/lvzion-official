@@ -3,9 +3,9 @@ export type Entry = { id: string; name: string; parentId?: string; canManage?: b
 export type Onboarding = { requests: {id:string;name:string;email:string;status:string;memberId?:string;createdAt:string;reason?:string}[]; invitations:{id:string;memberId:string;email:string;delivery:string;expiresAt:string;consumedAt?:string;revokedAt?:string}[]; accounts:{memberId:string;username:string;enabled:boolean}[];linkedMemberIds:string[] };
 export type Workspace = {
  onboarding?:Onboarding;
- self: Omit<Person,'groupId'|'unitId'> & { groupId: string | null; unitId: string | null };
+ self: Omit<Person,'groupId'|'unitId'> & { groupId: string | null; unitId: string | null; firstName?:string|null; lastName?:string|null };
  enrollment?: {state:'unassigned'|'assigned';placementHistory:{id:string;startedAt:string;endedAt:string|null;reason:string|null}[]};
- unassignedMembers?: {id:string;name:string;email:string|null;createdAt:string}[];
+ unassignedMembers?: {id:string;name:string;firstName?:string|null;lastName?:string|null;email:string|null;createdAt:string}[];
  permissions: { organization: boolean; memberManagement: boolean; departmentAdmin: boolean; technical: boolean };
  contacts: { email?: string | null; phone?: string | null };
  directory: Person[]; managedMembers: Person[]; categories: Entry[]; groups: Entry[]; units: Entry[];
