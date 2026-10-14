@@ -61,7 +61,7 @@ test('display operations R2: owner-scoped multi-screen, hours, restore and appro
    assert.equal(s.configVersion,1);assert.deepEqual(s.operatingHours,hours);
   });
   const starts=new Date(Date.now()-1000).toISOString(),until=new Date(Date.now()+86400000).toISOString();
-  const innerStart=new Date(Date.now()+1000).toISOString(),innerEnd=new Date(Date.now()+600000).toISOString();
+  const innerStart=new Date(Date.now()-500).toISOString(),innerEnd=new Date(Date.now()+600000).toISOString();
   const content=[{id:'approved-1',kind:'announcement',style:'editorial',title:'Fictional announcement',
      body:'Safe fixture',duration:12,startsAt:innerStart,endsAt:innerEnd}];
   await t.test('per-slide content must stay inside approved overall window',async()=>{

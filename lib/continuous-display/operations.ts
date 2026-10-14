@@ -1,4 +1,4 @@
-import {churchLocal,parseDisplaySnapshot,type DisplaySnapshot,type DisplayScreen,type DisplaySlide} from './live-contract';
+import {churchLocal,parseDisplaySnapshot,type DisplaySnapshot,type DisplayScreen,type DisplaySlide} from './live-contract.ts';
 
 export type OperatingDay={day:number;enabled:boolean;start:number;end:number};
 export type OperatingHours=OperatingDay[];
