@@ -1,5 +1,8 @@
 # Study Room Reservation — R3 reconciliation
 
+> **Historical checkpoint — not the current production state.** This page captures the earlier development checkpoint; its 'unapplied', 'draft', 'not implemented' and 'not deployed' statements reflect that past date, not the current R4 state. Booking is still closed pending Firebase migration. See the [current Study Room status](study-rooms/README.md), [R4 production evidence](STUDY-ROOM-R4-LIVE.md) and [cutover runbook](study-rooms/CUTOVER-RUNBOOK.md).
+
+
 ## Scope and safety
 
 Development-only integrated module at `/modules/study-rooms`; fictional, in-memory review at `/study-rooms-preview`. This revision does not publish the module, grant member access, apply hosted migrations, import real records, change production aliases, or touch the original Firebase scheduler. Existing original applications remain independent.

@@ -8,6 +8,14 @@ Keep production-only secrets in provider stores and personal integration credent
 
 See ACTUAL-APP-SETUP.md for validation, migration reconciliation and rollback.
 
+## Study Room Reservation: independent booking-activation gate
+
+The **real Study Room module** and R4 owner-management controls are already published at [lvz.app/modules/study-rooms](https://lvz.app/modules/study-rooms); that release is **not** permission to open bookings. As of the October 14 production check, the module had exactly one explicit owner-manager grant, and the Supabase row `app_private.study_booking_activation.bookings_open` was **false**, with zero new bookings.
+
+Keep the original [lvrooms.web.app](https://lvrooms.web.app) Firebase scheduler authoritative until its active/future reservation export is complete and verified, its **server-side** booking and administrator restore writes are demonstrably frozen, the records/slots are reconciled without inventing member identities, and genuine hosted signed-in member/manager booking, revocation, physical-device and backup/restore tests pass. Only a separate recorded scheduling-owner authorization may permit gate activation and explicitly scoped viewer/manager grants. Never allow overlapping independent writers.
+
+For operational procedures and stop/rollback criteria, see [Study Room cutover runbook](study-rooms/CUTOVER-RUNBOOK.md); [verified R4 release evidence](STUDY-ROOM-R4-LIVE.md) distinguishes shipped code from unavailable booking access.
+
 ## Worship Duty: unpublished workstream
 
 The user asked to integrate Worship Duty into the real `lvz.app`, but [PR #25](https://github.com/lovelaceaml-hub/lvzion-official/pull/25) remains a **draft, unmerged** workstream. **No Worship schema, module registration, feature activation or operational launch is verified.** See [Worship production checklist](worship-duty/PRODUCTION-RELEASE-CHECKLIST.md) and [current handoff](worship-duty/WORK-HANDOFF.md) for enforceable gates. The fourth proposed setup migration has no implemented UI/API or completed current-branch tests. Do not apply it, set `LVZ_WORSHIP_DUTY_ENABLED=true`, or promote this module until the reviewed code and SQL pass full authorization/integration checks. Do not affect existing live modules or the original Firebase Worship application.
