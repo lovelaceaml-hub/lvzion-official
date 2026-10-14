@@ -7,6 +7,8 @@
 - [Current setup and Build log](ACTUAL-APP-SETUP.md)
 - [Release controls](RELEASE-GATES.md)
 - [Hosted migration mapping](HOSTED-MIGRATION-LEDGER.json)
+- [Worship Duty integration (not live)](worship-duty/README.md)
+- [Worship Duty Work handoff](worship-duty/WORK-HANDOFF.md)
 
 ## Current work
 
@@ -59,3 +61,13 @@ A protected resend-confirmation action is available from the check-email screen;
 ## Contacts R5 verified private workspace
 
 The real Contacts module at [lvz.app/modules/contacts](https://lvz.app/modules/contacts) was expanded in merged PR #31. Production deployment `dpl_35kWj2cAcYYNjHq2fhc5XpAcofrv` is READY at commit `87c5a8573ca01f7216f2c78df1da5b827b7380d2`. It adds owner-only loaded-name search, status overview, accessible-record duplicate suggestions and the real shared Apps picker. The complete production build passed **322 app tests + 198 foundation SQL assertions**; five local Chromium widths passed. Signed-out and cross-origin Contacts requests were denied on the live domain. The existing owner-only database grant is unchanged, with zero contact records at verification. Confidential member sharing and richer database worklists are **not** enabled. Evidence and precise limitations: [Contacts owner experience R5](contacts/OWNER-EXPERIENCE-R5.md).
+
+## Worship Duty integration — NOT live
+
+The user requested Worship Duty as another module of the **real** `lvz.app`. [Draft PR #25](https://github.com/lovelaceaml-hub/lvzion-official/pull/25), branch `feature/worship-duty-live`, integrates the R1/R2 member-facing code with the current live foundation; historical [PR #5](https://github.com/lovelaceaml-hub/lvzion-official/pull/5) is based on a superseded member branch and is **not** to be directly merged. The historical R3 month planner remains **fictional and without persistent production storage**.
+
+As checked October 14, the real Supabase project had **zero Worship Duty module records, private tables, public RPCs or grants**. Four Worship-specific SQL migrations in the draft branch remain unapplied. The fourth owner-setup migration is not tested, and the owner setup screen/API are not committed. No real Worship session/write, branch build, or production deployment has been verified for this current integration. A READY production `lvz.app` build refers to the **other** live modules, not Worship.
+
+**Authoritative module documents:** [status/index](worship-duty/README.md), [Work handoff](worship-duty/WORK-HANDOFF.md), [feature inventory](worship-duty/IMPLEMENTATION-STATUS.md), [release checklist](worship-duty/PRODUCTION-RELEASE-CHECKLIST.md), [migration order/status](worship-duty/MIGRATION-STATUS.md), [verification plan](worship-duty/VERIFICATION-PLAN.md), [structured evidence](worship-duty/STATUS-EVIDENCE.json).
+
+Next authorized work is to finish and test the setup front end and backend, reconcile with concurrently updated `main`, validate SQL/RLS and exact member permissions, perform controlled hosted migration + owner verification, and deliberately deploy the tested combined production build. Do **not** import legacy rosters or touch `lv-zion-duties.web.app`. Documentation-only commits do not launch this module.

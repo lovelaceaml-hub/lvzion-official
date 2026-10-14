@@ -128,6 +128,12 @@
     "hosted": "Remove whitespace from each stored statement; these stored statements already omit comments and outer transaction wrappers.",
     "purpose": "Comparison of known migration definitions, not cryptographic attestation or a full semantic/security review."
   },
-  "unapplied_repository_migrations": [],
-  "warning": "Hosted migration versions differ from repository filenames. R4 operations already applied and booking gate remains closed; never replay or manually rewrite ledger or run unreviewed db push."
+  "unapplied_repository_migrations": [
+    "20261014103007_worship_duty_review.sql",
+    "20261014112521_worship_duty_authenticated_queries.sql",
+    "20261014224325_worship_duty_live_activation.sql",
+    "20261014224327_worship_duty_live_setup.sql"
+  ],
+  "warning": "Hosted migration versions differ from repository filenames. R4 operations already applied and booking gate remains closed; never replay or manually rewrite ledger or run unreviewed db push. This feature branch includes unapplied Worship-specific migrations from draft PR #25; never blanket db push or rewrite hosted history.",
+  "draft_workstream_note": "On draft PR #25 ONLY, these four Worship Duty migrations are present in the feature branch but NOT applied to hosted Supabase. The owner-setup SQL remains untested and corresponding UI/API are not committed. This is not a deployment authorization. See docs/worship-duty/MIGRATION-STATUS.md. Other concurrent workstreams may apply further migrations after this snapshot."
 }

@@ -7,3 +7,9 @@ Keep email confirmation, own-record Unassigned privacy, independent leader place
 Keep production-only secrets in provider stores and personal integration credentials in Keychain. Original LV Zion apps and unrelated draft modules remain out of scope. Physical-device testing is still a useful follow-up and is not claimed complete.
 
 See ACTUAL-APP-SETUP.md for validation, migration reconciliation and rollback.
+
+## Worship Duty: unpublished workstream
+
+The user asked to integrate Worship Duty into the real `lvz.app`, but [PR #25](https://github.com/lovelaceaml-hub/lvzion-official/pull/25) remains a **draft, unmerged** workstream. **No Worship schema, module registration, feature activation or operational launch is verified.** See [Worship production checklist](worship-duty/PRODUCTION-RELEASE-CHECKLIST.md) and [current handoff](worship-duty/WORK-HANDOFF.md) for enforceable gates. The fourth proposed setup migration has no implemented UI/API or completed current-branch tests. Do not apply it, set `LVZ_WORSHIP_DUTY_ENABLED=true`, or promote this module until the reviewed code and SQL pass full authorization/integration checks. Do not affect existing live modules or the original Firebase Worship application.
+
+Full historical Fill parity, the fictional R3 planner and real roster import are separate feature gates, not implicit parts of the owner-only initial setup.
