@@ -1,5 +1,7 @@
 # LV Zion Official — Study Room module, production setup
 
+> **Historical first live-module release.** Current production has progressed to [Study Room R4 management controls](STUDY-ROOM-R4-LIVE.md), but **real reservations are still closed** pending the original Firebase reconciliation and explicit cutover. The initial migration and preview results below are retained for traceability. [Current status](CURRENT-STATUS.md).
+
 **Real host:** https://lvz.app/modules/study-rooms  
 **Live GitHub:** lovelaceaml-hub/lvzion-official; integrate only through production main.  
 **Original scheduler:** https://lvrooms.web.app (unchanged, remains booking authority).
