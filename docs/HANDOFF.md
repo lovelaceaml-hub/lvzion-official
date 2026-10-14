@@ -22,7 +22,7 @@ Six migrations are now applied on the actual new project. The older three were n
 
 ## Current production and email
 
-The actual app and self-service signup are live at https://lvz.app/sign-up. Production deployment dpl_8aR37Y4qqZRfvfJbT9sMLA2MY7VK is READY at main commit c33bcb638e28822c24c5695ce5f610c535406e01. Signup, verified delivery and account-email switches are enabled only for production. Twelve production signup/access checks passed; fictional routes redirect, anonymous private records are denied and a forged-origin request created no Auth identity. The provider reports the SMTP test delivered to its own synthetic delivered@resend.dev inbox. TLS authentication was verified. No real account or personal record was created for testing.
+The actual app and self-service signup are live at https://lvz.app/sign-up. Production deployment dpl_5XtZ7FjKqF71w3unp8z59Vqd2722 is READY at main commit 9ac33961ad37c433e41cf256dbd3dfe2d9479b78. Signup, verified delivery and account-email switches are enabled only for production. Twelve production signup/access checks passed; fictional routes redirect, anonymous private records are denied and a forged-origin request created no Auth identity. The provider reports the SMTP test delivered to its own synthetic delivered@resend.dev inbox. TLS authentication was verified. No real account or personal record was created for testing.
 
 The approved Resend key has sending-only access to auth.lvz.app and is stored in personal Keychain plus Supabase/Vercel secret stores. No credential files or logs contain its value. Resend remains on the free plan with paid overages off. Supabase's existing signup-email cap remains two per hour. Automatic approval review rejected an unapproved increase to thirty; a separate specific user decision is pending. Do not raise that cap until approved. SMTP port is a string in the current management API.
 
@@ -36,4 +36,4 @@ Personal credentials use Apple Passwords or Keychain only. No credentials or des
 
 ## Password policy update
 
-Anthony requested six characters as the minimum on 2026-10-14. The signup, invitation-activation and recovery forms and their server validation now agree. Supabase Auth must be verified at the same minimum before the deliberate production release. The earlier twelve-character rule is superseded by this direct instruction.
+Anthony requested six characters as the minimum on 2026-10-14. The signup, invitation-activation and recovery forms and their server validation now agree. Supabase Auth was verified at six, and the actual signup, activation and recovery pages serve six-character fields after release. Production build, 125 application tests, 182 PostgreSQL assertions and 31 phone-browser checks passed. The earlier twelve-character rule is superseded by this direct instruction.

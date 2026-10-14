@@ -40,3 +40,5 @@ Retain the old production deployment dpl_6xjt1qTmgXggJvQUNoeJAhvnwLCk for websit
 - The real signup form is available for the owner to choose a password and confirm their own email. No real account or imported record was created by the agent.
 
 - Anthony requested a six-character password minimum on 2026-10-14. Signup, invitation activation, password recovery and Supabase Auth use the same six-character minimum. Longer passwords remain accepted up to 128 characters.
+
+- Six-character minimum is now live in production deployment dpl_5XtZ7FjKqF71w3unp8z59Vqd2722 at merged PR #17 commit 9ac33961ad37c433e41cf256dbd3dfe2d9479b78. Supabase Auth and all three live password forms were verified at six. Build, 125 app tests, 182 database assertions and 31 phone checks passed.
