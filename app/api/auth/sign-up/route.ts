@@ -18,7 +18,7 @@ export async function POST(request:Request){
   let signupTicket:string|undefined;
   if(c.production||(c.local&&process.env.LVZ_LOCAL_SIGNUP_HOOK==='true')){const ticket=await admin.rpc('issue_signup_ticket',{p_email:p.email,p_mode:'signup'});if(ticket.error||typeof ticket.data!=='string')throw new Error('Signup unavailable.');signupTicket=ticket.data;}
   const client=await userClient();
-  const result=await client.auth.signUp({email:p.email,password:p.password,options:{data:{display_name:p.name,...(signupTicket?{lvz_signup_ticket:signupTicket}:{})},captchaToken:p.captchaToken,emailRedirectTo:c.origin+'/signup/confirm'}});
+  const result=await client.auth.signUp({email:p.email,password:p.password,options:{data:{display_name:p.name,first_name:p.firstName,last_name:p.lastName,...(signupTicket?{lvz_signup_ticket:signupTicket}:{})},captchaToken:p.captchaToken,emailRedirectTo:c.origin+'/signup/confirm'}});
   // Misconfigured auto-confirm is never allowed to create a membership record.
   if(result.data.session){await client.auth.signOut({scope:'local'});return reply({error:'Email confirmation setup needs review. Signup is temporarily unavailable.'},503);}
   // Do not reveal duplicate emails, account existence, provider errors or delivery details.
