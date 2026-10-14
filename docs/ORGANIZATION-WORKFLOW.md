@@ -1,5 +1,7 @@
 # Organization and member placement completion
 
+> **Live hierarchy reconfirmed October 14, 2026:** four age categories, eight groups, sixteen units; one member (original owner) remains Unassigned, and **zero active placements**. This is a verified live structure, not imported church roster data. The test counts and deployment IDs below are historical release evidence. [Current status](CURRENT-STATUS.md) · [Member guide](USER-MANUAL.md).
+
 ## Scope and authority
 
 Anthony requested four named age categories, two empty placeholder groups in each, then two empty placeholder units in each group, and authorized autonomous completion of the organization and member-assignment workflow in the actual app. No preview is authorized. Full replacement is the established release mode.
