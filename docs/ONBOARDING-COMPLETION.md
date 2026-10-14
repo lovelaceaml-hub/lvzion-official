@@ -1,5 +1,7 @@
 # Member onboarding completion — October 13, 2026 Pacific
 
+> **Historical member-foundation review; not current production status.** This file preserves the original branch, test results and launch gates **at the time they were recorded**. The real platform and verified signup are now live at `lvz.app`; for current owner scope, module access, migration state and remaining tests read [CURRENT-STATUS.md](CURRENT-STATUS.md) and [RELEASE-GATES.md](RELEASE-GATES.md). Do not replay historic migrations or treat a past preview status as today's production state.
+
 ## Implemented in this review branch
 
 The member foundation now includes access-request intake and verification review, invitation creation/delivery/retry/status/revocation, verified account activation linked to an existing person, username/email sign-in, verified password recovery, session revocation, separate technical account suspension, independent department administration, organizational entry rename/archive, and an audited one-time initial-administrator bootstrap tool. The phone interface exposes the associated management screens. All demonstration records are fictional and preview edits are in memory.
