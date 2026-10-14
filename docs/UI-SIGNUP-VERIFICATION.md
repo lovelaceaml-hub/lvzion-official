@@ -1,5 +1,7 @@
 # Signup UI verification
 
+> **Historical development/preview record (not current production).** This file describes earlier proposed or disabled routes, previews, and verification performed at its original date. The real member platform now supports confirmed email signup, separate first/last-name storage and a limited set of approved owner-only modules. Read [CURRENT-STATUS.md](CURRENT-STATUS.md) and [INDEX.md](INDEX.md) before interpreting any old ‘unapplied’ or ‘not activated’ statement as the present live state.
+
 The new screens reuse the existing member typography, colors, rounded forms and native controls. This increment does not redesign the application. `/sign-up` displays the disabled activation boundary; `/enrollment-preview` provides a fictional Unassigned profile and leader assignment/decline journey. The leader must choose category, group and unit, independently verify membership, and explain the decision.
 
 Browser checks cover 320px layout, own-record member routes, hidden group/Manage navigation, assignment verification failure/success, decline history, semantic labels, password-manager autocomplete and deliberate confirmation-button keyboard focus. Confirmation GET requests do not exchange a code or create a member. Real local Auth integration independently verifies email confirmation, later sign-in, permission transitions and concurrent assignment. Hosted Auth, physical Safari/Android and human usability studies remain launch gates.
