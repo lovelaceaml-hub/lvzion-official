@@ -1,5 +1,7 @@
 # Morning Prayer — corrected legacy-app workstream R2
 
+> **Historical R2 development/legacy-reference document, not present production state.** The actual Work Mission Morning Prayer module is now integrated as an owner-only live LV Zion module. No verified real occurrences or automatic Google Sheet/GroupMe/Signal sync are implied. See [LIVE-SETUP.md](LIVE-SETUP.md) and [Current status](../CURRENT-STATUS.md). Earlier preview and unapplied-migration statements below describe the R2 branch at its original date.
+
 ## Scope correction and boundaries
 
 This module is based on `lovelaceaml-hub/morning-prayer-app`, the older **Morning Prayer Gathering — Las Vegas Work Mission** application at `lv-wm-prayer.web.app`. The user explicitly corrected the earlier recap direction and asked to continue. The Zoom recap prototype PR #7 stays on hold, unmerged, outside this branch. No recap generator, Gmail ingestion, educational graphics, attendance/PWP completion tracking, prayer journals, rankings or distribution is introduced here.
