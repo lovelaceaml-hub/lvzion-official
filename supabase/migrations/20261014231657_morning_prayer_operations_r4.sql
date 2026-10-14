@@ -182,7 +182,7 @@ create function mpg_private.bulk_schedule(
 ) returns jsonb language plpgsql security definer set search_path='' as $$
 declare actor uuid; sid uuid;s mpg_private.series; rec mpg_private.command_receipts;
  fp text; row jsonb; starts timestamptz; ends timestamptz;
- local_date date; kind text; dates date[]:='{}'; count_items integer;
+ v_date date; kind text; dates date[]:='{}'; count_items integer;
  ids jsonb:='[]'; inserted_id uuid; response jsonb;
 begin
  actor:=app_private.current_member_id();sid:=mpg_private.live_series();
@@ -212,20 +212,20 @@ begin
    or row->>'timezone'<>'America/Los_Angeles'
    or row->>'kind' not in ('gathering','app_day','cancelled')
    then raise exception 'INVALID_OCCURRENCE' using errcode='22023';end if;
-  local_date:=(row->>'date')::date;starts:=(row->>'startsAt')::timestamptz;
+  v_date:=(row->>'date')::date;starts:=(row->>'startsAt')::timestamptz;
   ends:=(row->>'endsAt')::timestamptz;kind:=row->>'kind';
   if ends<=starts or starts<=clock_timestamp()
-   or local_date>(((clock_timestamp() at time zone 'America/Los_Angeles')::date)+180)
-   or (starts at time zone 'America/Los_Angeles')::date<>local_date
-   or local_date=any(dates)
+   or v_date>(((clock_timestamp() at time zone 'America/Los_Angeles')::date)+180)
+   or (starts at time zone 'America/Los_Angeles')::date<>v_date
+   or v_date=any(dates)
   then raise exception 'DATE_UNAVAILABLE_OR_DUPLICATE' using errcode='22023';end if;
-  dates:=array_append(dates,local_date);
-  if exists(select 1 from mpg_private.occurrences
-    where series_id=sid and local_date=local_date) then
+  dates:=array_append(dates,v_date);
+  if exists(select 1 from mpg_private.occurrences o
+    where o.series_id=sid and o.local_date=v_date) then
     raise exception 'DATE_ALREADY_EXISTS' using errcode='23505';end if;
   insert into mpg_private.occurrences(series_id,original_date,local_date,
     starts_at,ends_at,timezone,kind,host_id,host_confirmed,schedule_verified,origin)
-   values(sid,local_date,local_date,starts,ends,'America/Los_Angeles',
+   values(sid,v_date,v_date,starts,ends,'America/Los_Angeles',
      kind,null,false,false,'app') returning id into inserted_id;
   ids:=ids||jsonb_build_array(inserted_id);
  end loop;
