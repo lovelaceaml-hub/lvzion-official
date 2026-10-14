@@ -3,7 +3,7 @@ import {useEffect,useMemo,useState} from 'react';
 import {churchClock} from '../../lib/mobile-time';
 import {
  BOOKING_RULES,PURPOSES,RESOURCES,RESOURCE_ORDER,bookingWindow,checkBooking,
- formattedTime,freeUnits,minutes,sampleReservations,serviceBlocks,timeOptions
+ formattedTime,freeUnits,minutes,overlaps,sampleReservations,serviceBlocks,timeOptions
 } from '../../lib/study-room-policy';
 import type {ResourceKind,BookingPurpose,Reservation,BookingRequest} from '../../lib/study-room-policy';
 import './study-rooms-preview.css';
@@ -18,6 +18,9 @@ const allTimes=timeOptions();
 function readableDay(date:string){
  return new Intl.DateTimeFormat('en-US',{timeZone:'UTC',weekday:'short',month:'short',day:'numeric'})
   .format(new Date(date+'T12:00:00Z'));
+}
+function monthShort(date:string){
+ return new Intl.DateTimeFormat('en-US',{timeZone:'UTC',month:'short'}).format(new Date(date+'T12:00:00Z')).toUpperCase();
 }
 function weekday(date:string){
  return new Intl.DateTimeFormat('en-US',{timeZone:'UTC',weekday:'short'}).format(new Date(date+'T12:00:00Z'));
@@ -64,7 +67,10 @@ export default function StudyRoomsPreview(){
  const days=useMemo(()=>bookingWindow(clock.day),[clock.day]);
  const daily=useMemo(()=>bookings.filter(b=>b.date===day&&b.status==='active'),[bookings,day]);
  const units=RESOURCES[tab].units;
- const occupied=units.length-freeUnits(tab,day,at,allTimes.find(t=>minutes(t)>minutes(at))??'23:00',daily).length;
+ const windowEnd=allTimes.find(t=>minutes(t)>minutes(at))??'23:00';
+ const serviceAtTime=serviceBlocks(day).some(s=>overlaps(at,windowEnd,s.start,s.end));
+ const freeCount=serviceAtTime?0:freeUnits(tab,day,at,windowEnd,daily).length;
+ const occupied=units.length-freeCount;
  const mine=myBookings.slice().sort((a,b)=>(a.date+a.start).localeCompare(b.date+b.start));
  const selections:BookingRequest={date:day,start,end,purpose,detail,resources};
  const checked=useMemo(()=>checkBooking(selections,bookings,{today:clock.day,localTime:clock.time}),
@@ -138,7 +144,7 @@ export default function StudyRoomsPreview(){
       {days.map((date,i)=><button className={day===date?'is-selected':''} aria-pressed={day===date}
         type="button" key={date} onClick={()=>{setDay(date);setAt(preferredStart(date,clock));}}>
        <span>{i===0?'Today':weekday(date)}</span><strong>{Number(date.slice(-2))}</strong>
-       <small>{date.slice(5,7)==='10'?'OCT':'DATE'}</small>
+       <small>{monthShort(date)}</small>
       </button>)}
      </div>
     </section>
@@ -167,8 +173,8 @@ export default function StudyRoomsPreview(){
       </div>}
      <div className="sr-unit-list">{units.map((u)=>{
       const events=unitSchedule(u.id);
-      const hasConflict=events.some(b=>minutes(b.start)<minutes(allTimes.find(t=>minutes(t)>minutes(at))??'23:00')&&minutes(b.end)>minutes(at));
-      const service=serviceBlocks(day).some(s=>minutes(s.start)<minutes(allTimes.find(t=>minutes(t)>minutes(at))??'23:00')&&minutes(s.end)>minutes(at));
+      const hasConflict=events.some(b=>overlaps(at,windowEnd,b.start,b.end));
+      const service=serviceAtTime;
       return <article className="sr-unit-card" key={u.id}>
        <div className="sr-unit-heading"><div className="sr-mini-icon">{labels[tab].symbol}</div><div><h3>{u.label}</h3><small>{u.note??labels[tab].short}</small></div>
         <span className={service||hasConflict?'sr-busy':'sr-free'}>{service?'Service':hasConflict?'Occupied':'Available'}</span>

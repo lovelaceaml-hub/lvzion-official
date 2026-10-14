@@ -40,6 +40,7 @@ test('simulated multi-resource booking is visible and cancellable but never post
 test('service exclusions prevent a Saturday morning booking',async({page})=>{
  await page.goto('/study-rooms-preview');
  await page.getByRole('button',{name:/Sat 17/}).click();
+ await expect(page.locator('.sr-time-check strong')).toHaveText('0');
  await page.getByRole('button',{name:'Reserve now'}).click();
  await page.getByRole('textbox',{name:'Contact name'}).fill('Demo contact');
  await page.getByLabel('Start').selectOption('10:00');
