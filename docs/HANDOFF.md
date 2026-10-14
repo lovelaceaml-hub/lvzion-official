@@ -7,10 +7,20 @@
 - [Current setup and Build log](ACTUAL-APP-SETUP.md)
 - [Release controls](RELEASE-GATES.md)
 - [Hosted migration mapping](HOSTED-MIGRATION-LEDGER.json)
+- [Study Room: current production status](study-rooms/README.md)
+- [Study Room: authoritative Firebase cutover gates](study-rooms/CUTOVER-RUNBOOK.md)
+
+## Study Room Reservation — live owner configuration; booking CLOSED
+
+Study Room is a **real integrated module** at [`lvz.app/modules/study-rooms`](https://lvz.app/modules/study-rooms). Initial integration is merged [PR #22](https://github.com/lovelaceaml-hub/lvzion-official/pull/22), and its inventory/service-calendar expansion is merged [PR #30](https://github.com/lovelaceaml-hub/lvzion-official/pull/30), production merge commit `7237109e46315a726cc88fa2069db0d58fbc69b1`. Vercel deployment `dpl_2CkfiSr2EM1tQaAEj5ff3gMcRNEq` passed its build and was READY; subsequent READY production deployment `dpl_35kWj2cAcYYNjHq2fhc5XpAcofrv` at `87c5a8573ca01f7216f2c78df1da5b827b7380d2` includes R4 by ancestry.
+
+The five Study Room migrations are **applied** in hosted Supabase `otecqlkqirncotytbfns`, including R4 `study_room_policy_operations` (hosted ID `20261014225514`). Verified on October 14: 12 resources (4 rooms/5 boards/3 TVs), one approved module with **one active owner-manager grant**, zero new-system bookings or occupied slots, original four weekly service blocks, no special-day overrides and **`bookings_open=false`**. Owner-only inventory creation and weekly/special-day rule management are deployed; ordinary members cannot book yet. No Firebase reservations were imported and **the original `lvrooms.web.app` is still the booking authority**.
+
+Final release verification: **317 application tests + 198 disposable PostgreSQL permission assertions**, TypeScript/build passed; **six Chromium phone/tablet tests** passed against the deployment using synthetic manager/viewer fixtures, and live anonymous Study Room schedule/admin/history/operations GET plus operations POST returned **401**. A real authenticated hosted manager write, a complete Firebase export/write freeze, hosted restore and physical Safari remain **unverified**. Do not conflate module publication with booking cutover. Details and the stop conditions are in [current status](study-rooms/README.md), [R4 verification](STUDY-ROOM-R4-LIVE.md) and [cutover runbook](study-rooms/CUTOVER-RUNBOOK.md).
 
 ## Current work
 
-change/actual-app-setup contains the main application release. Anthony explicitly requested the actual app at lvz.app and no additional previews. Automatic preview publication is disabled in Vercel; automatic Git deployments are disabled in vercel.json. The app's actual front door is sign-in. Fictional routes redirect on production. Other module draft branches and original LV Zion apps remain outside scope.
+The original `change/actual-app-setup` release is merged into `main`; the current production app now also contains multiple separately authorized modules. Anthony explicitly requested the actual app at lvz.app and no additional previews. Automatic preview publication is disabled in Vercel; automatic Git deployments are disabled in vercel.json. The app's actual front door is sign-in. Fictional routes redirect on production. Other module draft branches and original LV Zion apps remain outside scope.
 
 New confirmed accounts start Unassigned to category, group and unit and see only their own records. Authorized member administration verifies membership and places each person, retaining history/audit. The designated first owner confirms the privately configured email, receives independent organization/department/technical administration, and remains Unassigned. Organization entries are created only from Anthony's supplied instructions. No member roster is imported.
 
