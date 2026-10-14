@@ -40,3 +40,10 @@ Retain the old production deployment dpl_6xjt1qTmgXggJvQUNoeJAhvnwLCk for websit
 - The real signup form is available for the owner to choose a password and confirm their own email. No real account or imported record was created by the agent.
 
 - Anthony requested a six-character password minimum on 2026-10-14. Signup, invitation activation, password recovery and Supabase Auth use the same six-character minimum. Longer passwords remain accepted up to 128 characters.
+
+- Anthony approved thirty signup-confirmation emails per hour on 2026-10-14. The setting was applied and verified at thirty; no other limits were changed.
+- The first real owner confirmed the email, but the default hosted template still used browser-bound PKCE because the earlier template update used an ignored setting name. The correct mailer_templates_confirmation_content property is now applied and strictly checked by provider readback. Local mail tests share that exact template.
+- The owner's password sign-in completed the profile. Read-only verification confirmed three administrative roles, enabled access, Unassigned status with zero placements and exactly one audited owner initialization. No owner identity details or passwords were saved in Git.
+- Legacy PKCE confirmation failure now offers explicit sign-in recovery. Regression coverage checks fresh-browser email confirmation and password completion of a confirmed but unlinked profile. Confirmation still requires deliberate POST; email scanners cannot create membership.
+
+- Corrected confirmation build passed 128 application tests, 182 PostgreSQL assertions, 32 phone-browser checks and 44 real local signup checks, including fresh-browser confirmation and sign-in repair of a confirmed but unlinked profile.

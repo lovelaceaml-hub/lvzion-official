@@ -49,3 +49,9 @@ test('email confirmation GET never writes or exchanges a code',async({page})=>{
  await expect(page.getByRole('button',{name:'Confirm and create my profile'})).toBeEnabled();expect(posts).toHaveLength(0);expect(page.url()).not.toContain('code=');
  await page.getByRole('button',{name:'Confirm and create my profile'}).focus();await expect(page.getByRole('button',{name:'Confirm and create my profile'})).toBeFocused();
 });
+
+test('browser-bound confirmation failure explains how to finish an already-confirmed profile',async({page})=>{
+ await page.route('**/api/auth/signup-confirm',r=>r.fulfill({status:400,json:{error:'This link could not finish sign-in in this browser. If you already confirmed your email, sign in with the password you chose to finish your profile.',next:'/sign-in'}}));
+ await page.goto('/signup/confirm?code=synthetic-long-confirmation-code');await page.getByRole('button',{name:'Confirm and create my profile'}).click();
+ await expect(page.getByRole('link',{name:'Sign in to finish my profile'})).toHaveAttribute('href','/sign-in');
+});

@@ -18,7 +18,7 @@ try{
   check('real Auth hook rejects signup that bypasses app bot/rate checks',!r.ok);
   check('rejected direct signup creates no Auth identity',sql("select count(*) from auth.users where email='hook-bypass@example.invalid'")==='0');
  }
- const c=await context(),pastor=await context(),unit=await context(),declined=await context();
+ let c=await context(),pastor=await context(),unit=await context(),declined=await context();
  const signup={name:'Jamie Integration',email:'signup-integration@example.invalid',password:'Synthetic-Signup-Password!'};
  const forged=await request.newContext({baseURL:base,extraHTTPHeaders:{Origin:'https://untrusted.example'}});contexts.push(forged);
  const before=sql('select count(*) from auth.users');
@@ -30,6 +30,7 @@ try{
  check('unconfirmed signup creates no member',sql("select count(*) from public.members where display_name='Jamie Integration'")==='0');
  const otp=await token(signup.email);check('local email uses explicit confirmation and fragment token',otp.type==='signup'&&!!otp.token_hash);
  const scanner=await c.get('/auth/continue#token_hash='+otp.token_hash+'&type=signup');check('email scanner GET cannot enroll',scanner.ok()&&sql("select count(*) from public.members where display_name='Jamie Integration'")==='0');
+ c=await context();check('email confirmation succeeds without the signup browser cookies',(await c.storageState()).cookies.length===0);
  const confirmation=await post(c,'/api/auth/confirm',otp);check('real signup OTP creates Unassigned profile',confirmation.status===200&&confirmation.data.next==='/members');
  let w=await workspace(c);check('own profile has intake status and null placement',w.status===200&&w.data.self.status==='intake'&&w.data.self.groupId===null&&w.data.self.unitId===null);
  const mid=w.data.self.id;check('Unassigned cannot enumerate groups or member directory',w.data.groups.length===0&&w.data.directory.length===0&&w.data.unassignedMembers.length===0);
@@ -57,6 +58,14 @@ try{
  check('declined session immediately loses access',(await workspace(declined)).status===401);
  check('declined signup cannot sign in',(await post(declined,'/api/auth/sign-in',{identifier:declinedSignup.email,password:signup.password})).status===401);
  check('no automatic roles created for signup',sql("select count(*) from app_private.role_assignments where member_id='"+mid+"'")==='0');
+ const orphan=await context(),recoveryBrowser=await context();const orphanSignup={...signup,email:'confirmed-unlinked@example.invalid',name:'Confirmed Unlinked Example'};
+ await post(orphan,'/api/auth/sign-up',orphanSignup);const orphanOtp=await token(orphanSignup.email);
+ const orphanRedirect=await fetch('http://127.0.0.1:54321/auth/v1/verify?'+new URLSearchParams({token:orphanOtp.token_hash,type:'signup',redirect_to:base+'/signup/confirm'}),{headers:{apikey:keys.anon},redirect:'manual'});
+ const orphanLocation=orphanRedirect.headers.get('location');const orphanCode=orphanLocation?new URL(orphanLocation).searchParams.get('code'):null;
+ const lostCookie=await post(recoveryBrowser,'/api/auth/signup-confirm',{code:orphanCode});check('wrong-browser PKCE failure provides the sign-in recovery path',lostCookie.status===400&&lostCookie.data.next==='/sign-in');
+ check('failed PKCE exchange creates no membership',sql("select count(*) from public.members where display_name='Confirmed Unlinked Example'")==='0');
+ const repair=await post(recoveryBrowser,'/api/auth/sign-in',{identifier:orphanSignup.email,password:orphanSignup.password});check('password sign-in finishes a confirmed but unlinked profile',repair.status===200);
+ const repaired=await workspace(recoveryBrowser);check('repaired profile stays Unassigned and cannot enumerate groups',repaired.data.self.status==='intake'&&repaired.data.groups.length===0&&Object.values(repaired.data.permissions).every(x=>x===false));
  const pkce=await context();const pkceSignup={...signup,email:'pkce-integration@example.invalid',name:'PKCE Example'};
  await post(pkce,'/api/auth/sign-up',pkceSignup);const pkceOtp=await token(pkceSignup.email);
  const redirect=await fetch('http://127.0.0.1:54321/auth/v1/verify?'+new URLSearchParams({token:pkceOtp.token_hash,type:'signup',redirect_to:base+'/signup/confirm'}),{headers:{apikey:keys.anon},redirect:'manual'});
