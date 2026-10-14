@@ -10,7 +10,7 @@ export type DisplaySnapshot={paired:true;screen:string;version:number;serverTime
 const kinds=new Set(['announcement','schedule','event','campaign']);
 const styles=new Set(['editorial','schedule','event','campaign']);
 const uuid=/^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
-const instant=/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d{1,3})?(?:Z|[+-]\d{2}:\d{2})$/;
+const instant=/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d{1,6})?(?:Z|[+-]\d{2}:\d{2})$/;
 const local=/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}$/;
 const record=(value:unknown):value is Record<string,unknown>=>!!value&&typeof value==='object'&&!Array.isArray(value);
 const text=(value:unknown,max:number):value is string=>typeof value==='string'&&value.trim().length>0&&[...value].length<=max&&!/[\u0000-\u001f]/.test(value);
@@ -24,7 +24,7 @@ export function parseDisplaySlides(value:unknown):DisplaySlide[]{
  const seen=new Set<string>();
  return value.map(raw=>{
   if(!record(raw)||!strict(raw,['id','kind','style','title','body','duration','date','time','location','rows','startsAt','endsAt']))throw Error('Unknown or private display field.');
-  if(typeof raw.id!=='string'||!/^\w[a-z0-9-]{2,49}$/.test(raw.id)||seen.has(raw.id))throw Error('Slide identifiers must be unique.');
+  if(typeof raw.id!=='string'||!/^[a-z0-9][a-z0-9-]{2,49}$/.test(raw.id)||seen.has(raw.id))throw Error('Slide identifiers must be unique.');
   seen.add(raw.id);
   if(!kinds.has(String(raw.kind))||!styles.has(String(raw.style))||!text(raw.title,74)||!text(raw.body,160)||!int(raw.duration,8,60))throw Error('Use concise, readable TV content.');
   for(const name of ['date','time','location'])if(raw[name]!==undefined&&!text(raw[name],72))throw Error('An optional detail is invalid.');
@@ -36,7 +36,7 @@ export function parseDisplaySlides(value:unknown):DisplaySlide[]{
   if(raw.rows!==undefined&&(!Array.isArray(raw.rows)||raw.rows.length>3||raw.rows.some(r=>!record(r)||!strict(r,['time','label'])||!text(r.time,28)||!text(r.label,80))))throw Error('Schedules allow three brief activities.');
   if((raw.startsAt===undefined)!==(raw.endsAt===undefined))throw Error('A slide needs both its start and expiration.');
   if(raw.startsAt!==undefined&&(!safeInstant(raw.startsAt)||!safeInstant(raw.endsAt)||Date.parse(raw.startsAt)>=Date.parse(raw.endsAt as string)))throw Error('Invalid slide eligibility window.');
-  return raw as DisplaySlide;
+  return raw as unknown as DisplaySlide;
  });
 }
 export function parseDisplaySnapshot(value:unknown):DisplaySnapshot{

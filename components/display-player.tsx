@@ -1,5 +1,6 @@
 'use client';
 import {useEffect,useRef,useState} from 'react';
+import type{FormEvent}from'react';
 import type{DisplaySnapshot,DisplaySlide}from'../lib/continuous-display/live-contract';
 import {activeDisplaySlides,parseDisplaySnapshot} from '../lib/continuous-display/live-contract';
 import DisplayVisual from './display-visual';
@@ -66,7 +67,7 @@ export default function DisplayPlayer(){
  // The player intentionally creates one polling coordinator for its lifetime.
  // eslint-disable-next-line react-hooks/exhaustive-deps
  },[]);
- async function pair(e:React.FormEvent){
+ async function pair(e:FormEvent){
   e.preventDefault();if(pairing)return;setPairing(true);setError('');
   try{
    const response=await fetch('/api/display/device',{method:'POST',headers:{'Content-Type':'application/json'},credentials:'same-origin',body:JSON.stringify({code})});

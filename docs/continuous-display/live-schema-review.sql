@@ -238,6 +238,7 @@ begin
   where screen_id=p_screen and draft_version=s.draft_version;
  if a.items<>s.draft_items or a.valid_from<>s.draft_from or a.valid_until<>s.draft_until
    or a.valid_until<=now() then raise exception 'Exact approval required' using errcode='42501';end if;
+ if s.current_publication is not null and exists(select 1 from display_private.publications q where q.id=s.current_publication and q.approval_id=a.id) then raise exception 'Approval already published' using errcode='23505';end if;
  next_version:=s.generation+1;
  insert into display_private.publications(screen_id,approval_id,generation,items,valid_from,valid_until,published_by)
  values(p_screen,a.id,next_version,a.items,a.valid_from,a.valid_until,actor) returning id into pub;

@@ -89,9 +89,9 @@ export default function DisplayManager(){
  </div>;
  const windowEditor=<div className="cd-window"><h3>Publication window · Las Vegas</h3><p>Times use America/Los_Angeles. Select the correct daylight-saving offset for transition days.</p><div className="cd-fields">
   <label>Begins<input type="datetime-local" value={startWall} onChange={e=>{setStartWall(e.target.value);editing.current=true;setDirty(true);}}/></label>
-  <label>UTC offset<select value={startOffset} onChange={e=>{setStartOffset(e.target.value as '-07:00'|'-08:00');editing.current=true;setDirty(true;}}><option value="-07:00">Daylight (PDT −07)</option><option value="-08:00">Standard (PST −08)</option></select></label>
+  <label>UTC offset<select value={startOffset} onChange={e=>{setStartOffset(e.target.value as '-07:00'|'-08:00');editing.current=true;setDirty(true);}}><option value="-07:00">Daylight (PDT −07)</option><option value="-08:00">Standard (PST −08)</option></select></label>
   <label>Expires<input type="datetime-local" value={endWall} onChange={e=>{setEndWall(e.target.value);editing.current=true;setDirty(true);}}/></label>
-  <label>UTC offset<select value={endOffset} onChange={e=>{setEndOffset(e.target.value as '-07:00'|'-08:00');editing.current=true;setDirty(true;}}><option value="-07:00">Daylight (PDT −07)</option><option value="-08:00">Standard (PST −08)</option></select></label>
+  <label>UTC offset<select value={endOffset} onChange={e=>{setEndOffset(e.target.value as '-07:00'|'-08:00');editing.current=true;setDirty(true);}}><option value="-07:00">Daylight (PDT −07)</option><option value="-08:00">Standard (PST −08)</option></select></label>
  </div></div>;
  return <main className="cd-manage">
   <header className="cd-head"><Link href="/members">← My Week</Link><p>LV ZION OFFICIAL · APPS</p><h1>Church Display</h1><span>Animated digital billboard · authorized management</span></header>
