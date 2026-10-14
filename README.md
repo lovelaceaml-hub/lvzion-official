@@ -14,7 +14,7 @@ Independent phone-first Next.js application, using its own Supabase project. Ori
 
 Confirmed email signup creates an Unassigned member profile. Age category, group and unit stay unset until an authorized leader verifies membership and assigns placement. Unassigned members can view only their own records. The designated first owner can configure the actual organization while still Unassigned. No fictitious hierarchy or imported real records are seeded.
 
-The actual routes are [signup](https://lvz.app/sign-up), /sign-in, /sign-up, /members, /members/manage, /request-access, /reset-password and /install. Fictional development routes redirect on production. No official module has been released in this main-app increment.
+The actual routes are [signup](https://lvz.app/sign-up), /sign-in, /sign-up, /members, /members/manage, /request-access, /reset-password and /install. Fictional development routes redirect on production. The first private Contacts module is live for the verified owner at [lvz.app/modules/contacts](https://lvz.app/modules/contacts). Contact sharing, leader access, exports, and messaging remain disabled; see [Contacts release evidence](docs/contacts/LIVE-OWNER-RELEASE.md).
 
 ## Development
 
