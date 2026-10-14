@@ -35,3 +35,9 @@ Controller review is proportionate to documentation-only scope. No external revi
 - Controller review corrected ambiguous current-versus-historical status and obsolete rollback guidance. Existing app test counts remain historical, with no new runtime verification claimed.
 
 The requested publication target is this documentation-only branch followed by main in the existing private repository. Final remote commit and clean-tree verification are performed after push/merge; no new Vercel deployment is requested.
+
+## Contacts-specific documentation addendum (October 14, 2026)
+
+Following the platform-wide documentation reconciliation above, the owner-only Contacts workstream added [current scope](contacts/README.md), [owner user guide](contacts/USER-GUIDE.md), [operations](contacts/OPERATIONS.md) and [verification](contacts/VERIFICATION.md). README, AGENTS, handoff, member manual, release controls and actual setup now link those maintained references. Historical release artifacts and the other module runbooks are retained rather than overwritten. The earlier **214-link / 54-file** results above apply to the preceding audit snapshot; the newly added Contacts links were checked separately as part of this addendum.
+
+The existing 16-entry hosted migration ledger was already reconciled by the platform audit; no Contacts documentation-only change applies SQL or grants, and no real contact fields, account identifiers or credentials are included. The verified Contacts R5 build and the later platform production source are distinguished; owner-authenticated create/save/reload and multi-member sharing approval remain pending. A documentation push does not trigger production deployment.

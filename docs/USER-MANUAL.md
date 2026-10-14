@@ -79,3 +79,13 @@ Use **Apps** to see modules explicitly assigned to your account. Signing up or r
 - [Work Mission Morning Prayer](https://lvz.app/modules/work-mission-prayer): owner setup starts with empty schedules and materials. Check the real dates and approved wording before publishing. Member meeting-link access remains unavailable.
 
 See [all documentation](README.md) for each module's release evidence and remaining limits.
+
+## Contacts: authorized owner workspace
+
+Open [Contacts in LV Zion Official](https://lvz.app/modules/contacts) using your normal verified account and the authorized **Apps** selector. Only the individually granted owner sees Contacts; simply being a member, group leader or technical administrator is not sufficient.
+
+Under **My Contacts**, add a name, optional phone and preferred method. You can edit a name or preference later, but **not an existing saved phone number**. Search/filters inspect **loaded authorized names only**; use the next-page control for more records. Overview counts are partial until all pages have been loaded.
+
+On a contact, add **author-only notes**, schedule/complete/reschedule/cancel one active next step, mark do-not-contact, close, archive or restore without erasing the restriction. Possible duplicates are suggestions only, never automatic merges. Follow-Ups displays generic activity counts, not a full named task calendar; due dates on individual contacts are displayed in Las Vegas time. No email, SMS, Signal or call is sent by Contacts.
+
+The detailed [Contacts user guide](contacts/USER-GUIDE.md) covers every current control, errors and the sharing/export limitations. [Privacy status](contacts/README.md) and [verification](contacts/VERIFICATION.md) distinguish implemented owner-only functionality from unfinished shared features.

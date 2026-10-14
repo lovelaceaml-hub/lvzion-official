@@ -15,3 +15,9 @@ The **real Study Room module** and R4 owner-management controls are already publ
 Keep the original [lvrooms.web.app](https://lvrooms.web.app) Firebase scheduler authoritative until its active/future reservation export is complete and verified, its **server-side** booking and administrator restore writes are demonstrably frozen, the records/slots are reconciled without inventing member identities, and genuine hosted signed-in member/manager booking, revocation, physical-device and backup/restore tests pass. Only a separate recorded scheduling-owner authorization may permit gate activation and explicitly scoped viewer/manager grants. Never allow overlapping independent writers.
 
 For operational procedures and stop/rollback criteria, see [Study Room cutover runbook](study-rooms/CUTOVER-RUNBOOK.md); [verified R4 release evidence](STUDY-ROOM-R4-LIVE.md) distinguishes shipped code from unavailable booking access.
+
+## Contacts: owner-only confidentiality boundary
+
+The [Contacts owner workspace](contacts/README.md) is active only for its explicitly granted verified account. The Production-only `LVZ_CONTACTS_OWNER_PILOT` switch, current authenticated member/session, module grant, forced private-table RLS, contact ownership, do-not-contact restrictions and audit/idempotency enforcement must remain in effect. An organizational or technical leadership role does **not** confer contact access.
+
+Before enabling sharing, reassignment, confidential oversight, full worklist/search, export or outgoing communications, approve and test the exact audience, consent/DNC, field/history visibility and retention policy. A green frontend build does not authorize a wider grant. See [Contacts verification](contacts/VERIFICATION.md) for current evidence and unexecuted owner-session acceptance.
