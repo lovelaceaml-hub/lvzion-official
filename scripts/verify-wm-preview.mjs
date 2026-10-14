@@ -17,7 +17,7 @@ async function check(name,fn){await fn();report.checks.push(name);}
 async function goto(query=''){await page.goto(`${origin}/wm-prayer-preview${query}`,{waitUntil:'networkidle'});await expect(page.getByRole('heading',{name:'Prayer Gatherings',exact:true})).toBeVisible();}
 async function capture(name,locator=page){const filename=`${name}.png`;await locator.screenshot({path:path.join(out,filename),...(locator===page?{fullPage:true}:{})});report.screenshots.push(filename);}
 async function controls(){const d=page.locator('details').filter({has:page.locator('summary').filter({hasText:'Preview controls'})}).first();if((await d.getAttribute('open'))===null)await d.locator('summary').first().click();}
-async function role(key){await controls();await page.getByLabel('Preview role',{exact:true}).selectOption(key);}
+async function role(key){await controls();await page.getByLabel('Preview role').selectOption(key);}
 try{
  if(process.env.WM_AUTH_URL){const u=new URL(process.env.WM_AUTH_URL);if(u.origin!==origin)throw new Error('Auth link origin must match the preview.');await page.goto(u.toString(),{waitUntil:'networkidle'});}
  for(const width of [320,390,430]){
@@ -40,7 +40,7 @@ try{
  await check('approval leaves member publication empty',async()=>{await expect(page.getByTestId('review-panel')).toContainText('not published');await expect(page.getByRole('button',{name:'Publish in fictional preview'})).toHaveCount(0);});
  await role('publisher');await check('publisher has no source panel',async()=>expect(await page.getByTestId('source-panel').count()).toBe(0));
  await page.getByRole('button',{name:'Publish in fictional preview'}).click();await check('separate publication step works',async()=>expect(await page.getByTestId('review-panel').innerText()).toContain('Current member publication: revision 1'));
- await role('drafter');await page.getByLabel('Fictional gathering',{exact:true}).selectOption('demo-oct13');await page.getByRole('button',{name:'Create corrected draft'}).click();
+ await role('drafter');await page.getByLabel('Fictional gathering').selectOption('demo-oct13');await page.getByRole('button',{name:'Create corrected draft'}).click();
  await check('correction preserves published revision',async()=>expect(await page.getByTestId('review-panel').innerText()).toContain('Current member publication: revision 1'));
  await page.getByText('Test source-import scenarios',{exact:true}).click();await page.getByRole('button',{name:'Duplicate notification',exact:true}).click();await check('duplicate import simulation is idempotent',async()=>expect(await page.getByRole('status').innerText()).toContain('No new gathering or recap'));
  await page.getByRole('button',{name:'Incomplete transcript'}).click();await page.getByRole('button',{name:'Submit for review'}).click();await check('incomplete source blocks review',async()=>expect(await page.getByRole('status').innerText()).toContain('Source incomplete'));
