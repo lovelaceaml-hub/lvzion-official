@@ -69,6 +69,7 @@ test('fictional owner can restore an approved version and emphasize only publish
  await expect.poll(()=>writes.some(w=>w.action==='restore'&&w.expectedGeneration===2)).toBeTruthy();
 });
 test('fictional management never publishes unsaved per-slide scheduling edits',async({page})=>{
+ await page.clock.install({time:new Date(now)});
  const screen=baseScreen(),writes:any[]=[];
  await page.route('**/api/display/manage',async route=>{
   if(route.request().method()==='GET'){
