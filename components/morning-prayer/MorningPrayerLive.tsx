@@ -59,6 +59,9 @@ export default function MorningPrayerLive(){
  }
  const rows=[...(data?.occurrences||[])].sort((a,b)=>a.date.localeCompare(b.date));
  const today=localDay(),future=rows.filter(o=>o.date>=today&&o.kind==='gathering');
+ const upcoming=(data?.upcoming||[]).filter(o=>o.date>=today&&o.kind==='gathering');
+ const next=upcoming[0]||future[0];
+ const joinable=(id:string)=>cap('join_gathering')&&!!data?.meetingStates?.some(s=>s.occurrenceId===id&&s.ready);
  const active=focus?rows.find(o=>o.id===focus):future[0]||rows[0];
  const own=rows.filter(o=>o.isMine&&o.kind==='gathering'),requests=data?.requests||[];
  const published=(data?.materials||[]);
@@ -76,10 +79,10 @@ export default function MorningPrayerLive(){
    {data&&<>
     {tab==='home'&&<>
       <div className={styles.sectionHeading}><h2>Your next gathering</h2><span>{pretty(today)}</span></div>
-      {future[0]?<section className={styles.hero}><div className={styles.heroTop}><span>{pretty(future[0].date).toUpperCase()}</span><span>{future[0].verified?'SCHEDULED':'NEEDS VERIFICATION'}</span></div>
-       <div className={styles.heroTime}>{time(future[0].startsAt)}<small>Las Vegas time</small></div>
-       <h2>{future[0].host}</h2><p>{future[0].hostConfirmed?'Confirmed host':'Host and meeting details may need confirmation'}</p>
-       <button onClick={()=>{setFocus(future[0].id);setTab('schedule');}}>Gathering details →</button>
+      {next?<section className={styles.hero}><div className={styles.heroTop}><span>{pretty(next.date).toUpperCase()}</span><span>{next.verified?'SCHEDULED':'NEEDS VERIFICATION'}</span></div>
+       <div className={styles.heroTime}>{time(next.startsAt)}<small>Las Vegas time</small></div>
+       <h2>{next.host}</h2><p>{next.hostConfirmed?'Confirmed host':'Host and meeting details may need confirmation'}</p>
+       <button onClick={()=>{setFocus(next.id);setMonth(next.date.slice(0,7));setTab('schedule');}}>Gathering details →</button>
       </section>:<section className={styles.empty}><h2>No upcoming gatherings scheduled</h2><p>An authorized coordinator can add actual dates in Manage. No dates or meeting links are guessed.</p></section>}
       {cap('view_materials')&&<section className={styles.card}><div className={styles.cardTop}><h2>PWP · {new Intl.DateTimeFormat('en-US',{month:'long',year:'numeric',timeZone:'UTC'}).format(new Date(month+'-01T12:00:00Z'))}</h2><span className={styles.tag}>Approved sources only</span></div>
        <div className={styles.weekPicker}>{[1,2,3,4,5].map(n=><button key={n} aria-pressed={myWeek===n} onClick={()=>setMyWeek(n)}>Wk {n}</button>)}</div>
@@ -88,7 +91,7 @@ export default function MorningPrayerLive(){
        <a className={styles.officialLink} href="https://wm.watv.org/login.wmc" target="_blank" rel="noopener noreferrer">Open official WM PWP Card ↗</a>
       </section>}
       <div className={styles.sectionHeading}><h2>Upcoming dates</h2><button onClick={()=>setTab('schedule')}>Full schedule →</button></div>
-      {future.slice(0,5).map(o=><button className={styles.nextOwn} key={o.id} onClick={()=>{setFocus(o.id);setTab('schedule');}}><span><small>{pretty(o.date)}</small><strong>{time(o.startsAt)} · {o.host}</strong></span><b>›</b></button>)}
+      {(upcoming.length?upcoming:future).slice(0,5).map(o=><button className={styles.nextOwn} key={o.id} onClick={()=>{setFocus(o.id);setMonth(o.date.slice(0,7));setTab('schedule');}}><span><small>{pretty(o.date)}</small><strong>{time(o.startsAt)} · {o.host}</strong></span><b>›</b></button>)}
     </>}
     {tab==='schedule'&&<>
       <div className={styles.monthNav}><button aria-label="Previous month" onClick={()=>{setMonth(nextMonth(month,-1));setFocus(null);}}>‹</button><h2>{new Intl.DateTimeFormat('en-US',{month:'long',year:'numeric',timeZone:'UTC'}).format(new Date(month+'-01T12:00:00Z'))}</h2><button aria-label="Next month" onClick={()=>{setMonth(nextMonth(month,1));setFocus(null);}}>›</button></div>
