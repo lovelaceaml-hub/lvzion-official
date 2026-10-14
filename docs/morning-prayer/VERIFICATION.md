@@ -1,5 +1,7 @@
 # Morning Prayer R2 — verification and release record
 
+> **Historical R2 preview verification only.** The live module's later database migration and production integration are described separately in [LIVE-SETUP.md](LIVE-SETUP.md) and [Current status](../CURRENT-STATUS.md). Do not represent the preview checks below as physical phone tests, current meeting access or new live member onboarding.
+
 ## Verified initial implementation, October 14, 2026
 
 Initial application commit: `82def5050bce5dfed0f3c38bd8f8376d0b56ff67`.
