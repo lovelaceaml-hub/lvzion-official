@@ -1,5 +1,7 @@
 # Live Continuous Display integration verification — October 14, 2026
 
+> **Historical R1 verification and planned release order.** R1 and R2 integration have since been deployed to the real `lvz.app` project, but the physical TV/soak and real-content approvals described below remain open. For live status see [R2 Operations](OPERATIONS-R2.md) and [CURRENT-STATUS.md](../CURRENT-STATUS.md). This file is not proof of an actual TV session.
+
 ## Target
 New owner-only module on **lvz.app**, not another prototype website. The production app keeps its existing member sign-in, self-registration, Unassigned intake policy, and its general Apps system. No existing Mother's Love or lobby display code or database was modified.
 
