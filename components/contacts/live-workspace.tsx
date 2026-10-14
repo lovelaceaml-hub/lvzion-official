@@ -11,7 +11,7 @@ import './preview.css';import './workspace-r2.css';import './live-workspace.css'
 type View='mine'|'followup'|'overview';
 type Form='create'|'edit'|'note'|'schedule'|'reschedule'|null;
 type Packet={id:string;version:number;requestId:string;operation:string;data:Record<string,string|boolean>};
-class RequestFailure extends Error {status:number;constructor(status:number){super(status===401?'Please sign in again.':status===403?'This record or action is no longer available.':status===409?'This record changed. Reload it and review before saving.':'Contacts is unavailable. A submitted change may still have completed; reload before retrying.');this.status=status;}}
+class RequestFailure extends Error {status:number;constructor(status:number){super(status===401?'Please sign in again.':status===403?'This record or action is no longer available.':status===409?'This record changed. Reload it and review before saving.':status===400?'Review the entered information and try again.':'The save result is uncertain. Retry this unchanged form to reuse its request ID, or reload the record before making another change.');this.status=status;}}
 const format=(value:string)=>new Intl.DateTimeFormat('en-US',{timeZone:'America/Los_Angeles',month:'short',day:'numeric',hour:'numeric',minute:'2-digit'}).format(new Date(value));
 const labels={new:'New',active:'Active',paused:'Paused',closed:'Closed'};
 
@@ -41,7 +41,7 @@ export default function ContactsLiveWorkspace(){
   const fingerprint=JSON.stringify({operation,data,id:record?.id??null,version:record?.version??0});
   if(!pending.current||JSON.stringify({operation:pending.current.operation,data:pending.current.data,id:record?.id??null,version:pending.current.version})!==fingerprint)pending.current={id:record?.id??crypto.randomUUID(),version:record?.version??0,requestId:crypto.randomUUID(),operation,data};
   const packet=pending.current;
-  try{const receipt=await send<{id:string;version:number}>('command',packet);if(epoch.current!==version)return;pending.current=null;setForm(null);setName('');setPhone('');setNote('');setDue('');setNotice('Saved.');if(operation==='archive'||operation==='reassign'){await load();}else await open(receipt.id,true);}
+  try{const receipt=await send<{id:string;version:number}>('command',packet);if(epoch.current!==version)return;pending.current=null;setForm(null);setName('');setPhone('');setNote('');setDue('');setNotice('Saved.');if(operation==='create'){setFilter('open');setSearch('');setView('mine');}if(operation==='archive'){setView('mine');setFilter('archived');}if(operation==='archive'||operation==='reassign'){await load();}else await open(receipt.id,true);}
   catch(e){if(epoch.current===version)failure(e);}finally{submitting.current=false;if(epoch.current===version)setBusy(false);}
  }
  async function submit(event:FormEvent<HTMLFormElement>){event.preventDefault();if(!workspace||busy)return;
