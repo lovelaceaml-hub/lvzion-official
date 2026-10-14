@@ -57,7 +57,7 @@ grant execute on function public.study_room_schedule(date) to authenticated;
 do $owner$
 declare owner_member uuid; owner_count integer;
 begin
- select count(*),min(a.member_id) into owner_count,owner_member
+ select count(*),(array_agg(a.member_id order by a.member_id))[1] into owner_count,owner_member
  from app_private.bootstrap_receipts b
  join app_private.account_links a on a.auth_user_id=b.auth_user_id;
  if owner_count>1 then raise exception 'Multiple bootstrap owners; refuse automatic module assignment'; end if;
