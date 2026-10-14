@@ -1,6 +1,6 @@
 'use client';
 import {useEffect,useMemo,useState} from 'react';
-import {scheduleCandidates,vegasToday} from '../../lib/morning-prayer/time';
+import {scheduleCandidates,vegasToday,vegasInstant} from '../../lib/morning-prayer/time';
 import css from './operations.module.css';
 
 export type WMCapability='view_schedule'|'join_gathering'|'volunteer_host'|'review_requests'|'manage_schedule'|'view_materials'|'edit_materials'|'publish_materials';
@@ -58,6 +58,7 @@ export default function MorningPrayerOperations({data,onReload,onNotice}:{data:W
  const manage=allowed('manage_schedule'),canEdit=allowed('edit_materials');
  const {roster,denied,error:rosterError}=useOwnerRoster(data.version);
  const [busy,setBusy]=useState(false);
+ const [moveId,setMoveId]=useState(''),[moveDate,setMoveDate]=useState(vegasToday()),[moveStart,setMoveStart]=useState('07:00'),[moveEnd,setMoveEnd]=useState('07:30'),[confirmMove,setConfirmMove]=useState(false);
  const [from,setFrom]=useState(vegasToday()),[until,setUntil]=useState(vegasToday());
  const [weekdays,setWeekdays]=useState<number[]>([]);
  const [kind,setKind]=useState<'gathering'|'app_day'|'cancelled'>('gathering');
@@ -115,6 +116,25 @@ export default function MorningPrayerOperations({data,onReload,onNotice}:{data:W
     <label className={css.check}><input type="checkbox" checked={acknowledged} onChange={e=>setAcknowledged(e.target.checked)}/>I verified this selected range against the official schedule.</label>
     <button className={css.primary} disabled={!acknowledged||busy} onClick={()=>void save('/api/morning-prayer/batch',{expectedVersion:data.version,key:makeKey(),occurrences:planned},'Dates saved. Review each date before enabling participation.').then(()=>{setPlanned([]);setAcknowledged(false);})}>Save {planned.length} dates</button>
    </div>}
+  </section>}
+  {manage&&<section className={css.panel} data-testid="wm-reschedule">
+   <h2>Reschedule an existing gathering</h2>
+   <p>Changes retain the same occurrence and assignment history but invalidate Zoom access, host confirmation, and pending volunteer requests until reviewed.</p>
+   <label>Scheduled occurrence<select value={moveId} onChange={e=>{setMoveId(e.target.value);setConfirmMove(false);}}>
+    <option value="">Select a future occurrence</option>{future.map(o=><option key={o.id} value={o.id}>{dateText(o.date)} · {o.host}</option>)}
+   </select></label>
+   <div className={css.gridTwo}><label>New Las Vegas date<input type="date" min={vegasToday()} value={moveDate} onChange={e=>{setMoveDate(e.target.value);setConfirmMove(false);}}/></label>
+    <label>New start<input type="time" value={moveStart} onChange={e=>{setMoveStart(e.target.value);setConfirmMove(false);}}/></label></div>
+   <label>New end<input type="time" value={moveEnd} onChange={e=>{setMoveEnd(e.target.value);setConfirmMove(false);}}/></label>
+   <label className={css.check}><input type="checkbox" checked={confirmMove} onChange={e=>setConfirmMove(e.target.checked)}/>I confirmed the new time with the gathering coordinator.</label>
+   <button className={css.primary} disabled={!moveId||!confirmMove||busy} onClick={()=>{
+    try{
+     const startIso=vegasInstant(moveDate,moveStart),endIso=vegasInstant(moveDate,moveEnd);
+     if(Date.parse(endIso)<=Date.parse(startIso))throw new Error('The end time must follow the start time.');
+     void save('/api/morning-prayer/command',withVersion({type:'schedule',mode:'move',occurrenceId:moveId,startsAt:startIso,endsAt:endIso}),
+      'Gathering rescheduled. Verify its date/time again, then re-confirm the host and Zoom link.').then(()=>setConfirmMove(false));
+    }catch(e){onNotice(e instanceof Error?e.message:'Choose a valid time.');}
+   }}>Save rescheduled date</button>
   </section>}
   {manage&&<section className={css.panel} data-testid="wm-meeting-access">
    <h2>Private Zoom access</h2>
