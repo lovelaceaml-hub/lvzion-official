@@ -18,7 +18,7 @@ BotID uses explicit basic checks on client/server. Paid deep analysis is not ena
 
 ## Validation
 
-124 application tests, 182 disposable PostgreSQL permission assertions, 31 phone Chromium checks, 39 local signup/Auth/PostgREST/SMTP checks and 42 existing invitation/recovery checks passed. These local checks use fictional identities and a loopback mail sink. Hosted SMTP/TLS delivery is now verified. The owner's real email confirmation remains a separate human step. Physical-device checks remain unclaimed.
+128 application tests, 182 disposable PostgreSQL permission assertions, 32 phone Chromium checks, 44 local signup/Auth/PostgREST/SMTP checks and 42 existing invitation/recovery checks passed. These local checks use fictional identities and a loopback mail sink. Hosted SMTP/TLS delivery is now verified. The owner's real email confirmation and completed sign-in were verified privately. Physical-device checks remain unclaimed.
 
 ## Migration and rollback
 
@@ -31,11 +31,11 @@ Retain the old production deployment dpl_6xjt1qTmgXggJvQUNoeJAhvnwLCk for websit
 - Replaced the prototype front door with actual sign-in and redirected fictional routes in production.
 - Added explicit production safeguards, first-owner initialization without placement, free bot checks and a server-only signup ticket hook.
 - Applied tested additive database migrations and configured exact production confirmation links.
-- Created and verified public DNS entries for auth.lvz.app. The restricted credential connection is pending user confirmation. Actual app release is merged in PR #14 and production deployment dpl_9r1r6Gae4cRwtTnAtDmMunn9yqTX is READY at commit 3d4519856bebc322b27869d7dd3292258f54326f. Twelve actual production HTTP checks passed. Signup remains off until delivery is connected and verified.
+- Created and verified public DNS entries for auth.lvz.app. The restricted credential connection was subsequently approved and completed, as recorded below. Actual app release is merged in PR #14 and production deployment dpl_9r1r6Gae4cRwtTnAtDmMunn9yqTX is READY at commit 3d4519856bebc322b27869d7dd3292258f54326f. Twelve actual production HTTP checks passed. Signup remains off until delivery is connected and verified.
 
 - The user specifically approved creating the sending-only auth.lvz.app key and saving it in Keychain and Supabase/Vercel on 2026-10-14. Personal Keychain and both provider stores were verified without exposing its value.
 - SMTP/TLS authentication passed and Resend reported a non-personal provider test delivered. Resend free plan and disabled paid overages were verified.
-- Automatic approval review rejected an unapproved email-rate increase from two to thirty per hour. The existing cap was retained while the approved connection was completed. A specific capacity decision is pending.
+- Automatic approval review rejected an unapproved email-rate increase from two to thirty per hour. The existing cap was retained while the approved connection was completed. Anthony subsequently approved thirty per hour, applied as recorded below.
 - Real database enrollment and production signup/email switches are now enabled. Production deployment dpl_8aR37Y4qqZRfvfJbT9sMLA2MY7VK is READY at c33bcb638e28822c24c5695ce5f610c535406e01. Twelve production signup/access checks passed, and all app tables retain RLS.
 - The real signup form is available for the owner to choose a password and confirm their own email. No real account or imported record was created by the agent.
 
@@ -47,3 +47,5 @@ Retain the old production deployment dpl_6xjt1qTmgXggJvQUNoeJAhvnwLCk for websit
 - Legacy PKCE confirmation failure now offers explicit sign-in recovery. Regression coverage checks fresh-browser email confirmation and password completion of a confirmed but unlinked profile. Confirmation still requires deliberate POST; email scanners cannot create membership.
 
 - Corrected confirmation build passed 128 application tests, 182 PostgreSQL assertions, 32 phone-browser checks and 44 real local signup checks, including fresh-browser confirmation and sign-in repair of a confirmed but unlinked profile.
+
+- PR #18 merged confirmation recovery at main commit 85ec8e63626ce7bf62d449e396e79bd46b907f93. Actual production deployment dpl_HPHS62hL45xLa65yELUNNLt2gzRK is READY and aliased to lvz.app. Public signup, confirmation and continuation pages respond successfully. The actual signup minimum remains six. A synthetic invalid confirmation returns the sign-in recovery path with private no-store headers. Anonymous member API access returns 401; the public member page contains only a loading shell. No hosted test identities or emails were created. Disposable local services were stopped.
