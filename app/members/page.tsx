@@ -24,8 +24,8 @@ export default function Members(){
   return()=>{controller.abort();window.removeEventListener('focus',onFocus);};
  },[]);
  if(!data)return <main className="auth-box"><h1>My Week</h1><p role="status">{error||'Loading your authorized member space…'}</p>
-  {error&&<p><a href="/sign-in">Sign in</a> · <a href="/experience-preview">View fictional home preview</a></p>}</main>;
- if(data.self.status==='intake')return <UnassignedMember data={data}/>;
+  {error&&<p><a href="/sign-in">Sign in</a></p>}</main>;
+ if(data.self.status==='intake'&&!data.permissions.organization)return <UnassignedMember data={data}/>;
  return <MemberHome workspace={data} manageHref="/members/manage" experience={experience}
  onFavoriteUpdate={async(moduleIds,expectedVersion)=>{
   const response=await fetch('/api/members/experience/favorites',{method:'POST',

@@ -6,7 +6,7 @@ export default function SignupForm({enabled,local,siteKey}:{enabled:boolean;loca
  const [busy,setBusy]=useState(false),[message,setMessage]=useState(''),[show,setShow]=useState(false),[captcha,setCaptcha]=useState('');
  const [resetVersion,setResetVersion]=useState(0);
  return <main className="auth-box"><small>LV ZION OFFICIAL</small><h1>Create your account.</h1><p>Use your personal email. After confirmation, your age category, group, and unit will be <strong>Unassigned</strong> until an authorized leader verifies and places you.</p>
- {!enabled&&<p role="status">Signup is prepared but is not activated in this development preview.</p>}
+ {!enabled&&<p role="status">Account signup will open once email delivery is ready. Please check back soon.</p>}
  <form onSubmit={async e=>{e.preventDefault();const form=e.currentTarget;setBusy(true);setMessage('');try{const p=Object.fromEntries(new FormData(form));const r=await fetch('/api/auth/sign-up',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({...p,captchaToken:captcha||undefined})});const d=await r.json();setMessage(d.message??d.error);const password=form.elements.namedItem('password');if(password instanceof HTMLInputElement)password.value='';}catch{setMessage('Connection unavailable. Please try again.');}finally{setBusy(false);setCaptcha('');setResetVersion(x=>x+1);}}}>
  <label htmlFor="signup-name">Your name</label><input id="signup-name" name="name" autoComplete="name" minLength={2} maxLength={120} required disabled={!enabled}/>
  <label htmlFor="signup-email">Personal email</label><input id="signup-email" name="email" type="email" autoComplete="username" inputMode="email" spellCheck={false} maxLength={254} required disabled={!enabled}/>

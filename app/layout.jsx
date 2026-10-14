@@ -1,1 +1,1 @@
-import './globals.css'; export const metadata={title:'LV Zion | Mobile Preview',description:'An interactive preview of LV Zion.'}; export default function RootLayout({children}){return <html lang='en'><body>{children}</body></html>}
+import './globals.css'; export const metadata={title:'LV Zion Official',description:'Your LV Zion member space.'}; export default function RootLayout({children}){return <html lang='en'><body>{children}</body></html>}

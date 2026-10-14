@@ -12,7 +12,7 @@ export default function MemberWorkspace({data:w,execute,demo=false,invite}:Props
  const manage=w.permissions.memberManagement||w.departments.some(d=>d.canManage)||w.permissions.technical||w.permissions.departmentAdmin;
  async function send(action:Action,payload:Record<string,string>){setBusy(true);setMessage('');try{await execute({action,payload,requestId:crypto.randomUUID()});setMessage(demo?'Fictional change saved for this session.':'Change saved.');setSelected(null);}catch(e){setMessage(e instanceof Error?e.message:'Change failed.');}finally{setBusy(false);}}
  function submit(e:React.FormEvent<HTMLFormElement>,action:Action,extra:Record<string,string>={}){e.preventDefault();void send(action,{...Object.fromEntries(new FormData(e.currentTarget).entries()) as Record<string,string>,...extra});}
- const group=w.groups.find(g=>g.id===w.self.groupId)?.name??'Group';const unit=w.units.find(u=>u.id===w.self.unitId)?.name??'Unit';
+ const group=w.groups.find(g=>g.id===w.self.groupId)?.name??'Unassigned';const unit=w.units.find(u=>u.id===w.self.unitId)?.name??'Unassigned';
  const candidates=[...new Map([...w.directory,...w.managedMembers,...w.departments.flatMap(d=>d.members)].map(m=>[m.id,m])).values()];
  return <main className="members-app"><header className="members-header"><a href="/" className="members-brand">LV ZION<span>MEMBER FOUNDATION</span></a><button onClick={()=>setTab('profile')} aria-label="Open my profile" className="avatar">{w.self.name.split(' ').map(x=>x[0]).slice(0,2).join('')}</button></header>
  {demo&&<a className="demo-experience-link" href="/experience-preview">Explore the next-generation Home and My Week experience →</a>}

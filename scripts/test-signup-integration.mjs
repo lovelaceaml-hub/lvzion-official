@@ -13,6 +13,11 @@ async function workspace(c){const r=await c.get('/api/members');return{status:r.
 function messages(email){return existsSync(root+'/outbox.ndjson')?readFileSync(root+'/outbox.ndjson','utf8').trim().split('\n').filter(Boolean).map(JSON.parse).filter(x=>x.recipient===email):[];}
 async function token(email){for(let i=0;i<40;i++){const msg=messages(email).at(-1);if(msg){let text=msg.mime.slice(msg.mime.indexOf('\r\n\r\n')+4);if(/Content-Transfer-Encoding: base64/i.test(msg.mime))text=Buffer.from(text.replace(/\s/g,''),'base64').toString();else text=text.replace(/=\r\n/g,'').replace(/=([0-9a-f]{2})/gi,(_,h)=>String.fromCharCode(parseInt(h,16)));const link=text.match(/http:\/\/127\.0\.0\.1:3000\/auth\/continue#[^\s"<>]+/)?.[0]?.replaceAll('&amp;','&');if(link)return Object.fromEntries(new URLSearchParams(new URL(link).hash.slice(1)));}await new Promise(r=>setTimeout(r,100));}throw new Error('Signup email was not captured by local sink.');}
 try{
+ if(process.env.LVZ_SIGNUP_HOOK_INTEGRATION==='true'){
+  const r=await fetch('http://127.0.0.1:54321/auth/v1/signup',{method:'POST',headers:{apikey:keys.anon,'Content-Type':'application/json'},body:JSON.stringify({email:'hook-bypass@example.invalid',password:'Synthetic-Hook-Test-Password!',data:{role:'technical_admin'}})});
+  check('real Auth hook rejects signup that bypasses app bot/rate checks',!r.ok);
+  check('rejected direct signup creates no Auth identity',sql("select count(*) from auth.users where email='hook-bypass@example.invalid'")==='0');
+ }
  const c=await context(),pastor=await context(),unit=await context(),declined=await context();
  const signup={name:'Jamie Integration',email:'signup-integration@example.invalid',password:'Synthetic-Signup-Password!'};
  const forged=await request.newContext({baseURL:base,extraHTTPHeaders:{Origin:'https://untrusted.example'}});contexts.push(forged);

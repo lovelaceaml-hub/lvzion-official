@@ -1,3 +1,4 @@
+import {verifyHuman} from '../../../../lib/server/bot-protection';
 import {loginCaptcha} from '../../../../lib/signup';
 import { normalizeIdentifier } from '../../../../lib/contracts';
 import { body,reply } from '../../../../lib/server/http';
@@ -7,8 +8,9 @@ import {completeEnrollment} from '../../../../lib/server/enrollment';
 import { consumeLoginLimit } from '../../../../lib/server/login';
 export async function POST(request:Request) {
  const started=Date.now();
- let c;try {c=settings();} catch {return reply({error:'Member sign-in is not activated in this preview.'},503);}
+ let c;try {c=settings();} catch {return reply({error:'Member sign-in is not activated yet.'},503);}
  try {
+  await verifyHuman();
   const input=await body(request); const identifier=normalizeIdentifier(input.identifier);
   const captchaToken=loginCaptcha(input.captchaToken,!c.local&&process.env.LVZ_SIGNUP_CAPTCHA_VERIFIED==='true');
   if(typeof input.password!=='string' || input.password.length<1 || input.password.length>256) throw new Error('Invalid credentials.');

@@ -1,5 +1,6 @@
 -- Test harness ONLY. Never run on an existing Supabase project.
 create role anon nologin;
+create role supabase_auth_admin nologin;
 create role authenticated nologin;
 create role service_role nologin bypassrls;
 create schema auth;

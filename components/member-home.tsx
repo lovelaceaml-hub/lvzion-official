@@ -63,8 +63,8 @@ export default function MemberHome({workspace:w,demo=false,manageHref,experience
  const notices=[...actionNotices(w),...moduleActions];
  const recentNotices=(experience?.notifications??[]).filter(n=>!n.requiresAction||n.readAt!==null);
  const userManages=canManage(w);
- const group=w.groups.find(g=>g.id===w.self.groupId)?.name??'My Group';
- const unit=w.units.find(u=>u.id===w.self.unitId)?.name??'My Unit';
+ const group=w.groups.find(g=>g.id===w.self.groupId)?.name??'Unassigned';
+ const unit=w.units.find(u=>u.id===w.self.unitId)?.name??'Unassigned';
  const activities=allActivities.filter(e=>period==='today'?e.date===today:period==='week'?weekDays(anchor).includes(e.date):e.date===selectedDay)
   .sort((a,b)=>(a.date+'T'+a.startTime).localeCompare(b.date+'T'+b.startTime));
  const upcoming=allActivities.filter(a=>a.date>=today).sort((a,b)=>(a.date+'T'+a.startTime).localeCompare(b.date+'T'+b.startTime));

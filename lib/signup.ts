@@ -4,7 +4,8 @@ export const signupMessage='If this address is eligible, a confirmation email wi
 export function signupSettings(env:Record<string,string|undefined>){
  const c=resolveSettings(env);
  if(env.LVZ_SELF_SERVICE_SIGNUP_ENABLED!=='true')throw new Error('Signup is not activated.');
- if(!c.local && (env.LVZ_SIGNUP_DELIVERY_VERIFIED!=='true'||env.LVZ_SIGNUP_CAPTCHA_VERIFIED!=='true'||!env.NEXT_PUBLIC_LVZ_HCAPTCHA_SITE_KEY||!env.LVZ_TEST_EMAIL_ALLOWLIST))throw new Error('Verified isolated signup configuration required.');
+ if(c.production){if(env.LVZ_SIGNUP_DELIVERY_VERIFIED!=='true'||env.LVZ_BOT_PROTECTION_ENABLED!=='true')throw new Error('Production signup delivery and bot protection required.');}
+ else if(!c.local && (env.LVZ_SIGNUP_DELIVERY_VERIFIED!=='true'||env.LVZ_SIGNUP_CAPTCHA_VERIFIED!=='true'||!env.NEXT_PUBLIC_LVZ_HCAPTCHA_SITE_KEY||!env.LVZ_TEST_EMAIL_ALLOWLIST))throw new Error('Verified isolated signup configuration required.');
  return c;
 }
 export function parseSignup(input:Record<string,unknown>){
@@ -14,6 +15,7 @@ export function parseSignup(input:Record<string,unknown>){
  return {email,name:input.name.trim(),password:input.password,captchaToken:input.captchaToken as string|undefined};
 }
 export function allowedSignupEmail(email:string,env:Record<string,string|undefined>,local:boolean){
+ if(env.LVZ_DATABASE_ENV==='production')return /^[^\s@<>]+@[^\s@<>]+\.[^\s@<>]+$/.test(email);
  return local?email.endsWith('@example.invalid'):!!env.LVZ_TEST_EMAIL_ALLOWLIST?.toLowerCase().split(',').map(s=>s.trim()).includes(email);
 }
 

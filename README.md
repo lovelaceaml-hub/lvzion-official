@@ -2,71 +2,26 @@
 
 ## Quick links
 
-- **Website:** [Production design prototype](https://lvzion-official.vercel.app)
-- **Status:** Signup development preview published; real member activation remains disabled
-- **Signup preview:** [Unassigned lifecycle](https://lvzion-official-git-feature-self-service-signup-r1-lvzion.vercel.app/enrollment-preview), [signup form](https://lvzion-official-git-feature-self-service-signup-r1-lvzion.vercel.app/sign-up), [draft PR #12](https://github.com/lovelaceaml-hub/lvzion-official/pull/12)
-- **Repo:** [Private GitHub repository](https://github.com/lovelaceaml-hub/lvzion-official)
-- **Docs:** [Handoff](docs/HANDOFF.md), [signup plan](docs/PLAN-SELF-SERVICE-SIGNUP.md), [all documents](docs/)
+- **Actual app:** [lvz.app](https://lvz.app)
+- **Status:** Actual application setup in progress. Email connection and deliberate production release remain.
+- **Repository:** [Private GitHub repository](https://github.com/lovelaceaml-hub/lvzion-official)
+- **Handoff:** [Current status](docs/HANDOFF.md)
+- **Setup:** [Behavior, validation and rollback](docs/ACTUAL-APP-SETUP.md)
 
+Independent phone-first Next.js application, using its own Supabase project. Original LV Zion apps and databases are outside scope. No new previews are published without Anthony's explicit request.
 
-A new, independent phone-first application. Previous LV Zion apps and databases are references only and remain untouched.
+Confirmed email signup creates an Unassigned member profile. Age category, group and unit stay unset until an authorized leader verifies membership and assigns placement. Unassigned members can view only their own records. The designated first owner can configure the actual organization while still Unassigned. No fictitious hierarchy or imported real records are seeded.
 
-## Development status
-
-`feature/member-system-secure-r1` contains the member and organizational foundation, independent department/technical permissions, history-preserving management, verified invitation and recovery workflows, and a module integration framework. Draft PR #2 is stacked on mobile prototype PR #1; neither is a member-launch approval.
-
-The permanent domain **https://lvz.app is registered and connected** to the new Vercel project. `www.lvz.app` redirects to the apex. It still serves the earlier public design prototype, not the development branch. Email hosting and operational `@lvz.app` senders are not configured.
-
-## Self-service signup development
-
-The signup candidate is stacked on the member foundation in `feature/self-service-signup-r1`. New members confirm their personal email, then see only their own profile with age category, group and unit Unassigned. An authorized pastoral/member administrator verifies membership and chooses the initial placement. Existing-record invitations remain separate. All hosted activation switches and the database enrollment switch default off.
-
-## Review routes
-
-- `/sign-up`: email signup, disabled until the isolated Auth configuration and database switch are verified.
-- `/enrollment-preview`: fictional Unassigned member and leader assignment/decline journey.
-
-- `/`: preserved original home concept.
-- `/experience-preview`: fictional phone-first My Week / Manage / Apps / Notifications.
-- `/member-preview`: fictional member, leadership, department and technical-administrator management. Demo mutations are in-memory only.
-- `/roster-preview`: fixed fictional import rehearsal with duplicate and placement review. No uploads, accounts or database writes.
-- `/install`: phone-installation guidance, manifest and opt-in public-only offline fallback.
-- `/members` and `/members/manage`: session-authorized workspace; hosted activation remains deliberately gated.
-- `/request-access`, `/sign-in`, `/auth/continue`, `/activate`, `/reset-password`: account workflows implemented in code, not activated for real members.
-
-The new hosted Supabase project contains three applied foundation migrations and seventeen RLS-protected tables, with zero Auth users or member records at the last inspection. The module-runtime migration remains **unapplied**. No official individual application has been selected or published.
-
-Hosted test identity provisioning was previously blocked by tool safety checks. It is not retried through another mechanism; the known hosted-reference guard and disabled delivery remain. Existing local real-service Auth test results are not evidence of hosted sign-in success.
+The actual routes are /sign-in, /sign-up, /members, /members/manage, /request-access, /reset-password and /install. Fictional development routes redirect on production. No official module has been released in this main-app increment.
 
 ## Development
 
-Use Node 24 and the committed exact dependency lockfile.
+Use Node 24 and the exact dependency lockfile.
 
 ```sh
 npm ci --ignore-scripts
-npm run dev
 npm run build
 npm run test:browser
 ```
 
-`build` executes strict route/TypeScript checking, Node tests and disposable PostgreSQL permission tests before Next.js compiles. Browser tests use Playwright Chromium at a phone viewport. Do not add unnecessary automatic workflows to the GitHub Actions budget.
-
-For an offline local roster dry-run only:
-
-```sh
-node --experimental-strip-types scripts/roster-preflight.mjs roster.csv authorized-context.json
-```
-
-The summary excludes names/contact values and writes nothing. Do not commit a real roster or authorized-context export.
-
-## Read first
-
-- [R6 development work and boundaries](docs/AUTONOMOUS-FOUNDATION-R6.md)
-- [Domain setup](docs/DOMAIN-SETUP.md)
-- [Onboarding verification](docs/ONBOARDING-COMPLETION.md)
-- [Member verification](docs/MEMBER-SYSTEM-VERIFICATION.md)
-- [Product choices](docs/PRODUCT-DECISIONS.md)
-- [Release gates](docs/RELEASE-GATES.md)
-- [Hosted migration ledger](docs/HOSTED-MIGRATION-LEDGER.json)
-
-Keep migrations reconciled with the hosted ledger before CLI deployment. Never install seed/bootstrap test files into production. Independent review, hosted test accounts, email deliverability, backup restore and physical-device testing remain launch gates.
+Build checks types, application behavior and disposable PostgreSQL permissions. Browser tests run locally with fictional data. See AGENTS.md for isolated Auth/SMTP integration commands. Production requires explicit activation for the exact backend and https://lvz.app. Credentials belong in Keychain or provider stores, never Git. Automatic Git deployments are disabled; production release is deliberate.

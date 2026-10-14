@@ -1,6 +1,7 @@
+import {verifyHuman} from '../../../../lib/server/bot-protection';
 import {normalizeIdentifier} from '../../../../lib/contracts';import {body,reply} from '../../../../lib/server/http';import {consumeLoginLimit} from '../../../../lib/server/login';import {sendAccountEmail,mailConfigured} from '../../../../lib/server/mail';import {confirmationLink} from '../../../../lib/server/flow';
 export async function POST(request:Request){const started=Date.now();try{
- const input=await body(request);const identifier=normalizeIdentifier(input.identifier);const admin=await consumeLoginLimit(request,'recovery:'+identifier);
+ await verifyHuman();const input=await body(request);const identifier=normalizeIdentifier(input.identifier);const admin=await consumeLoginLimit(request,'recovery:'+identifier);
  const resolved=await admin.rpc('resolve_login_identifier',{p_identifier:identifier});
  if(!resolved.error&&typeof resolved.data==='string'&&mailConfigured()){
   const link=await admin.auth.admin.generateLink({type:'recovery',email:resolved.data});

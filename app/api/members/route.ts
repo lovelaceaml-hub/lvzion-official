@@ -4,5 +4,5 @@ export const dynamic='force-dynamic';
 export async function GET() {
  try { const client=await requireMember(); const {data,error}=await client.rpc('member_workspace');
   if(error) return reply({error:'Member workspace unavailable.'},503); return reply(data);
- } catch {return reply({error:'Sign in to an activated test environment to continue.'},401);}
+ } catch {return reply({error:'Sign in to continue.'},401);}
 }

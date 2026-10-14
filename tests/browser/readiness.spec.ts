@@ -15,7 +15,7 @@ test('roster rehearsal fits a narrow phone',async({page})=>{
 });
 test('install guide and manifest retain account gating',async({page,request})=>{
  await page.goto('/install');await expect(page.getByRole('heading',{name:'LV Zion, on your phone.'})).toBeVisible();
- await expect(page.getByText('Sign-in and real member rollout remain gated.',{exact:false})).toBeVisible();
+ await expect(page.getByText('Your account permissions apply on every device.',{exact:false})).toBeVisible();
  const response=await request.get('/manifest.webmanifest');expect(response.ok()).toBe(true);const manifest=await response.json();expect(manifest.start_url).toBe('/members');expect(manifest.display).toBe('standalone');expect(manifest.icons).toHaveLength(3);
  const sw=await request.get('/sw.js');expect(sw.headers()['cache-control']).toContain('no-store');
 });

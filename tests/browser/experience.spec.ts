@@ -56,7 +56,7 @@ test('ordinary member cannot access Manage or other groups through shell',async(
 });
 test('live member shell fails closed without approved authenticated deployment',async({page})=>{
  await page.goto('/members');
- await expect(page.getByText(/Sign in to an activated test environment|Member workspace unavailable|Sign in required/)).toBeVisible();
+ await expect(page.getByText(/Sign in to continue|Member workspace unavailable|Sign in required/)).toBeVisible();
  await expect(page.locator('.lvz-activity')).toHaveCount(0);
 });
 test('member roster preview links to home and honors profile/directory deep links',async({page})=>{

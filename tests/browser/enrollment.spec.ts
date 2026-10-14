@@ -2,7 +2,7 @@ import {test,expect} from '@playwright/test';
 import {unassignedPreview} from '../../lib/enrollment-demo';
 test('signup shows the activation boundary and accessible password manager fields',async({page,request})=>{
  await page.goto('/sign-up');await expect(page.getByRole('heading',{name:'Create your account.'})).toBeVisible();
- await expect(page.getByText('Signup is prepared but is not activated', {exact:false})).toBeVisible();
+ await expect(page.getByText('Account signup will open once email delivery is ready', {exact:false})).toBeVisible();
  await expect(page.getByLabel('Personal email',{exact:true})).toHaveAttribute('autocomplete','username');
  await expect(page.getByLabel('Password',{exact:true})).toHaveAttribute('autocomplete','new-password');
  await expect(page.getByRole('button',{name:'Create account',exact:true})).toBeDisabled();

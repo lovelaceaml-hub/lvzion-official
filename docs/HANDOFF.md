@@ -2,34 +2,26 @@
 
 ## Quick links
 
-- [Published Unassigned signup preview](https://lvzion-official-git-feature-self-service-signup-r1-lvzion.vercel.app/enrollment-preview)
-- [Published signup form and activation status](https://lvzion-official-git-feature-self-service-signup-r1-lvzion.vercel.app/sign-up)
-- [Signup draft PR #12](https://github.com/lovelaceaml-hub/lvzion-official/pull/12)
-
-- [Production design prototype](https://lvzion-official.vercel.app)
-- [Existing member development preview](https://lvzion-official-qqvc5dbh2-lvzion.vercel.app/experience-preview)
-- [Member foundation draft PR #2](https://github.com/lovelaceaml-hub/lvzion-official/pull/2)
-- [Current bounded signup plan](PLAN-SELF-SERVICE-SIGNUP.md)
-- [Release gates](RELEASE-GATES.md)
+- [Actual app](https://lvz.app)
+- [Private repository](https://github.com/lovelaceaml-hub/lvzion-official)
+- [Current setup and Build log](ACTUAL-APP-SETUP.md)
+- [Release controls](RELEASE-GATES.md)
+- [Hosted migration mapping](HOSTED-MIGRATION-LEDGER.json)
 
 ## Current work
 
-Self-service signup work is on feature/self-service-signup-r1, stacked on feature/member-system-secure-r1. Email/password registration creates an Unassigned profile only after confirmation. Age category, group and unit stay null until pastoral/member administration independently verifies membership and assigns an active unit. The person's own profile is available while Unassigned; no group directory, department/module access or leadership follows email confirmation. Existing-record emails are directed to verified invitation/access resolution rather than automatically linked.
+change/actual-app-setup contains the main application release. Anthony explicitly requested the actual app at lvz.app and no additional previews. Automatic preview publication is disabled in Vercel; automatic Git deployments are disabled in vercel.json. The app's actual front door is sign-in. Fictional routes redirect on production. Other module draft branches and original LV Zion apps remain outside scope.
 
-The independent own-account helper requires confirmed email, enabled account and a live Auth session. Existing active-member authority remains separate. Leaders receive an explicit pending queue and audited, serialized, idempotent assignment/decline operations. Declining retains the record and denies member access. Technical suspension remains independent.
+New confirmed accounts start Unassigned to category, group and unit and see only their own records. Authorized member administration verifies membership and places each person, retaining history/audit. The designated first owner confirms the privately configured email, receives independent organization/department/technical administration, and remains Unassigned. No hierarchy names or real records are imported.
 
-Review the published development routes at `/sign-up` and `/enrollment-preview` using the links above. The signup form is disabled by default; the lifecycle preview uses fictional records and sends no requests to the database.
+## Applied and verified
 
-## Live facts and boundaries
+Six migrations are now applied on the actual new project. The older three were not replayed; all definitions match the repository under the documented normalization. Production origin and confirmation template are configured. The Before User Created hook enforces app-issued signup tickets. Owner designation is private and enrollment remains disabled during setup. Before configuration there were zero Auth users, members and linked accounts.
 
-Production remains the earlier manual design prototype, deployment dpl_6xjt1qTmgXggJvQUNoeJAhvnwLCk. Vercel returned no source SHA for that manual deployment. Existing member preview remains commit 5a0d435. All open PRs remain drafts and no production promotion is authorized.
+124 application tests, 182 PostgreSQL assertions, 31 phone Chromium tests, 39 local signup checks and 42 invitation/recovery checks passed. The real local hook also rejected a direct signup bypass and allowed app-issued tickets. External security review was waived by Anthony. Physical-device and hosted owner confirmation are not yet claimed.
 
-Supabase otecqlkqirncotytbfns has three foundation migrations and no Auth accounts at this inspection. Module/enrollment migrations are unapplied. The known hosted-reference runtime guard stays intact. Hosted Auth provider signup/SMTP/CAPTCHA settings are unverified, and no settings were changed. Previous hosted test-user provisioning was blocked and was not retried.
+## Remaining setup
 
-Before real enrollment: approved isolated hosted Auth tests, actual SMTP/CAPTCHA/redirect verification, first authorized operator bootstrap, hosted migration reconciliation, backup/rollback review, physical Safari/Android testing and explicit release approval. Personal-email recovery stays available. Members without personal email need an approved leader verification process.
+Resend free-plan auth.lvz.app domain is verified. The restricted sending key is prepared, awaiting browser-required credential confirmation, then will be stored in Keychain and provider secret stores. SMTP, production deployment, hosted checks and public enrollment activation follow. Production still serves the earlier manual prototype until that release completes. Retain dpl_6xjt1qTmgXggJvQUNoeJAhvnwLCk for website rollback.
 
-Original applications, real member imports and domain work are outside this increment.
-
-## Verification and publication
-
-Strict types/build, 120 application tests, 156 disposable PostgreSQL permission assertions, 31 phone-browser checks, 37 real local signup assertions and 42 existing invitation/recovery assertions passed. The controller inspected the complete diff. Anthony waived the external security review, and no code was sent to Claude. The signup implementation is saved in commit 7339553. Anthony authorized private branch backup, a draft PR and a fictional Vercel preview on 2026-10-14. The private branch is backed up and draft PR #12 is open. Vercel deployment dpl_BxXd5MdDLM1Fyj93AYiqjWoB27n2 is READY at f8b4f8d; 14 hosted browser/API assertions passed with fictional records. Production remains dpl_6xjt1qTmgXggJvQUNoeJAhvnwLCk. Hosted email/CAPTCHA/delivery, physical devices and production activation are not claimed verified.
+Personal credentials use Apple Passwords or Keychain only. No credentials or designated personal email are in Git.

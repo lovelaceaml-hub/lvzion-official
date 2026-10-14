@@ -1,3 +1,4 @@
+import {withBotId} from 'botid/next/config';
 import type {NextConfig} from 'next';
 const privateHeaders=[{key:'Cache-Control',value:'private, no-store'},{key:'Referrer-Policy',value:'no-referrer'}];
 const config:NextConfig={async headers(){return[
@@ -12,4 +13,4 @@ const config:NextConfig={async headers(){return[
  {source:'/reset-password',headers:privateHeaders},
  {source:'/sw.js',headers:[{key:'Cache-Control',value:'no-store, max-age=0'},{key:'Service-Worker-Allowed',value:'/'},{key:'Content-Type',value:'application/javascript; charset=utf-8'}]}
 ];}};
-export default config;
+export default withBotId(config);

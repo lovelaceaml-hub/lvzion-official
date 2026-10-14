@@ -2,7 +2,7 @@
   "project_ref": "otecqlkqirncotytbfns",
   "applied_via": "Supabase MCP apply_migration",
   "verified_on": "2026-10-14",
-  "verification_mode": "read_only; no hosted schema or history mutation",
+  "verification_mode": "read-only definition comparison after individually applied additive migrations",
   "entries": [
     {
       "name": "member_system_foundation",
@@ -33,6 +33,36 @@
       "normalized_characters": 17956,
       "normalized_md5": "0a24114044ee6cdcad5890a49ad7c33d",
       "repository_normalized_match": true
+    },
+    {
+      "name": "module_runtime_foundation",
+      "hosted_version": "20261014191416",
+      "repository_version": "20261014074214",
+      "hosted_statement_count": 1,
+      "normalized_characters": 11302,
+      "normalized_md5": "b5408eab5224f3ad3a57f39cc9c91d87",
+      "repository_normalized_match": true,
+      "normalization": "Whitespace removed only; this hosted batch preserves comments and transaction wrappers."
+    },
+    {
+      "name": "self_service_unassigned_enrollment",
+      "hosted_version": "20261014191423",
+      "repository_version": "20261014155148",
+      "hosted_statement_count": 1,
+      "normalized_characters": 13917,
+      "normalized_md5": "a91cf1555f4d28fbdb5d2dcedeb50c77",
+      "repository_normalized_match": true,
+      "normalization": "Whitespace removed only; this hosted batch preserves comments and transaction wrappers."
+    },
+    {
+      "name": "production_owner_setup",
+      "hosted_version": "20261014193244",
+      "repository_version": "20261014190128",
+      "hosted_statement_count": 1,
+      "normalized_characters": 5954,
+      "normalized_md5": "faa797d5da869aebe92a0509815efe01",
+      "repository_normalized_match": true,
+      "normalization": "Whitespace removed only; this hosted batch preserves comments and transaction wrappers."
     }
   ],
   "normalization": {
@@ -40,9 +70,6 @@
     "hosted": "Remove whitespace from each stored statement; these stored statements already omit comments and outer transaction wrappers.",
     "purpose": "Comparison of known migration definitions, not cryptographic attestation or a full semantic/security review."
   },
-  "unapplied_repository_migrations": [
-    "20261014074214_module_runtime_foundation.sql",
-    "20261014155148_self_service_unassigned_enrollment.sql"
-  ],
+  "unapplied_repository_migrations": [],
   "warning": "The three definition fingerprints match, but hosted IDs still differ from repository filenames. Reconcile the deployment ledger deliberately before CLI db push. Do not replay duplicate CREATE migrations or rewrite hosted history blindly."
 }
