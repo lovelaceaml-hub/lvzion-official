@@ -1,5 +1,7 @@
 # LV Zion Mobile Product Decisions
 
+> **Design-interview decisions recorded October 13, 2026, not a real-time deployment or app-approval registry.** Continue to use these as intended product/design requirements where applicable, but actual live modules, permissions, migrations and operational restrictions are documented in [CURRENT-STATUS.md](CURRENT-STATUS.md) and [RELEASE-GATES.md](RELEASE-GATES.md).
+
 Recorded 2026-10-13 from the design interview. This is a new application, *not* a migration of the old app architecture. The previous six app concepts and demo slots are not an approved official app lineup.
 
 ## Mobile experience
