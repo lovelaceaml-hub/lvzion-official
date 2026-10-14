@@ -104,6 +104,15 @@
       "status": "applied",
       "verification": "migration accepted; hosted list_migrations and read-only checks verified six RLS/FORCE RLS tables, zero anonymous function grants, zero direct authenticated reads, one owner grant, zero real contacts. Dedicated PGlite tests exercise identity-aware setup. No live-contact fixture inserted.",
       "source": "supabase/migrations/20261014224708_contacts_private_owner_pilot_v1.sql"
+    },
+    {
+      "name": "study_room_policy_operations",
+      "hosted_version": "20261014225514",
+      "repository_version": "20261014224006",
+      "applied_via": "Supabase MCP apply_migration",
+      "status": "applied",
+      "verified_on": "2026-10-14",
+      "verification": "Hosted list_migrations and read-only RLS/function/body checks. No full pg_dump/restore rehearsal; did not activate bookings."
     }
   ],
   "normalization": {
@@ -112,5 +121,5 @@
     "purpose": "Comparison of known migration definitions, not cryptographic attestation or a full semantic/security review."
   },
   "unapplied_repository_migrations": [],
-  "warning": "Hosted migration IDs differ from repository filenames for all historical generations; do not blindly replay or rewrite ledger or run db push. Study Room migrations were individually applied via connector. Reservation cutover activation is separate and intentionally closed until original Firebase bookings are reconciled."
+  "warning": "Hosted versions can differ from repository filenames; reconcile carefully before any CLI db push. Never replay existing schema migrations. Study Room R4 changes the authorized policy calendar but does not turn on the separate booking activation gate."
 }
