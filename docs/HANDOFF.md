@@ -22,6 +22,6 @@ Six migrations are now applied on the actual new project. The older three were n
 
 ## Remaining setup
 
-Resend free-plan auth.lvz.app domain is verified. The restricted sending key is prepared, awaiting browser-required credential confirmation, then will be stored in Keychain and provider secret stores. SMTP, production deployment, hosted checks and public enrollment activation follow. Production still serves the earlier manual prototype until that release completes. Retain dpl_6xjt1qTmgXggJvQUNoeJAhvnwLCk for website rollback.
+Resend free-plan auth.lvz.app domain is verified. The restricted sending key is prepared, awaiting browser-required credential confirmation, then will be stored in Keychain and provider secret stores. SMTP connection and public enrollment activation remain. The actual app is live at lvz.app from merged PR #14, commit 3d4519856bebc322b27869d7dd3292258f54326f, production deployment dpl_9r1r6Gae4cRwtTnAtDmMunn9yqTX. Twelve actual production HTTP checks passed, and the browser displays the real sign-in page. Fictional routes redirect and anonymous member requests are denied. The owner has not created or confirmed an account yet. Retain dpl_6xjt1qTmgXggJvQUNoeJAhvnwLCk for website rollback.
 
 Personal credentials use Apple Passwords or Keychain only. No credentials or designated personal email are in Git.
