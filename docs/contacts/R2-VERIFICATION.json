@@ -1,0 +1,38 @@
+{
+  "date": "2026-10-14",
+  "status": "development-review-with-open-defects",
+  "source_commit": "21cfef98daeb45f4927ab77d606bdb1521fdea5c",
+  "base_commit": "5a0d435dc7dbf18401d0a77af89543bf9d9d9c4b",
+  "branch": "feature/contacts-r1",
+  "pull_request": 6,
+  "deployment": {
+    "id": "dpl_EJeZX6QGSToaSzVB8vbNnJUAcqR4",
+    "url": "https://lvzion-official-ov8hcborr-lvzion.vercel.app/contacts-preview",
+    "target": "preview",
+    "state": "READY"
+  },
+  "executed": {
+    "node_tests": {"passed": 166, "failed": 0, "skipped": 0},
+    "contacts_runtime_pglite_assertions": 58,
+    "browser_checks": {"passed": 25, "failed": 2, "total": 27},
+    "api_probes": {"total": 21, "generic_403_no_store": 21},
+    "responsive_widths": [320,390,430,768,1280],
+    "uncaught_browser_page_errors": 0,
+    "ui_contacts_or_supabase_data_requests": 0
+  },
+  "browser_failures": [
+    {"id":"UI-01","description":"Follow-up heading contains literal task.due"},
+    {"id":"A11Y-01","description":"Repeated Tab navigation is not fully trapped inside the open dialog"}
+  ],
+  "source_review_items": ["IDEMPOTENCY-01 restore retry ordering", "RACE-01 task assignee and hierarchy lock coverage"],
+  "not_executed": ["native two-connection Contacts contention suite", "hosted authenticated Contacts API tests", "physical device and full accessibility review", "hosted backup restore"],
+  "live_permissions_approved": false,
+  "contacts_hosted_migrations_applied": false,
+  "contacts_hosted_tables_at_inspection": 0,
+  "hosted_auth_users_at_inspection": 0,
+  "real_contacts_imported": 0,
+  "communications_enabled": false,
+  "exports_enabled": false,
+  "production_promoted": false,
+  "source_correction_step": "blocked by tool safety check; not bypassed or applied"
+}
