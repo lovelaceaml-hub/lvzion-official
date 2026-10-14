@@ -1,3 +1,4 @@
-/* Final playback/fit safeguards without changing any member-app stylesheet. */
+/* Scoped playback and fit safeguards; no member-app styling is changed. */
 .stage[data-transition="cut"] .slide{animation:none}
+.now-card>div{min-width:0}.now-card>.button{flex-shrink:0}.now-card [data-playback-summary]{line-height:1.5;overflow-wrap:anywhere;color:#344a3c}.now-card [data-timing-summary]{line-height:1.4;font-size:10px}
 @supports not (font-size:1cqw){.tv-surface .slide-content{padding:6vw}.tv-surface .slide h1{font-size:7vw}.tv-surface .slide-body{font-size:2.3vw}.tv-surface .eyebrow{font-size:1.6vw}.tv-surface .schedule-row span{font-size:2.3vw}.tv-surface .schedule-row strong{font-size:1.6vw}.tv-surface .date-block b{font-size:16vw}.tv-surface .date-block span{font-size:1.7vw}.tv-surface .watermark{font-size:1vw}.stage.mini .slide h1{font-size:24px}.stage.mini .slide-body,.stage.mini .eyebrow{font-size:9px}}
