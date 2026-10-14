@@ -13,7 +13,7 @@ export async function handleWorshipRequest(request:Request,dependencies:HandlerD
    if(url.search)throw new WorshipError('Unexpected query parameters.');
    let input:Record<string,unknown>;try{input=await dependencies.readBody(request);}catch{throw new WorshipError('A same-origin JSON request within the size limit is required.',400,'invalid');}
    const command=parseCommand(input);
-   const {error}=await client.rpc('worship_command',{p_command:command});
+   const {error}=await client.rpc(command.op==='batch'?'worship_batch':'worship_command',{p_command:command});
    if(error)throw sqlError(error.code);
    // Do not return raw command/audit data. A successful write and a later refresh are separate outcomes.
    return reply({ok:true});

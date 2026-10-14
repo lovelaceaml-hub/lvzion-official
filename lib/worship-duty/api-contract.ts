@@ -12,7 +12,9 @@ export type CandidateList={kind:'candidates';serviceId:string;dutyId:Duty;versio
 export type SongView={id:string;code:string;title:string;seconds:number};
 export type SongList={kind:'songs';serviceId:string;songs:SongView[];hasMore:boolean};
 export type Lookup={kind:'candidates';serviceId:string;dutyId:Duty}|{kind:'songs';serviceId:string;search?:string};
+export type BatchChange={serviceId:string;dutyId:Duty;memberId:string|null;expectedVersion:number};
 export type Command=
+ |{op:'batch';changes:BatchChange[]}
  |{op:'assign';serviceId:string;dutyId:Duty;memberId:string|null;expectedVersion:number}
  |{op:'request';serviceId:string;dutyId:Duty;expectedVersion:number}
  |{op:'withdraw';requestId:string}
@@ -39,6 +41,7 @@ export function parseItems(v:unknown):ProgramItem[]{return unique(list(v,23).map
 export function parseCommand(raw:unknown):Command{
  const o=object(raw),op=text(o.op,20);
  switch(op){
+ case 'batch':{keys(o,['op','changes']);const changes=list(o.changes,40).map(raw=>{const c=object(raw);keys(c,['serviceId','dutyId','memberId','expectedVersion']);return{serviceId:uuid(c.serviceId),dutyId:duty(c.dutyId),memberId:nullableId(c.memberId),expectedVersion:integer(c.expectedVersion)};});if(!changes.length)fail();return{op,changes:unique(changes,c=>c.serviceId+':'+c.dutyId)};}
  case 'assign':keys(o,['op','serviceId','dutyId','memberId','expectedVersion']);return{op,serviceId:uuid(o.serviceId),dutyId:duty(o.dutyId),memberId:nullableId(o.memberId),expectedVersion:integer(o.expectedVersion)};
  case 'request':keys(o,['op','serviceId','dutyId','expectedVersion']);return{op,serviceId:uuid(o.serviceId),dutyId:duty(o.dutyId),expectedVersion:integer(o.expectedVersion)};
  case 'withdraw':keys(o,['op','requestId']);return{op,requestId:uuid(o.requestId)};

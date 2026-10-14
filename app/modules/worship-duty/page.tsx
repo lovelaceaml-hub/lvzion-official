@@ -16,5 +16,6 @@ export default async function Page(){
   const feed=parseModuleFeed(data);
   if(!feed.modules.some(m=>m.route==='/modules/worship-duty'))return <main style={{maxWidth:560,margin:'40px auto',padding:24}}><Link href="/members">‹ My Week</Link><h1>Worship Duty</h1><p>Access to this module has not been assigned to your member account.</p></main>;
  }catch{return <main style={{padding:24}}><Link href="/members">‹ My Week</Link><h1>Worship Duty</h1><p>Module access could not be verified.</p></main>;}
- return <ConnectedWorkspace/>;
+ const setup=await client.rpc('worship_setup_workspace');
+ return <ConnectedWorkspace canSetup={!setup.error}/>;
 }

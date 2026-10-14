@@ -10,6 +10,8 @@
 
 ## Current work
 
+Worship Duty PR #25 is being completed against current production source. Owner setup, real monthly assignment batches and native persistence/concurrency checks are implemented in feature/worship-duty-live. Hosted Worship activation remains pending. See [Worship launch workflow](worship-duty/LAUNCH.md) for exact verified scope and the next release gates.
+
 change/actual-app-setup contains the main application release. Anthony explicitly requested the actual app at lvz.app and no additional previews. Automatic preview publication is disabled in Vercel; automatic Git deployments are disabled in vercel.json. The app's actual front door is sign-in. Fictional routes redirect on production. Other module draft branches and original LV Zion apps remain outside scope.
 
 New confirmed accounts start Unassigned to category, group and unit and see only their own records. Authorized member administration verifies membership and places each person, retaining history/audit. The designated first owner confirms the privately configured email, receives independent organization/department/technical administration, and remains Unassigned. Organization entries are created only from Anthony's supplied instructions. No member roster is imported.

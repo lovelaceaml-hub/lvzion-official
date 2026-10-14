@@ -7,6 +7,7 @@ import type {CandidateList,Command,ProgramItem,ProgramView,RequestView,ServiceVi
 import {createHttpTransport} from '../../lib/worship-duty/client-transport';
 import type {WorshipTransport} from '../../lib/worship-duty/client-transport';
 import {useUnsavedPlan} from './use-unsaved-plan';
+import MonthlyPlanner from './monthly-planner';
 import './worship-duty.css';
 import './connected-workspace.css';
 const title=(d:Duty)=>CATALOG.find(x=>x.id===d)!.label;
@@ -16,7 +17,7 @@ type Tab='mine'|'presider'|'manage';
 type Act=(command:Command)=>Promise<boolean>;
 const asError=(error:unknown)=>error instanceof WorshipError?error:new WorshipError('The workspace could not be loaded. Reload to verify your access.',503,'unavailable');
 
-export default function ConnectedWorkspace({transport,rehearsal=false}:{transport?:WorshipTransport;rehearsal?:boolean}){
+export default function ConnectedWorkspace({transport,rehearsal=false,canSetup=false}:{transport?:WorshipTransport;rehearsal?:boolean;canSetup?:boolean}){
  const api=useMemo(()=>transport??createHttpTransport(),[transport]);
  const {markDirty,permitNavigation}=useUnsavedPlan();
  const [data,setData]=useState<Workspace|null>(null),[tab,setTab]=useState<Tab>('mine'),[selected,setSelected]=useState('');
@@ -38,11 +39,12 @@ export default function ConnectedWorkspace({transport,rehearsal=false}:{transpor
  },[api,error]);
  useEffect(()=>{alive.current=true;markDirty(false);setTab('mine');setSelected('');setIssue(null);setMessage('');setReadOnly(false);void load(true);return()=>{alive.current=false;markDirty(false);generation.current++;};},[load,markDirty]);
  const act:Act=async command=>{
-  if(writeLock.current||readOnly||loading)return false;writeLock.current=true;setPending(true);setIssue(null);setMessage('');let accepted=false;
+  if(writeLock.current||readOnly||loading)return false;
+  if(command.op!=='batch'&&command.op!=='program'&&!permitNavigation())return false;
+  writeLock.current=true;setPending(true);setIssue(null);setMessage('');let accepted=false;
   try{
    await api.command(command);accepted=true;
    if(!alive.current)return false;
-   markDirty(false);
    const refreshed=await load();
    if(!alive.current)return false;
    setMessage(refreshed?(rehearsal?'Saved in this fictional rehearsal.':'Saved.'):'Save was accepted, but the refreshed schedule is unavailable. Reload; do not submit it again.');
@@ -58,7 +60,7 @@ export default function ConnectedWorkspace({transport,rehearsal=false}:{transpor
  const reload=()=>{if(permitNavigation()){setMessage('');void load(true);}};
  return <div className="wd-stage"><div className="wd-shell">
   {rehearsal&&<div className="wd-demo"><span>FICTIONAL WORKFLOW REHEARSAL</span><a href="/worship-duty-preview" onClick={e=>{if(!permitNavigation())e.preventDefault();}}>Original layouts</a></div>}
-  <header className="wd-header"><a className="wd-back" href={rehearsal?'/experience-preview':'/members'} onClick={e=>{if(!permitNavigation())e.preventDefault();}}>‹ LV Zion</a><button type="button" disabled={loading||pending} onClick={reload}>Reload</button></header>
+  <header className="wd-header"><a className="wd-back" href={rehearsal?'/experience-preview':'/members'} onClick={e=>{if(!permitNavigation())e.preventDefault();}}>‹ LV Zion</a>{canSetup&&<a href="/modules/worship-duty/setup" onClick={e=>{if(!permitNavigation())e.preventDefault();}}>Setup</a>}<button type="button" disabled={loading||pending} onClick={reload}>Reload</button></header>
   <main className="wd-main" aria-busy={loading||pending}>
    <div className="wd-heading"><span className="wd-kicker">WORSHIP DUTY</span><h1>{safeTab==='mine'?'My Duties':safeTab==='presider'?'Presider':'Manage'}</h1><p>{rehearsal?'The authenticated interface, using fictional records only.':'Your authorized services and assignments.'}</p></div>
    {message&&<p className="wd-notice" role="status">{message}</p>}
@@ -73,6 +75,7 @@ export default function ConnectedWorkspace({transport,rehearsal=false}:{transpor
     </>}
     <label className="wd-service-picker">Selected service<select aria-label="Selected service" value={selected} onChange={e=>{if(permitNavigation())setSelected(e.target.value);else e.currentTarget.value=selected;}}><option value="" disabled>Choose a service</option>{(safeTab==='presider'?planServices:data.services).map(s=><option key={s.id} value={s.id}>{label(s)} · {s.period}</option>)}</select></label>
     {service&&safeTab==='mine'&&<><section className="wd-card"><h2>{service.worship} · {service.period}</h2><p>{label(service)} · Las Vegas</p>{service.assignments.map(a=><div key={a.dutyId} className="wd-schedule-line"><span>{title(a.dutyId)}</span><strong>{a.name}</strong></div>)}<p className="wd-muted">Other-group names remain hidden unless you manage the relevant duty department.</p></section>{!isClosed(service,data.now)&&<section className="wd-card"><h2>Your availability</h2><p>{localDate(service)} · all services on this Las Vegas date. Existing assignments are never removed by an availability change.</p><button type="button" onClick={()=>void act({op:'availability',day:localDate(service),unavailable:!data.daysOff.includes(localDate(service)),expectedVersion:data.availabilityVersion})}>{data.daysOff.includes(localDate(service))?'Remove day off':'Mark day unavailable'}</button></section>}</>}
+    {safeTab==='manage'&&<MonthlyPlanner key={data.now} data={data} api={api} act={act} onError={error} onDirty={markDirty}/>}
     {service&&safeTab==='manage'&&<>
      {data.requests.filter(r=>r.status==='pending'&&data.manageDepartments.includes(departmentOf(r.dutyId))).length>0&&<section className="wd-card"><h2>Requests waiting</h2>{data.requests.filter(r=>r.status==='pending'&&data.manageDepartments.includes(departmentOf(r.dutyId))).map(r=>{const s=data.services.find(s=>s.id===r.serviceId);return s?<RequestEditor key={`${r.id}:${s.version}`} request={r} service={s} act={act} api={api} onError={error}/>:<p key={r.id}>A request is outside the displayed service window. It has not been changed.</p>;})}</section>}
      <p className="wd-muted">Authorized departments: {data.manageDepartments.join(', ')}.</p>

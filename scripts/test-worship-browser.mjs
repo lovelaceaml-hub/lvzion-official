@@ -1,0 +1,28 @@
+// Production components with real local Auth cookies and database records, never hosted accounts.
+import {chromium} from '@playwright/test';import assert from 'node:assert/strict';import {readFileSync} from 'node:fs';
+const root='/tmp/lvz-worship-integration',base='http://127.0.0.1:3000';
+if(process.env.LVZ_WORSHIP_INTEGRATION!=='true'||process.env.VERCEL)throw new Error('Explicit local Worship testing required.');
+const f=JSON.parse(readFileSync(root+'/worship-fixtures.json','utf8')),normal=JSON.parse(readFileSync(root+'/fixtures.json','utf8'));
+const songCode='BROWSER-'+Date.now();
+const browser=await chromium.launch({headless:true});let passes=0;
+const check=(label,value)=>{assert(value,label);passes++;console.log('PASS: '+label);};
+async function login(c,email,password){const r=await c.request.post(base+'/api/auth/sign-in',{headers:{Origin:base},data:{identifier:email,password}});assert.equal(r.status(),200);}
+try{
+ const owner=await browser.newContext({viewport:{width:390,height:844}});await login(owner,f.email,f.password);const page=await owner.newPage();
+ await page.goto(base+'/members');await page.getByRole('button',{name:'Open apps',exact:true}).waitFor();await page.getByRole('button',{name:'Open apps',exact:true}).click();
+ await page.locator('button.lvz-app-row-main').filter({hasText:'Worship Duty'}).click();
+ await page.getByRole('heading',{name:'My Duties',exact:true}).waitFor();check('real Unassigned owner opens Worship through existing Apps',true);
+ await page.getByRole('link',{name:'Setup',exact:true}).click();await page.getByRole('heading',{name:'Setup',exact:true}).waitFor();await page.getByRole('heading',{name:'Approved personnel'}).waitFor();await page.screenshot({path:'/tmp/lvz-worship-setup.png',fullPage:true});check('owner-only setup loads actual persisted services and catalog',await page.getByText('Fictional approved song',{exact:false}).count()>0);
+ for(const width of [320,390,430,768,1280]){await page.setViewportSize({width,height:900});check('setup has no horizontal overflow at '+width,await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1));}
+ await page.setViewportSize({width:390,height:844});const form=page.locator('form').filter({has:page.getByRole('button',{name:'Add approved song',exact:true})});await form.getByLabel('Song code',{exact:true}).fill(songCode);await form.getByLabel('Song title',{exact:true}).fill('Fictional browser song');await form.getByLabel('Duration (seconds)').fill('120');await form.getByRole('button',{name:'Add approved song',exact:true}).click();await page.getByText('Saved and verified.',{exact:true}).waitFor();await page.reload();await page.getByText(songCode+' | Fictional browser song',{exact:true}).waitFor();check('owner catalog save persists across an authenticated page reload',true);
+ await page.goto(base+'/modules/worship-duty');await page.getByRole('button',{name:'Manage',exact:true}).waitFor();await page.getByRole('button',{name:'Manage',exact:true}).click();await page.getByRole('heading',{name:'Monthly planner'}).waitFor();
+ await page.getByLabel('Planner service',{exact:true}).selectOption(f.serviceId);await page.getByLabel('Planner duty',{exact:true}).selectOption('usher_1');await page.getByLabel('Proposed member').selectOption('');await page.getByRole('button',{name:'Stage assignment'}).click();await page.getByRole('button',{name:'Review assignment batch'}).click();await page.getByRole('region',{name:'Assignment batch review'}).waitFor();check('monthly assignment changes require a visible batch review',true);
+ await page.getByRole('button',{name:'Apply reviewed assignments'}).click();await page.getByText('Saved.',{exact:true}).waitFor();check('reviewed batch saves through authenticated API into PostgreSQL',true);
+ for(const width of [320,390,430,768,1280]){await page.setViewportSize({width,height:900});check('planner has no horizontal overflow at '+width,await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1));}
+ await page.getByRole('button',{name:'Presider',exact:true}).click();await page.getByLabel('Glory song').waitFor();await page.getByLabel('Glory song').selectOption({label:songCode+' · Fictional browser song'});
+ page.once('dialog',d=>d.dismiss());await page.getByRole('button',{name:'Manage',exact:true}).click();check('cancelled navigation retains the unsaved real service song plan',await page.getByRole('heading',{name:'Presider',exact:true}).isVisible());
+ await page.getByRole('button',{name:'Save plan',exact:true}).click();await page.getByText('Saved.',{exact:true}).waitFor();await page.reload();await page.getByRole('button',{name:'Presider',exact:true}).click();await page.getByLabel('Glory song').waitFor();check('song plan persists for the exact service',await page.getByLabel('Glory song').inputValue().catch(()=>page.getByLabel('Glory song').evaluate(e=>e.value))!=='');
+ const outsider=await browser.newContext();const denied=await outsider.request.get(base+'/api/worship-duty/setup');check('anonymous owner setup API returns no personnel',denied.status()===401);const forged=await owner.request.post(base+'/api/worship-duty/setup',{headers:{Origin:'https://untrusted.example'},data:{op:'song',code:'BAD',title:'Bad',seconds:10,expectedVersion:0}});check('cross-origin mutation rejected before RPC',forged.status()===400);
+ const member=await browser.newContext();await login(member,'test-102@example.invalid',normal.password);const noSetup=await member.request.get(base+'/api/worship-duty/setup');check('ordinary authenticated member cannot read owner setup',noSetup.status()===403);
+ await owner.close();await outsider.close();await member.close();console.log(`PASS: ${passes} real local browser checks.`);
+}finally{await browser.close();}

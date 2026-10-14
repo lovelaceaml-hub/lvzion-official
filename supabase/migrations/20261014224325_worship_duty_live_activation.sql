@@ -4,7 +4,7 @@ begin;
 do $activation$
 declare v_owner uuid; v_module uuid; v_count integer; v_department text;
 begin
- select count(*),min(l.member_id) into v_count,v_owner
+ select count(*),min(l.member_id::text)::uuid into v_count,v_owner
  from app_private.bootstrap_receipts b join app_private.account_links l on l.auth_user_id=b.auth_user_id
  join public.members m on m.id=l.member_id where l.enabled and l.technical_enabled;
  if v_count<>1 then raise exception 'One verified application owner required for Worship setup' using errcode='42501';end if;

@@ -12,7 +12,7 @@ revoke all on app_private.worship_service_editor_grants from public,anon,authent
 do $owners$
 declare v_owner uuid;v_count integer;
 begin
- select count(*),min(l.member_id) into v_count,v_owner
+ select count(*),min(l.member_id::text)::uuid into v_count,v_owner
  from app_private.bootstrap_receipts b
  join app_private.account_links l on l.auth_user_id=b.auth_user_id
  where l.enabled and l.technical_enabled;
@@ -75,9 +75,9 @@ begin
    then array['op','worship','period','startsAt','endsAt'] else array['op','serviceId','expectedVersion','worship','period','startsAt','endsAt'] end)) then raise exception 'Unexpected setup field' using errcode='22023';end if;
   v_name:=btrim(p_command->>'worship');v_period:=p_command->>'period';
   if v_name is null or length(v_name) not between 2 and 80
-    or v_period not in ('Early Morning','Morning','Afternoon','Evening','Commemoration') then raise exception 'Invalid service details' using errcode='22023';end if;
+    or v_period is null or v_period not in ('Early Morning','Morning','Afternoon','Evening','Commemoration') then raise exception 'Invalid service details' using errcode='22023';end if;
   v_start:=(p_command->>'startsAt')::timestamptz;v_end:=(p_command->>'endsAt')::timestamptz;
-  if v_start<=clock_timestamp() or v_start>clock_timestamp()+interval '2 years'
+  if v_start is null or v_end is null or v_start<=clock_timestamp() or v_start>clock_timestamp()+interval '2 years'
     or v_end<=v_start or v_end>v_start+interval '24 hours' then raise exception 'Invalid service time' using errcode='23514';end if;
  end if;
  if v_op='create' then
@@ -163,7 +163,7 @@ begin
     on conflict(member_id,module_id) where ended_at is null do nothing;
   else
    update app_private.module_access_grants set ended_at=clock_timestamp(),ended_by=v_actor
-    where member_id=v_member and module_id=v_module and permission='viewer' and ended_at is null;
+    where member_id=v_member and module_id=v_module and ended_at is null;
   end if;
   v_after:=jsonb_build_object('memberId',v_member,'accessEnabled',p_command->'enabled');
  elsif v_op='song' then

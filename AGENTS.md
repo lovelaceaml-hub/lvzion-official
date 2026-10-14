@@ -8,6 +8,8 @@ Read README.md, docs/HANDOFF.md, docs/ACTUAL-APP-SETUP.md and docs/RELEASE-GATES
 
 ## Verification
 
+The active Worship integration workflow and Build log are docs/worship-duty/LAUNCH.md, with records at docs/runs/worship-launch/. Dedicated native Worship tests use a new loopback-only /tmp/lvz-worship-integration directory and fictional identities, as documented there. Owner activation/setup migrations are exercised by dedicated bootstrap-owner suites, rather than applied to unrelated empty foundation fixtures.
+
 Use Node 24. Run `npm ci --ignore-scripts`, `npm run build` and `npm run test:browser`. Browser tests run against a loopback-only server, with activation disabled. For real local Auth signup testing, run `LVZ_SIGNUP_INTEGRATION=true node tests/integration/start-stack.mjs`, then `LVZ_INTEGRATION_DIR=/tmp/lvz-integration node scripts/test-signup-integration.mjs`, then `node tests/integration/stop-stack.mjs`. The disposable integration directory must be new, and contains only fictional identities and ephemeral test credentials. Never commit or publish that directory. Never send a real address to local SMTP.
 
 ## Boundaries

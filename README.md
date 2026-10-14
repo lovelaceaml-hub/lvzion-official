@@ -18,6 +18,8 @@ The actual routes are [signup](https://lvz.app/sign-up), /sign-in, /sign-up, /me
 
 ## Development
 
+Worship Duty integration is being completed in PR #25 for the actual [Worship Duty route](https://lvz.app/modules/worship-duty). Hosted activation remains pending. See [implementation and launch evidence](docs/worship-duty/LAUNCH.md).
+
 Use Node 24 and the exact dependency lockfile.
 
 ```sh

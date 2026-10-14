@@ -1,0 +1,67 @@
+# Worship Duty production integration
+
+Target: https://lvz.app/modules/worship-duty, within the existing official member application. Original Firebase applications, data and schedules remain untouched.
+
+## Release status
+
+Implementation and isolated verification are in progress. Hosted Worship migrations and the production flag remain unapplied. Do not describe this as a completed launch until production route, owner session and database access are checked.
+
+## Acceptance and sequence
+
+1. Reconcile PR #25 with current main and the hosted migration ledger.
+2. Finish owner-only service, personnel, qualification, availability, permission and song setup.
+3. Persist reviewed monthly assignment batches with department scope, conflicts, stale protection and history.
+4. Verify real Auth/PostgREST/PostgreSQL sessions, concurrent edits, phone layouts, signup and Study Rooms.
+5. Apply only the five pending Worship migrations, register explicit owner access, enable the production flag and deliberately deploy the integrated source.
+6. Read back hosted state and the actual domain, preserve rollback, update guides and push the final evidence.
+
+## Implemented behavior
+
+The existing authenticated My Duties, Presider and Manage remain the foundation. Setup requires the verified bootstrap owner plus explicit service-editor and module-manager grants. Technical status alone does not authorize setup or scheduling. Active placed members receive approved department participation, module access, individual qualifications and independent scheduling/song grants. The owner remains Unassigned without a fabricated placement or serving qualification.
+
+Services begin as drafts. Editing and publication use exact service versions. Cancellation retains services, assignments, requests and audit history. Publication creates personal My Week activities; rescheduling updates activities and reopens the exact song plan for review. Availability changes share the member's optimistic version and never remove duties.
+
+Monthly list/calendar planning stages at most 40 cells for explicit batch review. The database authorizes every cell before changing records, validates the final assignment combination and rolls the whole transaction back on a conflict. Legal swaps clear only changed cells before applying final candidates. Song details that have been used cannot be rewritten; archiving preserves the catalog entry and plans.
+
+The interface extends the existing sage/cream module design. No new prototype, design provider, member database or login is introduced. Las Vegas times are independent of the device timezone; skipped/repeated daylight-saving inputs are rejected.
+
+## Verification commands
+
+Use Node 24. Standard build: `npm run build`. Activation-disabled browser regressions on a separate loopback server: `LVZ_BROWSER_TEST_PORT=3100 LVZ_MEMBER_SYSTEM_ENABLED=false npm run test:browser`.
+
+Native tests require new `/tmp/lvz-worship-integration` and free loopback ports. Never reuse an existing active stack or run the fixtures against a hosted backend.
+
+```sh
+LVZ_SIGNUP_INTEGRATION=true LVZ_WORSHIP_INTEGRATION=true node tests/integration/start-worship-stack.mjs
+LVZ_WORSHIP_INTEGRATION=true node scripts/test-worship-integration.mjs
+LVZ_WORSHIP_INTEGRATION=true node scripts/test-worship-browser.mjs
+node tests/integration/stop-worship-stack.mjs
+```
+
+The local harness creates the verified fictional owner through real Auth and enrollment before installing ordinary fixture administrators. Its mail sink accepts only example.invalid. Ephemeral credentials, session tokens, outbox and database files stay outside Git. Test-only migrations are not a hosted deployment.
+
+## Verification observed so far
+
+- Production build: passed; 386 Node tests and 198 foundation PostgreSQL assertions, plus dedicated Worship SQL tests.
+- Existing phone Chromium regressions: 77 passed with activation disabled.
+- Existing real local signup/Auth/PostgREST/SMTP regressions: 47 passed.
+- Native Worship: nine passed, including a legal swap, full rollback, actual separate-session race with exactly one accepted writer, historical-song protection and service rescheduling.
+- Authenticated browser: owner Apps navigation, setup at 320/390/430/768/1280 pixels and catalog save/reload passed. Remaining planner/song browser checks are being completed.
+- External Claude review was rejected before execution by automatic approval review because sending private source was not separately authorized. No source was sent. The existing release documentation waives external security review; local controller review and verification remain required.
+
+## Scope limits
+
+No original records are imported. No invitations, Signal messages, external notifications or purchases are sent. Suggestions are explicitly reviewed eligible-member proposals, not claimed legacy Usual, Auto, Rotation or Random parity. Workspace limits are visible (80 services over 90 days, 120 setup services over a year, 200 active personnel and 500 songs). Physical-device and real multi-member operating acceptance remain separate from emulated browser checks.
+
+## Rollback
+
+Retain the previous READY Vercel production deployment. Disable `LVZ_WORSHIP_DUTY_ENABLED` and restore that deployment if needed. Keep the additive private schema and history; do not drop records. Revoke module participation only through reviewed commands. Do not change other module flags or replay existing hosted migrations.
+
+## Build log
+
+- Reconciled initial Worship head c14ea76 with production main f4a888b in isolated branch feature/worship-duty-live, leaving the original checkout untouched.
+- Fixed unsupported UUID aggregation, required service input checks and manager access revocation before hosted application.
+- Added owner setup UI/API, independently scoped personnel grants, manual-only preferences, versioned service availability and song management.
+- Added atomic persisted batch scheduling and draft-publication activity projection with qualification/availability revalidation.
+- Added a native real-session test stack, concurrency checks and authentic browser checks. A local bootstrap-order error was corrected without bypassing the first-owner guard. Direct PostgREST stale error code 40001 is checked; the app maps it to HTTP 409.
+- Concurrent main advanced again during verification. A final reconciliation and rerun are required before release.
