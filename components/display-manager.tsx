@@ -36,11 +36,11 @@ export default function DisplayManager(){
  async function load(){
   try{
    const r=await fetch('/api/display/manage',{cache:'no-store',credentials:'same-origin'});
-   if(!r.ok){setStatus(r.status===401?'Sign in to manage the church display.':'Display management is not available for this account.');return;}
+   if(!r.ok){setScreen(null);setAllScreens([]);setSlides([]);setPairCode('');setStatus(r.status===401?'Sign in to manage the church display.':'Display management is not available for this account.');return;}
    const payload=await r.json() as{screens?:DisplayScreenR2[]};
    setAllScreens(payload.screens??[]);
    const next=(payload.screens??[]).find(candidate=>candidate.id===preferredScreen.current)??payload.screens?.[0];
-   if(next)preferredScreen.current=next.id;if(!next){setStatus('No display has been assigned to your account.');return;}
+   if(next)preferredScreen.current=next.id;if(!next){setScreen(null);setSlides([]);setPairCode('');setStatus('No display has been assigned to your account.');return;}
    setScreen(next);
    if(!editing.current){
     setSlides(next.items||[]);setSelected(0);setDirty(false);
@@ -60,18 +60,19 @@ export default function DisplayManager(){
    const r=await fetch('/api/display/manage',{method:'POST',headers:{'Content-Type':'application/json'},credentials:'same-origin',body:JSON.stringify(action==='createScreen'?{action,...extra}:{action,screenId:screen.id,...extra})});
    const data=await r.json() as Record<string,unknown>;
    if(!r.ok)throw Error(typeof data.error==='string'?data.error:'Display change was rejected.');
+   let notice='Display change saved.';
    if(action==='pair'&&typeof data.code==='string'){
-    setPairCode(data.code);setStatus('One-time pairing code created. It expires in five minutes.');
+    setPairCode(data.code);notice=('One-time pairing code created. It expires in five minutes.');
    }else if(action==='createScreen'&&typeof data.screenId==='string'){
     preferredScreen.current=data.screenId;setPairCode('');
-    setStatus('A new disabled screen has been created. Configure and approve it before pairing.');
-   }else if(action==='hours')setStatus('Operating hours saved. The screen will show a neutral state outside these hours.');
-   else if(action==='restore')setStatus('A previously approved publication was restored as a new version.');
-   else if(action==='override')setStatus('Temporary emphasis started for an already approved slide.');
-   else if(action==='clearOverride')setStatus('Temporary emphasis ended.');
-   else setStatus(action==='save'?'Draft saved. Approval is still required.':action==='approve'?'Exact draft approved. Publishing is a separate action.':action==='publish'?'Approved version published. Paired screens update at a safe transition.':'Device access revoked.');
+    notice=('A new disabled screen has been created. Configure and approve it before pairing.');
+   }else if(action==='hours')notice=('Operating hours saved. The screen will show a neutral state outside these hours.');
+   else if(action==='restore')notice=('A previously approved publication was restored as a new version.');
+   else if(action==='override')notice=('Temporary emphasis started for an already approved slide.');
+   else if(action==='clearOverride')notice=('Temporary emphasis ended.');
+   else notice=(action==='save'?'Draft saved. Approval is still required.':action==='approve'?'Exact draft approved. Publishing is a separate action.':action==='publish'?'Approved version published. Paired screens update at a safe transition.':'Device access revoked.');
    if(['save','approve','publish','createScreen'].includes(action)){editing.current=false;setDirty(false);}
-   await load();
+   await load();setStatus(notice);
   }catch(e){setStatus(e instanceof Error?e.message:'Could not complete the change.');}
   finally{setBusy(false);}
  }
