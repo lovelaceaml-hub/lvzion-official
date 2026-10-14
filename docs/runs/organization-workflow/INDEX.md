@@ -11,6 +11,6 @@
 |---|---|---|
 | [1: Actual hierarchy](lanes/ST1.md) | Complete | 4 categories, 8 groups, 16 empty units; parent relationships and audited commands verified |
 | [2: Management and placement](lanes/ST2.md) | Complete | Nested tree, contextual creation, rename/archive, dependent placement, scoped leadership and retry receipts |
-| [3: Verify and release](lanes/ST3.md) | Release pending | Build: 244 app tests and 182 SQL assertions; browser: 75 passed |
+| [3: Verify and release](lanes/ST3.md) | Release pending | Build: 244 app tests and 198 SQL assertions; browser: 77 passed |
 
 No separate lane board or rule diagram is needed for this single-writer feature. The established production rollback remains compatible and preserves the requested structure.
