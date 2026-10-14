@@ -1,5 +1,7 @@
 # Continuous Church Display R2 — operations, publication and release
 
+> **Production release verified October 14, 2026.** R2 operations are on production `lvz.app` through READY Vercel deployment `dpl_FFquRhvQkTW1xv1gRVz1SuKBg66S`, source `de5dcdede5fc740873fddfa36467d9d47f318fd6`. Hosted migration `continuous_display_operations` (`20261014232519`) is applied; its source is on `main` at `supabase/migrations/20261014230147_continuous_display_operations.sql`. The release sequence below is now **historical implementation evidence**, not unfinished permission to migrate or publish material. Read-only audit: one screen, zero real publications, zero paired devices. Live public TVs, religious content and external feed integrations still require separate authorization. [Current status](../CURRENT-STATUS.md) · [Ledger](../HOSTED-MIGRATION-LEDGER.json).
+
 **Product:** real LV Zion Official module at `https://lvz.app/modules/continuous-display` with the independent full-screen player at `https://lvz.app/display`.
 
 **Scope:** one usable screen plus the ability for the verified original owner to create up to eight independent, disabled, unpaired screens. Every new screen receives explicit owner-specific edit, approve, publish and device permissions. No group leader or technical administrator inherits broadcast power. Mother’s Love and original Study Room lobby displays are untouched.
