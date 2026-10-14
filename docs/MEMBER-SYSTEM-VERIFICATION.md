@@ -1,5 +1,7 @@
 # Member-system verification
 
+> **Historical member-foundation review; not current production status.** This file preserves the original branch, test results and launch gates **at the time they were recorded**. The real platform and verified signup are now live at `lvz.app`; for current owner scope, module access, migration state and remaining tests read [CURRENT-STATUS.md](CURRENT-STATUS.md) and [RELEASE-GATES.md](RELEASE-GATES.md). Do not replay historic migrations or treat a past preview status as today's production state.
+
 Current completion record: [ONBOARDING-COMPLETION.md](ONBOARDING-COMPLETION.md).
 
 | Current check | Result |
