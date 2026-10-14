@@ -13,7 +13,7 @@ export default function EnrollmentPanel({data:w,execute,demo=false}:{data:Worksp
  if(!w.permissions.organization)return null;
  return <section className="member-card"><h2>Unassigned members</h2><p>Confirm the person is a member and check for an existing record. Email confirmation proves ownership of the address. It does not verify church membership.</p>
  {message&&<p role="status" className="member-message">{message}</p>}
- {(w.unassignedMembers??[]).map(m=>{return <article className="sub-card" key={m.id}><strong>{m.name}</strong><p>{m.email}</p><span className="badge">Unassigned</span>
+ {(w.unassignedMembers??[]).map(m=>{return <article className="sub-card" key={m.id}><strong>{m.name}</strong>{m.firstName&&m.lastName&&<p>Submitted first name: <strong>{m.firstName}</strong><br/>Submitted last name: <strong>{m.lastName}</strong></p>}<p>{m.email}</p><span className="badge">Unassigned</span>
  <form onSubmit={e=>void submit(e,'enrollment.assign',m.id)}>
  <PlacementPicker data={w} manageableOnly/>
  <label>Membership and identity verified<select name="verified" required defaultValue="no"><option value="no">Not yet verified</option><option value="yes">I independently verified membership and identity</option></select></label>

@@ -6,7 +6,7 @@
 
 ## Sign up and sign in
 
-Create an account with your own name, personal email and a password of at least six characters. Open the confirmation email and confirm your account. If an older confirmation link says it could not finish, sign in with the password you chose.
+Create an account with your own first and last names, personal email and a password of at least six characters. Open the confirmation email and confirm your account. If an older confirmation link says it could not finish, sign in with the password you chose.
 
 New accounts start Unassigned to age category, group and unit. An authorized member administrator verifies the person and places them. Unassigned accounts can see only their own records.
 
