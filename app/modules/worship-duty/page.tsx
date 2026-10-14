@@ -1,13 +1,20 @@
 import {redirect} from 'next/navigation';
+import Link from 'next/link';
 import {requireMember} from '../../../lib/server/supabase';
-import {reviewEnabled} from '../../../lib/worship-duty/api-contract';
+import {worshipOperationalEnabled} from '../../../lib/worship-duty/activation';
+import {parseModuleFeed} from '../../../lib/app-runtime';
 import ConnectedWorkspace from '../../../components/worship-duty/connected-workspace';
 export const dynamic='force-dynamic';
 export const metadata={title:'Worship Duty · LV Zion',robots:{index:false,follow:false}};
 export default async function Page(){
- let authenticated=false;
- try{await requireMember();authenticated=true;}catch{}
- if(!authenticated)redirect('/sign-in');
- if(reviewEnabled(process.env))return <ConnectedWorkspace/>;
- return <main style={{maxWidth:560,margin:'48px auto',padding:24}}><a href="/members">‹ My Week</a><h1>Worship Duty</h1><h2>Not activated</h2><p>The authenticated application is implemented for isolated testing. No live schedule or member import has been enabled.</p><p>Activation requires the reviewed migrations, an accountable department owner, scoped grants and verified hosted account tests. A browser role selector cannot enable this route.</p><a href="/worship-duty-preview/connected">Review the fictional workflow rehearsal</a></main>;
+ let client;
+ try{client=await requireMember();}catch{redirect('/sign-in');}
+ if(!worshipOperationalEnabled(process.env))return <main style={{maxWidth:560,margin:'40px auto',padding:24}}><Link href="/members">‹ My Week</Link><h1>Worship Duty</h1><p>Worship Duty is not activated. Your existing assignments are unchanged.</p></main>;
+ const {data,error}=await client.rpc('member_module_home');
+ if(error)return <main style={{padding:24}}><Link href="/members">‹ My Week</Link><h1>Worship Duty</h1><p>Unable to verify module access. Please sign in again.</p></main>;
+ try{
+  const feed=parseModuleFeed(data);
+  if(!feed.modules.some(m=>m.route==='/modules/worship-duty'))return <main style={{maxWidth:560,margin:'40px auto',padding:24}}><Link href="/members">‹ My Week</Link><h1>Worship Duty</h1><p>Access to this module has not been assigned to your member account.</p></main>;
+ }catch{return <main style={{padding:24}}><Link href="/members">‹ My Week</Link><h1>Worship Duty</h1><p>Module access could not be verified.</p></main>;}
+ return <ConnectedWorkspace/>;
 }
