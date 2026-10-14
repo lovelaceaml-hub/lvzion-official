@@ -12,6 +12,8 @@ try{
  for(const file of ['supabase/tests/bootstrap.sql',...migrations,'supabase/seed/fictional_members.sql'])sql(await readFile(file,'utf8'));
  const native=execFileSync('psql',[...args,'-f','supabase/tests/study_rooms.sql'],{encoding:'utf8',timeout:20000,stdio:['ignore','pipe','pipe']});
  console.log('Native PostgreSQL study-room regression script: PASS');
+ execFileSync('psql',[...args,'-f','supabase/tests/study_room_changes.sql'],{encoding:'utf8',timeout:20000,stdio:['ignore','pipe','pipe']});
+ console.log('Native PostgreSQL R2 42-assertion regression: PASS');
  const test=await readFile('supabase/tests/study_rooms.sql','utf8');
  const prefix=test.slice(test.indexOf('begin;'),test.indexOf('create function pg_temp.login'));
  const grant=test.split("update app_private.app_modules set status='approved'")[1].split('select pg_temp.login(105)')[0];
@@ -25,4 +27,20 @@ try{
  assert.equal(sql('select count(*) from app_private.study_bookings').trim(),'1');assert.equal(sql('select count(*) from app_private.study_slots').trim(),'2');assert.equal(sql('select count(*) from app_private.module_activities').trim(),'1');
  const winner=outcomes.find(o=>o.ok).n;sql(tx(winner));assert.equal(sql('select count(*) from app_private.study_bookings').trim(),'1');
  console.log('Concurrent same-resource requests: one winner, one rejected; one booking, two occupied slots, one My Week activity. Exact retry creates no duplicate. PASS');
+ // Two stale editors of the same booking must never both win.
+ const bookingId=sql('select id from app_private.study_bookings limit 1').trim();
+ const edit=(n)=>({...make(n),action:'reschedule',bookingId,expectedVersion:1,resourceId:'92000000-0000-4000-8000-'+String(n===201?3:4).padStart(12,'0'),reason:'Concurrent editor test'});
+ const editOutcomes=await Promise.all([201,202].map(async n=>{try{await run('psql',[...args,'-c',auth(winner)+"select public.study_room_command('"+JSON.stringify(edit(n))+"');select pg_sleep(0.15);commit;"],{timeout:20000});return {ok:true};}catch(e){return{ok:false,error:String(e.stderr)};}}));
+ assert.equal(editOutcomes.filter(o=>o.ok).length,1);assert(editOutcomes.filter(o=>!o.ok).every(o=>o.error.includes('Reservation changed')));
+ assert.equal(sql('select version from app_private.study_bookings limit 1').trim(),'2');assert.equal(sql('select count(*) from app_private.study_slots').trim(),'2');assert.equal(sql('select count(*) from app_private.module_activities').trim(),'1');
+ console.log('Concurrent reschedules: one winner, stale editor rejected, version 2, one booking and one activity. PASS');
+ // A manager closure racing with a booking cannot silently cancel the reservation.
+ const reserve={...make(203),resourceId:'92000000-0000-4000-8000-000000000002'};
+ const closure={requestId:'96000000-0000-4000-8000-000000000204',action:'closure.add',resourceId:reserve.resourceId,day:tomorrow,start:780,end:840,reason:'Concurrent maintenance closure'};
+ const races=[{actor:103,fn:'study_room_command',payload:reserve},{actor:101,fn:'study_room_admin',payload:closure}];
+ const results=await Promise.all(races.map(async x=>{try{await run('psql',[...args,'-c',auth(x.actor)+"select public."+x.fn+"('"+JSON.stringify(x.payload)+"');select pg_sleep(0.15);commit;"],{timeout:20000});return{ok:true};}catch(e){return{ok:false,error:String(e.stderr)};}}));
+ assert.equal(results.filter(x=>x.ok).length,1);assert(results.filter(x=>!x.ok).every(x=>/Scheduled closure|conflicts with existing reservations/.test(x.error)));
+ assert.equal(sql("select (select count(*) from app_private.study_bookings where resource_id='"+reserve.resourceId+"')+(select count(*) from app_private.study_closures where resource_id='"+reserve.resourceId+"' and active)").trim(),'1');
+ console.log('Closure versus booking race: one winner; existing reservations never displaced. PASS');
+
 }finally{if(started)execFileSync('pg_ctl',['-D',dir+'/db','-m','immediate','stop'],{stdio:'ignore'});await rm(dir,{recursive:true,force:true});}
