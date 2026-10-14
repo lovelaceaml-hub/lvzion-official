@@ -42,11 +42,16 @@ test('Morning Prayer R4: verified owner, member grants, atomic dates and Vault j
   await db.exec('create schema vault;create table vault.decrypted_secrets(id uuid primary key default gen_random_uuid(),decrypted_secret text not null);');
   await db.exec('create function vault.create_secret(new_secret text,new_name text default null,new_description text default null,new_key_id uuid default null) returns uuid language plpgsql as $$declare v uuid;begin insert into vault.decrypted_secrets(decrypted_secret)values(new_secret) returning id into v;return v;end$$;');
   await db.exec('create function vault.update_secret(secret_id uuid,new_secret text,new_name text default null,new_description text default null,new_key_id uuid default null) returns void language plpgsql as $$begin update vault.decrypted_secrets set decrypted_secret=new_secret where id=secret_id;end$$;');
+  await db.exec("insert into public.age_categories(id,name)values('11111111-1111-4111-8111-000000000001','Example category');insert into public.church_groups(id,age_category_id,name)values('22222222-2222-4222-8222-000000000001','11111111-1111-4111-8111-000000000001','Example group');insert into public.church_units(id,group_id,name)values('33333333-3333-4333-8333-000000000001','22222222-2222-4222-8222-000000000001','Example unit');");
   for(let n=1;n<=3;n++){
    await db.query('insert into auth.users(id,email,email_confirmed_at)values($1,$2,now())',[user(n),'fictional-'+n+'@example.invalid']);
    await db.query('insert into auth.sessions(id,user_id)values($1,$2)',[session(n),user(n)]);
-   await db.query('insert into public.members(id,display_name,status)values($1,$2,$3)',[member(n),'Fictional Member '+n,n===1?'intake':'active']);
+   await db.query('insert into public.members(id,display_name,status)values($1,$2,$3)',[member(n),'Fictional Member '+n,'intake']);
    await db.query('insert into app_private.account_links(member_id,auth_user_id,username)values($1,$2,$3)',[member(n),user(n),'fictional_member_'+n]);
+  }
+  for(let n=2;n<=3;n++){
+   await db.query("insert into public.member_placements(member_id,group_id,unit_id,started_at)values($1,'22222222-2222-4222-8222-000000000001','33333333-3333-4333-8333-000000000001',now()-interval '1 day')",[member(n)]);
+   await db.query("update public.members set status='active' where id=$1",[member(n)]);
   }
   await db.query('insert into app_private.bootstrap_receipts(auth_user_id)values($1)',[user(1)]);
   await db.exec(await readFile('supabase/migrations/20261014224129_morning_prayer_live_core.sql','utf8'));
