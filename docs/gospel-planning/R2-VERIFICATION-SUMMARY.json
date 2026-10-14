@@ -1,0 +1,37 @@
+{
+  "status": "passed",
+  "evidenceKind": "summary of executed disposable native PostgreSQL harness",
+  "startedAt": "2026-10-14T16:02:20.621963+00:00",
+  "finishedAt": "2026-10-14T16:02:25.744384+00:00",
+  "postgres": "PostgreSQL 17.10 on x86_64-amazon-linux-gnu, compiled by gcc (GCC) 11.5.0 20240719 (Red Hat 11.5.0-5), 64-bit",
+  "namedChecks": 77,
+  "genuineConcurrentScenarios": 6,
+  "localBackupRestore": "passed; second database in the same disposable cluster, with existing test roles",
+  "races": [
+    {"name":"competing commitments","waitObserved":true,"firstExit":0,"secondExit":3,"expectedRejection":"GP_OVERLAP"},
+    {"name":"material revision versus queued response","waitObserved":true,"firstExit":0,"secondExit":3,"expectedRejection":"GP_STALE"},
+    {"name":"draft edit versus queued publication","waitObserved":true,"firstExit":0,"secondExit":3,"expectedRejection":"GP_STALE"},
+    {"name":"two partners reporting once","waitObserved":true,"firstExit":0,"secondExit":3,"expectedRejection":"GP_STALE_REPORT"},
+    {"name":"grant revocation versus queued save","waitObserved":true,"firstExit":0,"secondExit":3,"expectedRejection":"GP_DENIED"},
+    {"name":"ended leadership versus queued private projection","waitObserved":true,"firstExit":0,"secondExit":0,"result":"queued response omits revoked draft; ordinary member view remains available"}
+  ],
+  "sourceSha256": {
+    "supabase/tests/bootstrap.sql": "6c94aa2a6c972c6d1ac7dca416e9c0eb088ef77fdc3923f0e62d4a899ece024d",
+    "supabase/migrations/20261014020617_member_system_foundation.sql": "d50be9ff2eba3572b814342bd300a8dd82068d3ef08578c003522401222f45fb",
+    "supabase/migrations/20261014043055_member_command_hardening.sql": "75a1c231f1d05fab8c635c74a415be356c72e1fed87f9d863ba396d6a804236e",
+    "supabase/migrations/20261014045521_member_onboarding.sql": "4ac146e852bce86381167458edc7a1a76ebb1cb8bc56098be456ab5c88f7fa21",
+    "supabase/migrations/20261014074214_module_runtime_foundation.sql": "90486daf51aabb90423906c9a2d7861ace2a905657b799446abdf077c985bc0d",
+    "docs/gospel-planning/transactional-core-review.sql": "6778dabb17941547a49b20f9c8350a7896ad6d656ca7e0cf6a9b11efa82a31a2",
+    "scripts/gospel-planning/verify_native.py": "37334c16b75ec51083cb3c3a960c6f27c874c13fc051ab2bcf5fdbb1cae73167"
+  },
+  "reproduce": "python3 scripts/gospel-planning/verify_native.py",
+  "fullRunOutput": "The harness writes docs/gospel-planning/R2-VERIFICATION.json with every named check on each successful run.",
+  "limits": [
+    "Auth tables and session claims are repository test doubles, not real hosted Supabase Auth.",
+    "No hosted migration, live runtime, real-user Auth/PostgREST, frontend transport or physical-device verification.",
+    "Restricted Member Updates and Overseer Request persistence is not implemented by this core.",
+    "Six controlled interleavings with observed advisory-lock contention are not exhaustive stress testing.",
+    "Authorization ordering assumes protected operations use the existing foundation lock; infrastructure-owner direct SQL is outside the member API.",
+    "Local pg_dump/pg_restore is not hosted disaster-recovery evidence."
+  ]
+}
