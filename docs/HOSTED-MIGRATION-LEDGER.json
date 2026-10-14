@@ -95,6 +95,15 @@
       "applied_via": "Supabase MCP apply_migration",
       "status": "applied",
       "verification": "migration success, hosted list_migrations, RLS table list; no canonical digest attestation for this entry"
+    },
+    {
+      "name": "contacts_private_owner_pilot_v1",
+      "hosted_version": "20261014224708",
+      "repository_version": "20261014224708",
+      "applied_via": "Supabase MCP apply_migration",
+      "status": "applied",
+      "verification": "migration accepted; hosted list_migrations and read-only checks verified six RLS/FORCE RLS tables, zero anonymous function grants, zero direct authenticated reads, one owner grant, zero real contacts. Dedicated PGlite tests exercise identity-aware setup. No live-contact fixture inserted.",
+      "source": "supabase/migrations/20261014224708_contacts_private_owner_pilot_v1.sql"
     }
   ],
   "normalization": {
