@@ -3,13 +3,15 @@ import {useCallback,useEffect,useState} from 'react';
 import Link from 'next/link';
 import type {Action} from '../../lib/morning-prayer/domain';
 import styles from './morning-prayer.module.css';
+import MorningPrayerOperations from './MorningPrayerOperations';
+import MorningPrayerVolunteer from './MorningPrayerVolunteer';
 type Capability='view_schedule'|'join_gathering'|'volunteer_host'|'review_requests'|'manage_schedule'|'view_materials'|'edit_materials'|'publish_materials';
 type Occ={id:string;date:string;originalDate:string;startsAt:string;endsAt:string;timezone:string;kind:'gathering'|'app_day'|'cancelled';host:string;isMine:boolean;hostConfirmed:boolean;verified:boolean;revision:number;readingKey?:string|null};
 type Req={id:string;occurrenceId:string;kind:'volunteer'|'change';status:string;revision:number;isMine:boolean;requester:string;note:string};
 type Material={key:string;kind:'pwp'|'reading';revision:number;body:{title:string;summary:string;items:string[];sourceLabel:string}};
 type Draft=Material&{id:string;sourceState:'checked'|'incomplete'};
 type Host={id:string;name:string};
-type Workspace={version:number;occurrences:Occ[];requests:Req[];materials?:Material[];capabilities:Capability[];drafts:Draft[];eligibleHosts:Host[];timezone:string;setupComplete:boolean;meetingAccessConfigured:boolean};
+type Workspace={version:number;occurrences:Occ[];requests:Req[];materials?:Material[];capabilities:Capability[];drafts:Draft[];eligibleHosts:Host[];timezone:string;setupComplete:boolean;meetingAccessConfigured:boolean;upcoming?:Occ[];joinWindowMinutes?:number|null;meetingStates?:{occurrenceId:string;ready:boolean;configured:boolean}[];};
 type Tab='home'|'schedule'|'me'|'manage';
 const zone='America/Los_Angeles';
 const pretty=(date:string)=>new Intl.DateTimeFormat('en-US',{weekday:'short',month:'short',day:'numeric',timeZone:'UTC'}).format(new Date(date+'T12:00:00Z'));
@@ -48,14 +50,30 @@ export default function MorningPrayerLive(){
   return()=>window.removeEventListener('focus',onFocus);},[loader]);
  async function post(action:Record<string,unknown>,setup=false){
   if(!data||busy)return;setBusy(true);setMessage('');
-  try{const result=await json<{version:number}>(setup?'/api/morning-prayer/setup':'/api/morning-prayer/command',
-   {method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({key:crypto.randomUUID(),expectedVersion:data.version,action})});
+  try{const one=action.type==='create_occurrence';const url=one?'/api/morning-prayer/batch':setup?'/api/morning-prayer/setup':'/api/morning-prayer/command';
+   const body=one?{key:crypto.randomUUID(),expectedVersion:data.version,occurrences:[Object.fromEntries(Object.entries(action).filter(([key])=>key!=='type'))]}:{key:crypto.randomUUID(),expectedVersion:data.version,action};
+   const result=await json<{version:number}>(url,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});
    await loader();setMessage('Saved in LV Zion Official. Version '+result.version+'.');
   }catch(e){setMessage(e instanceof Error?e.message:'Unable to save.');await loader();}
   finally{setBusy(false);}
  }
+ async function joinGathering(id:string){
+  if(busy)return;setBusy(true);setMessage('');
+  try{
+   const value=await json<{joinUrl:string}>('/api/morning-prayer/join',
+    {method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({occurrenceId:id})});
+   const url=new URL(value.joinUrl);
+   if(url.protocol!=='https:'||!(/(^|[.])zoom[.]us$/.test(url.hostname))||
+      !(/^[/]j[/][0-9]{8,12}$/.test(url.pathname)))
+     throw new Error('The verified Zoom meeting URL is unavailable.');
+   window.location.assign(url.toString());
+  }catch(e){setMessage(e instanceof Error?e.message:'Joining is currently unavailable.');setBusy(false);}
+ }
  const rows=[...(data?.occurrences||[])].sort((a,b)=>a.date.localeCompare(b.date));
  const today=localDay(),future=rows.filter(o=>o.date>=today&&o.kind==='gathering');
+ const upcoming=(data?.upcoming||[]).filter(o=>o.date>=today&&o.kind==='gathering');
+ const next=upcoming[0]||future[0];
+ const joinable=(id:string)=>cap('join_gathering')&&!!data?.meetingStates?.some(s=>s.occurrenceId===id&&s.ready);
  const active=focus?rows.find(o=>o.id===focus):future[0]||rows[0];
  const own=rows.filter(o=>o.isMine&&o.kind==='gathering'),requests=data?.requests||[];
  const published=(data?.materials||[]);
@@ -73,10 +91,11 @@ export default function MorningPrayerLive(){
    {data&&<>
     {tab==='home'&&<>
       <div className={styles.sectionHeading}><h2>Your next gathering</h2><span>{pretty(today)}</span></div>
-      {future[0]?<section className={styles.hero}><div className={styles.heroTop}><span>{pretty(future[0].date).toUpperCase()}</span><span>{future[0].verified?'SCHEDULED':'NEEDS VERIFICATION'}</span></div>
-       <div className={styles.heroTime}>{time(future[0].startsAt)}<small>Las Vegas time</small></div>
-       <h2>{future[0].host}</h2><p>{future[0].hostConfirmed?'Confirmed host':'Host and meeting details may need confirmation'}</p>
-       <button onClick={()=>{setFocus(future[0].id);setTab('schedule');}}>Gathering details →</button>
+      {next?<section className={styles.hero}><div className={styles.heroTop}><span>{pretty(next.date).toUpperCase()}</span><span>{next.verified?'SCHEDULED':'NEEDS VERIFICATION'}</span></div>
+       <div className={styles.heroTime}>{time(next.startsAt)}<small>Las Vegas time</small></div>
+       <h2>{next.host}</h2><p>{next.hostConfirmed?'Confirmed host':'Host and meeting details may need confirmation'}</p>
+       {joinable(next.id)&&<button onClick={()=>void joinGathering(next.id)}>Join verified gathering ↗</button>}
+       <button onClick={()=>{setFocus(next.id);setMonth(next.date.slice(0,7));setTab('schedule');}}>Gathering details →</button>
       </section>:<section className={styles.empty}><h2>No upcoming gatherings scheduled</h2><p>An authorized coordinator can add actual dates in Manage. No dates or meeting links are guessed.</p></section>}
       {cap('view_materials')&&<section className={styles.card}><div className={styles.cardTop}><h2>PWP · {new Intl.DateTimeFormat('en-US',{month:'long',year:'numeric',timeZone:'UTC'}).format(new Date(month+'-01T12:00:00Z'))}</h2><span className={styles.tag}>Approved sources only</span></div>
        <div className={styles.weekPicker}>{[1,2,3,4,5].map(n=><button key={n} aria-pressed={myWeek===n} onClick={()=>setMyWeek(n)}>Wk {n}</button>)}</div>
@@ -85,10 +104,11 @@ export default function MorningPrayerLive(){
        <a className={styles.officialLink} href="https://wm.watv.org/login.wmc" target="_blank" rel="noopener noreferrer">Open official WM PWP Card ↗</a>
       </section>}
       <div className={styles.sectionHeading}><h2>Upcoming dates</h2><button onClick={()=>setTab('schedule')}>Full schedule →</button></div>
-      {future.slice(0,5).map(o=><button className={styles.nextOwn} key={o.id} onClick={()=>{setFocus(o.id);setTab('schedule');}}><span><small>{pretty(o.date)}</small><strong>{time(o.startsAt)} · {o.host}</strong></span><b>›</b></button>)}
+      {(upcoming.length?upcoming:future).slice(0,5).map(o=><button className={styles.nextOwn} key={o.id} onClick={()=>{setFocus(o.id);setMonth(o.date.slice(0,7));setTab('schedule');}}><span><small>{pretty(o.date)}</small><strong>{time(o.startsAt)} · {o.host}</strong></span><b>›</b></button>)}
     </>}
     {tab==='schedule'&&<>
       <div className={styles.monthNav}><button aria-label="Previous month" onClick={()=>{setMonth(nextMonth(month,-1));setFocus(null);}}>‹</button><h2>{new Intl.DateTimeFormat('en-US',{month:'long',year:'numeric',timeZone:'UTC'}).format(new Date(month+'-01T12:00:00Z'))}</h2><button aria-label="Next month" onClick={()=>{setMonth(nextMonth(month,1));setFocus(null);}}>›</button></div>
+      <MorningPrayerVolunteer month={month} rows={rows} today={today} selected={focus} onSelect={setFocus} canVolunteer={cap('volunteer_host')} busy={busy} onSubmit={async ids=>{await post({type:'volunteer',occurrenceIds:ids});}}/>
       {rows.length===0?<section className={styles.empty}><h2>No gatherings entered for this month</h2><p>This is the real app; only authorized records will appear here.</p></section>:rows.map(o=><button key={o.id} className={styles.scheduleRow} onClick={()=>setFocus(o.id)} aria-pressed={focus===o.id}>
        <span className={styles.dateBlock}><small>{pretty(o.date).split(',')[0]}</small><strong>{+o.date.slice(-2)}</strong></span>
        <span><b>{o.kind==='app_day'?'Pray Daily app day':o.kind==='cancelled'?'Cancelled':o.host}</b><small>{o.kind==='gathering'?time(o.startsAt)+' · '+(o.verified?'Schedule verified':'Pending verification'):'No live Zoom gathering'}</small></span><b>›</b>
@@ -96,7 +116,7 @@ export default function MorningPrayerLive(){
       {active&&active.date.slice(0,7)===month&&<section className={styles.card} data-testid="actual-gathering"><h2>{pretty(active.date)}</h2><p><strong>{active.kind==='gathering'?active.host:active.kind==='app_day'?'Pray Daily app day':'Cancelled'}</strong></p>
        <p>{time(active.startsAt)} – {time(active.endsAt)} · America/Los_Angeles</p>
        {!active.verified&&<p className={styles.warning}>Schedule has not been verified by a coordinator.</p>}
-       {active.kind==='gathering'&&<p className={styles.muted}>Join access remains unavailable until this occurrence has an authorized, verified meeting link.</p>}
+       {active.kind==='gathering'&&(joinable(active.id)?<button className={styles.primary} disabled={busy} onClick={()=>void joinGathering(active.id)}>Join verified gathering ↗</button>:<p className={styles.muted}>Join access opens only with a verified date and encrypted link, during the authorized meeting window.</p>)}
        {canVolunteer(active)&&<button className={styles.primary} disabled={busy} onClick={()=>void post({type:'volunteer',occurrenceIds:[active.id]})}>Request to host this date →</button>}
        {cap('view_materials')&&published.filter(m=>m.kind==='reading'&&m.key===active.readingKey).map(m=><p key={m.key}><strong>{m.body.title}</strong> — {m.body.summary}</p>)}
       </section>}
@@ -132,6 +152,7 @@ export default function MorningPrayerLive(){
        <button className={styles.primary} disabled={busy} onClick={()=>void post({type:'create_material',key:materialKey,kind:materialKind,body:{title,summary,items:items.split('\n').map(s=>s.trim()).filter(Boolean).slice(0,5),sourceLabel},sourceChecked},true)}>Save as an unpublished draft →</button>
       </section>}
       {cap('publish_materials')&&<section className={styles.card}><h2>Material publication review</h2>{data.drafts.length?data.drafts.map(m=><div key={m.id} className={styles.requestRow}><strong>{m.body.title}</strong><p>{m.key} · Revision {m.revision} · Source {m.sourceState}</p><p>{m.body.summary}</p><button className={styles.primary} disabled={busy||m.sourceState!=='checked'} onClick={()=>void post({type:'material_publish',materialId:m.id})}>Publish reviewed revision →</button></div>):<p className={styles.muted}>No material drafts awaiting publication.</p>}</section>}
+      <MorningPrayerOperations data={data} onReload={loader} onNotice={setMessage}/>
       <p className={styles.boundary}>No automatic sheet synchronization, external messages, attendance tracking, or old Firebase database access.</p>
       </>}
     </>}
