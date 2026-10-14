@@ -1,0 +1,19 @@
+/* Cinematic but readable motion language inspired by the separate Mother's Love display. No campaign assets copied. */
+:root{--display-motion:1}
+.slide .slide-content{animation:reveal-content 1.15s cubic-bezier(.18,.72,.2,1) both}
+.slide .eyebrow{animation:reveal-content .8s .15s both}
+.slide .art i{will-change:transform;animation:ambient-drift 16s ease-in-out infinite alternate}
+.slide .art i:nth-child(2){animation-duration:21s;animation-direction:alternate-reverse}
+.slide .art i:nth-child(3){animation-duration:27s}
+.slide.schedule .schedule-row{animation:reveal-content .8s both}
+.slide.schedule .schedule-row:nth-child(2){animation-delay:.3s}
+.slide.schedule .date-block b{animation:date-enter .9s both}
+.slide.campaign .art{animation:ambient-glow 9s ease-in-out infinite alternate}
+.slide.event .event-detail{animation:reveal-content 1s .35s both}
+.stage[data-transition="cut"] .slide,.stage[data-transition="cut"] .slide *{animation:none!important}
+@keyframes reveal-content{from{opacity:0;transform:translateY(1.6cqw)}to{opacity:1;transform:translateY(0)}}
+@keyframes ambient-drift{from{translate:0 0;scale:1}to{translate:1.2cqw -1cqw;scale:1.045}}
+@keyframes date-enter{from{opacity:0;transform:translateY(2cqw) scale(.94)}to{opacity:1;transform:translateY(0) scale(1)}}
+@keyframes ambient-glow{from{opacity:.65}to{opacity:1}}
+@media(prefers-reduced-motion:reduce){.slide,.slide *, .slide .art i{animation:none!important;transition:none!important;will-change:auto!important}}
+.still .slide,.still .slide *{animation:none!important;transition:none!important;will-change:auto!important}
