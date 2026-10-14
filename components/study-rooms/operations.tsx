@@ -19,7 +19,7 @@ export function StudyOperationsManager({data,today,save}:{data:StudyOperationsDa
  const [busy,setBusy]=useState(false),[error,setError]=useState(''),[message,setMessage]=useState('');
  const receipts=useRef(new Map<string,string>());
  const active=data.specialDays.find(item=>item.day===day);
- useEffect(()=>{setWeekly(data.weekly);},[data.version,data.weekly]);
+ useEffect(()=>{setWeekly(data.weekly);},[data.version]);
  useEffect(()=>{setSpecial(active?.blocks??[]);},[data.version,day]);
  async function send(draft:StudyOperationDraft){
   setBusy(true);setError('');setMessage('');
@@ -74,7 +74,7 @@ export function StudyOperationsManager({data,today,save}:{data:StudyOperationsDa
    <label>Starts{timeSelect(item.start,starts,n=>updateSpecial(i,{...item,start:n}),'Special starts '+(i+1))}</label>
    <label>Ends{timeSelect(item.end,ends,n=>updateSpecial(i,{...item,end:n}),'Special ends '+(i+1))}</label>
    <label className="sr-ops-name">Restriction name<input aria-label={'Special label '+(i+1)} value={item.label} onChange={e=>updateSpecial(i,{...item,label:e.target.value})} maxLength={80}/></label>
-   <button type="button" className="sr-secondary" disabled={busy} onClick={()=>setSpecial(rows=>rows.filter((_,j)=>j!==i)}>Remove</button>
+   <button type="button" className="sr-secondary" disabled={busy} onClick={()=>setSpecial(rows=>rows.filter((_,j)=>j!==i))}>Remove</button>
   </div>)}
   <button type="button" className="sr-secondary" disabled={busy||special.length>=26} onClick={()=>setSpecial(rows=>[...rows,{start:600,end:660,label:'Special service'}])}>Add service interval</button>
   <form className="sr-config-form" onSubmit={e=>{e.preventDefault();void send({action:'day.replace',day,blocks:special,reason:specialReason,expectedVersion:data.version});}}>
