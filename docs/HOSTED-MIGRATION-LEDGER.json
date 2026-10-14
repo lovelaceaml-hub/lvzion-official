@@ -2,7 +2,7 @@
   "project_ref": "otecqlkqirncotytbfns",
   "applied_via": "Supabase MCP apply_migration",
   "verified_on": "2026-10-14",
-  "verification_mode": "read-only definition comparison after individually applied additive migrations",
+  "verification_mode": "Historical normalized SQL comparison where explicitly stated per entry; latest mappings verified by Supabase migration list, repository source presence, and read-only schema/state inspection. No full SQL-byte attestation performed for recent additions.",
   "entries": [
     {
       "name": "member_system_foundation",
@@ -106,12 +106,14 @@
       "source": "supabase/migrations/20261014224708_contacts_private_owner_pilot_v1.sql"
     },
     {
-      "name": "member_signup_names",
-      "hosted_version": "20261014225857",
-      "repository_version": "20261014223500",
+      "name": "continuous_display_live_schema",
+      "hosted_version": "20261014224840",
+      "repository_version": "20261014223341",
+      "source": "supabase/migrations/20261014223341_continuous_display_live_schema.sql",
       "applied_via": "Supabase MCP apply_migration",
       "status": "applied",
-      "verification": "Additive RLS-enabled private signup-names table; three-argument enrollment RPC granted only to authenticated; anonymous/direct client table access denied; existing member and enrollment counts unchanged. Production Next build and disposable SQL checks completed."
+      "verified_on": "2026-10-14",
+      "verification": "Hosted migration name/version verified; private display schema has 8 RLS-enabled tables after R2. Original R1 live module approved for original owner, no real TV content or device pairing assumed. Mapping only; no newly computed SQL byte-level digest attestation."
     },
     {
       "name": "study_room_policy_operations",
@@ -121,6 +123,34 @@
       "status": "applied",
       "verified_on": "2026-10-14",
       "verification": "Hosted version, closed gate, original weekly rules, RLS/anonymous-execute verified."
+    },
+    {
+      "name": "morning_prayer_live_core",
+      "hosted_version": "20261014225825",
+      "repository_version": "20261014224129",
+      "source": "supabase/migrations/20261014224129_morning_prayer_live_core.sql",
+      "applied_via": "Supabase MCP apply_migration",
+      "status": "applied",
+      "verified_on": "2026-10-14",
+      "verification": "Hosted migration name/version verified; mpg_private contains 14 tables. Module approved with one owner-specific grant; no new-member pilot, automatic source sync or live meeting access implied. Mapping only; no newly computed SQL byte-level digest attestation."
+    },
+    {
+      "name": "member_signup_names",
+      "hosted_version": "20261014225857",
+      "repository_version": "20261014223500",
+      "applied_via": "Supabase MCP apply_migration",
+      "status": "applied",
+      "verification": "Additive RLS-enabled private signup-names table; three-argument enrollment RPC granted only to authenticated; anonymous/direct client table access denied; existing member and enrollment counts unchanged. Production Next build and disposable SQL checks completed."
+    },
+    {
+      "name": "continuous_display_operations",
+      "hosted_version": "20261014232519",
+      "repository_version": "20261014230147",
+      "source": "supabase/migrations/20261014230147_continuous_display_operations.sql",
+      "applied_via": "Supabase MCP apply_migration",
+      "status": "applied",
+      "verified_on": "2026-10-14",
+      "verification": "Hosted migration name/version verified; R2 implementation and source migrated into current main (production deployment READY, source de5dcdede5fc740873fddfa36467d9d47f318fd6). No publication, pairing or external feed activated. Mapping only; no newly computed SQL byte-level digest attestation."
     }
   ],
   "normalization": {
@@ -129,5 +159,7 @@
     "purpose": "Comparison of known migration definitions, not cryptographic attestation or a full semantic/security review."
   },
   "unapplied_repository_migrations": [],
-  "warning": "Hosted migration versions differ from repository filenames. R4 operations already applied and booking gate remains closed; never replay or manually rewrite ledger or run unreviewed db push."
+  "warning": "Hosted migration IDs differ from repository filenames, and an applied migration does not activate a member grant, booking gate, content publication, or meeting. Never blindly replay or rewrite migration history or run unreviewed db push; recheck live state before every rollout. Documentation updates alone make no schema changes.",
+  "hosted_migration_count_verified": 16,
+  "source_migration_count_on_main_verified": 16
 }
