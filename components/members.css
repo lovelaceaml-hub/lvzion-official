@@ -3,3 +3,5 @@
 .member-dialog{border:1px solid #dce5db;color:#244739;margin:auto}.member-dialog::backdrop{background:#14281fb0}
 
 .block{display:block;font-size:11px;color:#677b70;overflow-wrap:anywhere}.member-card p,.simple-row{overflow-wrap:anywhere}
+
+.demo-experience-link{display:block;padding:12px 14px;border-radius:13px;background:#dcebe5;color:#225e57;text-decoration:none;font-weight:700;font-size:13px;margin:7px 0 14px}

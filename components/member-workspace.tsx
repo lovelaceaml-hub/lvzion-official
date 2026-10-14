@@ -8,12 +8,14 @@ type Props={data:Workspace;execute:(command:Command)=>Promise<void>;demo?:boolea
 export default function MemberWorkspace({data:w,execute,demo=false,invite}:Props){
  const [tab,setTab]=useState('week');const [selected,setSelected]=useState<Person|null>(null);const [busy,setBusy]=useState(false);const [message,setMessage]=useState('');const [search,setSearch]=useState('');
  const dialog=useRef<HTMLDialogElement>(null);useEffect(()=>{if(selected)dialog.current?.showModal();},[selected]);
+ useEffect(()=>{const requested=new URLSearchParams(window.location.search).get('tab');if(requested&&['week','people','manage','profile'].includes(requested))setTab(requested);},[]);
  const manage=w.permissions.memberManagement||w.departments.some(d=>d.canManage)||w.permissions.technical||w.permissions.departmentAdmin;
  async function send(action:Action,payload:Record<string,string>){setBusy(true);setMessage('');try{await execute({action,payload,requestId:crypto.randomUUID()});setMessage(demo?'Fictional change saved for this session.':'Change saved.');setSelected(null);}catch(e){setMessage(e instanceof Error?e.message:'Change failed.');}finally{setBusy(false);}}
  function submit(e:React.FormEvent<HTMLFormElement>,action:Action,extra:Record<string,string>={}){e.preventDefault();void send(action,{...Object.fromEntries(new FormData(e.currentTarget).entries()) as Record<string,string>,...extra});}
  const group=w.groups.find(g=>g.id===w.self.groupId)?.name??'Group';const unit=w.units.find(u=>u.id===w.self.unitId)?.name??'Unit';
  const candidates=[...new Map([...w.directory,...w.managedMembers,...w.departments.flatMap(d=>d.members)].map(m=>[m.id,m])).values()];
  return <main className="members-app"><header className="members-header"><a href="/" className="members-brand">LV ZION<span>MEMBER FOUNDATION</span></a><button onClick={()=>setTab('profile')} aria-label="Open my profile" className="avatar">{w.self.name.split(' ').map(x=>x[0]).slice(0,2).join('')}</button></header>
+ {demo&&<a className="demo-experience-link" href="/experience-preview">Explore the next-generation Home and My Week experience →</a>}
  {demo&&<p className="demo-note">Fictional preview · Changes stay in this page session · Not a real login</p>}
  <section className="member-welcome"><span className="overline">{tab==='manage'?'YOUR RESPONSIBILITIES':'YOUR COMMUNITY'}</span><h1>{tab==='manage'?'Manage with care.':`Hello, ${w.self.name.split(' ')[0]}.`}</h1><p>{group} <span aria-hidden="true">/</span> {unit}</p></section>
  <nav className="member-tabs" aria-label="Member navigation">{[['week','My Week'],['people','My Group'],...(manage?[['manage','Manage']]:[]),['profile','Profile']].map(([key,label])=><button key={key} aria-current={tab===key?'page':undefined} onClick={()=>{setTab(key);setMessage('');}}>{label}</button>)}</nav>
