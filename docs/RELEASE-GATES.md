@@ -6,7 +6,7 @@ Keep email confirmation, own-record Unassigned privacy, independent leader place
 
 Keep production-only secrets in provider stores and personal integration credentials in Keychain. Original LV Zion apps and unrelated draft modules remain out of scope. Physical-device testing is still a useful follow-up and is not claimed complete.
 
-See ACTUAL-APP-SETUP.md for validation, migration reconciliation and rollback.
+Use the [handoff](HANDOFF.md) for current deployed source and module-specific gates, the [migration ledger](HOSTED-MIGRATION-LEDGER.json) before schema work, and [actual setup receipts](ACTUAL-APP-SETUP.md) for historical validation. A module tile, applied schema or open PR is not a completed rollout. Keep Study Room bookings closed until approved cutover, Contacts private, Display unpublished/unpaired until reviewed, and Morning Prayer member/join access gated. Documentation-only commits require link/JSON/diff/privacy checks, not a production deployment. Historical prototype fallbacks must not be promoted as a routine rollback for current modules.
 
 ## Study Room Reservation: independent booking-activation gate
 
