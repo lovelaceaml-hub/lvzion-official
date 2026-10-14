@@ -8,7 +8,8 @@
     "postgresql_assertions": 156,
     "phone_browser_tests": 31,
     "real_local_signup_assertions": 37,
-    "real_local_invitation_recovery_assertions": 42
+    "real_local_invitation_recovery_assertions": 42,
+    "hosted_preview_assertions": 14
   },
   "review": {
     "controller_diff_review": "completed",
@@ -31,5 +32,13 @@
   "external_email_sent": false,
   "hosted_auth_provider_settings": "unverified, no changes",
   "physical_device_tests": "not run",
-  "publication": "development preview authorized; verification in progress"
+  "publication": "development preview READY; draft PR 12, unmerged",
+  "pull_request": "https://github.com/lovelaceaml-hub/lvzion-official/pull/12",
+  "preview_url": "https://lvzion-official-git-feature-self-service-signup-r1-lvzion.vercel.app",
+  "verified_deployment": {
+    "id": "dpl_BxXd5MdDLM1Fyj93AYiqjWoB27n2",
+    "url": "https://lvzion-official-nx7d923ar-lvzion.vercel.app",
+    "source_sha": "f8b4f8d07266cd9b99ae91229446741e018c578c",
+    "state": "READY"
+  }
 }

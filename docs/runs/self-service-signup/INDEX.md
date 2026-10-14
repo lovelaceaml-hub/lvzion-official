@@ -6,6 +6,8 @@ Baseline: clean 5a0d435dc7dbf18401d0a77af89543bf9d9d9c4b in the private LV Zion 
 
 | Unit | Scope | State | Review |
 | --- | --- | --- | --- |
-| [S1](lanes/S1.md) | Email signup and Unassigned lifecycle | verified locally | controller review; external review waived |
+| [S1](lanes/S1.md) | Email signup and Unassigned lifecycle | development preview published and verified | controller review; external review waived |
 
 No parallel writers, real records, hosted migrations, email delivery or production promotion.
+
+Published preview and draft PR links are in the [handoff](../../HANDOFF.md). Fourteen additional hosted checks passed. Production and hosted member activation stay unchanged.

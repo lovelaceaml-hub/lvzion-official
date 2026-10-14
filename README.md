@@ -3,7 +3,8 @@
 ## Quick links
 
 - **Website:** [Production design prototype](https://lvzion-official.vercel.app)
-- **Status:** Development member system and signup candidate, not released for members
+- **Status:** Signup development preview published; real member activation remains disabled
+- **Signup preview:** [Unassigned lifecycle](https://lvzion-official-git-feature-self-service-signup-r1-lvzion.vercel.app/enrollment-preview), [signup form](https://lvzion-official-git-feature-self-service-signup-r1-lvzion.vercel.app/sign-up), [draft PR #12](https://github.com/lovelaceaml-hub/lvzion-official/pull/12)
 - **Repo:** [Private GitHub repository](https://github.com/lovelaceaml-hub/lvzion-official)
 - **Docs:** [Handoff](docs/HANDOFF.md), [signup plan](docs/PLAN-SELF-SERVICE-SIGNUP.md), [all documents](docs/)
 

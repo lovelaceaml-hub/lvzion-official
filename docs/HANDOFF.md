@@ -2,6 +2,10 @@
 
 ## Quick links
 
+- [Published Unassigned signup preview](https://lvzion-official-git-feature-self-service-signup-r1-lvzion.vercel.app/enrollment-preview)
+- [Published signup form and activation status](https://lvzion-official-git-feature-self-service-signup-r1-lvzion.vercel.app/sign-up)
+- [Signup draft PR #12](https://github.com/lovelaceaml-hub/lvzion-official/pull/12)
+
 - [Production design prototype](https://lvzion-official.vercel.app)
 - [Existing member development preview](https://lvzion-official-qqvc5dbh2-lvzion.vercel.app/experience-preview)
 - [Member foundation draft PR #2](https://github.com/lovelaceaml-hub/lvzion-official/pull/2)
@@ -14,7 +18,7 @@ Self-service signup work is on feature/self-service-signup-r1, stacked on featur
 
 The independent own-account helper requires confirmed email, enabled account and a live Auth session. Existing active-member authority remains separate. Leaders receive an explicit pending queue and audited, serialized, idempotent assignment/decline operations. Declining retains the record and denies member access. Technical suspension remains independent.
 
-Review locally at `/sign-up` and `/enrollment-preview`. The signup form is disabled by default; the lifecycle preview uses fictional records and sends no requests to the database.
+Review the published development routes at `/sign-up` and `/enrollment-preview` using the links above. The signup form is disabled by default; the lifecycle preview uses fictional records and sends no requests to the database.
 
 ## Live facts and boundaries
 
@@ -28,4 +32,4 @@ Original applications, real member imports and domain work are outside this incr
 
 ## Verification and publication
 
-Strict types/build, 120 application tests, 156 disposable PostgreSQL permission assertions, 31 phone-browser checks, 37 real local signup assertions and 42 existing invitation/recovery assertions passed. The controller inspected the complete diff. Anthony waived the external security review, and no code was sent to Claude. The signup implementation is saved in commit 7339553. Anthony authorized private branch backup, a draft PR and a fictional Vercel preview on 2026-10-14. Publication verification is in progress. Hosted email/CAPTCHA/delivery, physical devices and production activation are not claimed verified.
+Strict types/build, 120 application tests, 156 disposable PostgreSQL permission assertions, 31 phone-browser checks, 37 real local signup assertions and 42 existing invitation/recovery assertions passed. The controller inspected the complete diff. Anthony waived the external security review, and no code was sent to Claude. The signup implementation is saved in commit 7339553. Anthony authorized private branch backup, a draft PR and a fictional Vercel preview on 2026-10-14. The private branch is backed up and draft PR #12 is open. Vercel deployment dpl_BxXd5MdDLM1Fyj93AYiqjWoB27n2 is READY at f8b4f8d; 14 hosted browser/API assertions passed with fictional records. Production remains dpl_6xjt1qTmgXggJvQUNoeJAhvnwLCk. Hosted email/CAPTCHA/delivery, physical devices and production activation are not claimed verified.
