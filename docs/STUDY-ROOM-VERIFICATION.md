@@ -1,5 +1,7 @@
 # Study Room Reservation — first-module verification
 
+> **Historical Study Room development evidence.** These earlier review/preview/activation assertions apply to the commits and test environments named below. The actual module is now integrated at `lvz.app/modules/study-rooms` with owner setup, but the **production booking gate remains closed** and the original Firebase scheduler remains authoritative. Read [STUDY-ROOM-R4-LIVE.md](STUDY-ROOM-R4-LIVE.md) and [CURRENT-STATUS.md](CURRENT-STATUS.md) before any operational change.
+
 ## Scope of this change
 
 First official module selected by the user: Study Room Reservation. Dedicated review branch: feature/study-room-reservations-v1, based on the member/module foundation commit f0771afb48c1dae77b629c11203e632b90d48f7a. The proposal does not merge into production, mutate the original room scheduler, publish live module access, change hosted Auth, send email, import booking/member data, or work on lvz.app.
