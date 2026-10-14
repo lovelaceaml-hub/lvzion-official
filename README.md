@@ -8,6 +8,8 @@ A **fresh, independent LV Zion application**, designed from scratch. The former 
 - **Repository:** https://github.com/lovelaceaml-hub/lvzion-official (private)
 - **Draft review:** https://github.com/lovelaceaml-hub/lvzion-official/pull/1
 - **Vercel project:** `lvzion-official`, team `lvzion` (independent of previous project).
+- **Registered canonical domain:** https://lvz.app, connected and Vercel-verified, with auto-renewing HTTPS certificate; `www.lvz.app` redirects to the apex via HTTP 308.
+- **Domain mail:** Not yet configured (no MX/SPF/DKIM/DMARC). Do not send or receive from `@lvz.app` until a provider is selected and verified.
 - **Supabase Pro organization:** Las Vegas Zion, ID `ypidsvtopuiqvbvvucbp`
 - **Supabase project:** `lvzion-official`, ID `otecqlkqirncotytbfns`, US West (Northern California), healthy with no public application tables.
 - **Supabase public configuration:** project URL and publishable key set in Vercel environment settings for development, preview, and production. No service-role key or database password stored in the repository.
