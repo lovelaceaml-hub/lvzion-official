@@ -8,7 +8,21 @@ import './preview.css';
 type Tab='mine'|'shared'|'followup'|'manage';
 type Sheet='views'|'apps'|'notifications'|'add'|'share'|'interact'|'schedule'|'handoff'|'preferences'|'duplicates'|null;
 function Icon({name}:{name:'home'|'apps'|'bell'|'arrow'|'people'|'check'|'plus'|'shield'}) { return <svg aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">{name==='home'?<path d="m3 10 9-7 9 7v10H6V10m4 10v-7h4v7"/>:name==='apps'?<><rect x="3" y="3" width="7" height="7" rx="2"/><rect x="14" y="3" width="7" height="7" rx="2"/><rect x="3" y="14" width="7" height="7" rx="2"/><rect x="14" y="14" width="7" height="7" rx="2"/></>:name==='bell'?<path d="M5 17h14l-2-4V9a5 5 0 0 0-10 0v4l-2 4m5 3h4"/>:name==='arrow'?<path d="m9 5 7 7-7 7"/>:name==='check'?<path d="m5 12 4 4L19 6"/>:name==='plus'?<path d="M12 5v14M5 12h14"/>:name==='shield'?<><path d="m12 3 8 3v5c0 5-8 10-8 10S4 16 4 11V6l8-3Z"/><path d="m8 12 3 3 5-6"/></>:<><circle cx="9" cy="8" r="3"/><path d="M3 20v-3a6 6 0 0 1 12 0v3M16 5a3 3 0 0 1 0 6m2 4a5 5 0 0 1 3 5"/></>}</svg>; }
-function Modal({title,children,close}:{title:string;children:ReactNode;close:()=>void}) { const ref=useRef<HTMLDialogElement>(null);useEffect(()=>{const el=ref.current;el?.showModal();return()=>el?.close();},[]);return <dialog className="ct-dialog" ref={ref} onCancel={e=>{e.preventDefault();close();}} onClick={e=>{if(e.target===e.currentTarget)close();}}><div className="ct-sheet"><div className="ct-grab"/><header><h2>{title}</h2><button aria-label="Close panel" className="ct-close" autoFocus onClick={close}>×</button></header>{children}</div></dialog>; }
+function Modal({title,children,close}:{title:string;children:ReactNode;close:()=>void}) {
+ const ref=useRef<HTMLDialogElement>(null);
+ useEffect(()=>{
+  const el=ref.current, trigger=document.activeElement;
+  el?.showModal();
+  return()=>{
+   el?.close();
+   requestAnimationFrame(()=>{
+    if(trigger instanceof HTMLElement && trigger.isConnected) trigger.focus();
+    else document.querySelector<HTMLButtonElement>('.ct-view')?.focus();
+   });
+  };
+ },[]);
+ return <dialog aria-label={title} className="ct-dialog" ref={ref} onCancel={e=>{e.preventDefault();close();}} onClick={e=>{if(e.target===e.currentTarget)close();}}><div className="ct-sheet"><div className="ct-grab"/><header><h2>{title}</h2><button aria-label="Close panel" className="ct-close" onClick={close}>×</button></header>{children}</div></dialog>;
+}
 function time(value:string) { return new Intl.DateTimeFormat('en-US',{timeZone:'America/Los_Angeles',month:'short',day:'numeric',hour:'numeric',minute:'2-digit'}).format(new Date(value)); }
 const LABELS={new:'New',active:'Active',paused:'Paused',closed:'Closed'};
 export default function ContactsPreview() {
