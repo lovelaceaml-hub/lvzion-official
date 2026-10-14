@@ -51,7 +51,7 @@ test('Contacts schema: deny-all access, independent identity and structural inva
   await denied(`insert into contacts_private.follow_ups(contact_id,assigned_member_id,due_at,action) values('${u(8)}','${u(4)}',now()+interval '2 days','Another action')`);
   await denied(`update contacts_private.follow_ups set state='completed' where id='${u(10)}'`);
   await db.exec(`update contacts_private.follow_ups set state='completed',completed_at=now(),completed_by='${u(4)}' where id='${u(10)}'`);
-  check((await db.query("select state from contacts_private.follow_ups")).rows[0].state==='completed');
+  check((await db.query<{state:string}>("select state from contacts_private.follow_ups")).rows[0].state==='completed');
   await db.exec(`insert into contacts_private.interactions(id,contact_id,author_member_id,occurred_at,body) values('${u(11)}','${u(8)}','${u(4)}',now(),'Synthetic private note')`);
   await denied(`update contacts_private.interactions set body='Overwritten' where id='${u(11)}'`);
   await denied(`delete from contacts_private.interactions where id='${u(11)}'`);
@@ -62,7 +62,7 @@ test('Contacts schema: deny-all access, independent identity and structural inva
   // Two stale proposals queued together: exactly one CAS update wins. Not a two-connection hosted race test.
   const attempts=await Promise.all([db.query('update contacts_private.records set version=version+1 where id=$1 and version=1 returning version',[u(8)]),db.query('update contacts_private.records set version=version+1 where id=$1 and version=1 returning version',[u(8)])]);
   check(attempts.filter(x=>x.rows.length===1).length===1);
-  check((await db.query('select version from contacts_private.records where id=$1',[u(8)])).rows[0].version===2);
+  check((await db.query<{version:number}>('select version from contacts_private.records where id=$1',[u(8)])).rows[0].version===2);
   console.log(`CONTACTS SQL: ${assertions} assertions passed in disposable PGlite.`);
  } finally {await db.close();}
 });
