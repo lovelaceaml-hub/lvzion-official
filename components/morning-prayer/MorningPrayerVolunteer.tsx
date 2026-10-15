@@ -30,7 +30,7 @@ export default function MorningPrayerVolunteer({
      aria-label={date+' '+(o?o.kind==='gathering'?o.host:o.kind:'not scheduled')}
      className={[date===today?styles.today:'',o?.host==='You'?styles.mine:'',o?.kind==='gathering'&&o.host==='Host needed'?styles.open:''].join(' ')}
      onClick={()=>{if(o)onSelect(o.id);}}>
-     <strong>{Number(date.slice(-2))}</strong><span>{!o?'—':o.kind==='cancelled'?'Off':o.kind==='app_day'?'App':o.host==='You'?'You':o.host==='Host needed'?'Open':o.verified?'Host':'Check'}</span>
+     <strong>{Number(date.slice(-2))}</strong><span>{!o?':':o.kind==='cancelled'?'Off':o.kind==='app_day'?'App':o.host==='You'?'You':o.host==='Host needed'?'Open':o.verified?'Host':'Check'}</span>
     </button>:<span key={'blank-'+i}/>;
    })}</div>
    <p className={styles.legend}>Select an existing date to review its details. Only authorized schedule records appear.</p>

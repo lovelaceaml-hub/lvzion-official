@@ -6,7 +6,7 @@ import css from './operations.module.css';
 export type WMCapability='view_schedule'|'join_gathering'|'volunteer_host'|'review_requests'|'manage_schedule'|'view_materials'|'edit_materials'|'publish_materials';
 export type WMOcc={id:string;date:string;startsAt:string;endsAt:string;kind:'gathering'|'app_day'|'cancelled';host:string;verified:boolean;hostConfirmed:boolean;revision:number;readingKey?:string|null};
 export type WMMaterial={key:string;kind:'pwp'|'reading';revision:number;body:{title:string;summary:string;items:string[];sourceLabel:string}};
-export type WMScope={version:number;occurrences:WMOcc[];materials?:WMMaterial[];capabilities:WMCapability[];meetingStates?:{occurrenceId:string;ready:boolean;configured:boolean}[];joinWindowMinutes?:number|null};
+export type WMScope={version:number;occurrences:WMOcc[];materials?:WMMaterial[];materialCatalog?:WMMaterial[];capabilities:WMCapability[];meetingStates?:{occurrenceId:string;ready:boolean;configured:boolean}[];joinWindowMinutes?:number|null};
 type WMMember={id:string;name:string;status:string;placement:string;enabled:boolean;capabilities:WMCapability[];hostEligible:boolean;moduleAccess:boolean};
 type WMRoster={ownerId:string;version:number;members:WMMember[]};
 const caps:WMCapability[]=['view_schedule','join_gathering','view_materials','volunteer_host','review_requests','manage_schedule','edit_materials','publish_materials'];
@@ -75,7 +75,8 @@ export default function MorningPrayerOperations({data,onReload,onNotice}:{data:W
  const availableMembers=(roster?.members||[]).filter(x=>x.id!==roster?.ownerId);
  const listed=availableMembers.filter(m=>m.name.toLocaleLowerCase().includes(memberSearch.toLocaleLowerCase())||
  m.placement.toLocaleLowerCase().includes(memberSearch.toLocaleLowerCase()));
- const current=useMemo(()=>[...(data.materials||[])].find(x=>x.key===revisionKey),[data.materials,revisionKey]);
+ const catalog=data.materialCatalog||data.materials||[];
+ const current=useMemo(()=>catalog.find(x=>x.key===revisionKey),[catalog,revisionKey]);
  const future=data.occurrences.filter(x=>x.kind==='gathering'&&x.date>=vegasToday());
  useEffect(()=>{setWindowMinutes(String(data.joinWindowMinutes??10));},[data.joinWindowMinutes]);
  useEffect(()=>{if(!roster)return;const pick=roster.members.find(x=>x.id===chosenMember&&x.id!==roster.ownerId);if(pick)setGrantCaps(pick.capabilities);},[roster,chosenMember]);
@@ -139,7 +140,7 @@ export default function MorningPrayerOperations({data,onReload,onNotice}:{data:W
   {manage&&<section className={css.panel} data-testid="wm-meeting-access">
    <h2>Private Zoom access</h2>
    <p>Meeting links are stored encrypted in Supabase Vault and are never part of the schedule or member directory. Only permitted members can open them during the verified gathering window.</p>
-   <label>Join window (0–30 minutes before start)<input type="number" min="0" max="30" step="1" value={windowMinutes} onChange={e=>setWindowMinutes(e.target.value)}/></label>
+   <label>Join window (0 to 30 minutes before start)<input type="number" min="0" max="30" step="1" value={windowMinutes} onChange={e=>setWindowMinutes(e.target.value)}/></label>
    <button className={css.secondary} disabled={busy||!Number.isInteger(Number(windowMinutes))||Number(windowMinutes)<0||Number(windowMinutes)>30} onClick={()=>void save('/api/morning-prayer/meeting',withVersion({type:'set_window',windowMinutes:Number(windowMinutes)}),'Joining window saved.')}>Save joining window</button>
    <label>Verified upcoming gathering<select value={meetingOccurrence} onChange={e=>{setMeetingOccurrence(e.target.value);setMeetingUrl('');setSourceVerified(false);}}>
     <option value="">Select a gathering</option>{future.map(o=><option key={o.id} value={o.id}>{dateText(o.date)} · {o.verified?'Verified date':'Date unverified'}</option>)}
@@ -153,17 +154,17 @@ export default function MorningPrayerOperations({data,onReload,onNotice}:{data:W
    </div>
   </section>}
   {canEdit&&<section className={css.panel} data-testid="wm-revision-editor">
-   <h2>Revise published material</h2>
+   <h2>Revise a draft or published material</h2>
    <p>Existing PWP and readings keep their current published version until the new source-checked revision is explicitly published.</p>
-   <label>Published material<select value={revisionKey} onChange={e=>{const m=data.materials?.find(x=>x.key===e.target.value);if(m)inputMaterial(m);else setRevisionKey('');}}>
-    <option value="">Choose a published reading or PWP</option>{data.materials?.map(m=><option key={m.key} value={m.key}>{m.body.title} · r{m.revision}</option>)}</select></label>
+   <label>Material to revise<select value={revisionKey} onChange={e=>{const m=catalog.find(x=>x.key===e.target.value);if(m)inputMaterial(m);else setRevisionKey('');}}>
+    <option value="">Choose a draft, reading or PWP</option>{catalog.map(m=><option key={m.key} value={m.key}>{m.body.title} · r{m.revision}</option>)}</select></label>
    {current&&<>
-    <label>Title<input value={revisionTitle} maxLength={100} onChange={e=>setRevisionTitle(e.target.value)}/></label>
-    <label>Source-supported summary<textarea value={revisionSummary} maxLength={400} rows={3} onChange={e=>setRevisionSummary(e.target.value)}/></label>
-    <label>Points (one per line)<textarea rows={4} value={revisionItems} onChange={e=>setRevisionItems(e.target.value)}/></label>
-    <label>Source reference<input value={revisionSource} maxLength={100} onChange={e=>setRevisionSource(e.target.value)}/></label>
+    <label>Title<input value={revisionTitle} maxLength={100} onChange={e=>{setRevisionTitle(e.target.value);setRevisionChecked(false);}}/></label>
+    <label>Source-supported summary<textarea value={revisionSummary} maxLength={400} rows={3} onChange={e=>{setRevisionSummary(e.target.value);setRevisionChecked(false);}}/></label>
+    <label>Points (one per line)<textarea rows={4} value={revisionItems} onChange={e=>{setRevisionItems(e.target.value);setRevisionChecked(false);}}/></label>
+    <label>Source reference<input value={revisionSource} maxLength={100} onChange={e=>{setRevisionSource(e.target.value);setRevisionChecked(false);}}/></label>
     <label className={css.check}><input type="checkbox" checked={revisionChecked} onChange={e=>setRevisionChecked(e.target.checked)}/>I checked this revision against the approved source.</label>
-    <button className={css.primary} disabled={busy} onClick={()=>void save('/api/morning-prayer/command',withVersion({type:'material_draft',key:current.key,sourceChecked:revisionChecked,body:{title:revisionTitle,summary:revisionSummary,items:revisionItems.split('\n').map(x=>x.trim()).filter(Boolean).slice(0,5),sourceLabel:revisionSource}}),'A reviewable material correction was created; the old version remains published.')}>Create reviewable correction</button>
+    <button className={css.primary} disabled={busy} onClick={()=>void save('/api/morning-prayer/command',withVersion({type:'material_draft',key:current.key,sourceChecked:revisionChecked,body:{title:revisionTitle,summary:revisionSummary,items:revisionItems.split('\n').map(x=>x.trim()).filter(Boolean),sourceLabel:revisionSource}}),'A reviewable material correction was created; the old version remains published.')}>Create reviewable correction</button>
    </>}
   </section>}
   {!denied&&<section className={css.panel} data-testid="wm-member-access">

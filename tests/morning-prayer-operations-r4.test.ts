@@ -40,8 +40,6 @@ test('Morning Prayer R4: verified owner, member grants, atomic dates and Vault j
    'supabase/migrations/20261014074214_module_runtime_foundation.sql',
    'supabase/migrations/20261014155148_self_service_unassigned_enrollment.sql',
    'supabase/migrations/20261014190128_production_owner_setup.sql']){
-   // Existing bootstrap may or may not install this Supabase test-only role.
-   if(path.includes('production_owner_setup'))await db.exec("DO 'BEGIN IF NOT EXISTS (SELECT 1 FROM pg_roles WHERE rolname=''supabase_auth_admin'') THEN CREATE ROLE supabase_auth_admin NOLOGIN; END IF; END';");
    await db.exec(await readFile(path,'utf8'));
   }
   await db.exec('create schema vault;create table vault.decrypted_secrets(id uuid primary key default gen_random_uuid(),decrypted_secret text not null);');
@@ -61,6 +59,8 @@ test('Morning Prayer R4: verified owner, member grants, atomic dates and Vault j
   await db.query('insert into app_private.bootstrap_receipts(auth_user_id)values($1)',[user(1)]);
   await db.exec(await readFile('supabase/migrations/20261014224129_morning_prayer_live_core.sql','utf8'));
   await db.exec(await readFile('supabase/migrations/20261014231657_morning_prayer_operations_r4.sql','utf8'));
+  await db.exec(await readFile('supabase/migrations/20261015004856_morning_prayer_completion_r5.sql','utf8'));
+  await db.exec(await readFile('supabase/migrations/20261015010421_morning_prayer_setup_lock_guard.sql','utf8'));
   await t.test('all fifteen private tables have RLS and bootstrapped owner is Unassigned',async()=>{
    await owner();const r=(await db.query<{relrowsecurity:boolean}>(
     "select c.relrowsecurity from pg_class c join pg_namespace n on n.oid=c.relnamespace where n.nspname='mpg_private' and c.relkind='r'")).rows;
@@ -105,6 +105,28 @@ test('Morning Prayer R4: verified owner, member grants, atomic dates and Vault j
    assert.equal(Number(await scalar('select count(*) from mpg_private.occurrences where schedule_verified')),0);
    const newVersion=await version();
    await denied(()=>call(1,'mpg_bulk_schedule',[newVersion,randomUUID(),JSON.stringify([d1,d1])]),'23505');
+   await denied(()=>call(1,'mpg_bulk_schedule',[newVersion,randomUUID(),JSON.stringify([make(9),d1])]),'23505');
+   await owner();assert.equal(Number(await scalar('select count(*) from mpg_private.occurrences')),2);
+   await denied(()=>call(2,'mpg_bulk_schedule',[newVersion,randomUUID(),JSON.stringify([make(9)])]));
+  });
+  await t.test('missing batch fields and fractional meeting windows fail closed',async()=>{
+   const missing={...make(9)} as Record<string,unknown>;delete missing.timezone;
+   const expected=await version();
+   await denied(()=>call(1,'mpg_bulk_schedule',[expected,randomUUID(),JSON.stringify([missing])]),'22023');
+   await denied(()=>write(1,'mpg_meeting_settings',{type:'set_window',windowMinutes:1.5}),'22023');
+  });
+  const materialBody={title:'Fictional source title',summary:'Fictional approved wording',items:['Fictional point'],sourceLabel:'Fictional official source chapter 1'};
+  await write(1,'mpg_owner_access',{type:'grant',memberId:member(3),capabilities:['view_schedule','edit_materials']});
+  await t.test('editor without published-reading access can correct unpublished drafts',async()=>{
+   await write(3,'mpg_live_setup',{type:'create_material',key:'reading-test',kind:'reading',sourceChecked:false,body:materialBody});
+   const feed=await call<{drafts:unknown[];materialCatalog:{key:string}[];materials?:unknown}>(3,'mpg_live_home',[d1.date,d2.date]);
+   assert.equal(feed.materials,undefined);assert.equal(feed.drafts.length,1);
+   assert.equal(feed.materialCatalog[0].key,'reading-test');
+   const draft=await write(3,'mpg_live_command',{type:'material_draft',key:'reading-test',sourceChecked:true,body:{...materialBody,title:'Fictional corrected title'}});
+   await write(1,'mpg_live_command',{type:'material_publish',materialId:draft.materialId});
+   const after=await call<{drafts:unknown[];materialCatalog:{revision:number}[]}>(3,'mpg_live_home',[d1.date,d2.date]);
+   assert.equal(after.materialCatalog[0].revision,2);assert.equal(after.drafts.length,0);
+   await denied(()=>write(3,'mpg_live_command',{type:'material_publish',materialId:draft.materialId}));
   });
   await owner();const occ=await scalar<string>('select id from mpg_private.occurrences order by starts_at limit 1');
   await t.test('meeting setup blocked before schedule and window verified',async()=>{
@@ -113,6 +135,22 @@ test('Morning Prayer R4: verified owner, member grants, atomic dates and Vault j
   await write(1,'mpg_meeting_settings',{type:'set_window',windowMinutes:10});
   await write(1,'mpg_live_command',{type:'schedule',occurrenceId:occ,mode:'verify'});
   await write(1,'mpg_meeting_settings',{type:'configure_meeting',occurrenceId:occ,url:'https://us06web.zoom.us/j/12345678901?pwd=Fictional1'});
+  await t.test('Home and Me include full future occurrences outside the selected calendar month',async()=>{
+   await write(1,'mpg_live_command',{type:'assign',occurrenceId:occ,memberId:member(2)});
+   const past=new Date(Date.now()-95*86400000).toISOString().slice(0,10);
+   const feed=await call<{occurrences:unknown[];upcoming:{id:string;hostConfirmed:boolean;timezone:string}[];ownHosting:{id:string}[];meetingStates:{occurrenceId:string}[]}>(2,'mpg_live_home',[past,past]);
+   assert.equal(feed.occurrences.length,0);assert.equal(feed.ownHosting[0].id,occ);
+   assert.equal(feed.upcoming[0].timezone,'America/Los_Angeles');
+   assert.equal(feed.upcoming[0].hostConfirmed,false);
+   assert.ok(feed.meetingStates.some(s=>s.occurrenceId===occ));
+  });
+  await t.test('host changes retain the incumbent until approval and requests carry exact dates',async()=>{
+   await write(2,'mpg_live_command',{type:'request_change',occurrenceId:occ,note:'Fictional reason'});
+   const feed=await call<{requests:{date:string;id:string;note:string}[]}>(2,'mpg_live_home',[d1.date,d2.date]);
+   assert.equal(feed.requests[0].date,d1.date);
+   await owner();assert.equal(await scalar('select host_id from mpg_private.occurrences where id=$1',[occ]),member(2));
+   await denied(()=>write(2,'mpg_live_command',{type:'review',requestId:feed.requests[0].id,decision:'approve'}));
+  });
   await t.test('encrypted link is not returned in member home or audit',async()=>{
    await as(1);
    const home=await scalar('select public.mpg_live_home($1,$2)',[d1.date,d2.date]);
@@ -136,7 +174,17 @@ test('Morning Prayer R4: verified owner, member grants, atomic dates and Vault j
    await as(2);await denied(()=>db.query('select public.mpg_live_join($1)',[occ]));
    await owner();assert.equal(Number(await scalar('select count(*) from mpg_private.access_references where verified_at is not null')),0);
   });
+  await t.test('cancelled exceptions can be restored without restoring a host or meeting access',async()=>{
+   await owner();const futureId=await scalar<string>('select id from mpg_private.occurrences where id<>$1 limit 1',[occ]);
+   await write(1,'mpg_live_command',{type:'schedule',occurrenceId:futureId,mode:'app_day'});
+   await write(1,'mpg_live_command',{type:'schedule',occurrenceId:futureId,mode:'restore'});
+   await owner();const row=(await db.query<{kind:string;host_id:null;schedule_verified:boolean;original_date:string}>('select kind,host_id,schedule_verified,original_date::text from mpg_private.occurrences where id=$1',[futureId])).rows[0];
+   assert.equal(row.kind,'gathering');assert.equal(row.host_id,null);assert.equal(row.schedule_verified,false);
+   assert.equal(row.original_date,d2.date);
+  });
   await t.test('revoking member removes grants and host eligibility, not history',async()=>{
+   await owner();await db.query('update app_private.account_links set enabled=false where member_id=$1',[member(2)]);
+   await write(1,'mpg_owner_access',{type:'eligibility',memberId:member(2),enabled:false});
    await write(1,'mpg_owner_access',{type:'revoke',memberId:member(2)});
    await owner();assert.equal(Number(await scalar('select count(*) from mpg_private.grants where member_id=$1 and ended_at is null',[member(2)])),0);
    await as(2);await denied(()=>db.query('select public.mpg_live_home($1,$2)',[d1.date,d2.date]));

@@ -1,3 +1,5 @@
+> Continued by [Completion R5](COMPLETION-R5.md), including draft correction, private read guards, reversible exceptions and current production receipts.
+
 # Morning Prayer R4 — Production Operations & Release Gate
 
 **Target**: https://lvz.app/modules/work-mission-prayer  
