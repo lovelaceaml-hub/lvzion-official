@@ -1,4 +1,4 @@
-import {dayKey} from './domain.ts';
+import {dayKey,isPlainObject,uuidPattern,validServiceRange} from './domain.ts';
 export type ServiceInterval={start:number;end:number;label:string};
 export type WeeklyServiceInterval=ServiceInterval&{weekday:number};
 export type SpecialDay={day:string;blocks:ServiceInterval[];reason:string};
@@ -9,10 +9,9 @@ export type StudyOperationDraft=
  | {action:'day.replace';day:string;blocks:ServiceInterval[];reason:string;expectedVersion:number}
  | {action:'day.reset';day:string;reason:string;expectedVersion:number};
 export type StudyOperationCommand=StudyOperationDraft&{requestId:string};
-const uuid=/^[a-f\d]{8}-[a-f\d]{4}-[1-8][a-f\d]{3}-[89ab][a-f\d]{3}-[a-f\d]{12}$/i;
 function object(value:unknown):Record<string,unknown>{
- if(!value||typeof value!=='object'||Array.isArray(value))throw Error('Invalid management request.');
- return value as Record<string,unknown>;
+ if(!isPlainObject(value))throw Error('Invalid management request.');
+ return value;
 }
 function stringValue(value:unknown,min:number,max:number,description:string){
  if(typeof value!=='string'||value.trim().length<min||value.length>max)throw Error('Invalid '+description+'.');
@@ -27,9 +26,7 @@ function validatedBlocks(input:unknown,weekly:boolean):ServiceInterval[]|WeeklyS
  for(const raw of input){
   const p=object(raw);
   exactKeys(p,weekly?['weekday','start','end','label']:['start','end','label']);
-  if(!Number.isSafeInteger(p.start)||!Number.isSafeInteger(p.end)||
-   (p.start as number)<600||(p.end as number)>1380||(p.start as number)>=(p.end as number)||
-   (p.start as number)%30!==0||(p.end as number)%30!==0)throw Error('Service intervals must fit 10 AM–11 PM on half-hour boundaries.');
+  if(!validServiceRange(p.start,p.end))throw Error('Service intervals must fit 10 AM–11 PM on half-hour boundaries.');
   const label=stringValue(p.label,2,80,'service description');
   if(weekly&&(!Number.isSafeInteger(p.weekday)||(p.weekday as number)<0||(p.weekday as number)>6))
    throw Error('Choose a valid day of the week.');
@@ -46,7 +43,7 @@ function validatedBlocks(input:unknown,weekly:boolean):ServiceInterval[]|WeeklyS
 export function parseStudyOperation(value:unknown):StudyOperationCommand{
  const p=object(value);
  if(!['resource.add','weekly.replace','day.replace','day.reset'].includes(String(p.action)))throw Error('Unknown management operation.');
- if(typeof p.requestId!=='string'||!uuid.test(p.requestId))throw Error('Invalid request identifier.');
+ if(typeof p.requestId!=='string'||!uuidPattern.test(p.requestId))throw Error('Invalid request identifier.');
  if(!Number.isSafeInteger(p.expectedVersion)||(p.expectedVersion as number)<1||(p.expectedVersion as number)>999999999)throw Error('Refresh configuration before saving.');
  const reason=stringValue(p.reason,5,240,'change reason');
  const common={requestId:p.requestId,reason,expectedVersion:p.expectedVersion as number};

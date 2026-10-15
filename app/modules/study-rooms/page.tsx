@@ -9,46 +9,68 @@ import type {StudyOperationCommand,StudyOperationsData} from '../../../lib/study
 import type {HistoryPage,HistoryQuery} from '../../../lib/study-rooms/history';
 import {broadcastStudyChange,subscribeStudyRefresh} from '../../../lib/study-rooms/freshness';
 import {createAccessEpoch,refreshBookingDay,SupersededRead} from '../../../lib/study-rooms/read-guard';
+
 class RequestError extends Error{constructor(message:string,readonly status:number){super(message);}}
 async function readJSON<T>(path:string,options?:RequestInit):Promise<T>{
  const response=await fetch(path,{...options,cache:'no-store'});
- let result;try{result=await response.json();}catch{throw new RequestError('The server response could not be read. Please refresh.',response.status);}
- if(!response.ok)throw new RequestError(result.error??'Request unavailable.',response.status);return result as T;
+ let result;
+ try{result=await response.json();}catch{throw new RequestError('The server response could not be read. Please refresh.',response.status);}
+ if(!response.ok)throw new RequestError(result.error??'Request unavailable.',response.status);
+ return result as T;
 }
 const accessDenied=(e:unknown):e is RequestError=>e instanceof RequestError&&(e.status===401||e.status===403);
+const scheduleUrl=(date:string)=>'/api/study-rooms?day='+encodeURIComponent(date);
+const vegasTime=()=>new Date().toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit',timeZone:'America/Los_Angeles'});
+
 export default function StudyRooms(){
- const [day,setDay]=useState(''),[data,setData]=useState<Schedule|null>(null),[admin,setAdmin]=useState<AdminData>(),[operations,setOperations]=useState<StudyOperationsData>(),[error,setError]=useState(''),[warning,setWarning]=useState(''),[lastRefresh,setLastRefresh]=useState('');
+ const [day,setDay]=useState(''),[data,setData]=useState<Schedule|null>(null),[admin,setAdmin]=useState<AdminData>(),[operations,setOperations]=useState<StudyOperationsData>();
+ const [error,setError]=useState(''),[warning,setWarning]=useState(''),[lastRefresh,setLastRefresh]=useState('');
  const sequence=useRef(0),controller=useRef<AbortController|null>(null);
  const access=useRef(createAccessEpoch()).current;
+
+ /** Drops every in-flight read so a late response cannot repaint an older day or access state. */
+ const cancelReads=useCallback(()=>{sequence.current++;controller.current?.abort();},[]);
+ const clearScreen=useCallback(()=>{setData(null);setAdmin(undefined);setOperations(undefined);},[]);
  const clearAccess=useCallback((message:string)=>{
-  access.invalidate();sequence.current++;controller.current?.abort();
-  setData(null);setAdmin(undefined);setOperations(undefined);setLastRefresh('');setWarning('');setError(message);
- },[access]);
+  access.invalidate();cancelReads();clearScreen();
+  setLastRefresh('');setWarning('');setError(message);
+ },[access,cancelReads,clearScreen]);
+
  const loadDay=useCallback(async(date:string):Promise<Schedule>=>{
   dayKey(date);const ticket=access.capture();
-  try{const value=await readJSON<Schedule>('/api/study-rooms?day='+encodeURIComponent(date));access.assert(ticket);return value;}
+  try{const value=await readJSON<Schedule>(scheduleUrl(date));access.assert(ticket);return value;}
   catch(e){if(access.current(ticket)&&accessDenied(e))clearAccess(e.message);throw e;}
  },[access,clearAccess]);
+
  const load=useCallback(async(date:string):Promise<boolean>=>{
   const nextDay=refreshBookingDay(date,vegasDay());
-  if(nextDay!==date){sequence.current++;controller.current?.abort();setData(null);setAdmin(undefined);setOperations(undefined);setDay(nextDay);return false;}
+  if(nextDay!==date){cancelReads();clearScreen();setDay(nextDay);return false;}
   const ticket=access.capture(),id=++sequence.current;
-  controller.current?.abort();const abort=new AbortController();controller.current=abort;
+  controller.current?.abort();
+  const abort=new AbortController();controller.current=abort;
   try{
-   const schedule=await readJSON<Schedule>('/api/study-rooms?day='+encodeURIComponent(date),{signal:abort.signal});access.assert(ticket);
-   const [config,policy]=schedule.canManage?await Promise.all([readJSON<AdminData>('/api/study-rooms/admin',{signal:abort.signal}),readJSON<StudyOperationsData>('/api/study-rooms/operations',{signal:abort.signal})]):[undefined,undefined];
-   access.assert(ticket);if(id!==sequence.current)return false;
+   const schedule=await readJSON<Schedule>(scheduleUrl(date),{signal:abort.signal});
+   access.assert(ticket);
+   const [config,policy]=schedule.canManage
+    ?await Promise.all([readJSON<AdminData>('/api/study-rooms/admin',{signal:abort.signal}),readJSON<StudyOperationsData>('/api/study-rooms/operations',{signal:abort.signal})])
+    :[undefined,undefined];
+   access.assert(ticket);
+   if(id!==sequence.current)return false;
    setData(schedule);setAdmin(config);setOperations(policy);setError('');setWarning('');
-   setLastRefresh(new Date().toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit',timeZone:'America/Los_Angeles'}));return true;
+   setLastRefresh(vegasTime());
+   return true;
   }catch(e){
    if(e instanceof SupersededRead||!access.current(ticket)||id!==sequence.current||abort.signal.aborted)return false;
    const message=e instanceof Error?e.message:'Unable to refresh reservations.';
    if(accessDenied(e))clearAccess(message);
-   else{setError(message);setWarning('Availability could not be refreshed. The server will recheck every reservation before saving.');}return false;
+   else{setError(message);setWarning('Availability could not be refreshed. The server will recheck every reservation before saving.');}
+   return false;
   }
- },[access,clearAccess]);
- useEffect(()=>{setDay(vegasDay());return ()=>{access.invalidate();sequence.current++;controller.current?.abort();};},[access]);
- useEffect(()=>{if(!day)return;setData(null);setAdmin(undefined);setOperations(undefined);void load(day);return subscribeStudyRefresh(()=>load(day));},[day,load]);
+ },[access,cancelReads,clearAccess,clearScreen]);
+
+ useEffect(()=>{setDay(vegasDay());return ()=>{access.invalidate();cancelReads();};},[access,cancelReads]);
+ useEffect(()=>{if(!day)return;clearScreen();void load(day);return subscribeStudyRefresh(()=>load(day));},[day,load,clearScreen]);
+
  async function post(path:string,command:BookingCommand|AdminCommand|StudyOperationCommand){
   const ticket=access.capture();
   try{await readJSON(path,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(command)});}
@@ -58,9 +80,11 @@ export default function StudyRooms(){
    throw e;
   }
   if(!access.current(ticket))throw new Error('Your access changed while saving. Check the reservation after signing in again.');
-  broadcastStudyChange();const fresh=await load(day);
+  broadcastStudyChange();
+  const fresh=await load(day);
   if(!fresh&&access.current(ticket))setWarning('Your change was saved, but this screen could not refresh. Use Refresh to see the saved reservation.');
  }
+
  async function loadHistory(query:HistoryQuery):Promise<HistoryPage>{
   const ticket=access.capture();
   try{
@@ -68,6 +92,21 @@ export default function StudyRooms(){
    access.assert(ticket);return result;
   }catch(e){if(access.current(ticket)&&accessDenied(e))clearAccess(e.message);throw e;}
  }
- if(!data)return <main className="sr-app"><h1>Study Room Reservation</h1><p role="status">{error||'Checking authorized reservation access…'}</p><p>Study Room access requires sign-in and an explicit module grant.</p><a href="/sign-in">Sign in</a><p><a href="/members">Return to LV Zion Home</a></p>{day&&<button onClick={()=>{void load(day);}}>Try again</button>}</main>;
- return <>{warning&&<p role="status" className="sr-demo">{warning}</p>}<p className="sr-freshness">Updated {lastRefresh} Las Vegas time · Refreshes while this screen is active</p><Reservations schedule={data} changeDay={setDay} refresh={()=>{void load(day);}} loadDay={loadDay} loadHistory={loadHistory} admin={admin} saveAdmin={c=>post('/api/study-rooms/admin',c)} submit={c=>post('/api/study-rooms/command',c)} operations={data.canManage&&operations?<StudyOperationsManager data={operations} today={data.today} save={c=>post('/api/study-rooms/operations',c)}/>:null}/></>;
+
+ if(!data)return <main className="sr-app">
+  <h1>Study Room Reservation</h1>
+  <p role="status">{error||'Checking authorized reservation access…'}</p>
+  <p>Study Room access requires sign-in and an explicit module grant.</p>
+  <a href="/sign-in">Sign in</a>
+  <p><a href="/members">Return to LV Zion Home</a></p>
+  {day&&<button onClick={()=>{void load(day);}}>Try again</button>}
+ </main>;
+
+ return <>
+  {warning&&<p role="status" className="sr-demo">{warning}</p>}
+  <p className="sr-freshness">Updated {lastRefresh} Las Vegas time · Refreshes while this screen is active</p>
+  <Reservations schedule={data} changeDay={setDay} refresh={()=>{void load(day);}} loadDay={loadDay} loadHistory={loadHistory}
+   admin={admin} saveAdmin={c=>post('/api/study-rooms/admin',c)} submit={c=>post('/api/study-rooms/command',c)}
+   operations={data.canManage&&operations?<StudyOperationsManager data={operations} today={data.today} save={c=>post('/api/study-rooms/operations',c)}/>:null}/>
+ </>;
 }

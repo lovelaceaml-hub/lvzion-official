@@ -32,6 +32,13 @@ R4 was merged through **[PR #30](https://github.com/lovelaceaml-hub/lvzion-offic
 
 The final integrated R4 build passed **317 Node application tests and 198 disposable PostgreSQL foundation assertions**, with TypeScript and Next.js production build passing; **six deployed phone-Chromium tests** passed (synthetic manager/viewer data plus direct anonymous API denial). Live signed-out GETs against the schedule, administration, history and operations APIs, and an anonymous operations POST, each returned **401** with private/no-store controls. This is *not* evidence of a real signed-in owner booking, a complete hosted Auth/PostgREST user journey, physical Safari or hosted backup/restore.
 
+## Code map
+
+- Screen: `app/modules/study-rooms/page.tsx` (loading, access loss, refresh) and `components/study-rooms/` (member view, change dialog, history, manager controls, `use-receipt-save.ts` for idempotent manager saves).
+- Rules: `lib/study-rooms/domain.ts` holds the shared booking validation, service hours (10:00 AM to 11:00 PM on half-hour slots), labels and the fictional test fixtures (`demoSchedule`, `simulate`); `admin.ts`, `operations.ts` and `history.ts` validate their requests with the same helpers. PostgreSQL stays authoritative.
+- API: `app/api/study-rooms/` (schedule, command, history, admin, operations); `lib/study-rooms/server.ts` holds the shared sign-in check and messages.
+- October 15, 2026 cleanup: merged duplicated validation, time lists and labels, removed the unused preview-only code paths, with no change to permissions, database rules or the closed booking gate.
+
 ## Safe default
 
 Do not change `study_booking_activation`, add general-member grants, invent booking owners, or modify the original Firebase scheduler to “complete the launch” without the verified source export, a checked old-endpoint write freeze, authenticated member/manager tests, a recovery plan and explicit cutover approval. The new operational calendar can be configured without opening bookings.
