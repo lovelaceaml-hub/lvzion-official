@@ -2,12 +2,19 @@ import {churchLocal,parseDisplaySnapshot,type DisplaySnapshot,type DisplayScreen
 
 export type OperatingDay={day:number;enabled:boolean;start:number;end:number};
 export type OperatingHours=OperatingDay[];
+export type DisplayMotionMode='standard'|'calm'|'lively'|'still';
+export const DISPLAY_MOTION_MODES:readonly DisplayMotionMode[]=['standard','calm','lively','still'];
+export function parseDisplayMotionMode(value:unknown):DisplayMotionMode {
+ if(value===undefined)return 'standard';
+ if(value==='standard'||value==='calm'||value==='lively'||value==='still')return value;
+ throw Error('Unapproved motion setting.');
+}
 export type DisplayScreenR2=DisplayScreen&{
- operatingHours:OperatingHours;configVersion:number;publishedItems:DisplaySlide[];
+ operatingHours:OperatingHours;configVersion:number;motionMode?:DisplayMotionMode;publishedItems:DisplaySlide[];
  overrideSlideId:string|null;overrideUntil:string|null;
 };
 export type DisplaySnapshotR2=DisplaySnapshot&{
- operatingHours:OperatingHours;overrideSlideId:string|null;overrideUntil:string|null;
+ operatingHours:OperatingHours;motionMode:DisplayMotionMode;overrideSlideId:string|null;overrideUntil:string|null;
 };
 const weekday=['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
 const own=(v:unknown):v is Record<string,unknown>=>!!v&&typeof v==='object'&&!Array.isArray(v);
@@ -54,10 +61,11 @@ export function minuteValue(value:string):number {
 
 export function parseDisplaySnapshotR2(raw:unknown):DisplaySnapshotR2 {
  if(!own(raw)||Object.keys(raw).some(k=>!
- ['paired','screen','version','serverTime','leaseUntil','slides','operatingHours','overrideSlideId','overrideUntil'].includes(k)))
+ ['paired','screen','version','serverTime','leaseUntil','slides','operatingHours','overrideSlideId','overrideUntil','motionMode'].includes(k)))
   throw Error('Unexpected private screen metadata.');
  const base=parseDisplaySnapshot(raw);
  const hours=parseOperatingHours(raw.operatingHours??[]);
+ const motionMode=parseDisplayMotionMode(raw.motionMode);
  const overrideId=raw.overrideSlideId??null,overrideUntil=raw.overrideUntil??null;
  if((overrideId===null)!==(overrideUntil===null))throw Error('Incomplete temporary notice.');
  if(overrideId!==null){
@@ -67,7 +75,7 @@ export function parseDisplaySnapshotR2(raw:unknown):DisplaySnapshotR2 {
    Date.parse(overrideUntil)>Date.parse(base.serverTime)+1800000)
    throw Error('Expired or unauthorized temporary notice.');
  }
- return {...base,operatingHours:hours,overrideSlideId:overrideId as string|null,
+ return {...base,operatingHours:hours,motionMode,overrideSlideId:overrideId as string|null,
   overrideUntil:overrideUntil as string|null};
 }
 export function overrideForDisplay(snapshot:DisplaySnapshotR2,nowMs:number):DisplaySlide|null {

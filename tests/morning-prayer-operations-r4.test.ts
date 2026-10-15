@@ -41,7 +41,7 @@ test('Morning Prayer R4: verified owner, member grants, atomic dates and Vault j
    'supabase/migrations/20261014155148_self_service_unassigned_enrollment.sql',
    'supabase/migrations/20261014190128_production_owner_setup.sql']){
    // Existing bootstrap may or may not install this Supabase test-only role.
-   if(path.includes('production_owner_setup'))await db.exec("do $begin if not exists(select 1 from pg_roles where rolname='supabase_auth_admin')then create role supabase_auth_admin nologin;end if;end$;");
+   if(path.includes('production_owner_setup'))await db.exec("DO 'BEGIN IF NOT EXISTS (SELECT 1 FROM pg_roles WHERE rolname=''supabase_auth_admin'') THEN CREATE ROLE supabase_auth_admin NOLOGIN; END IF; END';");
    await db.exec(await readFile(path,'utf8'));
   }
   await db.exec('create schema vault;create table vault.decrypted_secrets(id uuid primary key default gen_random_uuid(),decrypted_secret text not null);');
