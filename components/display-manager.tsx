@@ -6,6 +6,7 @@ import type{DisplayKind,DisplaySlide,DisplayStyle}from'../lib/continuous-display
 import {churchLocal,churchTimeToUtc,offsetForChurchTime,parseDisplaySlides}from'../lib/continuous-display/live-contract';
 import type {DisplayScreenR2} from '../lib/continuous-display/operations';
 import {OperatingHoursEditor,PublicationControls,NewScreenEditor,SlideEligibilityEditor} from './display-operations-controls';
+import {DisplayMotionEditor} from './display-motion-editor';
 type Tab='content'|'playlist'|'publish'|'screens';
 const styles:DisplayStyle[]=['editorial','schedule','event','campaign'];
 const kinds:DisplayKind[]=['announcement','schedule','event','campaign'];
@@ -66,7 +67,8 @@ export default function DisplayManager(){
    }else if(action==='createScreen'&&typeof data.screenId==='string'){
     preferredScreen.current=data.screenId;setPairCode('');
     notice=('A new disabled screen has been created. Configure and approve it before pairing.');
-   }else if(action==='hours')notice=('Operating hours saved. The screen will show a neutral state outside these hours.');
+   }else if(action==='motion')notice=('This screen’s ambient motion is updated. Paired TVs will adopt it at their next verified update.');
+   else if(action==='hours')notice=('Operating hours saved. The screen will show a neutral state outside these hours.');
    else if(action==='restore')notice=('A previously approved publication was restored as a new version.');
    else if(action==='override')notice=('Temporary emphasis started for an already approved slide.');
    else if(action==='clearOverride')notice=('Temporary emphasis ended.');
@@ -165,6 +167,7 @@ export default function DisplayManager(){
    </div>
    <h3>Paired devices</h3>{screen.devices.length?screen.devices.map(d=><div className="cd-device" key={d.id}><div><strong>{d.revoked?'Revoked':d.lastSeen&&Date.now()-Date.parse(d.lastSeen)<45000?'Online · checking in':'Offline or not checking in'}</strong><small>Last seen: {d.lastSeen?new Date(d.lastSeen).toLocaleString('en-US',{timeZone:'America/Los_Angeles'}):'Not yet checked in'}</small></div>{!d.revoked&&<button className="cd-button cd-danger" disabled={busy} onClick={()=>{if(window.confirm('Revoke this screen immediately when it next checks in?'))void command('revoke',{deviceId:d.id});}}>Revoke</button>}</div>):<p className="cd-empty">No device has been paired. An unpaired display cannot receive approved content.</p>}
    <p className="cd-subtle">The player is silent and fails to a neutral screen when the network or publication expires. Device revocation is checked at the next poll.</p>
+   <DisplayMotionEditor key={'motion-'+screen.id} screen={screen} busy={busy} command={command}/>
    <OperatingHoursEditor key={screen.id} screen={screen} busy={busy} command={command}/>
    <NewScreenEditor busy={busy} command={command}/>
   </section>}
