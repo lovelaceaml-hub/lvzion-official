@@ -1,132 +1,86 @@
-/* Contacts workspace. Rule order matters: later rules intentionally override earlier ones. */
-.ct-stage{min-height:100dvh;background:#e9eee8;color:#294838;font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;display:flex;justify-content:center}
-.ct-stage *{box-sizing:border-box}
-.ct-shell{width:100%;max-width:520px;height:100dvh;display:flex;flex-direction:column;background:#fafbf6;overflow:hidden;position:relative}
-.ct-stage button,.ct-stage select{font:inherit}
-.ct-stage button,.ct-stage a{-webkit-tap-highlight-color:transparent}
-.ct-stage button{cursor:pointer}
-.ct-stage button:disabled{opacity:.45;cursor:not-allowed}
-.ct-stage h1,.ct-stage h2,.ct-stage h3,.ct-stage p{margin-top:0}
-.ct-stage h1{font:normal 43px/1.1 Georgia,serif;letter-spacing:-.04em;margin-bottom:12px}
-.ct-stage h2{font-size:17px;line-height:1.4;letter-spacing:-.025em;margin-bottom:12px}
-.ct-stage h3{font-size:17px;line-height:1.4;margin-bottom:6px}
-.ct-stage p{font-size:14px;line-height:1.65}
-.ct-top{padding:10px 20px;display:flex;align-items:center;gap:10px;min-height:65px;border-bottom:1px solid #e7ece4}
-.ct-top>span{flex:1;text-align:center;font-size:9px;letter-spacing:.1em;font-weight:800;color:#687d6a}
-.ct-home-link{font-size:13px;color:#34583e;text-decoration:none;display:flex;align-items:center;min-height:44px;font-weight:750}
-.ct-view{background:none;border:0;font-size:11px!important;color:#476a51;min-height:44px;padding:0 4px}
-.ct-main{padding:0 22px 24px;flex:1;overflow-y:auto;min-height:0;overscroll-behavior:contain;scrollbar-width:thin;scrollbar-color:#c6d5c5 transparent}
-.ct-intro{padding:30px 0 13px}
-.ct-eyebrow{font-size:9px!important;letter-spacing:.12em;font-weight:800;color:#5f7965;line-height:1.7!important;margin-bottom:10px}
-.ct-muted{color:#647b69;font-size:13px!important;line-height:1.6!important}
-.ct-intro .ct-muted{margin-bottom:14px}
-.ct-tabs{display:flex;background:#eaf0e6;padding:5px;border-radius:16px;margin-bottom:23px;gap:3px}
-.ct-tabs button{flex:1;border:0;border-radius:12px;min-height:46px;padding:8px 2px;background:transparent;color:#647a66;font-size:11px;font-weight:750;white-space:nowrap}
-.ct-tabs .selected{background:#fffefb;box-shadow:0 3px 9px #30462c0d;color:#31513b}
-.ct-section-title{display:flex;justify-content:space-between;align-items:center;gap:10px;margin:0 0 13px}
-.ct-section-title h2{margin:0}
-.ct-section-title small{font-size:10px;color:#6c7f6f}
-.ct-card{background:#fffefb;border:1px solid #e0e7dc;border-radius:21px;padding:18px;margin-bottom:13px}
-.ct-contact{display:block;width:100%;text-align:left;color:inherit;position:relative}
-.ct-contact-top{display:flex;gap:12px;align-items:center}
-.ct-contact-top>div{flex:1;min-width:0}
-.ct-contact h3{font-size:16px;margin:0 0 5px}
-.ct-contact small{font-size:11px;color:#6d7f70}
-.ct-pill{display:inline-block;padding:5px 8px;border-radius:20px;background:#edf0e8;color:#5e7162;font-size:10px!important;font-weight:700;white-space:nowrap}
-.ct-pill.active{background:#e8f0e3;color:#416949}
-.ct-pill.paused{background:#f4eee0;color:#806a38}
-.ct-pill.closed{background:#f3e9e3;color:#875c49}
-.ct-next{display:flex;justify-content:space-between;align-items:center;border-top:1px solid #ebeee5;padding-top:13px;margin-top:15px;gap:8px;font-size:12px;color:#5e7564}
-.ct-primary{width:100%;min-height:51px;padding:13px 16px;border:0;background:#3d644a;color:white;border-radius:15px;font-size:13px!important;font-weight:700!important;display:flex;justify-content:center;align-items:center;gap:10px}
-.ct-secondary{width:100%;min-height:47px;border:1px solid #cad9c5;border-radius:13px;background:#f3f7ee;color:#416347;padding:11px 14px;font-size:13px!important;font-weight:700!important;margin:9px 0}
-.ct-platform{display:grid;grid-template-columns:1fr 1fr 1fr;align-items:end;border-top:1px solid #e4eadf;padding:9px 12px max(10px,env(safe-area-inset-bottom));background:#fffef9}
-.ct-platform a,.ct-platform button{display:flex;align-items:center;justify-content:center;flex-direction:column;gap:5px;min-height:51px;background:none;border:0;text-decoration:none;font-size:10px;color:#6c7f6e}
-.ct-apps-icon{display:grid;place-items:center;background:#3d644a;color:#fff;width:50px;height:40px;border-radius:14px;margin-top:-5px}
-.ct-apps-button>span:last-child{font-weight:800;color:#365a40}
-.ct-back{background:none;border:0;padding:11px 0;min-height:44px;font-size:13px!important;color:#55735c}
-.ct-detail-head{text-align:center;padding:14px 0}
-.ct-detail-head h1{font-size:34px}
-.ct-detail-head .ct-muted{margin-top:13px}
-.ct-section{padding:19px;margin-top:12px}
-.ct-section .ct-primary{margin-top:15px}
-.ct-section p:last-child{margin-bottom:0}
-.ct-small{font-size:11px!important;line-height:1.7!important;color:#6d8170;margin:14px 0}
-.ct-text-button{min-height:44px;padding:9px 4px;background:none;border:0;color:#3c6649;font-size:12px!important;font-weight:750!important}
-.ct-history{border-top:1px solid #e7ede1;padding-top:14px;margin-top:13px}
-.ct-history small{font-size:10px;color:#788a79}
-.ct-history p{font-size:13px;margin:7px 0 11px}
-.ct-share-row{display:flex;align-items:center;justify-content:space-between;font-size:13px}
-.ct-metrics{display:grid;grid-template-columns:1fr 1fr;gap:12px}
-.ct-metrics .ct-card{min-height:126px;margin-bottom:0;display:flex;flex-direction:column;justify-content:center}
-.ct-metrics strong{font:normal 38px Georgia,serif;margin-bottom:13px}
-.ct-metrics span{font-size:11px;color:#657d68}
-.ct-empty{text-align:center;padding:40px 12px}
-.ct-empty h2{font-size:20px}
-.ct-empty p{color:#6b8170;font-size:13px}
-.ct-feedback{display:flex;align-items:center;justify-content:space-between;padding:13px;background:#e6f0e0;border-radius:14px;color:#416247;font-size:12px;line-height:1.6;margin-top:16px}
-.ct-choice{display:flex;align-items:center;justify-content:space-between;gap:10px;width:100%;min-height:58px;text-decoration:none;color:#3a6146;background:#f5f8ef;border:1px solid #dce6d4;border-radius:14px;padding:13px;font-size:13px!important;margin:10px 0;text-align:left}
-.ct-error{background:#fbede5;border:1px solid #d9b7a2;border-radius:12px;padding:14px;color:#814e3c;font-size:12px!important;margin-top:16px}
-.ct-danger{background:#f7e9e2;border:1px solid #dcc5b8;color:#83513e;border-radius:13px;width:100%;min-height:48px;padding:12px;font-size:12px!important;font-weight:700!important}
-.ct-stage :focus-visible{outline:3px solid #72986e;outline-offset:3px}
-@media(min-width:560px){
- .ct-stage{padding:22px}
- .ct-shell{height:calc(100dvh - 44px);border-radius:29px;box-shadow:0 20px 70px #23422c14}
-}
-@media(max-width:365px){
- .ct-main{padding-left:15px;padding-right:15px}
- .ct-top{padding-left:14px;padding-right:14px;gap:5px}
- .ct-top>span{font-size:8px}
- .ct-contact-top{gap:9px}
- .ct-contact-top h3{font-size:14px}
- .ct-card{padding:15px}
- .ct-pill{padding:5px 6px;font-size:9px!important}
- .ct-tabs button{font-size:10px}
- .ct-stage h1{font-size:38px}
- .ct-detail-head h1{font-size:32px}
-}
-@media(prefers-reduced-motion:reduce){.ct-stage *{animation:none!important;transition:none!important;scroll-behavior:auto!important}}
+/* Contacts on the Day Sheet contract. Layout only: every value comes from styles/lvz-tokens.css,
+ * every shared piece (rows, buttons, fields, notices, tabs, sheet) from styles/lvz-ui.css. */
 
-.ct-stage .ct-filters{display:flex;gap:8px;margin:-1px 0 16px}
-.ct-stage .ct-filters input{flex:1;min-width:0;width:100px}
-.ct-stage .ct-filters input,.ct-stage .ct-filters select{font:inherit;font-size:12px;background:#fffefb;border:1px solid #d3dfcd;color:#3b5b45;border-radius:12px;min-height:46px;padding:10px}
-.ct-stage .ct-filters select{max-width:135px}
-.ct-stage .ct-inline-actions{display:flex;justify-content:space-between;gap:12px}
-.ct-stage .ct-sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
-.ct-stage .ct-text-button{min-width:44px}
-.ct-stage .ct-muted,.ct-stage .ct-small{color:#526d58}
-.ct-stage .ct-contact small,.ct-stage .ct-history small{color:#596e5d}
-.ct-stage .ct-feedback{overflow-wrap:anywhere}
-@media(max-width:365px){
- .ct-stage .ct-filters select{max-width:113px;font-size:11px}
- .ct-stage .ct-filters input{font-size:11px}
+.ct-header-actions{display:flex;align-items:center;gap:var(--lvz-space-1)}
+.ct-header-button{min-height:var(--lvz-tap);font-size:var(--lvz-text-sm)}
+.ct-main p{overflow-wrap:anywhere}
+.ct-loading,.ct-quiet{color:var(--lvz-ink-quiet);font-size:var(--lvz-text-sm)}
+.ct-quiet{margin:var(--lvz-space-2) 0 var(--lvz-space-3)}
+.ct-hint{margin:var(--lvz-space-2) 0 var(--lvz-space-4);font-size:var(--lvz-text-sm);color:var(--lvz-ink-quiet)}
+.ct-lead{margin:0 0 var(--lvz-space-3)}
+.ct-notice p{margin:0 0 var(--lvz-space-3)}
+.ct-notice-actions{display:flex;flex-wrap:wrap;align-items:center;gap:var(--lvz-space-4)}
+
+/* List pane */
+/* The shared tab strip scrolls sideways, which clips an outer focus ring; draw it inside instead. */
+.ct-list-pane .ui-tab:focus-visible{outline-offset:-3px}
+.ct-list-head{display:flex;align-items:flex-end;justify-content:space-between;gap:var(--lvz-space-3);margin-top:var(--lvz-space-6)}
+.ct-list-head .ui-section-title{margin:0 0 var(--lvz-space-2)}
+.ct-count{font-weight:var(--lvz-weight-regular);margin-left:var(--lvz-space-1)}
+.ct-filters{display:flex;gap:var(--lvz-space-2);margin-top:var(--lvz-space-4)}
+.ct-filters input{flex:1}
+.ct-filters select{flex:none;width:auto;max-width:42%}
+.ct-contact{cursor:pointer}
+.ct-contact:disabled{cursor:wait}
+.ct-contact[aria-current="true"]{box-shadow:inset 3px 0 0 var(--lvz-accent);padding-left:var(--lvz-space-3)}
+.ct-chevron{flex:none;color:var(--lvz-ink-quiet)}
+.ct-status{font-weight:var(--lvz-weight-strong);color:var(--lvz-ink)}
+.ct-status[data-tone="danger"]{color:var(--lvz-danger)}
+.ct-metric strong{font-size:var(--lvz-text-lg);font-weight:var(--lvz-weight-strong)}
+.ct-more{margin-top:var(--lvz-space-4)}
+
+/* Record pane */
+.ct-back{margin:var(--lvz-space-4) 0 0 calc(-1 * var(--lvz-space-2))}
+.ct-record-title{margin-top:var(--lvz-space-3);overflow-wrap:anywhere}
+.ct-record-title:focus,.ct-form-title:focus{outline:none}
+.ct-record-meta{margin:0;color:var(--lvz-ink-quiet);font-size:var(--lvz-text-sm)}
+.ct-timed{align-items:flex-start}
+.ct-when{display:flex;flex-direction:column;flex:none;width:64px;font-weight:var(--lvz-weight-strong)}
+.ct-when small{font-size:var(--lvz-text-xs);font-weight:var(--lvz-weight-regular);color:var(--lvz-ink-quiet)}
+.ct-note{white-space:pre-wrap;overflow-wrap:anywhere}
+.ct-next{margin-bottom:var(--lvz-space-3)}
+.ct-next .ui-row{border-bottom:0}
+.ct-actions{display:flex;flex-wrap:wrap;gap:var(--lvz-space-2);margin-top:var(--lvz-space-3)}
+.ct-inline{margin:var(--lvz-space-2) 0 0 calc(-1 * var(--lvz-space-2))}
+.ct-danger{color:var(--lvz-danger);border-color:var(--lvz-danger)}
+.ct-danger:hover{background:var(--lvz-danger-soft)}
+.ct-pane-empty{display:none}
+
+/* Form */
+.ct-form{margin-top:var(--lvz-space-6)}
+.ct-form-title{margin:0 0 var(--lvz-space-4);font-size:var(--lvz-text-xl);font-weight:var(--lvz-weight-strong)}
+.ct-form .ui-hint{margin:calc(-1 * var(--lvz-space-2)) 0 var(--lvz-space-4)}
+.ct-textarea{min-height:120px;resize:vertical}
+
+/* Apps sheet */
+.ct-sheet-head{display:flex;align-items:center;justify-content:space-between;gap:var(--lvz-space-3);margin-bottom:var(--lvz-space-2)}
+.ct-sheet-head h2{margin:0;font-size:var(--lvz-text-xl);font-weight:var(--lvz-weight-strong)}
+.ct-close{min-width:var(--lvz-tap);padding:0}
+
+/* Phone: one pane at a time. The record replaces the list until "Back to contacts". */
+@media (max-width:899px){
+ .ct-intro[data-pane="open"] :is(.ui-kicker,.ui-lede){display:none}
+ .ct-layout[data-pane="open"] .ct-list-pane{display:none}
+ .ct-layout[data-pane="closed"] .ct-record-pane{display:none}
+ .ct-list-head .ui-button{min-height:var(--lvz-tap)}
+ .ct-actions .ui-button{flex:1 1 auto}
 }
-/* Privacy: printing the private workspace is disabled. */
+@media (max-width:359px){
+ .ct-filters{flex-direction:column}
+ .ct-filters select{max-width:none;width:100%}
+}
+
+/* Desktop: the list stays on the left and the open record or form sits beside it. */
+@media (min-width:900px){
+ .ct-layout{display:grid;grid-template-columns:minmax(320px,400px) minmax(0,1fr);gap:var(--lvz-space-12);align-items:start}
+ .ct-record-pane{position:sticky;top:calc(var(--lvz-header-height) + var(--lvz-space-4));max-height:calc(100dvh - var(--lvz-header-height) - var(--lvz-space-8));overflow-y:auto;padding:0 var(--lvz-space-2) var(--lvz-space-8);border-left:1px solid var(--lvz-line);padding-left:var(--lvz-space-8)}
+ .ct-back{display:none}
+ .ct-pane-empty{display:block;padding-top:var(--lvz-space-12)}
+ .ct-record-title{margin-top:var(--lvz-space-5)}
+}
+
+/* Privacy: the private workspace is never printed. */
 @media print{
- .ct-stage{display:none!important}
- body:after{content:'Contacts preview printing is disabled. No contact data is exported.';font:16px sans-serif}
-}
-
-.ct-live-form{display:grid;gap:12px}
-.ct-live-form label{font-size:13px;font-weight:700;color:#365440}
-.ct-live-form input,.ct-live-form select,.ct-live-form textarea{box-sizing:border-box;width:100%;min-height:48px;padding:12px;border:1px solid #c9d8c3;border-radius:12px;background:#fffefb;color:#294838;font:inherit;font-size:16px}
-.ct-live-form textarea{resize:vertical;min-height:118px}
-.ct-live-form input:focus-visible,.ct-live-form select:focus-visible,.ct-live-form textarea:focus-visible{outline:3px solid #72986e;outline-offset:2px}
-.ct-live-form h2{margin-bottom:5px}
-.ct-live-form .ct-small{margin:0 0 5px}
-.ct-live-form .ct-secondary{margin:0}
-.ct-error a{color:inherit;display:inline-flex;align-items:center;min-height:44px;font-weight:700}
-.ct-stage p,.ct-stage h3{overflow-wrap:anywhere}
-.ct-search-explain{margin:-6px 0 18px!important;font-size:11px!important}
-.ct-activity{display:flex;align-items:center;justify-content:space-between;gap:12px}
-.ct-activity strong{font-size:13px;color:#355840}
-.ct-activity span{color:#718574;font-size:11px}
-.ct-app-link{font-weight:650;text-decoration:none}
-.ct-app-link span{font-size:20px;color:#75977b}
-.ct-stage .ct-share-row{border-top:1px solid #e4ebde;padding:8px 0;gap:14px}
-.ct-stage .ct-share-row strong{font-size:13px;overflow-wrap:anywhere}
-.ct-stage .ct-share-row button{flex:none}
-.ct-stage .ct-metrics{margin-bottom:18px}
-@media(max-width:360px){
- .ct-stage .ct-metrics{gap:9px}
- .ct-stage .ct-metrics .ct-card{padding:13px;min-height:105px}
+ .ct-page{display:none!important}
+ body::after{content:'Printing Contacts is turned off. No contact data is exported.';font:var(--lvz-text-md) var(--lvz-font-sans)}
 }
