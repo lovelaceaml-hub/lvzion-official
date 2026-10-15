@@ -66,10 +66,11 @@ export function churchTimeToUtc(wall:string,offset:ChurchOffset):string{
  if(churchLocal(new Date(parsed).toISOString())!==wall)throw Error('The time does not exist in Las Vegas with that UTC offset (DST).');
  return new Date(parsed).toISOString();
 }
+// Compared at minute precision: a current time with seconds would otherwise never match and wrongly read as standard time.
 export function offsetForChurchTime(value:string):ChurchOffset{
- const wall=churchLocal(value);
- try{if(churchTimeToUtc(wall,'-07:00')===new Date(value).toISOString())return '-07:00';}catch{}
+ const wall=churchLocal(value),minute=Math.floor(Date.parse(value)/60000)*60000;
+ try{if(Date.parse(churchTimeToUtc(wall,'-07:00'))===minute)return '-07:00';}catch{}
  return '-08:00';
 }
-// Las Vegas wall-clock text for manager screens (for example "10/14/2026, 6:00:00 PM").
-export function churchDateTime(value:string):string{return new Date(value).toLocaleString('en-US',{timeZone:CHURCH_TIME_ZONE});}
+// Las Vegas wall-clock text for manager screens (for example "Oct 14, 2026, 6:00 PM").
+export function churchDateTime(value:string):string{return new Date(value).toLocaleString('en-US',{timeZone:CHURCH_TIME_ZONE,dateStyle:'medium',timeStyle:'short'});}

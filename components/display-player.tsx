@@ -118,11 +118,11 @@ export default function DisplayPlayer(){
  return <main className="cd-screen" aria-label="LV Zion Official Continuous Church Display">
   <div className={'cd-stage cd-motion-'+motionMode}>
    {mode==='unpaired'?<section className="cd-device-pair">
-    <p>LV ZION OFFICIAL · DIGITAL BILLBOARD</p>
+    <p className="cd-mark">LV<span>Zion</span></p>
     <h1>Pair this display</h1>
-    <p>Open Continuous Church Display in your authorized LV Zion account, choose Screens, then create a one-time pairing code.</p>
-    <form onSubmit={pair}><label htmlFor="cd-code" className="cd-visually-hidden">Pairing code</label>
-     <input id="cd-code" value={code} onChange={e=>setCode(e.target.value.toUpperCase())} maxLength={18} placeholder="XXXX–XXXX–XXXX" autoComplete="off" spellCheck={false} aria-label="Pairing code"/>
+    <p>On a phone or computer, open Church Display in LV Zion, choose Screens, then create a one-time pairing code and type it here.</p>
+    <form onSubmit={pair}><label htmlFor="cd-code" className="ui-visually-hidden">Pairing code</label>
+     <input id="cd-code" value={code} onChange={e=>setCode(e.target.value.toUpperCase())} maxLength={18} placeholder="XXXX-XXXX-XXXX" autoComplete="off" spellCheck={false} aria-label="Pairing code"/>
      <button disabled={pairing||code.replace(/[–\s-]/g,'').length!==12}>{pairing?'Pairing…':'Connect'}</button>
     </form>
     {error&&<p role="alert" className="cd-pair-error">{error}</p>}

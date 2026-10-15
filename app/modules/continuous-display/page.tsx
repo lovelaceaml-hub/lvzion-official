@@ -1,5 +1,5 @@
 import {notFound,redirect} from 'next/navigation';
-import Link from 'next/link';
+import AppHeader from '../../../components/app-header';
 import {requireMember} from '../../../lib/server/supabase';
 import {parseModuleFeed} from '../../../lib/app-runtime';
 import DisplayManager from '../../../components/display-manager';
@@ -17,6 +17,6 @@ export default async function ChurchDisplayModule(){
  try{feed=parseModuleFeed(data);}catch{notFound();}
  const module=feed.modules.find(m=>m.route==='/modules/continuous-display');
  if(!module)notFound();
- if(!module.canManage)return <main className="cd-manage"><Link href="/members">← My Week</Link><h1>Church Display</h1><p>Your account is not granted independent display management rights.</p></main>;
+ if(!module.canManage)return <div className="ui-page"><AppHeader homeHref="/members"/><main className="ui-main ui-narrow"><h1 className="ui-title">Church Display</h1><p className="ui-lede">Your account can see this app but cannot manage displays. Ask the display owner for a manager grant.</p></main></div>;
  return <DisplayManager/>;
 }
