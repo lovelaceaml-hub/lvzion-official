@@ -20,6 +20,8 @@ export default function DisplayPlayer(){
  const overrideActive=useRef(false);
  const requestSequence=useRef(0);
  const inFlight=useRef<AbortController|null>(null);
+ // Show the neutral welcome and forget which slide or temporary notice was on screen.
+ const blank=()=>{shown.current=null;overrideActive.current=false;setSlide(null);};
  const apply=(verified:Verified)=>{
   setMotionMode(verified.packet.motionMode);
   current.current=verified;pending.current=null;shown.current=null;shownAt.current=performance.now();generation.current++;
@@ -38,8 +40,7 @@ export default function DisplayPlayer(){
    const raw:unknown=await r.json();
    if(!alive.current||sequence!==requestSequence.current)return;
    if(!raw||typeof raw!=='object'||!('paired' in raw)||raw.paired!==true){
-    current.current=null;pending.current=null;shown.current=null;overrideActive.current=false;
-    setSlide(null);setMode('unpaired');return;
+    current.current=null;pending.current=null;blank();setMode('unpaired');return;
    }
    const packet=parseDisplaySnapshotR2(raw);
    const checked={packet,serverEpoch:Date.parse(packet.serverTime),verifiedAt:performance.now()};
@@ -72,14 +73,12 @@ export default function DisplayPlayer(){
      const pv=pending.current,pNow=pv.serverEpoch+(performance.now()-pv.verifiedAt);
      if(pNow<Date.parse(pv.packet.leaseUntil)){apply(pv);return;}
     }
-    current.current=null;shown.current=null;overrideActive.current=false;setSlide(null);return;
+    current.current=null;blank();return;
    }
    // Operating periods and per-slide expiry are evaluated from the verified server clock.
-   if(!withinOperatingHours(v.packet.operatingHours,now)){
-    shown.current=null;overrideActive.current=false;setSlide(null);return;
-   }
+   if(!withinOperatingHours(v.packet.operatingHours,now)){blank();return;}
    const items=activeDisplaySlides(v.packet.slides,now);
-   if(!items.length){shown.current=null;overrideActive.current=false;setSlide(null);return;}
+   if(!items.length){blank();return;}
    const forced=overrideForDisplay(v.packet,now);
    if(forced){
     if(!overrideActive.current||shown.current!==forced.id){

@@ -2,19 +2,33 @@
 import {useEffect,useRef,useState} from 'react';
 import Link from 'next/link';
 import DisplayVisual from './display-visual';
-import type{DisplayKind,DisplaySlide,DisplayStyle}from'../lib/continuous-display/live-contract';
-import {churchLocal,churchTimeToUtc,offsetForChurchTime,parseDisplaySlides}from'../lib/continuous-display/live-contract';
+import type{ChurchOffset,DisplayKind,DisplaySlide,DisplayStyle}from'../lib/continuous-display/live-contract';
+import {MAX_DISPLAY_SLIDES,churchDateTime,churchLocal,churchTimeToUtc,offsetForChurchTime,parseDisplaySlides}from'../lib/continuous-display/live-contract';
 import type {DisplayScreenR2} from '../lib/continuous-display/operations';
-import {OperatingHoursEditor,PublicationControls,NewScreenEditor,SlideEligibilityEditor} from './display-operations-controls';
-import {DisplayMotionEditor} from './display-motion-editor';
-type Tab='content'|'playlist'|'publish'|'screens';
+import {DisplayMotionEditor,OperatingHoursEditor,PublicationControls,NewScreenEditor,SlideEligibilityEditor} from './display-operations-controls';
+const tabs=['content','playlist','publish','screens'] as const;
+type Tab=typeof tabs[number];
 const styles:DisplayStyle[]=['editorial','schedule','event','campaign'];
 const kinds:DisplayKind[]=['announcement','schedule','event','campaign'];
 const capital=(s:string)=>s.slice(0,1).toUpperCase()+s.slice(1);
 const defaultWall=(days=0)=>churchLocal(new Date(Date.now()+days*86400000).toISOString());
+const notices:Record<string,string>={
+ save:'Draft saved. Approval is still required.',
+ approve:'Exact draft approved. Publishing is a separate action.',
+ publish:'Approved version published. Paired screens update at a safe transition.',
+ motion:'This screen’s ambient motion is updated. Paired TVs will adopt it at their next verified update.',
+ hours:'Operating hours saved. The screen will show a neutral state outside these hours.',
+ restore:'A previously approved publication was restored as a new version.',
+ override:'Temporary emphasis started for an already approved slide.',
+ clearOverride:'Temporary emphasis ended.',
+ revoke:'Device access revoked.'
+};
+function OffsetSelect({value,onChange}:{value:ChurchOffset;onChange:(offset:ChurchOffset)=>void}){
+ return <label>UTC offset<select value={value} onChange={e=>onChange(e.target.value as ChurchOffset)}><option value="-07:00">Daylight (PDT −07)</option><option value="-08:00">Standard (PST −08)</option></select></label>;
+}
 function newSlide(kind:DisplayKind):DisplaySlide{
  const date=churchLocal(new Date().toISOString()).slice(0,10);
- return{id:'slide-'+crypto.randomUUID().slice(0,12),kind,style:kind==='announcement'?'editorial':kind==='schedule'?'schedule':kind==='event'?'event':'campaign',
+ return{id:'slide-'+crypto.randomUUID().slice(0,12),kind,style:kind==='announcement'?'editorial':kind,
   title:'New '+kind,body:'Add approved details before publication.',duration:kind==='schedule'?20:15,
   ...(kind==='schedule'?{date,rows:[{time:'',label:''}]}:{}),
   ...(kind==='event'?{date,time:'',location:''}:{})};
@@ -28,12 +42,13 @@ export default function DisplayManager(){
  const [selected,setSelected]=useState(0),[status,setStatus]=useState('Loading your authorized displays…');
  const [busy,setBusy]=useState(false),[dirty,setDirty]=useState(false);
  const [startWall,setStartWall]=useState(defaultWall()),[endWall,setEndWall]=useState(defaultWall(7));
- const [startOffset,setStartOffset]=useState<'-07:00'|'-08:00'>(offsetForChurchTime(new Date().toISOString()));
- const [endOffset,setEndOffset]=useState<'-07:00'|'-08:00'>(offsetForChurchTime(new Date(Date.now()+7*86400000).toISOString()));
+ const [startOffset,setStartOffset]=useState<ChurchOffset>(offsetForChurchTime(new Date().toISOString()));
+ const [endOffset,setEndOffset]=useState<ChurchOffset>(offsetForChurchTime(new Date(Date.now()+7*86400000).toISOString()));
  const [pairCode,setPairCode]=useState('');
  const editing=useRef(false);
  const update=(fn:(items:DisplaySlide[])=>DisplaySlide[])=>{setSlides(before=>fn(before));setDirty(true);editing.current=true;};
  const change=(index:number,patch:Partial<DisplaySlide>)=>update(before=>before.map((slide,i)=>i===index?{...slide,...patch}:slide));
+ const editWindow=<T,>(set:(value:T)=>void)=>(value:T)=>{set(value);editing.current=true;setDirty(true);};
  async function load(){
   try{
    const r=await fetch('/api/display/manage',{cache:'no-store',credentials:'same-origin'});
@@ -61,18 +76,13 @@ export default function DisplayManager(){
    const r=await fetch('/api/display/manage',{method:'POST',headers:{'Content-Type':'application/json'},credentials:'same-origin',body:JSON.stringify(action==='createScreen'?{action,...extra}:{action,screenId:screen.id,...extra})});
    const data=await r.json() as Record<string,unknown>;
    if(!r.ok)throw Error(typeof data.error==='string'?data.error:'Display change was rejected.');
-   let notice='Display change saved.';
+   let notice=notices[action]??'Device access revoked.';
    if(action==='pair'&&typeof data.code==='string'){
-    setPairCode(data.code);notice=('One-time pairing code created. It expires in five minutes.');
+    setPairCode(data.code);notice='One-time pairing code created. It expires in five minutes.';
    }else if(action==='createScreen'&&typeof data.screenId==='string'){
     preferredScreen.current=data.screenId;setPairCode('');
-    notice=('A new disabled screen has been created. Configure and approve it before pairing.');
-   }else if(action==='motion')notice=('This screen’s ambient motion is updated. Paired TVs will adopt it at their next verified update.');
-   else if(action==='hours')notice=('Operating hours saved. The screen will show a neutral state outside these hours.');
-   else if(action==='restore')notice=('A previously approved publication was restored as a new version.');
-   else if(action==='override')notice=('Temporary emphasis started for an already approved slide.');
-   else if(action==='clearOverride')notice=('Temporary emphasis ended.');
-   else notice=(action==='save'?'Draft saved. Approval is still required.':action==='approve'?'Exact draft approved. Publishing is a separate action.':action==='publish'?'Approved version published. Paired screens update at a safe transition.':'Device access revoked.');
+    notice='A new disabled screen has been created. Configure and approve it before pairing.';
+   }
    if(['save','approve','publish','createScreen'].includes(action)){editing.current=false;setDirty(false);}
    await load();setStatus(notice);
   }catch(e){setStatus(e instanceof Error?e.message:'Could not complete the change.');}
@@ -111,10 +121,10 @@ export default function DisplayManager(){
    </div>}
  </div>;
  const windowEditor=<div className="cd-window"><h3>Publication window · Las Vegas</h3><p>Times use America/Los_Angeles. Select the correct daylight-saving offset for transition days.</p><div className="cd-fields">
-  <label>Begins<input type="datetime-local" value={startWall} onChange={e=>{setStartWall(e.target.value);editing.current=true;setDirty(true);}}/></label>
-  <label>UTC offset<select value={startOffset} onChange={e=>{setStartOffset(e.target.value as '-07:00'|'-08:00');editing.current=true;setDirty(true);}}><option value="-07:00">Daylight (PDT −07)</option><option value="-08:00">Standard (PST −08)</option></select></label>
-  <label>Expires<input type="datetime-local" value={endWall} onChange={e=>{setEndWall(e.target.value);editing.current=true;setDirty(true);}}/></label>
-  <label>UTC offset<select value={endOffset} onChange={e=>{setEndOffset(e.target.value as '-07:00'|'-08:00');editing.current=true;setDirty(true);}}><option value="-07:00">Daylight (PDT −07)</option><option value="-08:00">Standard (PST −08)</option></select></label>
+  <label>Begins<input type="datetime-local" value={startWall} onChange={e=>editWindow(setStartWall)(e.target.value)}/></label>
+  <OffsetSelect value={startOffset} onChange={editWindow(setStartOffset)}/>
+  <label>Expires<input type="datetime-local" value={endWall} onChange={e=>editWindow(setEndWall)(e.target.value)}/></label>
+  <OffsetSelect value={endOffset} onChange={editWindow(setEndOffset)}/>
  </div></div>;
  return <main className="cd-manage">
   <header className="cd-head"><Link href="/members">← My Week</Link><p>LV ZION OFFICIAL · APPS</p><h1>Church Display</h1><span>Animated digital billboard · authorized management</span></header>
@@ -127,11 +137,11 @@ export default function DisplayManager(){
      }}>{allScreens.map(candidate=><option key={candidate.id} value={candidate.id}>{candidate.label}</option>)}</select>
     </label>}
    </div>
-  <nav className="cd-tabs" aria-label="Display management tabs">{(['content','playlist','publish','screens'] as const).map(t=><button key={t} aria-current={tab===t?'page':undefined} onClick={()=>setTab(t)}>{capital(t)}</button>)}</nav>
+  <nav className="cd-tabs" aria-label="Display management tabs">{tabs.map(t=><button key={t} aria-current={tab===t?'page':undefined} onClick={()=>setTab(t)}>{capital(t)}</button>)}</nav>
   {status&&<p className="cd-notice" role="status">{status}</p>}
   {!screen?<p className="cd-empty">The display management module requires an active, explicitly assigned manager grant.</p>:<>
   {tab==='content'&&<section className="cd-panel">
-   <div className="cd-heading"><div><h2>Content library</h2><p>Create and review church-approved content. Nothing uploads or publishes automatically.</p></div><button className="cd-button" disabled={busy||slides.length>=16} onClick={()=>{update(a=>[...a,newSlide('announcement')]);setSelected(slides.length);}}>+ Create</button></div>
+   <div className="cd-heading"><div><h2>Content library</h2><p>Create and review church-approved content. Nothing uploads or publishes automatically.</p></div><button className="cd-button" disabled={busy||slides.length>=MAX_DISPLAY_SLIDES} onClick={()=>{update(a=>[...a,newSlide('announcement')]);setSelected(slides.length);}}>+ Create</button></div>
    {slides.length===0?<div className="cd-empty"><h3>No content yet</h3><p>Start with a church announcement or schedule. The TV displays a neutral welcome until something is approved and published.</p></div>:<>
     <div className="cd-library">{slides.map((s,i)=><button key={s.id} type="button" className={selected===i?'cd-library-item is-selected':'cd-library-item'} onClick={()=>setSelected(i)}><strong>{s.title||'Untitled'}</strong><small>{capital(s.kind)} · {s.duration}s</small></button>)}</div>
     <div className="cd-stage cd-small-preview"><DisplayVisual slide={active} preview/></div>
@@ -156,7 +166,7 @@ export default function DisplayManager(){
     <button className="cd-button cd-primary" disabled={busy||!canPublish} onClick={()=>command('publish',{expectedVersion:screen.draftVersion})}>Publish approved playlist</button>
    </div>
    {dirty&&<p className="cd-subtle">There are unsaved changes. Save, review and approve the new revision before publishing.</p>}
-   <h3>Previous published versions</h3>{screen.history.length?<div>{screen.history.map(h=><p key={h.id} className="cd-history">v{h.generation} · {new Date(h.publishedAt).toLocaleString('en-US',{timeZone:'America/Los_Angeles'})} · Expires {new Date(h.until).toLocaleString('en-US',{timeZone:'America/Los_Angeles'})}</p>)}</div>:<p>No publication history yet.</p>}
+   <h3>Previous published versions</h3>{screen.history.length?<div>{screen.history.map(h=><p key={h.id} className="cd-history">v{h.generation} · {churchDateTime(h.publishedAt)} · Expires {churchDateTime(h.until)}</p>)}</div>:<p>No publication history yet.</p>}
    <PublicationControls key={screen.id} screen={screen} busy={busy} command={command} draftDirty={dirty}/>
   </section>}
   {tab==='screens'&&<section className="cd-panel"><h2>Screen pairing and health</h2>
@@ -165,7 +175,7 @@ export default function DisplayManager(){
     <button className="cd-button cd-primary" disabled={busy} onClick={()=>command('pair')}>Create one-time pairing code</button>
     {pairCode&&<div className="cd-pair-code" aria-live="polite"><span>Use on lvz.app/display · expires in five minutes</span><strong>{pairCode}</strong></div>}
    </div>
-   <h3>Paired devices</h3>{screen.devices.length?screen.devices.map(d=><div className="cd-device" key={d.id}><div><strong>{d.revoked?'Revoked':d.lastSeen&&Date.now()-Date.parse(d.lastSeen)<45000?'Online · checking in':'Offline or not checking in'}</strong><small>Last seen: {d.lastSeen?new Date(d.lastSeen).toLocaleString('en-US',{timeZone:'America/Los_Angeles'}):'Not yet checked in'}</small></div>{!d.revoked&&<button className="cd-button cd-danger" disabled={busy} onClick={()=>{if(window.confirm('Revoke this screen immediately when it next checks in?'))void command('revoke',{deviceId:d.id});}}>Revoke</button>}</div>):<p className="cd-empty">No device has been paired. An unpaired display cannot receive approved content.</p>}
+   <h3>Paired devices</h3>{screen.devices.length?screen.devices.map(d=><div className="cd-device" key={d.id}><div><strong>{d.revoked?'Revoked':d.lastSeen&&Date.now()-Date.parse(d.lastSeen)<45000?'Online · checking in':'Offline or not checking in'}</strong><small>Last seen: {d.lastSeen?churchDateTime(d.lastSeen):'Not yet checked in'}</small></div>{!d.revoked&&<button className="cd-button cd-danger" disabled={busy} onClick={()=>{if(window.confirm('Revoke this screen immediately when it next checks in?'))void command('revoke',{deviceId:d.id});}}>Revoke</button>}</div>):<p className="cd-empty">No device has been paired. An unpaired display cannot receive approved content.</p>}
    <p className="cd-subtle">The player is silent and fails to a neutral screen when the network or publication expires. Device revocation is checked at the next poll.</p>
    <DisplayMotionEditor key={'motion-'+screen.id} screen={screen} busy={busy} command={command}/>
    <OperatingHoursEditor key={screen.id} screen={screen} busy={busy} command={command}/>

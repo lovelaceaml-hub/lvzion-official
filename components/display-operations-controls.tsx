@@ -1,10 +1,10 @@
 'use client';
 import {useEffect,useState} from 'react';
-import type {DisplaySlide} from '../lib/continuous-display/live-contract';
-import {churchLocal,churchTimeToUtc,offsetForChurchTime} from '../lib/continuous-display/live-contract';
-import type {DisplayScreenR2,OperatingDay,OperatingHours} from '../lib/continuous-display/operations';
-import {minuteValue,parseOperatingHours,standardOperatingHours,timeValue} from '../lib/continuous-display/operations';
-type Command=(action:string,extra?:Record<string,unknown>)=>Promise<void>;
+import type {ChurchOffset,DisplaySlide} from '../lib/continuous-display/live-contract';
+import {CHURCH_TIME_ZONE,churchLocal,churchTimeToUtc,offsetForChurchTime,slideEligible} from '../lib/continuous-display/live-contract';
+import type {DisplayMotionMode,DisplayScreenR2,OperatingDay,OperatingHours} from '../lib/continuous-display/operations';
+import {minuteValue,parseDisplayMotionMode,parseOperatingHours,standardOperatingHours,timeValue} from '../lib/continuous-display/operations';
+export type Command=(action:string,extra?:Record<string,unknown>)=>Promise<void>;
 const weekdays=['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
 const isoFromWall=(wall:string,current:string)=> {
  const preferred=offsetForChurchTime(current);
@@ -22,7 +22,7 @@ export function SlideEligibilityEditor({slide,overallStartsAt,overallEndsAt,onCh
   if(!Number.isFinite(start)||!Number.isFinite(end)||end<=start){onError('The overall publication window must include a future interval.');return;}
   onChange({startsAt:new Date(start).toISOString(),endsAt:new Date(end).toISOString()});onError('');
  };
- const update=(field:'startsAt'|'endsAt',value:string,offset?:'-07:00'|'-08:00')=>{
+ const update=(field:'startsAt'|'endsAt',value:string,offset?:ChurchOffset)=>{
   if(!value)return;
   try{
    const current=slide[field]||new Date().toISOString();
@@ -40,7 +40,7 @@ export function SlideEligibilityEditor({slide,overallStartsAt,overallEndsAt,onCh
      <input type="datetime-local" value={churchLocal(slide[field]!)} onChange={e=>update(field,e.target.value)}/>
     </label>
     <label className="cd-utc-label">DST offset
-     <select value={offsetForChurchTime(slide[field]!)} onChange={e=>update(field,churchLocal(slide[field]!),e.target.value as '-07:00'|'-08:00')}>
+     <select value={offsetForChurchTime(slide[field]!)} onChange={e=>update(field,churchLocal(slide[field]!),e.target.value as ChurchOffset)}>
       <option value="-07:00">PDT −07</option><option value="-08:00">PST −08</option>
      </select>
     </label>
@@ -87,9 +87,7 @@ export function PublicationControls({screen,busy,command,draftDirty}:{
  const [selected,setSelected]=useState(screen.publishedItems?.[0]?.id??'');
  const [minutes,setMinutes]=useState(5);
  useEffect(()=>{setSelected(screen.publishedItems?.[0]?.id??'');},[screen.id,screen.publishedVersion]);
- const available=(screen.publishedItems??[]).filter(item=>{
-  const now=Date.now();return (!item.startsAt||Date.parse(item.startsAt)<=now)&&(!item.endsAt||now<Date.parse(item.endsAt));
- });
+ const available=(screen.publishedItems??[]).filter(item=>slideEligible(item,Date.now()));
  const canOverride=available.some(x=>x.id===selected)&&!busy&&
   Boolean(screen.publishedUntil&&Date.parse(screen.publishedUntil)>Date.now()+minutes*60000);
  const overrideActive=!!screen.overrideSlideId&&!!screen.overrideUntil&&Date.parse(screen.overrideUntil)>Date.now();
@@ -100,7 +98,7 @@ export function PublicationControls({screen,busy,command,draftDirty}:{
     <strong>{s.title}</strong><span>{s.duration}s · {s.kind}</span></li>)}</ol>:<p className="cd-subtle">No approved content is currently published.</p>}
   <h3>Temporary emphasis</h3>
   <p>Feature an existing approved slide for a short notice. This cannot publish new wording or bypass expiration.</p>
-  {overrideActive&&<p className="cd-operation-alert">Currently featuring: <strong>{screen.publishedItems?.find(s=>s.id===screen.overrideSlideId)?.title||'Approved slide'}</strong> until {new Date(screen.overrideUntil!).toLocaleTimeString('en-US',{timeZone:'America/Los_Angeles'})}.</p>}
+  {overrideActive&&<p className="cd-operation-alert">Currently featuring: <strong>{screen.publishedItems?.find(s=>s.id===screen.overrideSlideId)?.title||'Approved slide'}</strong> until {new Date(screen.overrideUntil!).toLocaleTimeString('en-US',{timeZone:CHURCH_TIME_ZONE})}.</p>}
   <div className="cd-operation-grid">
    <label>Approved slide<select value={selected} disabled={!available.length} onChange={e=>setSelected(e.target.value)}>
     {available.map(s=><option key={s.id} value={s.id}>{s.title}</option>)}
@@ -119,7 +117,7 @@ export function PublicationControls({screen,busy,command,draftDirty}:{
   <h3>Restore a known-good publication</h3>
   <p>Restore previously approved wording using its ORIGINAL dates. An expired version cannot be reactivated.</p>
   <div className="cd-restore-list">{screen.history.map(h=><div key={h.id} className="cd-restore-row">
-   <span>v{h.generation} · {new Date(h.publishedAt).toLocaleDateString('en-US',{timeZone:'America/Los_Angeles'})}</span>
+   <span>v{h.generation} · {new Date(h.publishedAt).toLocaleDateString('en-US',{timeZone:CHURCH_TIME_ZONE})}</span>
    <button className="cd-button cd-light" disabled={busy||h.generation===screen.publishedVersion||Date.parse(h.until)<=Date.now()}
     onClick={()=>{if(window.confirm('Restore this previously approved publication as a NEW version?'))
       void command('restore',{publicationId:h.id,expectedGeneration:screen.publishedVersion});}}>Restore v{h.generation}</button>
@@ -137,5 +135,32 @@ export function NewScreenEditor({busy,command}:{busy:boolean;command:Command}){
   <button className="cd-button cd-light cd-wide" disabled={busy||name.trim().length<3}
     onClick={()=>{void command('createScreen',{label:name.trim()});setName('');}}>
    + Add an unpaired display</button>
+ </section>;
+}
+const motionModes:{id:DisplayMotionMode;label:string;description:string}[]=[
+ {id:'standard',label:'Standard',description:'Balanced cinematic ambience'},
+ {id:'calm',label:'Calm',description:'Slow movement for reading spaces'},
+ {id:'lively',label:'Lively',description:'More active but readable motion'},
+ {id:'still',label:'Still',description:'No animation or transitions'}
+];
+export function DisplayMotionEditor({screen,busy,command}:{screen:DisplayScreenR2;busy:boolean;command:Command}){
+ const current=parseDisplayMotionMode(screen.motionMode);
+ const [selected,setSelected]=useState<DisplayMotionMode>(current);
+ useEffect(()=>setSelected(parseDisplayMotionMode(screen.motionMode)),[screen.id,screen.motionMode,screen.configVersion]);
+ return <section className="cd-operations" aria-labelledby="cd-motion-title">
+  <h3 id="cd-motion-title">Animation and motion</h3>
+  <p>Each TV has its own approved presentation speed. Changing motion never publishes or edits church content. System reduced-motion settings always take priority.</p>
+  <fieldset className="cd-motion-options">
+   <legend>Ambient motion for {screen.label}</legend>
+   {motionModes.map(m=><label key={m.id} className="cd-motion-choice">
+    <input type="radio" name={'motion-'+screen.id} checked={selected===m.id} onChange={()=>setSelected(m.id)} />
+    <span><strong>{m.label}</strong><small>{m.description}</small></span>
+   </label>)}
+  </fieldset>
+  <p className="cd-subtle">Current setting: {motionModes.find(m=>m.id===current)?.label}. A paired player checks settings approximately every 12 seconds.</p>
+  <button type="button" className="cd-button cd-primary cd-wide" disabled={busy||selected===current}
+   onClick={()=>void command('motion',{expectedVersion:screen.configVersion,motionMode:selected})}>
+   Save screen motion
+  </button>
  </section>;
 }
