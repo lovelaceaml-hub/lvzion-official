@@ -24,7 +24,7 @@ export default function Members(){
   window.addEventListener('focus',onFocus);
   return()=>{controller.abort();window.removeEventListener('focus',onFocus);};
  },[]);
- if(!data)return <main className="auth-box"><h1>My Week</h1><p role="status">{error||'Loading your authorized member space…'}</p>
+ if(!data)return <main className="auth-box"><a className="ui-wordmark auth-mark" href="/" aria-label="LV Zion home">LV<span>Zion</span></a><h1>My Week</h1><p role="status">{error||'Loading your authorized member space…'}</p>
   {error&&<p><a href="/sign-in">Sign in</a></p>}</main>;
  if(data.self.status==='intake'&&!data.permissions.organization)return <UnassignedMember data={data}/>;
  return <MemberHome workspace={data} manageHref="/members/manage" experience={experience}

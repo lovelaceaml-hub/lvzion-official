@@ -18,6 +18,20 @@ export function localDay(now:Date=new Date(),timeZone='America/Los_Angeles'):str
  const p=Object.fromEntries(format.formatToParts(now).filter(x=>x.type!=='literal').map(x=>[x.type,x.value]));
  return [p.year,p.month,p.day].join('-');
 }
+/** Church-local 24-hour time ("HH:MM"), independent of the device's own timezone. */
+export function localTime(now:Date=new Date(),timeZone='America/Los_Angeles'):string{
+ const p=Object.fromEntries(new Intl.DateTimeFormat('en-US',{timeZone,hour:'2-digit',minute:'2-digit',hourCycle:'h23'}).formatToParts(now).filter(x=>x.type!=='literal').map(x=>[x.type,x.value]));
+ return p.hour+':'+p.minute;
+}
+/** Home greeting for a church-local "HH:MM" time. */
+export function greeting(time:string):string{
+ const hour=Number(time.slice(0,2));
+ return hour>=4&&hour<12?'Good morning':hour>=12&&hour<17?'Good afternoon':'Good evening';
+}
+/** Position of the "now" mark in a day's activities sorted by start time. */
+export function nowIndex(items:{startTime:string}[],time:string):number{
+ const i=items.findIndex(e=>e.startTime>time);return i<0?items.length:i;
+}
 function dateAtUtcNoon(key:string):Date{
  if(!/^\d{4}-\d{2}-\d{2}$/.test(key))throw new Error('Invalid calendar day');
  const d=new Date(key+'T12:00:00.000Z');

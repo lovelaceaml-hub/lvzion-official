@@ -105,7 +105,7 @@ export default function SignupForm({enabled,local,siteKey}:{enabled:boolean;loca
  }
 
  return <main className="auth-box">
-  <small>LV ZION OFFICIAL</small>
+  <a className="ui-wordmark auth-mark" href="/" aria-label="LV Zion home">LV<span>Zion</span></a>
   {submitted?<section aria-live="polite">
    <h1>Check your email.</h1>
    <p role="status">{message}</p>
