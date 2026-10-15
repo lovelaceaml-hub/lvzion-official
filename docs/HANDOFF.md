@@ -11,6 +11,10 @@
 - [Study Room current status](study-rooms/README.md)
 - [Study Room cutover runbook](study-rooms/CUTOVER-RUNBOOK.md)
 
+## Work Mission interface refinement R6
+
+Anthony asked for a simpler, cleaner module and authorized independent execution. [R6 evidence](morning-prayer/SIMPLER-R6.md) records focused management sections, quieter member screens, native disclosures and simpler material entry. No database, grants, real input data or external distribution changes. This interface release is pending production verification; R5 remains the preceding compatible READY release.
+
 ## Work Mission completion R5
 
 Work Mission completion is released at [the actual module](https://lvz.app/modules/work-mission-prayer); see [R5 completion and Build log](morning-prayer/COMPLETION-R5.md). R4 was already merged/applied; R5 hosted migration `20261015010132` now replaces private functions without creating real dates or grants. Current readback: one active module owner grant, seven capabilities, 15 RLS tables, zero occurrences/publications/meeting references. Concurrent Church Display PR #39 is preserved. Deployment `dpl_8Jj8U36EVYvWaFRtvd2xBQxi8xKs` is READY at `caf5ba80849bbd460e24807e6878ec668611d93e` (merged PR #40), with lvz.app/www.lvz.app aliases verified. The compatible setup guard `20261015010537` is also installed. Verification: 375 app tests, 198 SQL assertions, 87 existing browser cases, six isolated Work Mission client cases, four native concurrency races and 15 live privacy/origin checks. Real hosted owner save, member join and physical-device acceptance remain unverified.

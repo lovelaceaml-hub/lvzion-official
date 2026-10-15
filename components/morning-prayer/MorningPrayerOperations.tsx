@@ -53,10 +53,11 @@ function useOwnerRoster(version:number){
  },[version]);
  return {roster,denied,error};
 }
-export default function MorningPrayerOperations({data,onReload,onNotice}:{data:WMScope;onReload:()=>Promise<void>;onNotice:(message:string)=>void}){
+export default function MorningPrayerOperations({data,area,onOwnerAccess,onReload,onNotice}:{data:WMScope;area?:'schedule'|'materials'|'people';onOwnerAccess?:(allowed:boolean)=>void;onReload:()=>Promise<boolean>;onNotice:(message:string)=>void}){
  const allowed=(cap:WMCapability)=>data.capabilities.includes(cap);
  const manage=allowed('manage_schedule'),canEdit=allowed('edit_materials');
  const {roster,denied,error:rosterError}=useOwnerRoster(data.version);
+ useEffect(()=>{onOwnerAccess?.(!!roster&&!denied);},[roster,denied,onOwnerAccess]);
  const [busy,setBusy]=useState(false);
  const [moveId,setMoveId]=useState(''),[moveDate,setMoveDate]=useState(vegasToday()),[moveStart,setMoveStart]=useState('07:00'),[moveEnd,setMoveEnd]=useState('07:30'),[confirmMove,setConfirmMove]=useState(false);
  const [from,setFrom]=useState(vegasToday()),[until,setUntil]=useState(vegasToday());
@@ -71,6 +72,7 @@ export default function MorningPrayerOperations({data,onReload,onNotice}:{data:W
  const [meetingOccurrence,setMeetingOccurrence]=useState(''),[meetingUrl,setMeetingUrl]=useState(''),[sourceVerified,setSourceVerified]=useState(false);
  const [revisionKey,setRevisionKey]=useState(''),[revisionTitle,setRevisionTitle]=useState(''),[revisionSummary,setRevisionSummary]=useState(''),
  [revisionItems,setRevisionItems]=useState(''),[revisionSource,setRevisionSource]=useState(''),[revisionChecked,setRevisionChecked]=useState(false);
+ const accessLevel=grantCaps.length?(Object.keys(presets).find(level=>presets[level].length===grantCaps.length&&presets[level].every(cap=>grantCaps.includes(cap)))||'Custom'):'';
  const selected=roster?.members.find(x=>x.id===chosenMember);
  const availableMembers=(roster?.members||[]).filter(x=>x.id!==roster?.ownerId);
  const listed=availableMembers.filter(m=>m.name.toLocaleLowerCase().includes(memberSearch.toLocaleLowerCase())||
@@ -81,9 +83,9 @@ export default function MorningPrayerOperations({data,onReload,onNotice}:{data:W
  useEffect(()=>{setWindowMinutes(String(data.joinWindowMinutes??10));},[data.joinWindowMinutes]);
  useEffect(()=>{if(!roster)return;const pick=roster.members.find(x=>x.id===chosenMember&&x.id!==roster.ownerId);if(pick)setGrantCaps(pick.capabilities);},[roster,chosenMember]);
  async function save(path:string,payload:unknown,success:string){
-  if(busy)return;setBusy(true);
-  try{await post(path,payload);onNotice(success);await onReload();}
-  catch(e){onNotice(e instanceof Error?e.message:'Unable to save your changes.');await onReload().catch(()=>{});}
+  if(busy)return false;setBusy(true);
+  try{await post(path,payload);const refreshed=await onReload();onNotice(refreshed?success:'Change accepted. Refresh to confirm the result.');return refreshed;}
+  catch(e){onNotice(e instanceof Error?e.message:'Unable to save your changes.');await onReload().catch(()=>{});return false;}
   finally{setBusy(false);}
  }
  const withVersion=(action:Record<string,unknown>)=>({key:makeKey(),expectedVersion:data.version,action});
@@ -98,8 +100,8 @@ export default function MorningPrayerOperations({data,onReload,onNotice}:{data:W
  };
  const roleLabel=(m:WMMember)=>m.status==='active'?(m.moduleAccess?'Has module access':'Not assigned'):'Not eligible for new access';
  return <div className={css.root}>
-  {manage&&<section className={css.panel} data-testid="wm-bulk-schedule">
-   <div className={css.heading}><div><h2>Build a recurring schedule</h2><p>Select the actual dates. Nothing repeats automatically or goes live without review.</p></div></div>
+  {area==='schedule'&&manage&&<details className={css.panel} data-testid="wm-bulk-schedule">
+   <summary>Add several dates</summary><div className={css.content}><p>Choose a date range and weekdays, then review the dates.</p>
    <div className={css.gridTwo}><label>First date<input type="date" value={from} min={vegasToday()} onChange={e=>{setFrom(e.target.value);setPlanned([]);}}/></label>
     <label>Last date<input type="date" value={until} min={from} onChange={e=>{setUntil(e.target.value);setPlanned([]);}}/></label></div>
    <p className={css.help}>Select the weekdays that are really scheduled (up to 180 days ahead).</p>
@@ -115,12 +117,12 @@ export default function MorningPrayerOperations({data,onReload,onNotice}:{data:W
     <div className={css.datePreview}>{planned.map(x=><span key={x.date}>{dateText(x.date)}</span>)}</div>
     <p>New dates will be saved as <strong>Unverified</strong>. Existing dates are never overwritten; any conflict rejects the entire batch.</p>
     <label className={css.check}><input type="checkbox" checked={acknowledged} onChange={e=>setAcknowledged(e.target.checked)}/>I verified this selected range against the official schedule.</label>
-    <button className={css.primary} disabled={!acknowledged||busy} onClick={()=>void save('/api/morning-prayer/batch',{expectedVersion:data.version,key:makeKey(),occurrences:planned},'Dates saved. Review each date before enabling participation.').then(()=>{setPlanned([]);setAcknowledged(false);})}>Save {planned.length} dates</button>
+    <button className={css.primary} disabled={!acknowledged||busy} onClick={()=>void save('/api/morning-prayer/batch',{expectedVersion:data.version,key:makeKey(),occurrences:planned},'Dates saved. Review each date before enabling participation.').then(saved=>{if(saved){setPlanned([]);setAcknowledged(false);}})}>Save {planned.length} dates</button>
    </div>}
-  </section>}
-  {manage&&<section className={css.panel} data-testid="wm-reschedule">
-   <h2>Reschedule an existing gathering</h2>
-   <p>Changes retain the same occurrence and assignment history but invalidate Zoom access, host confirmation, and pending volunteer requests until reviewed.</p>
+  </div></details>}
+  {area==='schedule'&&manage&&<details className={css.panel} data-testid="wm-reschedule">
+   <summary>Change a gathering time</summary><div className={css.content}>
+   <p>Confirm the new time afterward. The host and meeting link will need to be checked again.</p>
    <label>Scheduled occurrence<select value={moveId} onChange={e=>{setMoveId(e.target.value);setConfirmMove(false);}}>
     <option value="">Select a future occurrence</option>{future.map(o=><option key={o.id} value={o.id}>{dateText(o.date)} · {o.host}</option>)}
    </select></label>
@@ -133,13 +135,13 @@ export default function MorningPrayerOperations({data,onReload,onNotice}:{data:W
      const startIso=vegasInstant(moveDate,moveStart),endIso=vegasInstant(moveDate,moveEnd);
      if(Date.parse(endIso)<=Date.parse(startIso))throw new Error('The end time must follow the start time.');
      void save('/api/morning-prayer/command',withVersion({type:'schedule',mode:'move',occurrenceId:moveId,startsAt:startIso,endsAt:endIso}),
-      'Gathering rescheduled. Verify its date/time again, then re-confirm the host and Zoom link.').then(()=>setConfirmMove(false));
+      'Gathering rescheduled. Verify its date/time again, then re-confirm the host and Zoom link.').then(saved=>{if(saved)setConfirmMove(false);});
     }catch(e){onNotice(e instanceof Error?e.message:'Choose a valid time.');}
    }}>Save rescheduled date</button>
-  </section>}
-  {manage&&<section className={css.panel} data-testid="wm-meeting-access">
-   <h2>Private Zoom access</h2>
-   <p>Meeting links are stored encrypted in Supabase Vault and are never part of the schedule or member directory. Only permitted members can open them during the verified gathering window.</p>
+  </div></details>}
+  {area==='schedule'&&manage&&<details className={css.panel} data-testid="wm-meeting-access">
+   <summary>Meeting link</summary><div className={css.content}>
+   <p>Choose a confirmed gathering and add its Zoom link. Only people with joining access can open it.</p>
    <label>Join window (0 to 30 minutes before start)<input type="number" min="0" max="30" step="1" value={windowMinutes} onChange={e=>setWindowMinutes(e.target.value)}/></label>
    <button className={css.secondary} disabled={busy||!Number.isInteger(Number(windowMinutes))||Number(windowMinutes)<0||Number(windowMinutes)>30} onClick={()=>void save('/api/morning-prayer/meeting',withVersion({type:'set_window',windowMinutes:Number(windowMinutes)}),'Joining window saved.')}>Save joining window</button>
    <label>Verified upcoming gathering<select value={meetingOccurrence} onChange={e=>{setMeetingOccurrence(e.target.value);setMeetingUrl('');setSourceVerified(false);}}>
@@ -149,15 +151,15 @@ export default function MorningPrayerOperations({data,onReload,onNotice}:{data:W
    <label>Official Zoom join link<input type="password" value={meetingUrl} autoComplete="off" spellCheck={false} placeholder="https://us06web.zoom.us/j/..." onChange={e=>{setMeetingUrl(e.target.value);setSourceVerified(false);}}/></label>
    <label className={css.check}><input type="checkbox" checked={sourceVerified} onChange={e=>setSourceVerified(e.target.checked)}/>I verified this link and the exact occurrence against an authorized source.</label>
    <div className={css.actions}>
-    <button className={css.primary} disabled={busy||!meetingOccurrence||!sourceVerified||!meetingUrl||data.joinWindowMinutes===null||data.joinWindowMinutes===undefined||!future.find(o=>o.id===meetingOccurrence)?.verified} onClick={()=>void save('/api/morning-prayer/meeting',withVersion({type:'configure_meeting',occurrenceId:meetingOccurrence,url:meetingUrl}),'Encrypted link saved for this occurrence.').then(()=>{setMeetingUrl('');setSourceVerified(false);})}>Save verified Zoom link</button>
+    <button className={css.primary} disabled={busy||!meetingOccurrence||!sourceVerified||!meetingUrl||data.joinWindowMinutes===null||data.joinWindowMinutes===undefined||!future.find(o=>o.id===meetingOccurrence)?.verified} onClick={()=>void save('/api/morning-prayer/meeting',withVersion({type:'configure_meeting',occurrenceId:meetingOccurrence,url:meetingUrl}),'Encrypted link saved for this occurrence.').then(saved=>{if(saved){setMeetingUrl('');setSourceVerified(false);}})}>Save verified Zoom link</button>
     <button className={css.secondary} disabled={busy||!meetingOccurrence} onClick={()=>{if(window.confirm('Revoke joining access for this occurrence?'))void save('/api/morning-prayer/meeting',withVersion({type:'revoke_meeting',occurrenceId:meetingOccurrence}),'Joining access revoked.');}}>Revoke access</button>
    </div>
-  </section>}
-  {canEdit&&<section className={css.panel} data-testid="wm-revision-editor">
-   <h2>Revise a draft or published material</h2>
-   <p>Existing PWP and readings keep their current published version until the new source-checked revision is explicitly published.</p>
+  </div></details>}
+  {area==='materials'&&canEdit&&<details className={css.panel} data-testid="wm-revision-editor">
+   <summary>Edit a reading or PWP</summary><div className={css.content}>
+   <p>Save a new draft. The current published version stays in place until the replacement is reviewed.</p>
    <label>Material to revise<select value={revisionKey} onChange={e=>{const m=catalog.find(x=>x.key===e.target.value);if(m)inputMaterial(m);else setRevisionKey('');}}>
-    <option value="">Choose a draft, reading or PWP</option>{catalog.map(m=><option key={m.key} value={m.key}>{m.body.title} · r{m.revision}</option>)}</select></label>
+    <option value="">Choose a draft, reading or PWP</option>{catalog.map(m=><option key={m.key} value={m.key}>{m.body.title}</option>)}</select></label>
    {current&&<>
     <label>Title<input value={revisionTitle} maxLength={100} onChange={e=>{setRevisionTitle(e.target.value);setRevisionChecked(false);}}/></label>
     <label>Source-supported summary<textarea value={revisionSummary} maxLength={400} rows={3} onChange={e=>{setRevisionSummary(e.target.value);setRevisionChecked(false);}}/></label>
@@ -166,29 +168,29 @@ export default function MorningPrayerOperations({data,onReload,onNotice}:{data:W
     <label className={css.check}><input type="checkbox" checked={revisionChecked} onChange={e=>setRevisionChecked(e.target.checked)}/>I checked this revision against the approved source.</label>
     <button className={css.primary} disabled={busy} onClick={()=>void save('/api/morning-prayer/command',withVersion({type:'material_draft',key:current.key,sourceChecked:revisionChecked,body:{title:revisionTitle,summary:revisionSummary,items:revisionItems.split('\n').map(x=>x.trim()).filter(Boolean),sourceLabel:revisionSource}}),'A reviewable material correction was created; the old version remains published.')}>Create reviewable correction</button>
    </>}
-  </section>}
-  {!denied&&<section className={css.panel} data-testid="wm-member-access">
-   <h2>Member access and hosting eligibility</h2>
-   <p>Each person requires an explicit Morning Prayer grant. A leadership or department title alone does not grant access.</p>
+  </div></details>}
+  {area==='people'&&!denied&&<section className={css.panel} data-testid="wm-member-access">
+   <h2>People</h2>
+   <p>Choose who can use Morning Prayer and who can host.</p>
    {rosterError&&<p role="status">{rosterError}</p>}
    {!roster&&!rosterError&&<p>Checking whether your account can manage member access…</p>}
    {roster&&<>
-    <p className={css.help}>Only the confirmed LV Zion owner may grant or revoke access. The owner’s own permissions cannot be modified here.</p>
+    <p className={css.help}>Only the app owner can change access.</p>
     <label>Find a member<input value={memberSearch} placeholder="Name or assigned group" onChange={e=>setMemberSearch(e.target.value)}/></label>
     <label>Member<select value={chosenMember} onChange={e=>{setChosenMember(e.target.value);const m=roster.members.find(x=>x.id===e.target.value);setGrantCaps(m?.capabilities||[]);}}>
      <option value="">Choose an eligible member</option>{listed.map(m=><option key={m.id} value={m.id}>{m.name} · {m.status==='active'?m.placement:'Not active'}</option>)}</select></label>
-    {availableMembers.length===0&&<p className={css.empty}>No other members are active yet. Once members complete enrollment and their placements are verified, they can be granted access here.</p>}
+    {availableMembers.length===0&&<p className={css.empty}>No members to manage yet. Members appear after their enrollment is confirmed.</p>}
     {selected&&<div className={css.accessEditor}>
      <strong>{selected.name}</strong><p>{selected.placement} · {roleLabel(selected)}</p>
-     <label>Quick permission set<select value="" onChange={e=>setGrantCaps(presets[e.target.value]||[])}>
-      <option value="">Choose a preset</option>{Object.keys(presets).map(p=><option key={p} value={p}>{p}</option>)}</select></label>
-     <fieldset className={css.permissions}><legend>Individual capabilities</legend>{caps.map(c=><label key={c}><input type="checkbox" checked={grantCaps.includes(c)} onChange={e=>setGrantCaps(v=>e.target.checked?[...v,c]:v.filter(x=>x!==c))}/><span><strong>{c.replaceAll('_',' ')}</strong><small>{descriptions[c]}</small></span></label>)}</fieldset>
-     <button className={css.primary} disabled={busy||selected.status!=='active'||!selected.enabled||!grantCaps.includes('view_schedule')} onClick={()=>void save('/api/morning-prayer/access',withVersion({type:'grant',memberId:selected.id,capabilities:grantCaps}),'Saved explicit member permissions.')} >Save member capabilities</button>
+     <label>Access level<select value={accessLevel} onChange={e=>setGrantCaps(presets[e.target.value]||[])}>
+      <option value="">Choose an access level</option><option value="Custom" disabled>Custom access</option>{Object.keys(presets).map(p=><option key={p} value={p}>{p}</option>)}</select></label>
+     <details className={css.custom}><summary>Customize access</summary><fieldset className={css.permissions}><legend>Individual capabilities</legend>{caps.map(c=><label key={c}><input type="checkbox" checked={grantCaps.includes(c)} onChange={e=>setGrantCaps(v=>e.target.checked?[...v,c]:v.filter(x=>x!==c))}/><span><strong>{({view_schedule:'View schedule',join_gathering:'Join meetings',view_materials:'Read materials',volunteer_host:'Volunteer to host',review_requests:'Review host requests',manage_schedule:'Manage schedule',edit_materials:'Edit materials',publish_materials:'Publish materials'} as Record<WMCapability,string>)[c]}</strong><small>{descriptions[c]}</small></span></label>)}</fieldset></details>
+     <button className={css.primary} disabled={busy||selected.status!=='active'||!selected.enabled||!grantCaps.includes('view_schedule')} onClick={()=>void save('/api/morning-prayer/access',withVersion({type:'grant',memberId:selected.id,capabilities:grantCaps}),'Saved explicit member permissions.')} >Save access</button>
      <div className={css.actions}><button className={css.secondary} disabled={busy||!selected.capabilities.includes('volunteer_host')||selected.hostEligible} onClick={()=>void save('/api/morning-prayer/access',withVersion({type:'eligibility',memberId:selected.id,enabled:true}),'Host eligibility enabled.')}>Allow hosting</button>
       <button className={css.secondary} disabled={busy||!selected.hostEligible} onClick={()=>void save('/api/morning-prayer/access',withVersion({type:'eligibility',memberId:selected.id,enabled:false}),'Host eligibility ended.')}>Pause hosting</button>
       <button className={css.danger} disabled={busy||!selected.moduleAccess} onClick={()=>{if(window.confirm('Revoke all Morning Prayer permissions for '+selected.name+'? Existing assignment history remains.'))void save('/api/morning-prayer/access',withVersion({type:'revoke',memberId:selected.id}),'Morning Prayer access revoked.');}}>Revoke access</button>
      </div>
-     <p className={css.help}>Revoking a host does not silently reassign their existing dates. Coordinators should review those assignments.</p>
+     <p className={css.help}>Removing access keeps past records. Review any future hosting assignments separately.</p>
     </div>}
    </>}
   </section>}

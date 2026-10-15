@@ -5,7 +5,7 @@ import styles from './volunteer.module.css';
 export default function MorningPrayerVolunteer({
  month,rows,today,selected,onSelect,canVolunteer,busy,onSubmit
 }:{month:string;rows:WMOcc[];today:string;selected:string|null;onSelect:(id:string)=>void;
- canVolunteer:boolean;busy:boolean;onSubmit:(ids:string[])=>Promise<void>}){
+ canVolunteer:boolean;busy:boolean;onSubmit:(ids:string[])=>Promise<boolean>}){
  const [marked,setMarked]=useState<string[]>([]);
  useEffect(()=>setMarked([]),[month,rows.length]);
  const lookup=new Map(rows.map(o=>[o.date,o]));
@@ -43,7 +43,7 @@ export default function MorningPrayerVolunteer({
      <input type="checkbox" checked={marked.includes(o.id)} onChange={()=>toggle(o.id)}/>
      <span>{new Intl.DateTimeFormat('en-US',{weekday:'short',month:'short',day:'numeric',timeZone:'UTC'}).format(new Date(o.date+'T12:00:00Z'))}</span>
     </label>)}</div>
-    <button disabled={busy||!marked.length} onClick={()=>{if(window.confirm('Submit '+marked.length+' hosting request(s) for review?'))void onSubmit(marked).then(()=>setMarked([]));}}>
+    <button disabled={busy||!marked.length} onClick={()=>{if(window.confirm('Submit '+marked.length+' hosting request(s) for review?'))void onSubmit(marked).then(saved=>{if(saved)setMarked([]);});}}>
      Submit {marked.length||''} hosting request{marked.length===1?'':'s'}
     </button>
    </>}
