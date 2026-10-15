@@ -1,7 +1,7 @@
 import {test,expect,type Page} from '@playwright/test';
 import {demoSchedule,vegasDay} from '../../lib/study-rooms/domain';
 import {openStudyRoute} from './study-route-fixture';
-/** Day Sheet layout checks on synthetic data. Set LVZ_SCREENSHOT_DIR to also save review screenshots. */
+/** Compact booking layout checks on synthetic data. Set LVZ_SCREENSHOT_DIR for review screenshots. */
 const shots=process.env.LVZ_SCREENSHOT_DIR;
 async function capture(page:Page,name:string){if(shots)await page.screenshot({path:`${shots}/${name}.png`,fullPage:true});}
 async function checkLayout(page:Page){
@@ -49,4 +49,38 @@ test('header wordmark goes home and tab content swipes',async({page})=>{
  await panel.dispatchEvent('touchstart',{touches:[{identifier:1,clientX:300,clientY:y}],changedTouches:[{identifier:1,clientX:300,clientY:y}]});
  await panel.dispatchEvent('touchend',{touches:[],changedTouches:[{identifier:1,clientX:150,clientY:y+5}]});
  await expect(page.getByRole('button',{name:'My Reservations',exact:true})).toHaveAttribute('aria-current','page');
+});
+
+test('selecting an open 30-minute cell prepares a reservation without saving it',async({page})=>{
+ await page.setViewportSize({width:390,height:780});
+ await openStudyRoute(page);
+ await page.getByRole('button',{name:'Room 2, 11:00 AM, available'}).click();
+ const summary=page.locator('.sr-selection-bar');
+ await expect(summary).toContainText('Room 2');
+ await expect(page.getByRole('button',{name:'Room 2, 11:00 AM, available'})).toHaveAttribute('aria-pressed','true');
+ await summary.getByRole('button',{name:'Reserve'}).click();
+ const dialog=page.getByRole('dialog',{name:'Reserve a resource'});
+ await expect(dialog).toBeVisible();
+ await expect(dialog.getByLabel('Start',{exact:true})).toHaveValue('660');
+ await expect(dialog.getByLabel('End',{exact:true})).toHaveValue('690');
+ await page.keyboard.press('Escape');
+ await expect(dialog).not.toBeVisible();
+});
+test('center Apps button opens only authorized modules without leaving Study Rooms',async({page})=>{
+ await page.setViewportSize({width:390,height:780});
+ await page.route('**/api/members/experience',route=>route.fulfill({json:{
+  modules:[{id:'92000000-0000-4000-8000-000000000001',name:'Study Room Reservation',shortName:'SR',description:'Only assigned modules',accent:'#1f5c4d',status:'approved',route:'/modules/study-rooms',canManage:false}],
+  activities:[],notifications:[],favorites:[],favoriteVersion:0
+ }}));
+ await openStudyRoute(page);
+ const nav=page.getByRole('navigation',{name:'Study Room bottom navigation'});
+ await expect(nav.locator(':scope > *').nth(2)).toHaveAttribute('aria-label','Open apps');
+ await nav.getByRole('button',{name:'Open apps'}).click();
+ const dialog=page.getByRole('dialog',{name:'Apps'});
+ await expect(dialog).toBeVisible();
+ await expect(dialog.getByRole('link',{name:'Study Room Reservation'})).toHaveAttribute('href','/modules/study-rooms');
+ await expect(page).toHaveURL(/\\/modules\\/study-rooms$/);
+ await dialog.getByRole('button',{name:'Close apps'}).click();
+ await expect(dialog).not.toBeVisible();
+ await checkLayout(page);
 });
