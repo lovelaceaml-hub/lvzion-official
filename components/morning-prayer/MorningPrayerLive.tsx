@@ -28,6 +28,7 @@ async function json<T>(url:string,options?:RequestInit):Promise<T>{
 export default function MorningPrayerLive(){
  const readSequence=useRef(0),readController=useRef<AbortController|null>(null);
  const [tab,setTab]=useState<Tab>('home'),[month,setMonth]=useState(()=>localDay().slice(0,7));
+ const [monthDraft,setMonthDraft]=useState(()=>localDay().slice(0,7));
  const [data,setData]=useState<Workspace|null>(null),[error,setError]=useState(''),[message,setMessage]=useState(''),[busy,setBusy]=useState(false),[focus,setFocus]=useState<string|null>(null);
  const [date,setDate]=useState(()=>localDay()),[start,setStart]=useState('07:00'),[end,setEnd]=useState('07:30'),[kind,setKind]=useState<'gathering'|'app_day'|'cancelled'>('gathering');
  const [manageArea,setManageArea]=useState<ManageArea>('schedule'),[ownerAccess,setOwnerAccess]=useState(false);
@@ -35,12 +36,13 @@ export default function MorningPrayerLive(){
  const [materialKind,setMaterialKind]=useState<'pwp'|'reading'>('pwp'),[readingDraftKey,setReadingDraftKey]=useState(''),[title,setTitle]=useState(''),[summary,setSummary]=useState(''),[items,setItems]=useState(''),[sourceLabel,setSourceLabel]=useState(''),[sourceChecked,setSourceChecked]=useState(false);
  const [hostSelection,setHostSelection]=useState(''),[readingSelection,setReadingSelection]=useState(''),[myWeek,setMyWeek]=useState(1);
  const cap=(key:Capability)=>!!data?.capabilities?.includes(key);
+ useEffect(()=>{setMonthDraft(month);},[month]);
  const loader=useCallback(async()=>{
   const sequence=++readSequence.current;
   readController.current?.abort();
   const controller=new AbortController();readController.current=controller;
-  const first=month+'-01',last=new Date(Date.UTC(+month.slice(0,4),+month.slice(5,7),0)).toISOString().slice(0,10);
   try{
+   const first=month+'-01',last=new Date(Date.UTC(+month.slice(0,4),+month.slice(5,7),0)).toISOString().slice(0,10);
    const result=await json<Workspace>('/api/morning-prayer?from='+first+'&to='+last,{signal:controller.signal});
    if(sequence!==readSequence.current||controller.signal.aborted)return false;
    setData(result);setError('');return true;
@@ -140,7 +142,7 @@ export default function MorningPrayerLive(){
     </>}
     {tab==='manage'&&<>
       {!canManage?<section className={styles.empty}><h2>No management permission</h2><p>Management is assigned independently of group and department positions.</p></section>:<>
-      <div className={styles.sectionHeading}><h2>Manage</h2></div><nav className={styles.manageTabs} aria-label="Manage sections">{manageAreas.map(area=><button key={area} aria-pressed={activeManageArea===area} onClick={()=>setManageArea(area)}>{area==='schedule'?'Schedule':area==='materials'?'Materials':'People'}</button>)}</nav>{activeManageArea==='schedule'&&<label className={styles.monthFilter}>Month<input type="month" value={month} onChange={e=>{if(e.target.value){setMonth(e.target.value);setDate(e.target.value===localDay().slice(0,7)?localDay():e.target.value+'-01');}}}/></label>}
+      <div className={styles.sectionHeading}><h2>Manage</h2></div><nav className={styles.manageTabs} aria-label="Manage sections">{manageAreas.map(area=><button key={area} aria-pressed={activeManageArea===area} onClick={()=>setManageArea(area)}>{area==='schedule'?'Schedule':area==='materials'?'Materials':'People'}</button>)}</nav>{activeManageArea==='schedule'&&<label className={styles.monthFilter}>Month<input type="month" value={monthDraft} placeholder="YYYY-MM" pattern="[0-9]{4}-(0[1-9]|1[0-2])" onChange={e=>{const value=e.target.value;setMonthDraft(value);if(/^[0-9]{4}-(0[1-9]|1[0-2])$/.test(value)){setMonth(value);setDate(value===localDay().slice(0,7)?localDay():value+'-01');}}}/></label>}
       {activeManageArea==='schedule'&&cap('manage_schedule')&&<details className={styles.editor}><summary>Add a gathering</summary><div className={styles.editorBody}><p className={styles.muted}>Enter the date and Las Vegas time. Confirm it after saving.</p>
        <label>Date<input className={styles.input} type="date" value={date} onChange={e=>setDate(e.target.value)}/></label>
        <div className={styles.two}><label>Start (Las Vegas)<input className={styles.input} type="time" value={start} onChange={e=>setStart(e.target.value)}/></label><label>End (Las Vegas)<input className={styles.input} type="time" value={end} onChange={e=>setEnd(e.target.value)}/></label></div>
@@ -154,7 +156,7 @@ export default function MorningPrayerLive(){
       {activeManageArea==='schedule'&&cap('review_requests')&&requests.some(r=>r.status==='pending')&&<section className={styles.card}><h2>Hosting requests</h2>{requests.filter(r=>r.status==='pending').length?requests.filter(r=>r.status==='pending').map(r=><div key={r.id} className={styles.requestRow}><strong>{r.requester} · {r.kind==='volunteer'?'Volunteer':'Change'}</strong><p>{pretty(r.date||rows.find(o=>o.id===r.occurrenceId)?.date||today)}{r.note?' · Private note: '+r.note:''}</p><div className={styles.actions}><button disabled={busy} onClick={()=>void post({type:'review',requestId:r.id,decision:'approve'})}>Approve</button><button disabled={busy} onClick={()=>void post({type:'review',requestId:r.id,decision:'decline'})}>Decline</button></div></div>):<p className={styles.muted}>No pending requests.</p>}</section>}
       {activeManageArea==='materials'&&cap('edit_materials')&&<details className={styles.editor}><summary>New reading or PWP</summary><form className={styles.editorBody} action="/api/morning-prayer/setup" method="post" onSubmit={event=>{event.preventDefault();const key=materialKind==='pwp'?'pwp-'+materialMonth+'-week-'+materialWeek:readingDraftKey||'reading-'+crypto.randomUUID();if(materialKind==='reading')setReadingDraftKey(key);void post({type:'create_material',key,kind:materialKind,body:{title,summary,items:items.split('\n').map(s=>s.trim()).filter(Boolean),sourceLabel},sourceChecked},true).then(saved=>{if(saved){setReadingDraftKey('');setTitle('');setSummary('');setItems('');setSourceLabel('');setSourceChecked(false);}});}}><p className={styles.muted}>Prepare the wording from an approved source. Publishing is a separate step.</p>
        <label>Type<select value={materialKind} onChange={e=>{setMaterialKind(e.target.value as typeof materialKind);setSourceChecked(false);}}><option value="pwp">PWP</option><option value="reading">Daily reading</option></select></label>
-       {materialKind==='pwp'&&<div className={styles.two}><label>PWP month<input className={styles.input} type="month" required name="month" value={materialMonth} onChange={e=>{setMaterialMonth(e.target.value);setSourceChecked(false);}}/></label><label>Week<select value={materialWeek} onChange={e=>{setMaterialWeek(Number(e.target.value));setSourceChecked(false);}}>{[1,2,3,4,5].map(n=><option key={n} value={n}>Week {n}</option>)}</select></label></div>}
+       {materialKind==='pwp'&&<div className={styles.two}><label>PWP month<input className={styles.input} type="month" required name="month" placeholder="YYYY-MM" pattern="[0-9]{4}-(0[1-9]|1[0-2])" value={materialMonth} onChange={e=>{setMaterialMonth(e.target.value);setSourceChecked(false);}}/></label><label>Week<select value={materialWeek} onChange={e=>{setMaterialWeek(Number(e.target.value));setSourceChecked(false);}}>{[1,2,3,4,5].map(n=><option key={n} value={n}>Week {n}</option>)}</select></label></div>}
        <label>Title<input className={styles.input} required name="title" maxLength={100} value={title} onChange={e=>{setTitle(e.target.value);setSourceChecked(false);}}/></label>
        <label>Summary<textarea className={styles.input} required name="summary" maxLength={400} rows={3} value={summary} onChange={e=>{setSummary(e.target.value);setSourceChecked(false);}}/></label>
        <label>Activities or points (one per line, up to five)<textarea className={styles.input} required name="items" rows={4} value={items} onChange={e=>{setItems(e.target.value);setSourceChecked(false);}}/></label>
