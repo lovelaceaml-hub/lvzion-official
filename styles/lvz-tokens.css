@@ -1,0 +1,87 @@
+/*
+ * LV Zion design tokens: Day Sheet direction, selected by Anthony on 2026-10-14.
+ * Contract: docs/design/LVZ-DESIGN-CONTRACT.md. Every screen and module reads its
+ * colors, type, spacing, radius and motion from these variables. Do not add
+ * module-specific palettes; add a token here (shared-core owner) if one is missing.
+ * Light only for now; color-scheme stays light until a dark set is approved.
+ */
+:root{
+ color-scheme:light;
+
+ /* Color: grey-green paper, white surfaces, one spruce green for actions. */
+ --lvz-ground:#f2f4f1;
+ --lvz-surface:#ffffff;
+ --lvz-sunken:#e8ede9;
+ --lvz-ink:#132e28;
+ --lvz-ink-quiet:#5a6d67;
+ --lvz-ink-faint:#869690;
+ --lvz-line:#dce3df;
+ --lvz-line-input:#869690;
+ --lvz-accent:#1f5c4d;
+ --lvz-accent-strong:#174a3e;
+ --lvz-accent-soft:#e2ede8;
+ --lvz-on-accent:#ffffff;
+ --lvz-focus:#1f5c4d;
+ --lvz-alert:#b4532a;
+ --lvz-danger:#a3361f;
+ --lvz-danger-soft:#f8e7e2;
+ --lvz-warning:#7a5200;
+ --lvz-warning-soft:#f8efd9;
+ --lvz-success:#1f6b3f;
+ --lvz-success-soft:#e3f1e7;
+
+ /* Type: the phone's own system text, a quiet serif only for page titles and the greeting. */
+ --lvz-font-sans:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
+ --lvz-font-serif:ui-serif,"New York",Georgia,"Times New Roman",serif;
+ --lvz-text-xs:12px;
+ --lvz-text-sm:14px;
+ --lvz-text-md:16px;
+ --lvz-text-lg:18px;
+ --lvz-text-xl:22px;
+ --lvz-text-2xl:30px;
+ --lvz-text-3xl:40px;
+ --lvz-leading-body:1.5;
+ --lvz-leading-tight:1.15;
+ --lvz-weight-regular:400;
+ --lvz-weight-strong:600;
+ --lvz-weight-bold:700;
+
+ /* Spacing: 4px steps. Gutters are the page side padding. */
+ --lvz-space-1:4px;
+ --lvz-space-2:8px;
+ --lvz-space-3:12px;
+ --lvz-space-4:16px;
+ --lvz-space-5:20px;
+ --lvz-space-6:24px;
+ --lvz-space-8:32px;
+ --lvz-space-10:40px;
+ --lvz-space-12:48px;
+ --lvz-gutter:20px;
+ --lvz-gutter-wide:48px;
+
+ /* Shape */
+ --lvz-radius-sm:8px;
+ --lvz-radius-md:12px;
+ --lvz-radius-lg:16px;
+ --lvz-radius-round:999px;
+ --lvz-shadow-sheet:0 -8px 24px rgb(19 46 40 / 12%);
+ --lvz-shadow-pop:0 6px 18px rgb(19 46 40 / 14%);
+
+ /* Size */
+ --lvz-tap:44px;
+ --lvz-header-height:56px;
+ --lvz-reading-max:640px;
+ --lvz-content-max:1120px;
+
+ /* Motion: short, explains change only. Reduced motion sets every duration to zero. */
+ --lvz-ease:cubic-bezier(.2,.7,.2,1);
+ --lvz-duration-fast:120ms;
+ --lvz-duration:200ms;
+ --lvz-duration-slow:320ms;
+}
+@media (prefers-reduced-motion:reduce){
+ :root{--lvz-duration-fast:0ms;--lvz-duration:0ms;--lvz-duration-slow:0ms}
+}
+@media (min-width:900px){
+ :root{--lvz-gutter:var(--lvz-gutter-wide)}
+}
