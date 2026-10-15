@@ -18,6 +18,8 @@ export type ManageArea='schedule'|'materials'|'people';
 export const dayLabel=(date:string)=>new Intl.DateTimeFormat('en-US',{weekday:'short',month:'short',day:'numeric',timeZone:'UTC'}).format(new Date(date+'T12:00:00Z'));
 /** Las Vegas clock time for an instant, e.g. "7:00 AM". */
 export const clockTime=(iso:string)=>new Intl.DateTimeFormat('en-US',{timeZone:ZONE,hour:'numeric',minute:'2-digit'}).format(new Date(iso));
+/** Clock time split for the day line, e.g. ["7:00","AM"]. */
+export const clockParts=(iso:string)=>{const [time,...rest]=clockTime(iso).split(/\s/);return [time,rest.join(' ')] as const;};
 export const monthLabel=(month:string)=>new Intl.DateTimeFormat('en-US',{month:'long',year:'numeric',timeZone:'UTC'}).format(new Date(month+'-01T12:00:00Z'));
 export const shiftMonth=(month:string,delta:number)=>{const [y,m]=month.split('-').map(Number);return new Date(Date.UTC(y,m-1+delta,1)).toISOString().slice(0,7);};
 export const MONTH_PATTERN=/^[0-9]{4}-(0[1-9]|1[0-2])$/;

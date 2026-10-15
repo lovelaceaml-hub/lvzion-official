@@ -33,9 +33,7 @@ export default function ManageTab(props:Screen&{
  onReload:()=>Promise<boolean>;onNotice:(message:string)=>void;
 }){
  const {data,rows,today,published,busy,cap,post,canManage,ownerAccess,gathering:g,material:m}=props;
- if(!canManage)return <section className={styles.empty}>
-  <h2>No management permission</h2><p>Management is assigned independently of group and department positions.</p>
- </section>;
+ if(!canManage)return <p className="ui-empty"><strong>You do not manage Morning Prayer</strong>The app owner assigns management separately from group and department roles.</p>;
  const areas:ManageArea[]=[
   ...(cap('manage_schedule')||cap('review_requests')?['schedule' as const]:[]),
   ...(cap('edit_materials')||cap('publish_materials')?['materials' as const]:[]),
@@ -54,98 +52,107 @@ export default function ManageTab(props:Screen&{
   void post({type:'create_material',key,kind:m.kind,body:{title:m.title,summary:m.summary,items:lines(m.items),sourceLabel:m.sourceLabel},sourceChecked:m.sourceChecked},true)
    .then(saved=>{if(saved)m.clear();});
  }
- return <>
-  <div className={styles.sectionHeading}><h2>Manage</h2></div>
-  <nav className={styles.manageTabs} aria-label="Manage sections">{areas.map(x=>
-   <button key={x} aria-pressed={area===x} onClick={()=>props.onArea(x)}>{AREA_LABELS[x]}</button>)}
+ const field='ui-field',input='ui-input';
+ return <div className={styles.form}>
+  <nav className={'ui-tabs '+styles.subTabs} aria-label="Manage sections">{areas.map(x=>
+   <button key={x} type="button" className="ui-tab" aria-pressed={area===x} onClick={()=>props.onArea(x)}>{AREA_LABELS[x]}</button>)}
   </nav>
-  {area==='schedule'&&<label className={styles.monthFilter}>Month<input type="month" value={props.monthDraft} placeholder="YYYY-MM" pattern="[0-9]{4}-(0[1-9]|1[0-2])" onChange={e=>{
+  {area==='schedule'&&<label className={styles.inline}>Month<input className={input} type="month" value={props.monthDraft} placeholder="YYYY-MM" pattern="[0-9]{4}-(0[1-9]|1[0-2])" onChange={e=>{
    const value=e.target.value;props.onMonthDraft(value);
    if(MONTH_PATTERN.test(value)){props.onMonth(value);g.set({date:value===vegasToday().slice(0,7)?vegasToday():value+'-01'});}
   }}/></label>}
 
-  {area==='schedule'&&cap('manage_schedule')&&<details className={styles.editor}><summary>Add a gathering</summary><div className={styles.editorBody}>
-   <p className={styles.muted}>Enter the date and Las Vegas time. Confirm it after saving.</p>
-   <label>Date<input className={styles.input} type="date" value={g.date} onChange={e=>g.set({date:e.target.value})}/></label>
+  {area==='schedule'&&cap('manage_schedule')&&<details className={styles.disclosure}><summary>Add a gathering</summary><div className={styles.disclosureBody}>
+   <p className={styles.quiet}>Enter the date and Las Vegas time. Confirm the date after saving.</p>
+   <label className={field}>Date<input className={input} type="date" value={g.date} onChange={e=>g.set({date:e.target.value})}/></label>
    <div className={styles.two}>
-    <label>Start (Las Vegas)<input className={styles.input} type="time" value={g.start} onChange={e=>g.set({start:e.target.value})}/></label>
-    <label>End (Las Vegas)<input className={styles.input} type="time" value={g.end} onChange={e=>g.set({end:e.target.value})}/></label>
+    <label className={field}>Start (Las Vegas)<input className={input} type="time" value={g.start} onChange={e=>g.set({start:e.target.value})}/></label>
+    <label className={field}>End (Las Vegas)<input className={input} type="time" value={g.end} onChange={e=>g.set({end:e.target.value})}/></label>
    </div>
-   <label>Occurrence type<select value={g.kind} onChange={e=>g.set({kind:e.target.value as Kind})}>
+   <label className={field}>Occurrence type<select className={input} value={g.kind} onChange={e=>g.set({kind:e.target.value as Kind})}>
     <option value="gathering">Live gathering</option><option value="app_day">Pray Daily app day</option><option value="cancelled">Cancelled occurrence</option>
    </select></label>
-   <button disabled={busy} className={styles.primary} onClick={saveGathering}>Save gathering</button>
+   <button type="button" disabled={busy} className="ui-button" onClick={saveGathering}>Save gathering</button>
   </div></details>}
 
-  {area==='schedule'&&cap('manage_schedule')&&rows.length>0&&<section className={styles.card}><h2>Gatherings</h2>{rows.filter(o=>o.date>=today).map(o=>
-   <details key={o.id} className={styles.dateEditor}>
-    <summary><strong>{dayLabel(o.date)} · {o.host}</strong><span>{o.verified?'Confirmed':'To confirm'} <span aria-hidden="true">›</span></span></summary>
-    <div className={styles.editorBody}>
-     {readings.length>0&&<div>
-      <label>Reading for this date<select value={props.readingSelection} onChange={e=>props.onReadingSelection(e.target.value)}>
-       <option value="">Choose approved reading</option>{readings.map(x=><option key={x.key} value={x.key}>{x.body.title}</option>)}
-      </select></label>
-      <button className={styles.secondary} disabled={busy||!props.readingSelection} onClick={()=>void post({type:'link_reading',occurrenceId:o.id,readingKey:props.readingSelection},true)}>Link reading</button>
-     </div>}
+  {area==='schedule'&&cap('review_requests')&&pending.length>0&&<section aria-labelledby="wm-requests-title">
+   <h2 className={styles.heading} id="wm-requests-title">Hosting requests <span className="ui-count">{pending.length}</span></h2>
+   <ul className="ui-list">{pending.map(r=><li key={r.id} className={'ui-row '+styles.rowWrap}>
+    <span className="ui-row-body">
+     <strong>{r.requester}</strong>
+     <small>{r.kind==='volunteer'?'Wants to host':'Asks for a change'} · {dayLabel(r.date||rows.find(o=>o.id===r.occurrenceId)?.date||today)}{r.note?' · Private note: '+r.note:''}</small>
+    </span>
+    <span className={styles.actions}>
+     <button type="button" className="ui-button" disabled={busy} onClick={()=>void post({type:'review',requestId:r.id,decision:'approve'})}>Approve</button>
+     <button type="button" className="ui-button ui-button-secondary" disabled={busy} onClick={()=>void post({type:'review',requestId:r.id,decision:'decline'})}>Decline</button>
+    </span>
+   </li>)}</ul>
+  </section>}
+
+  {area==='schedule'&&cap('manage_schedule')&&rows.length>0&&<section aria-labelledby="wm-gatherings-title">
+   <h2 className={styles.heading} id="wm-gatherings-title">Gatherings this month</h2>
+   {rows.filter(o=>o.date>=today).map(o=><details key={o.id} className={styles.disclosure}>
+    <summary>{dayLabel(o.date)} · {o.host}<small>{o.verified?'Confirmed':'To confirm'}</small></summary>
+    <div className={styles.disclosureBody}>
      <div className={styles.actions}>
-      <button className={styles.primary} disabled={busy||o.verified||o.kind!=='gathering'} onClick={()=>void post({type:'schedule',occurrenceId:o.id,mode:'verify'})}>Confirm date</button>
-      <button disabled={busy||o.kind!=='gathering'} onClick={()=>void post({type:'schedule',occurrenceId:o.id,mode:'app_day'})}>App day</button>
-      <button disabled={busy||o.kind!=='gathering'} onClick={()=>void post({type:'schedule',occurrenceId:o.id,mode:'cancel'})}>Cancel</button>
-      {o.kind!=='gathering'&&<button disabled={busy} onClick={()=>void post({type:'schedule',occurrenceId:o.id,mode:'restore'})}>Restore as unverified gathering</button>}
+      <button type="button" className="ui-button" disabled={busy||o.verified||o.kind!=='gathering'} onClick={()=>void post({type:'schedule',occurrenceId:o.id,mode:'verify'})}>Confirm date</button>
+      <button type="button" className="ui-button ui-button-secondary" disabled={busy||o.kind!=='gathering'} onClick={()=>void post({type:'schedule',occurrenceId:o.id,mode:'app_day'})}>App day</button>
+      <button type="button" className="ui-button ui-button-secondary" disabled={busy||o.kind!=='gathering'} onClick={()=>void post({type:'schedule',occurrenceId:o.id,mode:'cancel'})}>Cancel</button>
+      {o.kind!=='gathering'&&<button type="button" className="ui-button ui-button-secondary" disabled={busy} onClick={()=>void post({type:'schedule',occurrenceId:o.id,mode:'restore'})}>Restore as unverified gathering</button>}
      </div>
-     {data.eligibleHosts.length>0&&o.verified&&o.kind==='gathering'&&<div>
-      <label>Eligible host<select value={props.hostSelection} onChange={e=>props.onHostSelection(e.target.value)}>
+     {data.eligibleHosts.length>0&&o.verified&&o.kind==='gathering'&&<div className={styles.actions}>
+      <label className={field}>Eligible host<select className={input} value={props.hostSelection} onChange={e=>props.onHostSelection(e.target.value)}>
        <option value="">Choose an eligible host</option>{data.eligibleHosts.map(h=><option key={h.id} value={h.id}>{h.name}</option>)}
       </select></label>
-      <button className={styles.secondary} disabled={!props.hostSelection||busy} onClick={()=>void post({type:'assign',occurrenceId:o.id,memberId:props.hostSelection})}>Assign host</button>
+      <button type="button" className="ui-button ui-button-secondary" disabled={!props.hostSelection||busy} onClick={()=>void post({type:'assign',occurrenceId:o.id,memberId:props.hostSelection})}>Assign host</button>
+     </div>}
+     {readings.length>0&&<div className={styles.actions}>
+      <label className={field}>Reading for this date<select className={input} value={props.readingSelection} onChange={e=>props.onReadingSelection(e.target.value)}>
+       <option value="">Choose approved reading</option>{readings.map(x=><option key={x.key} value={x.key}>{x.body.title}</option>)}
+      </select></label>
+      <button type="button" className="ui-button ui-button-secondary" disabled={busy||!props.readingSelection} onClick={()=>void post({type:'link_reading',occurrenceId:o.id,readingKey:props.readingSelection},true)}>Link reading</button>
      </div>}
     </div>
    </details>)}
   </section>}
 
-  {area==='schedule'&&cap('review_requests')&&pending.length>0&&<section className={styles.card}><h2>Hosting requests</h2>{pending.map(r=>
-   <div key={r.id} className={styles.requestRow}>
-    <strong>{r.requester} · {r.kind==='volunteer'?'Volunteer':'Change'}</strong>
-    <p>{dayLabel(r.date||rows.find(o=>o.id===r.occurrenceId)?.date||today)}{r.note?' · Private note: '+r.note:''}</p>
-    <div className={styles.actions}>
-     <button disabled={busy} onClick={()=>void post({type:'review',requestId:r.id,decision:'approve'})}>Approve</button>
-     <button disabled={busy} onClick={()=>void post({type:'review',requestId:r.id,decision:'decline'})}>Decline</button>
+  {area==='materials'&&cap('publish_materials')&&<section aria-labelledby="wm-publish-title">
+   <h2 className={styles.heading} id="wm-publish-title">Ready to publish</h2>
+   {data.drafts.length?<ul className="ui-list">{data.drafts.map(d=><li key={d.id} className={styles.disclosure}>
+    <div className={styles.material}>
+     <h3>{d.body.title}</h3>
+     <p className={styles.quiet}>{d.sourceState==='checked'?'Source checked':'Source needs checking before publishing'}</p>
     </div>
-   </div>)}
+    <details className={styles.review}><summary>Review draft</summary>
+     <div className={styles.material}>
+      <p>{d.body.summary}</p>
+      <ul>{d.body.items.map((item,i)=><li key={i}>{item}</li>)}</ul>
+      <p className={styles.quiet}>Source: {d.body.sourceLabel}</p>
+     </div>
+     <button type="button" className="ui-button" disabled={busy||d.sourceState!=='checked'} onClick={()=>void post({type:'material_publish',materialId:d.id})}>Publish</button>
+    </details>
+   </li>)}</ul>:<p className={styles.quiet}>No drafts are waiting to be published.</p>}
   </section>}
 
-  {area==='materials'&&cap('edit_materials')&&<details className={styles.editor}><summary>New reading or PWP</summary>
-   <form className={styles.editorBody} action="/api/morning-prayer/setup" method="post" onSubmit={event=>{event.preventDefault();saveMaterial();}}>
-    <p className={styles.muted}>Prepare the wording from an approved source. Publishing is a separate step.</p>
-    <label>Type<select value={m.kind} onChange={e=>m.edit({kind:e.target.value as typeof m.kind})}>
+  {area==='materials'&&cap('edit_materials')&&<details className={styles.disclosure}><summary>New reading or PWP</summary>
+   <form className={styles.disclosureBody} action="/api/morning-prayer/setup" method="post" onSubmit={event=>{event.preventDefault();saveMaterial();}}>
+    <p className={styles.quiet}>Copy the wording from an approved source. Publishing is a separate step.</p>
+    <label className={field}>Type<select className={input} value={m.kind} onChange={e=>m.edit({kind:e.target.value as typeof m.kind})}>
      <option value="pwp">PWP</option><option value="reading">Daily reading</option>
     </select></label>
     {m.kind==='pwp'&&<div className={styles.two}>
-     <label>PWP month<input className={styles.input} type="month" required name="month" placeholder="YYYY-MM" pattern="[0-9]{4}-(0[1-9]|1[0-2])" value={m.month} onChange={e=>m.edit({month:e.target.value})}/></label>
-     <label>Week<select value={m.week} onChange={e=>m.edit({week:Number(e.target.value)})}>{[1,2,3,4,5].map(n=><option key={n} value={n}>Week {n}</option>)}</select></label>
+     <label className={field}>PWP month<input className={input} type="month" required name="month" placeholder="YYYY-MM" pattern="[0-9]{4}-(0[1-9]|1[0-2])" value={m.month} onChange={e=>m.edit({month:e.target.value})}/></label>
+     <label className={field}>Week<select className={input} value={m.week} onChange={e=>m.edit({week:Number(e.target.value)})}>{[1,2,3,4,5].map(n=><option key={n} value={n}>Week {n}</option>)}</select></label>
     </div>}
-    <label>Title<input className={styles.input} required name="title" maxLength={100} value={m.title} onChange={e=>m.edit({title:e.target.value})}/></label>
-    <label>Summary<textarea className={styles.input} required name="summary" maxLength={400} rows={3} value={m.summary} onChange={e=>m.edit({summary:e.target.value})}/></label>
-    <label>Activities or points (one per line, up to five)<textarea className={styles.input} required name="items" rows={4} value={m.items} onChange={e=>m.edit({items:e.target.value})}/></label>
-    <label>Source<input className={styles.input} required name="source" maxLength={100} value={m.sourceLabel} onChange={e=>m.edit({sourceLabel:e.target.value})}/></label>
-    <label><input type="checkbox" checked={m.sourceChecked} onChange={e=>m.set({sourceChecked:e.target.checked})}/> I have checked the content against the permitted source.</label>
-    <button className={styles.primary} disabled={busy} type="submit">Save draft</button>
+    <label className={field}>Title<input className={input} required name="title" maxLength={100} value={m.title} onChange={e=>m.edit({title:e.target.value})}/></label>
+    <label className={field}>Summary<textarea className={input} required name="summary" maxLength={400} rows={3} value={m.summary} onChange={e=>m.edit({summary:e.target.value})}/></label>
+    <label className={field}>Activities or points (one per line, up to five)<textarea className={input} required name="items" rows={4} value={m.items} onChange={e=>m.edit({items:e.target.value})}/></label>
+    <label className={field}>Source<input className={input} required name="source" maxLength={100} value={m.sourceLabel} onChange={e=>m.edit({sourceLabel:e.target.value})}/></label>
+    <label className={styles.check}><input type="checkbox" checked={m.sourceChecked} onChange={e=>m.set({sourceChecked:e.target.checked})}/> I have checked the content against the permitted source.</label>
+    <button className="ui-button" disabled={busy} type="submit">Save draft</button>
    </form>
   </details>}
 
-  {area==='materials'&&cap('publish_materials')&&<section className={styles.card}><h2>Ready to publish</h2>{data.drafts.length?data.drafts.map(d=>
-   <div key={d.id} className={styles.requestRow}>
-    <strong>{d.body.title}</strong>
-    <p>{d.sourceState==='checked'?'Source checked':'Source needs checking'}</p>
-    <details className={styles.review}><summary>Review draft</summary>
-     <p>{d.body.summary}</p>
-     <ul>{d.body.items.map((item,i)=><li key={i}>{item}</li>)}</ul>
-     <p className={styles.muted}>Source: {d.body.sourceLabel}</p>
-     <button className={styles.primary} disabled={busy||d.sourceState!=='checked'} onClick={()=>void post({type:'material_publish',materialId:d.id})}>Publish</button>
-    </details>
-   </div>):<p className={styles.muted}>No material drafts awaiting publication.</p>}
-  </section>}
-
   <MorningPrayerOperations data={data} area={area} onOwnerAccess={props.onOwnerAccess} onReload={props.onReload} onNotice={props.onNotice}/>
- </>;
+ </div>;
 }

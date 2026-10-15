@@ -2,7 +2,7 @@
 import {useEffect,useMemo,useState} from 'react';
 import {dayLabel} from './shared';
 import type {Occurrence} from './shared';
-import styles from './volunteer.module.css';
+import styles from './morning-prayer.module.css';
 export default function MorningPrayerVolunteer({
  month,rows,today,selected,onSelect,canVolunteer,busy,onSubmit
 }:{month:string;rows:Occurrence[];today:string;selected:string|null;onSelect:(id:string)=>void;
@@ -22,31 +22,32 @@ export default function MorningPrayerVolunteer({
  },[month]);
  const open=rows.filter(o=>o.kind==='gathering'&&o.verified&&o.host==='Host needed'&&o.date>=today);
  function toggle(id:string){setMarked(prev=>prev.includes(id)?prev.filter(x=>x!==id):prev.length<12?[...prev,id]:prev);}
- return <div className={styles.wrap}>
-  <section className={styles.calendar} aria-label="Monthly Morning Prayer gathering calendar">
-   <div className={styles.head}>{['Mon','Tue','Wed','Thu','Fri','Sat','Sun'].map(x=><span key={x}>{x}</span>)}</div>
+ const status=(o:Occurrence)=>o.kind==='cancelled'?'Off':o.kind==='app_day'?'App':o.host==='You'?'You':o.host==='Host needed'?'Open':o.verified?'Host':'Check';
+ return <div>
+  <section aria-label="Monthly Morning Prayer gathering calendar" data-no-swipe>
+   <div className={styles.weekHead} aria-hidden="true">{['Mon','Tue','Wed','Thu','Fri','Sat','Sun'].map(x=><span key={x}>{x}</span>)}</div>
    <div className={styles.days}>{dates.map((date,i)=>{
     const o=date?lookup.get(date):undefined;
-    return date?<button key={date} type="button" disabled={!o} aria-pressed={selected===o?.id}
-     aria-label={date+' '+(o?o.kind==='gathering'?o.host:o.kind:'not scheduled')}
+    return date?<button key={date} type="button" disabled={!o} aria-pressed={o?selected===o.id:undefined}
+     aria-label={dayLabel(date)+', '+(o?o.kind==='gathering'?o.host:o.kind==='app_day'?'Pray Daily app day':'cancelled':'not scheduled')}
      className={[date===today?styles.today:'',o?.host==='You'?styles.mine:'',o?.kind==='gathering'&&o.host==='Host needed'?styles.open:''].join(' ')}
      onClick={()=>{if(o)onSelect(o.id);}}>
-     <strong>{Number(date.slice(-2))}</strong><span>{!o?':':o.kind==='cancelled'?'Off':o.kind==='app_day'?'App':o.host==='You'?'You':o.host==='Host needed'?'Open':o.verified?'Host':'Check'}</span>
+     <strong>{Number(date.slice(-2))}</strong><span aria-hidden="true">{o?status(o):'-'}</span>
     </button>:<span key={'blank-'+i}/>;
    })}</div>
-   <p className={styles.legend}>Select an existing date to review its details. Only authorized schedule records appear.</p>
+   <p className={styles.legend}>Choose a scheduled date to see its details. Open means the date still needs a host.</p>
   </section>
-  {canVolunteer&&<section className={styles.volunteer}>
-   <h2>Volunteer for available dates</h2>
-   <p>Select one or several open, verified dates. Requests remain pending until an authorized reviewer approves them.</p>
-   {!open.length?<p className={styles.empty}>No verified open hosting dates in this month.</p>:<>
-    <div className={styles.openList}>{open.map(o=><label key={o.id}>
+  {canVolunteer&&<section aria-labelledby="wm-volunteer-title">
+   <h2 className={styles.heading} id="wm-volunteer-title">Volunteer to host</h2>
+   <p className={styles.quiet}>Choose one or more open, confirmed dates. Each request waits for a coordinator to approve it.</p>
+   {!open.length?<p className={styles.quiet}>No open dates to host this month.</p>:<>
+    <div className={styles.checkList} role="group" aria-label="Open dates">{open.map(o=><label key={o.id} className={styles.check}>
      <input type="checkbox" checked={marked.includes(o.id)} onChange={()=>toggle(o.id)}/>
      <span>{dayLabel(o.date)}</span>
     </label>)}</div>
-    <button disabled={busy||!marked.length} onClick={()=>{if(window.confirm('Submit '+marked.length+' hosting request(s) for review?'))void onSubmit(marked).then(saved=>{if(saved)setMarked([]);});}}>
+    <div className={styles.actions}><button type="button" className="ui-button" disabled={busy||!marked.length} onClick={()=>{if(window.confirm('Submit '+marked.length+' hosting request(s) for review?'))void onSubmit(marked).then(saved=>{if(saved)setMarked([]);});}}>
      Submit {marked.length||''} hosting request{marked.length===1?'':'s'}
-    </button>
+    </button></div>
    </>}
   </section>}
  </div>;

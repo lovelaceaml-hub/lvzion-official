@@ -1,6 +1,8 @@
 'use client';
 import {useCallback,useEffect,useRef,useState} from 'react';
-import Link from 'next/link';
+import AppHeader from '../app-header';
+import {CalendarDays,Clock3,House,Pencil} from '../home-icons';
+import {useSwipeTabs} from '../../lib/use-swipe-tabs';
 import {vegasToday} from '../../lib/morning-prayer/time';
 import styles from './morning-prayer.module.css';
 import {postJSON,requestJSON} from './shared';
@@ -11,6 +13,7 @@ import MeTab from './MeTab';
 import ManageTab,{useGatheringForm,useMaterialForm} from './ManageTab';
 type Tab='home'|'schedule'|'me'|'manage';
 const TAB_LABELS:Record<Tab,string>={home:'Home',schedule:'Schedule',me:'Me',manage:'Manage'};
+const TAB_ICONS:Record<Tab,typeof House>={home:House,schedule:CalendarDays,me:Clock3,manage:Pencil};
 const MANAGER_CAPS:Capability[]=['review_requests','manage_schedule','edit_materials','publish_materials'];
 /** Posts one action. Single new dates go to the batch endpoint; setup actions to setup; everything else to command. */
 export type Post=(action:Record<string,unknown>,setup?:boolean)=>Promise<boolean>;
@@ -85,19 +88,27 @@ export default function MorningPrayerLive(){
  const joinable=(id:string)=>cap('join_gathering')&&!!data?.meetingStates?.some(s=>s.occurrenceId===id&&s.ready);
  const canManage=MANAGER_CAPS.some(cap);
  const tabs:Tab[]=['home','schedule','me',...(canManage?['manage' as const]:[])];
+ const swipe=useSwipeTabs(tabs,tab,setTab);
  const screen={data:data!,rows,today,published,busy,cap,post,joinable,joinGathering};
- return <main className={styles.root}>
-  <div className={styles.shell}>
-   <header className={styles.header}><Link href="/members">‹ LV Zion Official</Link><span className={styles.brand}>Work Mission</span></header>
-   <div className={styles.titleRow}><div><p className={styles.overline}>Las Vegas Zion</p><h1>Morning Prayer</h1></div><div className={styles.logo}>WM</div></div>
-   {message&&<p className={styles.message} role="status">{message}</p>}
-   {error&&<section className={styles.empty}>
-    <h2>Access or service unavailable</h2><p role="alert">{error}</p>
-    <button className={styles.secondary} onClick={()=>void loader()}>Try again</button>
-    <p><Link href="/members">Back to My Week</Link></p>
+ return <div className="ui-page">
+  <AppHeader homeHref="/members"/>
+  <main className={'ui-main '+styles.main}>
+   <p className="ui-kicker">Work Mission</p>
+   <h1 className="ui-title">Morning Prayer</h1>
+   {data&&<nav className={'ui-tabs '+styles.topTabs} aria-label="Morning Prayer sections">
+    {tabs.map(x=><button key={x} type="button" className="ui-tab" aria-current={tab===x?'page':undefined} onClick={()=>setTab(x)}>{TAB_LABELS[x]}</button>)}
+   </nav>}
+   {message&&<p className="ui-notice" role="status">{message}</p>}
+   {error&&<section className="ui-empty">
+    <strong>Morning Prayer is unavailable</strong>
+    <p role="alert">{error}</p>
+    <div className={styles.actions}>
+     <button type="button" className="ui-button" onClick={()=>void loader()}>Try again</button>
+     <a className="ui-button ui-button-secondary" href="/members">Back to your apps</a>
+    </div>
    </section>}
-   {!error&&!data&&<p role="status">Loading your authorized gathering schedule…</p>}
-   {data&&<>
+   {!error&&!data&&<p className="ui-empty" role="status">Loading your gathering schedule…</p>}
+   {data&&<div className={styles.content} data-testid="wm-content" {...swipe}>
     {tab==='home'&&<HomeTab {...screen} month={month} myWeek={myWeek} onWeek={setMyWeek} onOpen={openDate}
      onFullSchedule={()=>setTab('schedule')} onAddGathering={()=>{setManageArea('schedule');setTab('manage');}}/>}
     {tab==='schedule'&&<ScheduleTab {...screen} month={month} focus={focus} onFocus={setFocus}
@@ -107,13 +118,14 @@ export default function MorningPrayerLive(){
      ownerAccess={ownerAccess} onOwnerAccess={setOwnerAccess} monthDraft={monthDraft} onMonthDraft={setMonthDraft} onMonth={setMonth} gathering={gatheringForm} material={materialForm}
      hostSelection={hostSelection} onHostSelection={setHostSelection} readingSelection={readingSelection} onReadingSelection={setReadingSelection}
      onReload={loader} onNotice={setMessage}/>}
-   </>}
-   <footer className={styles.footer}>Las Vegas Zion · Work Mission</footer>
-  </div>
-  <nav className={styles.nav} aria-label="Morning Prayer navigation">
-   {tabs.map(x=><button key={x} aria-current={tab===x?'page':undefined} onClick={()=>setTab(x)}>{TAB_LABELS[x]}</button>)}
-  </nav>
- </main>;
+   </div>}
+  </main>
+  {data&&<nav className={styles.bottomBar} aria-label="Morning Prayer sections">
+   {tabs.map(x=>{const Icon=TAB_ICONS[x];return <button key={x} type="button" aria-current={tab===x?'page':undefined} onClick={()=>setTab(x)}>
+    <Icon size={22}/><span>{TAB_LABELS[x]}</span>
+   </button>;})}
+  </nav>}
+ </div>;
 }
 /** Props every tab receives from the shell. `data` is always loaded when a tab renders. */
 export type Screen={
