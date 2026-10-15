@@ -11,6 +11,10 @@
 - [Study Room current status](study-rooms/README.md)
 - [Study Room cutover runbook](study-rooms/CUTOVER-RUNBOOK.md)
 
+## Work Mission completion R5
+
+Work Mission operational code is ready for the requested actual-app release; see [R5 completion and Build log](morning-prayer/COMPLETION-R5.md). R4 was already merged/applied; R5 hosted migration `20261015010132` now replaces private functions without creating real dates or grants. Current readback: one active module owner grant, seven capabilities, 15 RLS tables, zero occurrences/publications/meeting references. Concurrent Church Display PR #39 is preserved. Final application deployment receipt is pending.
+
 ## Current verified snapshot
 
 Hosted counts checked October 14, 2026 at 23:26 UTC; production source refreshed after the concurrent Display merge. The actual app is [lvz.app](https://lvz.app), with [member management](https://lvz.app/members/manage). No new preview is authorized.

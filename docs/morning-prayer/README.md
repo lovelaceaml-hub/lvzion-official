@@ -1,3 +1,5 @@
+> Current actual-app implementation: [Completion R5](COMPLETION-R5.md). Historical R2 material below remains reference only.
+
 # Morning Prayer — corrected legacy-app workstream R2
 
 > Historical R2 development record. Current actual-app setup is in [LIVE-SETUP](LIVE-SETUP.md), with the verified hosted snapshot in the [handoff](../HANDOFF.md). Preview links and unapplied-schema statements below describe the older milestone only.

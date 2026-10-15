@@ -60,6 +60,7 @@ test('Morning Prayer R4: verified owner, member grants, atomic dates and Vault j
   await db.exec(await readFile('supabase/migrations/20261014224129_morning_prayer_live_core.sql','utf8'));
   await db.exec(await readFile('supabase/migrations/20261014231657_morning_prayer_operations_r4.sql','utf8'));
   await db.exec(await readFile('supabase/migrations/20261015004856_morning_prayer_completion_r5.sql','utf8'));
+  await db.exec(await readFile('supabase/migrations/20261015010421_morning_prayer_setup_lock_guard.sql','utf8'));
   await t.test('all fifteen private tables have RLS and bootstrapped owner is Unassigned',async()=>{
    await owner();const r=(await db.query<{relrowsecurity:boolean}>(
     "select c.relrowsecurity from pg_class c join pg_namespace n on n.oid=c.relnamespace where n.nspname='mpg_private' and c.relkind='r'")).rows;

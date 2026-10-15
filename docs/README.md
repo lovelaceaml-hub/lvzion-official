@@ -88,3 +88,5 @@ The catalog includes guides, historical plans, run records, JSON evidence, scree
 - [screenshots/organization-live.jpg](screenshots/organization-live.jpg)
 - [study-rooms/CUTOVER-RUNBOOK.md](study-rooms/CUTOVER-RUNBOOK.md)
 - [study-rooms/README.md](study-rooms/README.md)
+
+- [Work Mission completion R5](morning-prayer/COMPLETION-R5.md): current scope, verification, hosted migration, rollback and owner setup.

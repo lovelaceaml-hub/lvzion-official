@@ -39,7 +39,7 @@ try{
  sql(`create schema vault;create table vault.decrypted_secrets(id uuid primary key default gen_random_uuid(),decrypted_secret text not null);create function vault.create_secret(new_secret text)returns uuid language plpgsql as $$declare v uuid;begin insert into vault.decrypted_secrets(decrypted_secret)values(new_secret)returning id into v;return v;end$$;create function vault.update_secret(secret_id uuid,new_secret text)returns void language sql as $$update vault.decrypted_secrets set decrypted_secret=new_secret where id=secret_id$$;`);
  for(let n=1;n<=2;n++)sql(`insert into auth.users values('${uid(n)}','fictional-${n}@example.invalid',now());insert into auth.sessions(id,user_id)values('${sid(n)}','${uid(n)}');insert into public.members(id,display_name,status)values('${mid(n)}','Fictional Member ${n}','intake');insert into app_private.account_links(member_id,auth_user_id,username)values('${mid(n)}','${uid(n)}','fictional_member_${n}');`);
  sql(`insert into app_private.bootstrap_receipts(auth_user_id)values('${uid(1)}');`);
- for(const name of ['20261014224129_morning_prayer_live_core','20261014231657_morning_prayer_operations_r4','20261015004856_morning_prayer_completion_r5'])sql(await readFile('supabase/migrations/'+name+'.sql','utf8'));
+ for(const name of ['20261014224129_morning_prayer_live_core','20261014231657_morning_prayer_operations_r4','20261015004856_morning_prayer_completion_r5','20261015010421_morning_prayer_setup_lock_guard'])sql(await readFile('supabase/migrations/'+name+'.sql','utf8'));
  sql(`insert into public.age_categories(id,name)values('11111111-1111-4111-8111-000000000001','Fictional category');insert into public.church_groups(id,age_category_id,name)values('22222222-2222-4222-8222-000000000001','11111111-1111-4111-8111-000000000001','Fictional group');insert into public.church_units(id,group_id,name)values('33333333-3333-4333-8333-000000000001','22222222-2222-4222-8222-000000000001','Fictional unit');insert into public.member_placements(member_id,group_id,unit_id,started_at)values('${mid(2)}','22222222-2222-4222-8222-000000000001','33333333-3333-4333-8333-000000000001',now()-interval '1 day');update public.members set status='active' where id='${mid(2)}';`);
  const grant=()=>sql(actor(1)+rpc('mpg_owner_access',version(),{type:'grant',memberId:mid(2),capabilities:caps}));
  grant();
@@ -54,6 +54,14 @@ try{
  assert.notEqual(outcome.code,0);assert.match(outcome.output,/42501/);
  assert.equal(sql('select count(*) from mpg_private.occurrences'),'0');
  console.log('PASS: waiting schedule writer denied after permission revocation.');
+ // The original compatible setup RPC must apply the same rule after waiting.
+ grant();v=version();
+ writer=execAsync("set application_name='wm-race-writer';begin;"+actor(1)+rpc('mpg_owner_access',v,{type:'revoke',memberId:mid(2)})+'select pg_sleep(1.5);commit;');
+ await sleeping();contender=execAsync(actor(2)+rpc('mpg_live_setup',v,{type:'create_material',key:'fictional-reading',kind:'reading',sourceChecked:false,body:{title:'Fictional title',summary:'Fictional wording',items:['Fictional point'],sourceLabel:'Fictional chapter'}}));
+ assert.equal((await writer).code,0);outcome=await contender;
+ assert.notEqual(outcome.code,0);assert.match(outcome.output,/42501/);
+ assert.equal(sql('select count(*) from mpg_private.materials'),'0');
+ console.log('PASS: waiting legacy setup writer denied after permission revocation.');
  // Two valid writers with the same revision create exactly one occurrence.
  grant();v=version();
  writer=execAsync("set application_name='wm-race-writer';begin;"+actor(1)+rpc('mpg_bulk_schedule',v,[occurrence])+'select pg_sleep(1.5);commit;');
