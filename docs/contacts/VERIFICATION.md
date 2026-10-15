@@ -33,6 +33,10 @@ Evidence sources: [initial owner release](LIVE-OWNER-RELEASE.md), [R5 owner UI r
 - Individual sharing, group-wide/leader oversight, cross-group access, owner reassignments, broad contact merges or private notification contents. They remain **disabled**, not merely missing from the current UI.
 - Complete retention/deletion and DNC reversal policy approval for multi-member use.
 
+## Code cleanup, October 14, 2026 (not deployed)
+
+A no-behavior-change cleanup on branch `claude/refactor-contacts-ce28c3`: the three Contacts stylesheets were merged into `components/contacts/contacts.css` with unused rules removed, the workspace screen was reformatted with shared helpers, the filter and count logic now share one predicate, the unused `dateLabel` helper was removed, and the server adapter uses one route table. No database, migration, permission, privacy or wire-contract change. Evidence: a scratch harness rendered the screen with fictional data at 340, 390 and 800 px before and after the change; all 20 captured screens were byte-identical in markup and pixel-identical, and all 10 save requests sent were identical. `npm run build` (typecheck, unit tests, disposable PGlite database tests) and `npm run test:browser` passed. Not released to lvz.app.
+
 ## Re-verification checklist
 
 For future changes, record the exact Vercel deployment ID, Git SHA, target, passing test counts, hosted migration versions and any RLS/permission changes. Confirm anonymous and wrong-origin requests cannot read details. Confirm a disabled/revoked member cannot continue using stale client state. For UI work, test responsive widths and browser errors with fictional fixtures only, then separate owner-session acceptance. Never manufacture login success, imported records or permission approvals for a green checklist.
