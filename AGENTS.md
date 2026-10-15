@@ -30,3 +30,11 @@ Use Node 24. Run `npm ci --ignore-scripts`, `npm run build` and `npm run test:br
 - **Study Room:** the module is deployed to `lvz.app` with an explicit single-owner manager grant, but `app_private.study_booking_activation.bookings_open=false` remains mandatory until a verified and approved cutover. R4 permits audited inventory and service-calendar configuration only; it cannot open bookings. Never grant all members access, use the public Firebase lobby as a booking export, or change/disable the original Firebase booking functions without the signed-off cutover runbook. Do not claim synthetic browser tests prove a real hosted member booking.
 
 Personal credentials for this project use Apple Passwords or macOS Keychain only. Do not access the user's work password store.
+
+## Worship Duty module integration — pending release
+
+Continue the **real** Worship Duty module from [draft PR #25](https://github.com/lovelaceaml-hub/lvzion-official/pull/25), branch `feature/worship-duty-live`, rather than directly merging the outdated historical PR #5. First read `docs/worship-duty/README.md`, `docs/worship-duty/WORK-HANDOFF.md`, `docs/worship-duty/MIGRATION-STATUS.md` and `docs/worship-duty/PRODUCTION-RELEASE-CHECKLIST.md`.
+
+At the October 14 snapshot, the main LV Zion platform is live while Worship remains **unmerged, unmigrated and disabled**. The owner setup UI/API and real hosted Auth-to-RPC verification are missing. The R3 month planner in historical PR #5 is fictional, not installed. New Worship SQL must be tested against the latest live foundation and reconciled with `docs/HOSTED-MIGRATION-LEDGER.json` before any hosted write; do not turn on `LVZ_WORSHIP_DUTY_ENABLED` prematurely.
+
+This project forbids unsolicited preview deployments, silent production merges and alterations to `lv-zion-duties.web.app`/Firebase/Sheets. Preserve Study Rooms, Contacts, Morning Prayer, Continuous Display, signup and organizational access as they currently exist.

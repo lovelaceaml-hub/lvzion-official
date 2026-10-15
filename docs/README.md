@@ -17,6 +17,8 @@ Start with the actual app at [lvz.app](https://lvz.app). Current documentation d
 
 ## Module contracts and evidence
 
+Worship Duty production integration and current verification: [Launch record](worship-duty/LAUNCH.md). Historical Work handoff: [Worship guide](worship-duty/README.md).
+
 | Module | Latest guide or release record | Limits |
 |---|---|---|
 | Contacts | [Current owner scope](contacts/README.md), [user guide](contacts/USER-GUIDE.md), [operations](contacts/OPERATIONS.md), [verification](contacts/VERIFICATION.md), [R5 evidence](contacts/OWNER-EXPERIENCE-R5.md) | Private owner scope; sharing/export/messages off; real owner save/reload acceptance outstanding |
