@@ -26,7 +26,7 @@ function validatedBlocks(input:unknown,weekly:boolean):ServiceInterval[]|WeeklyS
  for(const raw of input){
   const p=object(raw);
   exactKeys(p,weekly?['weekday','start','end','label']:['start','end','label']);
-  if(!validServiceRange(p.start,p.end))throw Error('Service intervals must fit 10 AM–11 PM on half-hour boundaries.');
+  if(!validServiceRange(p.start,p.end))throw Error('Service intervals must fit 10 AM to 11 PM on half-hour boundaries.');
   const label=stringValue(p.label,2,80,'service description');
   if(weekly&&(!Number.isSafeInteger(p.weekday)||(p.weekday as number)<0||(p.weekday as number)>6))
    throw Error('Choose a valid day of the week.');

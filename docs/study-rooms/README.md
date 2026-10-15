@@ -37,6 +37,7 @@ The final integrated R4 build passed **317 Node application tests and 198 dispos
 - Screen: `app/modules/study-rooms/page.tsx` (loading, access loss, refresh) and `components/study-rooms/` (member view, change dialog, history, manager controls, `use-receipt-save.ts` for idempotent manager saves).
 - Rules: `lib/study-rooms/domain.ts` holds the shared booking validation, service hours (10:00 AM to 11:00 PM on half-hour slots), labels and the fictional test fixtures (`demoSchedule`, `simulate`); `admin.ts`, `operations.ts` and `history.ts` validate their requests with the same helpers. PostgreSQL stays authoritative.
 - API: `app/api/study-rooms/` (schedule, command, history, admin, operations); `lib/study-rooms/server.ts` holds the shared sign-in check and messages.
+- October 15, 2026 redesign: the screens follow the locked [Day Sheet design contract](../design/LVZ-DESIGN-CONTRACT.md) (shared tokens, `AppHeader`, underlined tabs with swipe, rows instead of cards, a 320px manager column on desktop). `tests/browser/study-room-layout.spec.ts` checks 320, 390 and 1280px widths, 44px targets, the home link and swipe; set `LVZ_SCREENSHOT_DIR` to save review screenshots. Current review screenshots (fictional data) are in [screens/](screens/).
 - October 15, 2026 cleanup: merged duplicated validation, time lists and labels, removed the unused preview-only code paths, with no change to permissions, database rules or the closed booking gate.
 
 ## Safe default

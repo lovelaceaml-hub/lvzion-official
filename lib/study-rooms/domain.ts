@@ -80,7 +80,7 @@ export function parseBookingCommand(raw:unknown):BookingCommand{
  if(changesExisting(action)){
   if(typeof p.bookingId!=='string'||!uuidPattern.test(p.bookingId)||!Number.isSafeInteger(p.expectedVersion)||(p.expectedVersion as number)<1)throw Error('Refresh the reservation before changing it.');
  }
- if(action!=='reserve'&&!validReason(p.reason))throw Error('Give a reason (5–240 characters).');
+ if(action!=='reserve'&&!validReason(p.reason))throw Error('Give a reason (5 to 240 characters).');
  if(action==='reserve'||action==='hold'||action==='reschedule'){
   const ids=p.resourceIds===undefined?[p.resourceId]:p.resourceIds;
   if((p.resourceIds!==undefined&&p.resourceId!==undefined)||!Array.isArray(ids)||ids.length<1||ids.length>3||new Set(ids).size!==ids.length||ids.some(id=>typeof id!=='string'||!uuidPattern.test(id))||typeof p.day!=='string')throw Error('Choose one to three distinct resources and a date.');

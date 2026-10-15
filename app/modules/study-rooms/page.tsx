@@ -1,6 +1,8 @@
 'use client';
 import {useCallback,useEffect,useRef,useState} from 'react';
+import AppHeader from '../../../components/app-header';
 import Reservations from '../../../components/study-rooms/reservations';
+import '../../../components/study-rooms/reservations.css';
 import {StudyOperationsManager} from '../../../components/study-rooms/operations';
 import {dayKey,vegasDay} from '../../../lib/study-rooms/domain';
 import type {Schedule,BookingCommand} from '../../../lib/study-rooms/domain';
@@ -93,20 +95,27 @@ export default function StudyRooms(){
   }catch(e){if(access.current(ticket)&&accessDenied(e))clearAccess(e.message);throw e;}
  }
 
- if(!data)return <main className="sr-app">
-  <h1>Study Room Reservation</h1>
-  <p role="status">{error||'Checking authorized reservation access…'}</p>
-  <p>Study Room access requires sign-in and an explicit module grant.</p>
-  <a href="/sign-in">Sign in</a>
-  <p><a href="/members">Return to LV Zion Home</a></p>
-  {day&&<button onClick={()=>{void load(day);}}>Try again</button>}
- </main>;
+ if(!data)return <div className="ui-page sr-app">
+  <AppHeader homeHref="/members"/>
+  <main className="ui-main ui-narrow">
+   <p className="ui-kicker">Study rooms</p>
+   <h1 className="ui-title">Study Room Reservation</h1>
+   <p role="status" className={error?'ui-notice':'ui-lede'} data-tone={error?'danger':undefined}>{error||'Checking your reservation access…'}</p>
+   <p className="ui-hint">Study Room access requires sign-in and an explicit module grant.</p>
+   <div className="sr-sheet-actions sr-shell-actions">
+    {day&&error&&<button type="button" className="ui-button" onClick={()=>{void load(day);}}>Try again</button>}
+    <a className="ui-button ui-button-secondary" href="/sign-in">Sign in</a>
+    {day&&!error&&<button type="button" className="ui-button ui-button-secondary" onClick={()=>{void load(day);}}>Try again</button>}
+    <a className="ui-link sr-home-link" href="/members">Return to LV Zion Home</a>
+   </div>
+  </main>
+ </div>;
 
- return <>
-  {warning&&<p role="status" className="sr-demo">{warning}</p>}
-  <p className="sr-freshness">Updated {lastRefresh} Las Vegas time · Refreshes while this screen is active</p>
-  <Reservations schedule={data} changeDay={setDay} refresh={()=>{void load(day);}} loadDay={loadDay} loadHistory={loadHistory}
-   admin={admin} saveAdmin={c=>post('/api/study-rooms/admin',c)} submit={c=>post('/api/study-rooms/command',c)}
-   operations={data.canManage&&operations?<StudyOperationsManager data={operations} today={data.today} save={c=>post('/api/study-rooms/operations',c)}/>:null}/>
+ const status=<>
+  {warning&&<p role="status" className="ui-notice" data-tone="warning">{warning}</p>}
+  <p className="ui-hint sr-freshness">Updated {lastRefresh} Las Vegas time. Refreshes while this screen is open.</p>
  </>;
+ return <Reservations status={status} schedule={data} changeDay={setDay} refresh={()=>{void load(day);}} loadDay={loadDay} loadHistory={loadHistory}
+   admin={admin} saveAdmin={c=>post('/api/study-rooms/admin',c)} submit={c=>post('/api/study-rooms/command',c)}
+   operations={data.canManage&&operations?<StudyOperationsManager data={operations} today={data.today} save={c=>post('/api/study-rooms/operations',c)}/>:null}/>;
 }
