@@ -4,12 +4,13 @@ import type{FormEvent}from'react';
 import type{DisplaySlide}from'../lib/continuous-display/live-contract';
 import type{DisplaySnapshotR2}from'../lib/continuous-display/operations';
 import {activeDisplaySlides}from '../lib/continuous-display/live-contract';
-import {parseDisplaySnapshotR2,overrideForDisplay,withinOperatingHours}from '../lib/continuous-display/operations';
+import {parseDisplaySnapshotR2,overrideForDisplay,withinOperatingHours,type DisplayMotionMode}from '../lib/continuous-display/operations';
 import DisplayVisual from './display-visual';
 type Verified={packet:DisplaySnapshotR2;serverEpoch:number;verifiedAt:number};
 type ScreenMode='loading'|'unpaired'|'paired';
 export default function DisplayPlayer(){
  const [mode,setMode]=useState<ScreenMode>('loading');
+ const [motionMode,setMotionMode]=useState<DisplayMotionMode>('standard');
  const [slide,setSlide]=useState<DisplaySlide|null>(null);
  const [code,setCode]=useState('');const [pairing,setPairing]=useState(false);
  const [error,setError]=useState('');
@@ -20,6 +21,7 @@ export default function DisplayPlayer(){
  const requestSequence=useRef(0);
  const inFlight=useRef<AbortController|null>(null);
  const apply=(verified:Verified)=>{
+  setMotionMode(verified.packet.motionMode);
   current.current=verified;pending.current=null;shown.current=null;shownAt.current=performance.now();generation.current++;
   overrideActive.current=false;setMode('paired');setSlide(null);
  };
@@ -46,7 +48,7 @@ export default function DisplayPlayer(){
     // Only a specifically authorized active override can interrupt the regular safe-transition handoff.
     if(packet.overrideSlideId)apply(checked);
     else pending.current=checked;
-   }else current.current={...checked};
+   }else {current.current={...checked};setMotionMode(checked.packet.motionMode);}
    setMode('paired');setError('');
   }catch{
    if(!alive.current||sequence!==requestSequence.current)return;
@@ -115,7 +117,7 @@ export default function DisplayPlayer(){
   finally{setPairing(false);}
  }
  return <main className="cd-screen" aria-label="LV Zion Official Continuous Church Display">
-  <div className="cd-stage">
+  <div className={'cd-stage cd-motion-'+motionMode}>
    {mode==='unpaired'?<section className="cd-device-pair">
     <p>LV ZION OFFICIAL · DIGITAL BILLBOARD</p>
     <h1>Pair this display</h1>

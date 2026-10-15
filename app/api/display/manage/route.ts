@@ -1,7 +1,7 @@
 import {requireMember} from '../../../../lib/server/supabase';
 import {body,reply} from '../../../../lib/server/http';
 import {parseDisplaySlides,isUuid,safeInstant} from '../../../../lib/continuous-display/live-contract';
-import {parseOperatingHours} from '../../../../lib/continuous-display/operations';
+import {parseOperatingHours,parseDisplayMotionMode} from '../../../../lib/continuous-display/operations';
 import {createPairCode,deviceDigest,formatPairCode} from '../../../../lib/server/display';
 export const runtime='nodejs';
 export const dynamic='force-dynamic';
@@ -70,6 +70,15 @@ export async function POST(request:Request){
    r=await client.rpc('display_set_operating_hours',{p_screen:screenId,p_expected_version:version,p_hours:hours});
    if(r.error)return reply({error:'Operating hours could not be saved. Refresh and retry.'},status(r));
    return reply({configVersion:Number(r.data)});
+  }
+  if(action==='motion'){
+   const version=n(input.expectedVersion);
+   if(version===null)return reply({error:'Invalid screen configuration version.'},400);
+   let motionMode;try{motionMode=parseDisplayMotionMode(input.motionMode);}catch{return reply({error:'Unsupported display motion mode.'},400);}
+   if(input.motionMode===undefined)return reply({error:'Choose a display motion mode.'},400);
+   r=await client.rpc('display_set_motion',{p_screen:screenId,p_expected_version:version,p_mode:motionMode});
+   if(r.error)return reply({error:'Motion settings could not be saved. Refresh and retry.'},status(r));
+   return reply({configVersion:Number(r.data),motionMode});
   }
   if(action==='restore'){
    const generation=n(input.expectedGeneration);

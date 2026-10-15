@@ -73,3 +73,19 @@
 .cd-device-pair .cd-pair-error{color:#ffe1c5}
 @media(prefers-reduced-motion:reduce){.cd-stage *, .cd-stage *:before,.cd-stage *:after{animation:none!important;transition:none!important;will-change:auto!important}}
 @media(max-width:700px){.cd-device-pair form{flex-wrap:wrap;justify-content:center}.cd-device-pair input{min-height:42px;font-size:18px}.cd-device-pair button{min-height:42px;font-size:16px}.cd-device-pair p{font-size:14px}}
+
+/* Independent approved per-device cinematic motion choices. Decorative animation is optional. */
+.cd-motion-calm .cd-art i,.cd-motion-calm .cd-art::before,.cd-motion-calm .cd-art::after,
+.cd-motion-calm .cd-date-rail::before{animation-duration:55s!important}
+.cd-motion-lively .cd-art i,.cd-motion-lively .cd-art::before,.cd-motion-lively .cd-art::after,
+.cd-motion-lively .cd-date-rail::before{animation-duration:16s!important}
+.cd-motion-still *, .cd-motion-still *::before,.cd-motion-still *::after{
+ animation:none!important;transition:none!important;will-change:auto!important
+}
+@media(prefers-reduced-motion:reduce){
+ .cd-motion-calm *, .cd-motion-lively *, .cd-motion-standard *,
+ .cd-motion-calm *::before,.cd-motion-lively *::before,.cd-motion-standard *::before,
+ .cd-motion-calm *::after,.cd-motion-lively *::after,.cd-motion-standard *::after{
+  animation:none!important;transition:none!important;will-change:auto!important
+ }
+}
