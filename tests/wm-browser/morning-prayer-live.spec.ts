@@ -22,6 +22,14 @@ async function setup(page:Page,manager=true){
  await expect(page.getByRole('heading',{name:'Your next gathering'})).toBeVisible();
  return {commands,setData:(value:typeof data)=>{data=value;},get data(){return data;}};
 }
+async function useMonthTextFallback(page:Page){
+ await page.addInitScript(()=>{
+  const descriptor=Object.getOwnPropertyDescriptor(HTMLInputElement.prototype,'type')!;
+  Object.defineProperty(HTMLInputElement.prototype,'type',{...descriptor,set(value:string){descriptor.set!.call(this,value==='month'?'text':value);}});
+  const setAttribute=Element.prototype.setAttribute;
+  Element.prototype.setAttribute=function(name:string,value:string){setAttribute.call(this,name,this instanceof HTMLInputElement&&name==='type'&&value==='month'?'text':value);};
+ });
+}
 test('real client supports Home Schedule Me Manage across phone and tablet widths',async({page})=>{
  await setup(page);
  await page.getByRole('button',{name:'Schedule',exact:true}).click();
@@ -191,5 +199,41 @@ test('new material form blocks empty required details before sending a command',
  await page.getByText('New reading or PWP',{exact:true}).click();
  await page.getByRole('button',{name:'Save draft',exact:true}).click();
  await expect(page.getByLabel('Title',{exact:true})).toBeFocused();
+ expect(f.commands).toHaveLength(0);
+});
+test('month text fallback keeps partial entries editable and loads only complete months',async({page})=>{
+ await useMonthTextFallback(page);
+ await setup(page);await page.getByRole('button',{name:'Manage',exact:true}).click();
+ const month=page.getByLabel('Month',{exact:true});
+ const reads:string[]=[];
+ page.on('request',request=>{if(request.url().includes('/api/morning-prayer?'))reads.push(request.url());});
+ await expect(month).toHaveAttribute('type','text');
+ await month.fill('2026-');
+ await expect(month).toHaveValue('2026-');
+ await expect(page.getByTestId('wm-bulk-schedule')).toBeVisible();
+ expect(reads).toHaveLength(0);
+ await month.fill('2026-99');
+ await expect(month).toHaveValue('2026-99');
+ expect(reads).toHaveLength(0);
+ await month.fill('2026-12');
+ await expect.poll(()=>reads.some(url=>url.includes('from=2026-12-01&to=2026-12-31'))).toBe(true);
+ await expect(page.getByLabel('Month',{exact:true})).toHaveValue('2026-12');
+ await expect(page.locator('main [role=alert]')).toHaveCount(0);
+});
+test('PWP text fallback rejects an invalid month before creating a draft',async({page})=>{
+ await useMonthTextFallback(page);
+ const f=await setup(page);await page.getByRole('button',{name:'Manage',exact:true}).click();
+ await page.getByRole('button',{name:'Materials',exact:true}).click();
+ await page.getByText('New reading or PWP',{exact:true}).click();
+ const month=page.getByLabel('PWP month');
+ await expect(month).toHaveAttribute('type','text');
+ await month.fill('2026-99');
+ await page.getByLabel('Title',{exact:true}).fill('Fictional title');
+ await page.getByLabel('Summary',{exact:true}).fill('Fictional summary');
+ await page.getByLabel('Activities or points (one per line, up to five)').fill('Fictional point');
+ await page.getByLabel('Source',{exact:true}).fill('Fictional source');
+ await page.getByRole('button',{name:'Save draft',exact:true}).click();
+ await expect(month).toBeFocused();
+ expect(await month.evaluate(element=>(element as HTMLInputElement).validity.patternMismatch)).toBe(true);
  expect(f.commands).toHaveLength(0);
 });

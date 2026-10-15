@@ -13,7 +13,7 @@
 
 ## Work Mission interface refinement R6
 
-Anthony asked for a simpler, cleaner module and authorized independent execution. [R6 evidence](morning-prayer/SIMPLER-R6.md) records focused management sections, quieter member screens, native disclosures and simpler material entry. No database, grants, real input data or external distribution changes. This interface release is pending production verification; R5 remains the preceding compatible READY release.
+Anthony asked for a simpler, cleaner module and authorized independent execution. [R6 evidence](morning-prayer/SIMPLER-R6.md) records focused management sections, quieter member screens, native disclosures and simpler material entry. No database, grants, real input data or external distribution changes. Initial R6 source `2b88682` (PR #42) is live on READY production deployment `dpl_44DoGi1GHyJF3b3CafbZPRMywr9B`. The final month-entry compatibility guard passed the full build and browser checks; its production receipt is pending. R5 remains a compatible rollback release.
 
 ## Work Mission completion R5
 
