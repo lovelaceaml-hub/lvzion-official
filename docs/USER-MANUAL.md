@@ -97,3 +97,7 @@ In [Morning Prayer](https://lvz.app/modules/work-mission-prayer), open Manage to
 Use Material to revise to correct the latest unpublished draft or a published reading/PWP. Changes create a new version; source confirmation resets when you edit wording. A publisher must review and publish the replacement. Me lists your future hosting dates across the selected calendar month. Access revocation does not erase assignment or audit history.
 
 Real dates, permitted Zoom links, host eligibility and member/coordinator access must be chosen by the accountable owner. The release sends no external messages and does not change the retired Firebase app. [Operational evidence and remaining setup](morning-prayer/COMPLETION-R5.md).
+
+## Simpler Morning Prayer management
+
+Open [Morning Prayer](https://lvz.app/modules/work-mission-prayer), then Manage. Choose Schedule, Materials or People. Schedule has a month selector and expandable date controls. Materials lets you prepare a reading or choose the PWP month and week, with no internal key to type. Open Review draft to read all wording and its source before publishing. In People, choose an access level; custom permissions are available under Customize access. Owner and coordinator permissions remain enforced separately.

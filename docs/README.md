@@ -92,3 +92,5 @@ The catalog includes guides, historical plans, run records, JSON evidence, scree
 - [study-rooms/README.md](study-rooms/README.md)
 
 - [Work Mission completion R5](morning-prayer/COMPLETION-R5.md): current scope, verification, hosted migration, rollback and owner setup.
+
+- [Simpler Morning Prayer interface R6](morning-prayer/SIMPLER-R6.md): focused management, clear materials and phone/desktop evidence.
