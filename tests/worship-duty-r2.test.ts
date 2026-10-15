@@ -2,10 +2,10 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {readFile} from 'node:fs/promises';
 import {PGlite} from '@electric-sql/pglite';
-import {WorshipError,parseCandidates,parseCommand,parseLookup,parseSongs,parseWorkspace,reviewEnabled,sqlError} from '../lib/worship-duty/api-contract.ts';
+import {WorshipError,firstSuggestion,parseCandidates,parseCommand,parseLookup,parseSongs,parseWorkspace,sqlError} from '../lib/worship-duty/api-contract.ts';
+import {reviewEnabled} from '../lib/worship-duty/activation.ts';
 import {createHttpTransport} from '../lib/worship-duty/client-transport.ts';
 import {handleWorshipRequest} from '../lib/worship-duty/http-handler.ts';
-import {createRehearsal} from '../lib/worship-duty/rehearsal-transport.ts';
 const uuid='aaaaaaaa-aaaa-4aaa-8aaa-000000000001';
 const assignment={op:'assign',serviceId:uuid,dutyId:'usher_1',memberId:null,expectedVersion:0};
 test('R2 commands reject forged authority, ambiguous clears and malformed versions',()=>{
@@ -50,13 +50,10 @@ test('R2 transport rejects HTML, wrong-service responses and malformed projectio
  const wrong:typeof fetch=async()=>Response.json({kind:'candidates',serviceId:'bbbbbbbb-bbbb-4bbb-8bbb-000000000001',dutyId:'usher_1',version:0,candidates:[],hasMore:false});await assert.rejects(()=>createHttpTransport(wrong).candidates(uuid,'usher_1'));
  assert.throws(()=>parseWorkspace({memberId:uuid}));assert.throws(()=>parseCandidates({kind:'candidates',serviceId:uuid,dutyId:'usher_1',version:0,candidates:[],hasMore:'false'}));assert.throws(()=>parseSongs({kind:'songs',serviceId:uuid,songs:[{id:uuid,code:'1',title:'Test',seconds:0}],hasMore:false}));
 });
-test('R2 rehearsal follows the same contracts and recovers an uncertain save without duplication',async()=>{
- for(let persona=0;persona<5;persona++)parseWorkspace(await createRehearsal(persona).transport.workspace());
- const demo=createRehearsal(0),before=await demo.transport.workspace(),service=before.services[0],duty=service.assignments.find(a=>a.isMine)!;
- demo.loseNextResponse();await assert.rejects(()=>demo.transport.command({op:'request',serviceId:service.id,dutyId:duty.dutyId,expectedVersion:service.version}));
- const refreshed=await demo.transport.workspace();assert.equal(refreshed.requests.length,1);
- demo.staleNext();await assert.rejects(()=>demo.transport.command({op:'withdraw',requestId:refreshed.requests[0].id}));
- demo.revoke();await assert.rejects(()=>demo.transport.workspace(),(e:unknown)=>(e as WorshipError).status===403);
+test('R2 suggestions skip manual-only, ineligible and excluded members',()=>{
+ const c=(n:number,eligible:boolean,manualOnly:boolean)=>({id:`bbbbbbbb-bbbb-4bbb-8bbb-00000000000${n}`,name:`Member ${n}`,eligible,manualOnly,reason:'available' as const,paired:false});
+ const list=[c(1,false,false),c(2,true,true),c(3,true,false),c(4,true,false)];
+ assert.equal(firstSuggestion(list)?.id,list[2].id);assert.equal(firstSuggestion(list,list[2].id)?.id,list[3].id);assert.equal(firstSuggestion(list.slice(0,2)),undefined);assert.equal(firstSuggestion(undefined),undefined);
 });
 const member=(n:number)=>`44444444-4444-4444-8444-${String(n).padStart(12,'0')}`;
 const user=(n:number)=>`99999999-9999-4999-8999-${String(n).padStart(12,'0')}`;

@@ -1,7 +1,8 @@
 import {WorshipError,parseCandidates,parseCommand,parseLookup,parseSongs,parseWorkspace,sqlError} from './api-contract.ts';
 export type RpcClient={rpc:(name:string,args?:Record<string,unknown>)=>PromiseLike<{data:unknown;error:{code?:string}|null}>};
 export type HandlerDependencies={authorize:()=>Promise<RpcClient>;readBody:(request:Request)=>Promise<Record<string,unknown>>};
-const reply=(data:unknown,status=200)=>new Response(JSON.stringify(data),{status,headers:{'Content-Type':'application/json','Cache-Control':'private, no-store, max-age=0','Vary':'Cookie','X-Content-Type-Options':'nosniff'}});
+/** Private, uncached JSON. Every Worship response carries member-specific data. */
+export const reply=(data:unknown,status=200)=>new Response(JSON.stringify(data),{status,headers:{'Content-Type':'application/json','Cache-Control':'private, no-store, max-age=0','Vary':'Cookie','X-Content-Type-Options':'nosniff'}});
 // Dependency injection keeps HTTP behavior testable without creating a bypass or accepting an actor.
 // The production route supplies only the existing verified-member client and trusted-origin body reader.
 export async function handleWorshipRequest(request:Request,dependencies:HandlerDependencies):Promise<Response>{

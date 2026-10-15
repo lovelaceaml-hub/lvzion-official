@@ -1,6 +1,6 @@
 'use client';
 import {useEffect,useState,useRef} from 'react';
-import {CATALOG} from '../../lib/worship-duty/domain';
+import {CATALOG,PERIODS} from '../../lib/worship-duty/domain';
 import {parseSetupState,parseSetupCommand} from '../../lib/worship-duty/setup-contract';
 import type {SetupState,SetupService,SetupSong} from '../../lib/worship-duty/setup-contract';
 import {serviceInstant,serviceLocalTime} from '../../lib/worship-duty/service-time';
@@ -42,7 +42,7 @@ export default function SetupWorkspace(){
      </div>{m.departments.includes(d)&&<div className="ws-qualifications">{CATALOG.filter(c=>c.department===d).map(c=><label key={c.id}><input type="checkbox" checked={m.duties.includes(c.id)} onChange={e=>void save({op:'qualify',memberId:m.id,dutyId:c.id,enabled:e.target.checked,expectedVersion:data.version})}/>{c.label}</label>)}</div>}</details>)}
      <h3>Song editing</h3><p>This permission is independent of department scheduling and assigned Presider access.</p><button type="button" onClick={()=>void save({op:'song_editor',memberId:m.id,enabled:!m.songEditor,expectedVersion:data.version})}>{m.songEditor?'End song-editor appointment':'Appoint song editor'}</button>
      <h3>Service availability</h3><p>A service exception overrides the member's day or weekly setting. Existing assignments remain in place and display a conflict.</p>
-     {data.services.filter(s=>s.status!=='cancelled'&&Date.parse(s.startsAt)>Date.now()).map(s=>{const a=m.serviceAvailability.find(a=>a.serviceId===s.id);return <label key={s.id}>{s.worship} | {serviceLocalTime(s.startsAt).replace('T',' ')}<select value={a===undefined?'':'available' in a&&a.available?'true':'false'} onChange={e=>void save({op:'service_availability',memberId:m.id,serviceId:s.id,available:e.target.value==='true',expectedAvailabilityVersion:m.availabilityVersion,expectedVersion:data.version})}><option value="" disabled>Use member's normal availability</option><option value="true">Available for this service</option><option value="false">Unavailable for this service</option></select></label>;})}
+     {data.services.filter(s=>s.status!=='cancelled'&&Date.parse(s.startsAt)>Date.now()).map(s=>{const a=m.serviceAvailability.find(a=>a.serviceId===s.id);return <label key={s.id}>{s.worship} | {serviceLocalTime(s.startsAt).replace('T',' ')}<select value={a===undefined?'':a.available?'true':'false'} onChange={e=>void save({op:'service_availability',memberId:m.id,serviceId:s.id,available:e.target.value==='true',expectedAvailabilityVersion:m.availabilityVersion,expectedVersion:data.version})}><option value="" disabled>Use member's normal availability</option><option value="true">Available for this service</option><option value="false">Unavailable for this service</option></select></label>;})}
     </div>}
    </section>
    <section className="wd-card"><h2>Approved song catalog</h2><SongForm version={data.version} save={save}/>{data.songsHasMore&&<p className="wd-warning">Only the first 500 catalog entries are shown.</p>}{data.songs.map(s=><details key={`${s.id}:${data.version}`}><summary>{s.code} | {s.title}{s.active?'':' (archived)'}</summary><SongForm song={s} version={data.version} save={save}/></details>)}<p className="wd-muted">Used song details remain historical. Add a new catalog revision to change a used song. Archiving retains saved plans.</p></section>
@@ -53,7 +53,7 @@ function ServiceForm({s,save}:{s?:SetupService;save:Save}){
  const [error,setError]=useState('');
  return <form className="ws-form" onSubmit={async e=>{e.preventDefault();const f=new FormData(e.currentTarget);setError('');try{await save({op:s?'move':'create',...(s?{serviceId:s.id,expectedVersion:s.version}:{}),worship:f.get('worship'),period:f.get('period'),startsAt:serviceInstant(String(f.get('start'))),endsAt:serviceInstant(String(f.get('end')))});}catch(e){setError(e instanceof Error?e.message:'Choose valid service details.');}}}>
   <label>Worship type<input name="worship" required minLength={2} maxLength={80} defaultValue={s?.worship??'Sabbath Day'}/></label>
-  <label>Period<select name="period" defaultValue={s?.period??'Morning'}>{['Early Morning','Morning','Afternoon','Evening','Commemoration'].map(p=><option key={p}>{p}</option>)}</select></label>
+  <label>Period<select name="period" defaultValue={s?.period??'Morning'}>{PERIODS.map(p=><option key={p}>{p}</option>)}</select></label>
   <label>Starts (Las Vegas)<input type="datetime-local" name="start" required defaultValue={s?serviceLocalTime(s.startsAt):undefined}/></label><label>Ends (Las Vegas)<input type="datetime-local" name="end" required defaultValue={s?serviceLocalTime(s.endsAt):undefined}/></label>
   {error&&<p role="alert">{error}</p>}<button type="submit" className="wd-primary">{s?'Save service details':'Create draft service'}</button>
  </form>;

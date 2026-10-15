@@ -1,16 +1,16 @@
 'use client';
 import {useEffect,useState} from 'react';
-import {CATALOG,hasChoir,hasThanks} from '../../lib/worship-duty/domain';
+import {CATALOG,dutyLabel,hasDuty} from '../../lib/worship-duty/domain';
 import type {Duty} from '../../lib/worship-duty/domain';
 import type {Workspace,BatchChange,CandidateList,ServiceView,Command} from '../../lib/worship-duty/api-contract';
-import {isClosed,WorshipError} from '../../lib/worship-duty/api-contract';
+import {firstSuggestion,isClosed,WorshipError} from '../../lib/worship-duty/api-contract';
 import type {WorshipTransport} from '../../lib/worship-duty/client-transport';
 import {serviceLocalTime} from '../../lib/worship-duty/service-time';
 type Props={data:Workspace;api:WorshipTransport;act:(c:Command)=>Promise<boolean>;onError:(e:unknown)=>void;onDirty:(d:boolean)=>void};
 export default function MonthlyPlanner({data,api,act,onError,onDirty}:Props){
  const [month,setMonth]=useState(serviceLocalTime(data.now).slice(0,7)),[calendar,setCalendar]=useState(false),[selected,setSelected]=useState(''),[duty,setDuty]=useState<Duty>('presider'),[options,setOptions]=useState<CandidateList|null>(null),[choice,setChoice]=useState(''),[changes,setChanges]=useState<BatchChange[]>([]),[review,setReview]=useState(false),[names,setNames]=useState<Record<string,string>>({});
  const services=data.services.filter(s=>serviceLocalTime(s.startsAt).startsWith(month));
- const s=services.find(s=>s.id===selected),duties=CATALOG.filter(d=>data.manageDepartments.includes(d.department)&&(!s||d.id!=='thanks_prayer'||hasThanks(s))&&(!s||d.id!=='closing_prayer'||hasChoir(s.worship)));
+ const s=services.find(s=>s.id===selected),duties=CATALOG.filter(d=>data.manageDepartments.includes(d.department)&&(!s||hasDuty(s,d.id)));
  const activeDuty=duties.some(d=>d.id===duty)?duty:duties[0]?.id;
  useEffect(()=>{onDirty(changes.length>0);return()=>onDirty(false);},[changes.length,onDirty]);
  useEffect(()=>{
@@ -31,10 +31,10 @@ export default function MonthlyPlanner({data,api,act,onError,onDirty}:Props){
    <label>Proposed member<select aria-label="Proposed member" disabled={!options} value={choice} onChange={e=>setChoice(e.target.value)}><option value="">Leave open</option>{choice&&!options?.candidates.some(c=>c.id===choice)&&<option value={choice}>Current assignment</option>}{options?.candidates.map(c=><option key={c.id} value={c.id}>{c.name}{!c.eligible?' (current conflict or unavailable)':c.manualOnly?' (manual only)':''}</option>)}</select></label>
    {options?.hasMore&&<p className="wd-warning">Candidate list is incomplete. Omitted members are not confirmed ineligible.</p>}
    <p className="wd-muted">Current conflicts may be resolved by another staged change, such as a swap. The database validates the final batch. Availability and qualifications are always enforced.</p>
-   <div className="wd-actions"><button type="button" disabled={!options||changes.length>=40} onClick={stage}>Stage assignment</button>{activeDuty!=='opening_prayer'&&<button type="button" disabled={!options?.candidates.some(c=>c.eligible&&!c.manualOnly)} onClick={()=>setChoice(options?.candidates.find(c=>c.eligible&&!c.manualOnly)?.id??'')}>Suggest eligible member</button>}</div>
+   <div className="wd-actions"><button type="button" disabled={!options||changes.length>=40} onClick={stage}>Stage assignment</button>{activeDuty!=='opening_prayer'&&<button type="button" disabled={!firstSuggestion(options?.candidates)} onClick={()=>setChoice(firstSuggestion(options?.candidates)?.id??'')}>Suggest eligible member</button>}</div>
   </>}
   {!!changes.length&&<><h3>{changes.length} unsaved changes</h3><div className="wd-actions"><button type="button" onClick={()=>setReview(true)}>Review assignment batch</button><button type="button" onClick={()=>{if(window.confirm('Discard all staged assignments?')){setChanges([]);setReview(false);}}}>Discard staged changes</button></div>
-   {review&&<div role="region" aria-label="Assignment batch review"><h3>Review before saving</h3>{changes.map(c=>{const service=data.services.find(s=>s.id===c.serviceId);return <p key={c.serviceId+c.dutyId}>{service?label(service):'Service no longer visible'}<br/>{CATALOG.find(d=>d.id===c.dutyId)?.label}: {service?.assignments.find(a=>a.dutyId===c.dutyId)?.name??'Not filled'} → {c.memberId?names[c.memberId]??'Selected member':'Leave open'}</p>;})}<button type="button" className="wd-primary" onClick={async()=>{if(await act({op:'batch',changes})){setChanges([]);setReview(false);}}}>Apply reviewed assignments</button></div>}
+   {review&&<div role="region" aria-label="Assignment batch review"><h3>Review before saving</h3>{changes.map(c=>{const service=data.services.find(s=>s.id===c.serviceId);return <p key={c.serviceId+c.dutyId}>{service?label(service):'Service no longer visible'}<br/>{dutyLabel(c.dutyId)}: {service?.assignments.find(a=>a.dutyId===c.dutyId)?.name??'Not filled'} → {c.memberId?names[c.memberId]??'Selected member':'Leave open'}</p>;})}<button type="button" className="wd-primary" onClick={async()=>{if(await act({op:'batch',changes})){setChanges([]);setReview(false);}}}>Apply reviewed assignments</button></div>}
   </>}
  </section>;
 }

@@ -1,8 +1,8 @@
 import {WorshipError,sqlError} from './api-contract.ts';
 import {parseSetupCommand,parseSetupState} from './setup-contract.ts';
+import {reply} from './http-handler.ts';
 import type {HandlerDependencies} from './http-handler.ts';
 export async function handleSetupRequest(request:Request,deps:HandlerDependencies):Promise<Response>{
- const reply=(v:unknown,status=200)=>new Response(JSON.stringify(v),{status,headers:{'Content-Type':'application/json','Cache-Control':'private, no-store, max-age=0','Vary':'Cookie','X-Content-Type-Options':'nosniff'}});
  try{
   if(!['GET','POST'].includes(request.method))return reply({error:'Method not allowed.'},405);
   if(new URL(request.url).search)throw new WorshipError('Unexpected query parameters.');

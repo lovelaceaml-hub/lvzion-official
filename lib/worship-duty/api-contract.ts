@@ -1,5 +1,7 @@
-import {CATALOG,DEPARTMENTS} from './domain.ts';
+import {DEPARTMENTS,DUTY_IDS,PERIODS} from './domain.ts';
 import type {Duty,Department,Period} from './domain.ts';
+import {WorshipError,validators} from './validate.ts';
+export {WorshipError};
 
 export type AssignmentView={dutyId:Duty;filled:boolean;isMine:boolean;memberId:string|null;name:string;availabilityConflict:boolean|null};
 export type ServiceView={id:string;worship:string;period:Period;startsAt:string;endsAt:string;status:'draft'|'published'|'cancelled';version:number;canPlan:boolean;assignments:AssignmentView[]};
@@ -21,21 +23,10 @@ export type Command=
  |{op:'resolve';requestId:string;decision:'replace'|'open'|'decline'|'close';memberId?:string|null;expectedVersion:number}
  |{op:'availability';day:string;unavailable:boolean;expectedVersion:number}
  |{op:'program';serviceId:string;expectedVersion:number;expectedProgramVersion:number;status:'draft'|'confirmed';items:ProgramItem[]};
-export class WorshipError extends Error {status:number;code:string;constructor(message:string,status=400,code='invalid'){super(message);this.status=status;this.code=code;}}
-const fail=():never=>{throw new WorshipError('Invalid Worship Duty data.');};
-const object=(v:unknown):Record<string,unknown>=>v!==null&&typeof v==='object'&&!Array.isArray(v)?v as Record<string,unknown>:fail();
-const text=(v:unknown,max=160):string=>typeof v==='string'&&v.length<=max?v:fail();
-const bool=(v:unknown):boolean=>typeof v==='boolean'?v:fail();
-const list=(v:unknown,max:number):unknown[]=>Array.isArray(v)&&v.length<=max?v:fail();
-const integer=(v:unknown,max=999999999):number=>typeof v==='number'&&Number.isSafeInteger(v)&&v>=0&&v<=max?v:fail();
-const uuidPattern=/^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
-export const uuid=(v:unknown):string=>typeof v==='string'&&uuidPattern.test(v)?v:fail();
+const {fail,object,text,bool,list,integer,oneOf,uuid,instant,keys}=validators('Invalid Worship Duty data.');
 const nullableId=(v:unknown):string|null=>v===null?null:uuid(v);
-const oneOf=<T extends string>(v:unknown,values:readonly T[]):T=>typeof v==='string'&&values.includes(v as T)?v as T:fail();
-const duty=(v:unknown):Duty=>oneOf(v,CATALOG.map(d=>d.id));
+const duty=(v:unknown):Duty=>oneOf(v,DUTY_IDS);
 const date=(v:unknown):string=>{const s=text(v,10);if(!/^\d{4}-\d{2}-\d{2}$/.test(s)||!Number.isFinite(Date.parse(s+'T12:00:00Z'))||new Date(s+'T12:00:00Z').toISOString().slice(0,10)!==s)fail();return s;};
-const instant=(v:unknown):string=>{const s=text(v,40);if(!/^\d{4}-\d{2}-\d{2}T.*(?:Z|[+-]\d{2}:\d{2})$/.test(s)||!Number.isFinite(Date.parse(s)))fail();return s;};
-const keys=(o:Record<string,unknown>,required:string[],optional:string[]=[])=>{if(required.some(k=>!(k in o))||Object.keys(o).some(k=>![...required,...optional].includes(k)))fail();};
 function unique<T>(items:T[],key:(x:T)=>string):T[]{if(new Set(items.map(key)).size!==items.length)fail();return items;}
 export function parseItems(v:unknown):ProgramItem[]{return unique(list(v,23).map(raw=>{const i=object(raw);keys(i,['section','position','songId']);const section=oneOf(i.section,['preparation','glory','thanks','choir'] as const),position=integer(i.position,20);if(position<1||(section!=='preparation'&&position!==1))fail();return{section,position,songId:uuid(i.songId)};}),i=>`${i.section}:${i.position}`);}
 export function parseCommand(raw:unknown):Command{
@@ -66,7 +57,7 @@ export function parseWorkspace(raw:unknown):Workspace{
  const services=unique(list(o.services,80).map(raw=>{
   const s=object(raw),startsAt=instant(s.startsAt),endsAt=instant(s.endsAt);if(Date.parse(endsAt)<=Date.parse(startsAt))fail();
   const assignments=unique(list(s.assignments,27).map(raw=>{const a=object(raw);return{dutyId:duty(a.dutyId),filled:bool(a.filled),isMine:bool(a.isMine),memberId:nullableId(a.memberId),name:text(a.name,120),availabilityConflict:a.availabilityConflict===null?null:bool(a.availabilityConflict)};}),a=>a.dutyId);
-  return{id:uuid(s.id),worship:text(s.worship,80),period:oneOf(s.period,['Early Morning','Morning','Afternoon','Evening','Commemoration'] as const),startsAt,endsAt,status:oneOf(s.status,['draft','published','cancelled'] as const),version:integer(s.version),canPlan:bool(s.canPlan),assignments};
+  return{id:uuid(s.id),worship:text(s.worship,80),period:oneOf(s.period,PERIODS),startsAt,endsAt,status:oneOf(s.status,['draft','published','cancelled'] as const),version:integer(s.version),canPlan:bool(s.canPlan),assignments};
  }),s=>s.id);
  const requests=unique(list(o.requests,100).map(raw=>{const r=object(raw);return{id:uuid(r.id),serviceId:uuid(r.serviceId),dutyId:duty(r.dutyId),isMine:bool(r.isMine),status:oneOf(r.status,['pending','withdrawn','approved','declined','closed'] as const),stale:bool(r.stale)};}),r=>r.id);
  const programs=unique(list(o.programs,80).map(raw=>{const p=object(raw);return{serviceId:uuid(p.serviceId),version:integer(p.version),status:oneOf(p.status,['draft','confirmed','sung'] as const),items:parseItems(p.items)};}),p=>p.serviceId);
@@ -78,6 +69,6 @@ export function sqlError(code:string|undefined):WorshipError{
  if(['23514','23503','22023','22P02','22007','22008','23502'].includes(code??''))return new WorshipError('That change is not allowed. Review the service, assignment eligibility and selected songs.',422,'rule');
  return new WorshipError('Worship Duty is temporarily unavailable. No success has been confirmed.',503,'unavailable');
 }
-export function reviewEnabled(env:Record<string,string|undefined>):boolean{return env.LVZ_WORSHIP_DUTY_ENABLED==='true'&&env.VERCEL_ENV!=='production';}
 export const isClosed=(s:ServiceView,now:string)=>s.status==='cancelled'||Date.parse(s.startsAt)<=Math.max(Date.parse(now),Date.now());
-export const departmentOf=(d:Duty)=>CATALOG.find(x=>x.id===d)!.department;
+/** First eligible member who may be suggested; manual-only members are never proposed. */
+export const firstSuggestion=(candidates:readonly Candidate[]|undefined,excludeId?:string)=>candidates?.find(c=>c.eligible&&!c.manualOnly&&c.id!==excludeId);
