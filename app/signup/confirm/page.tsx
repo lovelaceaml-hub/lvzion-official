@@ -3,6 +3,7 @@
 import {useEffect,useRef,useState} from 'react';
 import {forgetConfirmation,pendingConfirmation} from '../../../lib/confirmation-cache';
 import '../../../components/members.css';
+import {postJson} from '../../../lib/post-json';
 
 const PENDING_KEY='lvz:confirmation:pkce';
 export default function ConfirmSignup(){
@@ -22,7 +23,7 @@ export default function ConfirmSignup(){
   if(busy||!code.current)return;
   setBusy(true);setMessage('');
   try{
-   const r=await fetch('/api/auth/signup-confirm',{method:'POST',headers:{'Content-Type':'application/json'},credentials:'same-origin',cache:'no-store',body:JSON.stringify({code:code.current})});
+   const r=await postJson('/api/auth/signup-confirm',{code:code.current},{credentials:'same-origin',cache:'no-store'});
    const d=await r.json() as {error?:string;next?:string};
    if(r.ok){
     forgetConfirmation(PENDING_KEY);

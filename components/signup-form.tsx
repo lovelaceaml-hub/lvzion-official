@@ -4,6 +4,7 @@ import {useEffect,useRef,useState,type FormEvent} from 'react';
 import {signupNames} from '../lib/signup-name';
 import CaptchaChallenge from './captcha-challenge';
 import './members.css';
+import {postJson} from '../lib/post-json';
 
 const SUBMITTED_KEY='lvz:signup:check-email';
 const SUBMITTED_FOR_MS=30*60*1000;
@@ -53,11 +54,7 @@ export default function SignupForm({enabled,local,siteKey}:{enabled:boolean;loca
   setBusy(true);
   setError('');
   try{
-   const response=await fetch('/api/auth/sign-up',{
-    method:'POST',headers:{'Content-Type':'application/json'},
-    credentials:'same-origin',cache:'no-store',
-    body:JSON.stringify({...input,...names,captchaToken:captcha||undefined})
-   });
+   const response=await postJson('/api/auth/sign-up',{...input,...names,captchaToken:captcha||undefined},{credentials:'same-origin',cache:'no-store'});
    const data:unknown=await response.json();
    if(!data||typeof data!=='object')throw new Error('Unexpected signup response. Please try again.');
    const result=data as {message?:string;error?:string};
@@ -87,11 +84,7 @@ export default function SignupForm({enabled,local,siteKey}:{enabled:boolean;loca
   if(typeof email!=='string'||!email.trim())return;
   setResendBusy(true);setResendError('');setResendStatus('');
   try{
-   const response=await fetch('/api/auth/resend-confirmation',{
-    method:'POST',headers:{'Content-Type':'application/json'},
-    credentials:'same-origin',cache:'no-store',
-    body:JSON.stringify({email:email.trim()})
-   });
+   const response=await postJson('/api/auth/resend-confirmation',{email:email.trim()},{credentials:'same-origin',cache:'no-store'});
    const data=await response.json() as {message?:string;error?:string};
    if(!response.ok)throw new Error(data.error||'Resend unavailable. Try again later.');
    setResendStatus(data.message||'Check your inbox for the newest confirmation email.');

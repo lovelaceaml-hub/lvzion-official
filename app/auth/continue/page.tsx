@@ -3,6 +3,7 @@
 import {useEffect,useRef,useState} from 'react';
 import {forgetConfirmation,pendingConfirmation} from '../../../lib/confirmation-cache';
 import '../../../components/members.css';
+import {postJson} from '../../../lib/post-json';
 
 const PENDING_KEY='lvz:confirmation:email';
 export default function ContinueAuth(){
@@ -22,7 +23,7 @@ export default function ContinueAuth(){
   if(busy||!payload.current)return;
   setBusy(true);setMessage('');
   try{
-   const r=await fetch('/api/auth/confirm',{method:'POST',headers:{'Content-Type':'application/json'},credentials:'same-origin',cache:'no-store',body:JSON.stringify(payload.current)});
+   const r=await postJson('/api/auth/confirm',payload.current,{credentials:'same-origin',cache:'no-store'});
    const d=await r.json() as {next?:string;error?:string};
    if(r.ok&&d.next&&['/activate','/reset-password','/members'].includes(d.next)){
     forgetConfirmation(PENDING_KEY);

@@ -8,7 +8,7 @@ import {
 import type {Workspace} from '../lib/contracts';
 import {
  actionNotices,activitiesForPreview,addCalendarDays,canManage,
- cleanFavorites,conceptModules,formatDay,localDay,monthCells,
+ cleanFavorites,conceptModules,formatDay,initials,localDay,monthCells,
  reorderFavorite,toggleFavorite,weekDays
 } from '../lib/member-experience';
 import type{MemberActivity,ModuleEntry}from'../lib/member-experience';
@@ -30,7 +30,6 @@ function nextMonth(day:string,offset:number){
  const d=new Date(day.slice(0,7)+'-01T12:00:00Z');d.setUTCMonth(d.getUTCMonth()+offset);
  return d.toISOString().slice(0,10);
 }
-function initials(name:string){return name.split(/\s+/).filter(Boolean).slice(0,2).map(x=>x[0]).join('').toUpperCase();}
 export default function MemberHome({workspace:w,demo=false,manageHref,experience,onFavoriteUpdate,onModuleNoticeRead}:Props){
  const[section,setSection]=useState<Section>('home');
  const[period,setPeriod]=useState<Period>('today');

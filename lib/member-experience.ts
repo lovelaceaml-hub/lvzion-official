@@ -86,6 +86,8 @@ export function actionNotices(w:Workspace):ActionNotice[]{
  const enrollments=w.permissions.organization?(w.unassignedMembers??[]).map(x=>({id:'enrollment-'+x.id,title:'Unassigned member needs verification',description:'Verify membership and choose an initial placement.',destination:'manage' as const,source:'access-request' as const})):[];
  return [...transfers,...requests,...enrollments];
 }
+/** Up to two capital initials for an avatar. */
+export function initials(name:string):string{return name.split(/\s+/).filter(Boolean).slice(0,2).map(x=>x[0]).join('').toUpperCase();}
 export function canManage(w:Workspace):boolean{
  return w.permissions.organization||w.permissions.memberManagement||w.permissions.departmentAdmin||w.permissions.technical||
   w.departments.some(d=>d.canManage);
