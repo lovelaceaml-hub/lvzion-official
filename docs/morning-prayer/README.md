@@ -1,3 +1,5 @@
+> Simpler interface refinement: [R6](SIMPLER-R6.md). R5 below records the installed operational foundations.
+
 > Current actual-app implementation: [Completion R5](COMPLETION-R5.md). Historical R2 material below remains reference only.
 
 # Morning Prayer — corrected legacy-app workstream R2

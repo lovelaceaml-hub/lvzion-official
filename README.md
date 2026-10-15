@@ -45,3 +45,5 @@ npm run test:browser
 Build checks types, application behavior and disposable PostgreSQL permissions. Browser tests run locally with fictional data. See AGENTS.md for isolated Auth/SMTP integration commands. Production requires explicit activation for the exact backend and https://lvz.app. Credentials belong in Keychain or provider stores, never Git. Automatic Git deployments are disabled; production release is deliberate.
 
 Work Mission operations and completion evidence: [Morning Prayer R5](docs/morning-prayer/COMPLETION-R5.md). Actual-app release is verified at `caf5ba8`; real owner setup remains explicit.
+
+Simpler Morning Prayer interface work: [R6](docs/morning-prayer/SIMPLER-R6.md), existing operational foundations and privacy controls retained.
