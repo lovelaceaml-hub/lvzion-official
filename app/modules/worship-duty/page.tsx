@@ -1,13 +1,13 @@
 import {redirect} from 'next/navigation';
-import Link from 'next/link';
 import {requireMember} from '../../../lib/server/supabase';
 import {worshipOperationalEnabled} from '../../../lib/worship-duty/activation';
 import {parseModuleFeed} from '../../../lib/app-runtime';
 import ConnectedWorkspace from '../../../components/worship-duty/connected-workspace';
+import AppHeader from '../../../components/app-header';
 export const dynamic='force-dynamic';
 export const metadata={title:'Worship Duty · LV Zion',robots:{index:false,follow:false}};
 function Notice({children}:{children:string}){
- return <main style={{maxWidth:560,margin:'40px auto',padding:24}}><Link href="/members">‹ My Week</Link><h1>Worship Duty</h1><p>{children}</p></main>;
+ return <div className="ui-page"><AppHeader homeHref="/members"/><main className="ui-main ui-narrow"><h1 className="ui-title">Worship Duty</h1><p className="ui-lede">{children}</p><p><a className="ui-link" href="/members">Back to My Week</a></p></main></div>;
 }
 export default async function Page(){
  let client;

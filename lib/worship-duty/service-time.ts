@@ -1,6 +1,8 @@
 // Every service time is Las Vegas time, independent of the viewing device's timezone.
 const ZONE='America/Los_Angeles';
 const format=new Intl.DateTimeFormat('sv-SE',{timeZone:ZONE,year:'numeric',month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit',hourCycle:'h23'});
+const dayFormat=new Intl.DateTimeFormat('en-US',{timeZone:ZONE,weekday:'short',month:'short',day:'numeric'});
+const clockFormat=new Intl.DateTimeFormat('en-US',{timeZone:ZONE,hour:'numeric',minute:'2-digit'});
 const labelFormat=new Intl.DateTimeFormat('en-US',{timeZone:ZONE,weekday:'short',month:'short',day:'numeric',hour:'numeric',minute:'2-digit'});
 /** YYYY-MM-DDTHH:MM in Las Vegas. */
 export function serviceLocalTime(iso:string){return format.format(new Date(iso)).replace(' ','T');}
@@ -8,6 +10,10 @@ export function serviceLocalTime(iso:string){return format.format(new Date(iso))
 export const vegasDate=(iso:string)=>serviceLocalTime(iso).slice(0,10);
 /** For example "Sat, Oct 17, 10:00 AM". */
 export const serviceLabel=(iso:string)=>labelFormat.format(new Date(iso));
+/** For example "Sat, Oct 17". */
+export const serviceDay=(iso:string)=>dayFormat.format(new Date(iso));
+/** For example "10:00 AM". */
+export const serviceClock=(iso:string)=>clockFormat.format(new Date(iso));
 export function serviceInstant(local:string){
  if(!/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}$/.test(local))throw new Error('Choose a valid Las Vegas date and time.');
  const wall=Date.parse(local+'Z');
