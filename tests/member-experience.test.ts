@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {actionNotices,activitiesForPreview,addCalendarDays,cleanFavorites,conceptModules,localDay,mondayOf,monthCells,reorderFavorite,toggleFavorite,weekDays} from '../lib/member-experience.ts';
+import {actionNotices,activitiesForPreview,addCalendarDays,cleanFavorites,conceptModules,greeting,initials,localDay,localTime,mondayOf,nowIndex,monthCells,reorderFavorite,toggleFavorite,weekDays} from '../lib/member-experience.ts';
 import {demoWorkspace,id,initialDemo}from'../lib/demo.ts';
 
 test('Las Vegas local day differs correctly from UTC around midnight',()=>{
@@ -44,4 +44,18 @@ test('authorized staff see generic alerts without email or member name',()=>{
  assert(notes.some(n=>n.source==='access-request'));
  assert(!JSON.stringify(notes).includes('@example.invalid'));
  assert(!JSON.stringify(notes).includes('Isla Example'));
+});
+
+test('home greeting and now mark follow the church clock',()=>{
+ assert.equal(localTime(new Date('2026-10-14T13:12:00Z')),'06:12');
+ assert.equal(localTime(new Date('2026-12-01T07:30:00Z')),'23:30');
+ assert.equal(greeting('06:12'),'Good morning');
+ assert.equal(greeting('12:00'),'Good afternoon');
+ assert.equal(greeting('17:00'),'Good evening');
+ assert.equal(greeting('02:00'),'Good evening');
+ const day=[{startTime:'05:00'},{startTime:'19:00'},{startTime:'20:00'}];
+ assert.equal(nowIndex(day,'06:12'),1);
+ assert.equal(nowIndex(day,'04:00'),0);
+ assert.equal(nowIndex(day,'21:00'),3);
+ assert.equal(initials('eira  example member'),'EE');
 });

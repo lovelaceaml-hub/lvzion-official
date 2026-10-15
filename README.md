@@ -11,6 +11,7 @@
 - **Contacts owner instructions:** [How to use Contacts](docs/contacts/USER-GUIDE.md) · [Privacy and operational scope](docs/contacts/README.md)
 - **Repository:** [Private GitHub repository](https://github.com/lovelaceaml-hub/lvzion-official)
 - **Handoff:** [Current status](docs/HANDOFF.md)
+- **Design contract:** [Day Sheet look every screen follows](docs/design/LVZ-DESIGN-CONTRACT.md)
 - **Setup:** [Behavior, validation and rollback](docs/ACTUAL-APP-SETUP.md)
 
 Independent phone-first Next.js application, using its own Supabase project. Original LV Zion apps and databases are outside scope. No new previews are published without Anthony's explicit request.

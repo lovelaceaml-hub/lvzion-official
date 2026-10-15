@@ -2,7 +2,7 @@ import{test,expect}from'@playwright/test';
 const uid=(n:number)=>'44444444-4444-4444-8444-'+String(n).padStart(12,'0');
 test('new phone home provides Today, Week and 42-cell Calendar views',async({page})=>{
  await page.goto('/experience-preview');
- await expect(page.getByRole('heading',{name:/Welcome back/})).toBeVisible();
+ await expect(page.getByRole('heading',{name:/^Good (morning|afternoon|evening), /})).toBeVisible();
  await expect(page.getByText('Example Activity 01').first()).toBeVisible();
  await page.getByRole('button',{name:'Week',exact:true}).click();
  await expect(page.getByRole('heading',{name:'This week'})).toBeVisible();

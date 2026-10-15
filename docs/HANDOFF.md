@@ -11,6 +11,17 @@
 - [Study Room current status](study-rooms/README.md)
 - [Study Room cutover runbook](study-rooms/CUTOVER-RUNBOOK.md)
 
+## Shared core refactor and Day Sheet redesign (branch, not released)
+
+Anthony asked for a refactor and redesign of the whole app and chose the **Day Sheet** look on 2026-10-14 from three directions ([board](design/directions/direction-board.html)). Branch `claude/refactor-shared-core-1f518a` holds:
+
+- The locked [design contract](design/LVZ-DESIGN-CONTRACT.md), tokens in `styles/lvz-tokens.css`, shared `ui-` building blocks in `styles/lvz-ui.css`, `components/app-header.tsx` (wordmark always goes home) and `lib/use-swipe-tabs.ts` (swipe between tabs). The five module sessions adopt these on their own branches.
+- Shared screens redesigned: member Home (day line with a "now" mark, apps and group on the side on desktop), member workspace, unassigned profile, sign in, sign up, confirmation, recovery, activation, access request, install guide, module landing and the offline page.
+- Cleanup with no permission or data change: the old global stylesheet (entirely unused), an unused time helper, and duplicated JSON-post, permission and initials code were removed or consolidated.
+- Preview routes (`/experience-preview`, `/member-preview`, `/enrollment-preview`, `/roster-preview`, `/display-operations-review`) were kept: each is a fixture the browser suite drives, all are blocked in production, and the roster rehearsal is a documented R6 deliverable.
+
+Nothing on this branch is merged or deployed. Production stays on the release recorded below until Anthony approves a release.
+
 ## Work Mission interface refinement R6
 
 Anthony asked for a simpler, cleaner module and authorized independent execution. [R6 evidence](morning-prayer/SIMPLER-R6.md) records focused management sections, quieter member screens, native disclosures and simpler material entry. No database, grants, real input data or external distribution changes. Initial R6 source `2b88682` (PR #42) is live on READY production deployment `dpl_44DoGi1GHyJF3b3CafbZPRMywr9B`. The final month-entry compatibility guard passed the full build and browser checks; its production receipt is pending. R5 remains a compatible rollback release.
