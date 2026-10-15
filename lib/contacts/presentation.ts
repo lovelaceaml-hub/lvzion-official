@@ -1,34 +1,28 @@
 import type {ContactSummary} from './server-contract.ts';
 export type ContactFilter='open'|'new'|'active'|'paused'|'closed'|'archived'|'all';
 export type ContactCounts={loaded:number;open:number;new:number;active:number;paused:number;closed:number;archived:number};
+export const contactFilters:readonly {value:ContactFilter;label:string}[]=[
+ {value:'open',label:'Open'},{value:'new',label:'New'},{value:'active',label:'Active'},{value:'paused',label:'Paused'},
+ {value:'closed',label:'Closed'},{value:'archived',label:'Archived'},{value:'all',label:'All'}
+];
+/** Fails closed: a record without a matching owner is never counted, listed or searched. */
+const ownedBy=(c:ContactSummary,memberId:string)=>Boolean(memberId)&&Boolean(c.ownerId)&&c.ownerId===memberId;
+function matchesFilter(c:ContactSummary,filter:ContactFilter):boolean{
+ if(filter==='all')return true;
+ if(filter==='archived')return c.archived;
+ if(c.archived)return false;
+ if(filter==='open')return c.lifecycle!=='closed';
+ return c.lifecycle===filter;
+}
 export function contactCounts(records:readonly ContactSummary[],memberId:string):ContactCounts {
- const own=records.filter(c=>Boolean(memberId)&&Boolean(c.ownerId)&&c.ownerId===memberId);
- return {
-  loaded:own.length,
-  open:own.filter(c=>!c.archived&&c.lifecycle!=='closed').length,
-  new:own.filter(c=>!c.archived&&c.lifecycle==='new').length,
-  active:own.filter(c=>!c.archived&&c.lifecycle==='active').length,
-  paused:own.filter(c=>!c.archived&&c.lifecycle==='paused').length,
-  closed:own.filter(c=>!c.archived&&c.lifecycle==='closed').length,
-  archived:own.filter(c=>c.archived).length
- };
+ const own=records.filter(c=>ownedBy(c,memberId));
+ const count=(filter:ContactFilter)=>own.filter(c=>matchesFilter(c,filter)).length;
+ return {loaded:own.length,open:count('open'),new:count('new'),active:count('active'),paused:count('paused'),closed:count('closed'),archived:count('archived')};
 }
 export function findLoadedContacts(records:readonly ContactSummary[],memberId:string,filter:ContactFilter,query:string):ContactSummary[] {
  const needle=query.normalize('NFKC').trim().toLocaleLowerCase('en-US').slice(0,120);
- return records.filter(c=>{
-  if(!memberId||!c.ownerId||c.ownerId!==memberId)return false;
-  if(needle&&!c.name.normalize('NFKC').toLocaleLowerCase('en-US').includes(needle))return false;
-  if(filter==='all')return true;
-  if(filter==='archived')return c.archived;
-  if(c.archived)return false;
-  if(filter==='open')return c.lifecycle!=='closed';
-  return c.lifecycle===filter;
- }).sort((a,b)=>a.name.localeCompare(b.name,'en-US'));
-}
-export function dateLabel(due:string,now:string):'Overdue'|'Today'|'Upcoming' {
- const value=Date.parse(due),current=Date.parse(now);
- if(!Number.isFinite(value)||!Number.isFinite(current))return 'Upcoming';
- if(value<current)return 'Overdue';
- const format=new Intl.DateTimeFormat('en-CA',{timeZone:'America/Los_Angeles',year:'numeric',month:'2-digit',day:'2-digit'});
- return format.format(value)===format.format(current)?'Today':'Upcoming';
+ return records.filter(c=>ownedBy(c,memberId)
+  &&(!needle||c.name.normalize('NFKC').toLocaleLowerCase('en-US').includes(needle))
+  &&matchesFilter(c,filter)
+ ).sort((a,b)=>a.name.localeCompare(b.name,'en-US'));
 }
