@@ -79,7 +79,12 @@ test('center Apps button opens only authorized modules without leaving Study Roo
  const dialog=page.getByRole('dialog',{name:'Apps'});
  await expect(dialog).toBeVisible();
  await expect(dialog.getByRole('link',{name:'Study Room Reservation'})).toHaveAttribute('href','/modules/study-rooms');
- await expect(page).toHaveURL(/\\/modules\\/study-rooms$/);
+ await expect(page).toHaveURL(new RegExp('/modules/study-rooms
+ await dialog.getByRole('button',{name:'Close apps'}).click();
+ await expect(dialog).not.toBeVisible();
+ await checkLayout(page);
+});
+));
  await dialog.getByRole('button',{name:'Close apps'}).click();
  await expect(dialog).not.toBeVisible();
  await checkLayout(page);
