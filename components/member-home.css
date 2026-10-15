@@ -184,3 +184,10 @@
  .lvz-apps-section{margin-top:var(--lvz-space-3)}
  .lvz-favorite-grid{grid-template-columns:repeat(4,minmax(0,1fr))}
 }
+
+/* Raised center Apps control on the member home, matching module navigation. */
+@media (max-width:899px){
+ .lvz-bottom-nav .lvz-apps-trigger{position:relative;gap:0;color:var(--lvz-accent);font-weight:var(--lvz-weight-bold)}
+ .lvz-bottom-nav .lvz-apps-trigger svg{width:50px;height:50px;margin-top:-13px;padding:var(--lvz-space-3);border:3px solid var(--lvz-surface);border-radius:var(--lvz-radius-round);background:var(--lvz-accent);color:var(--lvz-on-accent);box-shadow:var(--lvz-shadow-pop)}
+ .lvz-bottom-nav .lvz-apps-trigger span{margin-top:-3px}
+}

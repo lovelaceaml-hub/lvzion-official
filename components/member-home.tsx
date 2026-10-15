@@ -58,6 +58,13 @@ export default function MemberHome({workspace:w,demo=false,manageHref,experience
  useEffect(()=>{if(!demo){setFavorites(experience?.favorites??[]);setFavoriteVersion(experience?.favoriteVersion??0);}},[demo,experience?.favorites,experience?.favoriteVersion]);
  useEffect(()=>{if(selectedEvent&&!activitySheet.current?.open)activitySheet.current?.showModal();},[selectedEvent]);
  useEffect(()=>{if(selectedApp&&!moduleSheet.current?.open)moduleSheet.current?.showModal();},[selectedApp]);
+ // Apps links from modules return here and open the same authorized app switcher.
+ useEffect(()=>{
+  const params=new URLSearchParams(window.location.search);
+  if(params.get('apps')!=='1')return;
+  appSheet.current?.showModal();
+  window.history.replaceState(window.history.state,'',window.location.pathname+window.location.hash);
+ },[]);
  const allActivities=useMemo(()=>demo?activitiesForPreview(today):experience?.activities??[],[demo,today,experience?.activities]);
  // Future module services MUST scope this list server-side; no unapproved module is live.
  const apps=useMemo(()=>demo?conceptModules():experience?.modules??[],[demo,experience?.modules]);

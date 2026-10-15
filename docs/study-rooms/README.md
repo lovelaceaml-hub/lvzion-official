@@ -40,6 +40,18 @@ The final integrated R4 build passed **317 Node application tests and 198 dispos
 - October 15, 2026 redesign: the screens follow the locked [Day Sheet design contract](../design/LVZ-DESIGN-CONTRACT.md) (shared tokens, `AppHeader`, underlined tabs with swipe, rows instead of cards, a 320px manager column on desktop). `tests/browser/study-room-layout.spec.ts` checks 320, 390 and 1280px widths, 44px targets, the home link and swipe; set `LVZ_SCREENSHOT_DIR` to save review screenshots. Current review screenshots (fictional data) are in [screens/](screens/).
 - October 15, 2026 cleanup: merged duplicated validation, time lists and labels, removed the unused preview-only code paths, with no change to permissions, database rules or the closed booking gate.
 
+## Compact reservation-screen refinement — October 15, 2026
+
+The member-facing screen now uses a single-line header instead of a large page hero; resource-type controls sit above four full-date chips. The real 30-minute room/whiteboard/TV availability table has large rounded cells, clear unavailable/occupied states and an optional selected-slot confirmation above the bottom bar. Selecting a slot pre-fills the existing two-step reservation form; no POST is made until the existing authenticated confirmation flow runs.
+
+- **Bottom bar:** Home, Schedule, **Apps (center)**, Bookings, and authorized Manage / History. The Apps button opens a native in-place switcher and reads the same member-specific, server-filtered `/api/members/experience` feed as the member home. It never shows unapproved or unassigned apps.
+- **Member home:** the already-central Apps button is visually emphasized; `/members?apps=1` also opens the authorized home Apps sheet as a compatible fallback for future modules.
+- **Accessibility:** screen-reader labels on every button, visible focus controls, 44px minimum interaction targets, scrollable four-resource grid on narrow phones, keyboard-closeable dialogs and no document-level horizontal overflow.
+- **Boundaries:** presentation-only: existing modules, calendar policy, permissions, PostgreSQL validation, authenticated endpoints and `bookings_open=false` are unchanged. Do not use this design release to migrate or activate the old Firebase booking records.
+- **Verification:** `tests/browser/study-room-layout.spec.ts` additionally checks open-slot selection/pre-filled times and an in-place Apps switcher with a fictional authorized module feed. Browser fixtures are synthetic, not evidence of hosted member sign-in or a successful live booking.
+
+Release provenance and actual production state must be recorded only after a passing build and explicit Vercel production deployment.
+
 ## Safe default
 
 Do not change `study_booking_activation`, add general-member grants, invent booking owners, or modify the original Firebase scheduler to “complete the launch” without the verified source export, a checked old-endpoint write freeze, authenticated member/manager tests, a recovery plan and explicit cutover approval. The new operational calendar can be configured without opening bookings.
