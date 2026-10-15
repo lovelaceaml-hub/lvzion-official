@@ -1,0 +1,83 @@
+/*
+ * Shared Day Sheet building blocks (prefix ui-). Built only from styles/lvz-tokens.css.
+ * Modules use these instead of restyling the same pieces. Contract: docs/design/LVZ-DESIGN-CONTRACT.md.
+ */
+*,*::before,*::after{box-sizing:border-box}
+html,body{margin:0;min-height:100%}
+body{background:var(--lvz-ground);color:var(--lvz-ink);font:var(--lvz-weight-regular) var(--lvz-text-md)/var(--lvz-leading-body) var(--lvz-font-sans);-webkit-text-size-adjust:100%;font-variant-numeric:tabular-nums}
+button,input,select,textarea{font:inherit;color:inherit}
+button{cursor:pointer}
+:where(a,button,input,select,textarea,summary,[tabindex]):focus-visible{outline:3px solid var(--lvz-focus);outline-offset:2px}
+
+/* Page frame: one reading column on phones, the wide layout grows from it. */
+.ui-page{min-height:100dvh;display:flex;flex-direction:column;background:var(--lvz-ground)}
+.ui-main{width:100%;max-width:var(--lvz-content-max);margin:0 auto;padding:var(--lvz-space-2) var(--lvz-gutter) var(--lvz-space-12);flex:1}
+.ui-main.ui-narrow{max-width:calc(var(--lvz-reading-max) + 2 * var(--lvz-gutter))}
+
+/* Header: tapping the wordmark always goes home. */
+.ui-header{position:sticky;top:0;z-index:20;display:flex;align-items:center;justify-content:space-between;gap:var(--lvz-space-3);min-height:calc(var(--lvz-header-height) + env(safe-area-inset-top,0px));padding:env(safe-area-inset-top,0px) var(--lvz-gutter) 0;background:var(--lvz-ground)}
+.ui-header.ui-header-solid{background:var(--lvz-surface);border-bottom:1px solid var(--lvz-line)}
+.ui-wordmark{display:inline-flex;align-items:center;min-height:var(--lvz-tap);padding:0;border:0;background:none;font-size:var(--lvz-text-md);font-weight:var(--lvz-weight-bold);letter-spacing:.01em;color:var(--lvz-ink);text-decoration:none}
+.ui-wordmark span{color:var(--lvz-accent);margin-left:.28em}
+.ui-avatar{width:36px;height:36px;border-radius:var(--lvz-radius-round);display:grid;place-items:center;background:var(--lvz-accent-soft);color:var(--lvz-accent);font-size:var(--lvz-text-xs);font-weight:var(--lvz-weight-bold);text-decoration:none;flex:none}
+
+/* Titles: serif for the page title only; everything else is system text. */
+.ui-kicker{margin:0;font-size:var(--lvz-text-sm);color:var(--lvz-ink-quiet)}
+.ui-title{margin:var(--lvz-space-1) 0 var(--lvz-space-2);font:var(--lvz-weight-regular) var(--lvz-text-2xl)/var(--lvz-leading-tight) var(--lvz-font-serif);letter-spacing:-.01em;text-wrap:balance}
+.ui-lede{margin:0;max-width:60ch;color:var(--lvz-ink-quiet)}
+.ui-section-title{margin:var(--lvz-space-8) 0 var(--lvz-space-3);font-size:var(--lvz-text-sm);font-weight:var(--lvz-weight-bold);color:var(--lvz-ink-quiet)}
+@media (min-width:900px){.ui-title{font-size:var(--lvz-text-3xl)}}
+
+/* Tabs: underline style. Pair with useSwipeTabs for the swipe gesture. */
+.ui-tabs{display:flex;gap:var(--lvz-space-6);margin:var(--lvz-space-5) 0 var(--lvz-space-2);border-bottom:1px solid var(--lvz-line);overflow-x:auto;scrollbar-width:none}
+.ui-tab{flex:none;min-height:var(--lvz-tap);padding:0;border:0;background:none;font-size:var(--lvz-text-sm);font-weight:var(--lvz-weight-strong);color:var(--lvz-ink-quiet);box-shadow:inset 0 -2px 0 transparent;transition:color var(--lvz-duration-fast) var(--lvz-ease),box-shadow var(--lvz-duration-fast) var(--lvz-ease)}
+.ui-tab[aria-selected="true"],.ui-tab[aria-current="page"]{color:var(--lvz-ink);box-shadow:inset 0 -2px 0 var(--lvz-accent)}
+
+/* Lists: rows divided by hairlines, not cards. */
+.ui-list{list-style:none;margin:0;padding:0}
+.ui-row{display:flex;align-items:center;gap:var(--lvz-space-3);width:100%;min-height:56px;padding:var(--lvz-space-3) 0;border:0;border-bottom:1px solid var(--lvz-line);background:none;text-align:left;color:var(--lvz-ink);text-decoration:none}
+.ui-row-body{display:flex;flex-direction:column;gap:2px;flex:1;min-width:0}
+.ui-row-body strong{font-weight:var(--lvz-weight-strong)}
+.ui-row-body small{font-size:var(--lvz-text-sm);color:var(--lvz-ink-quiet)}
+.ui-icon-tile{width:40px;height:40px;border-radius:var(--lvz-radius-md);display:grid;place-items:center;flex:none;background:var(--lvz-accent-soft);color:var(--lvz-accent)}
+
+/* Surfaces: only for things that are separate objects (a form, a notice, a sheet). */
+.ui-surface{background:var(--lvz-surface);border:1px solid var(--lvz-line);border-radius:var(--lvz-radius-lg);padding:var(--lvz-space-5)}
+
+/* Buttons: one primary action per screen. */
+.ui-button{display:inline-flex;align-items:center;justify-content:center;gap:var(--lvz-space-2);min-height:48px;padding:0 var(--lvz-space-5);border:1px solid transparent;border-radius:var(--lvz-radius-md);background:var(--lvz-accent);color:var(--lvz-on-accent);font-size:var(--lvz-text-md);font-weight:var(--lvz-weight-strong);text-decoration:none;transition:background var(--lvz-duration-fast) var(--lvz-ease)}
+.ui-button:hover{background:var(--lvz-accent-strong)}
+.ui-button:disabled{opacity:.55;cursor:not-allowed}
+.ui-button-block{width:100%}
+.ui-button-secondary{background:var(--lvz-surface);color:var(--lvz-accent);border-color:var(--lvz-line-input)}
+.ui-button-secondary:hover{background:var(--lvz-accent-soft)}
+.ui-button-quiet{background:none;color:var(--lvz-accent);padding:0 var(--lvz-space-2)}
+.ui-button-quiet:hover{background:var(--lvz-accent-soft)}
+.ui-button-danger{background:var(--lvz-danger)}
+.ui-link{color:var(--lvz-accent);font-weight:var(--lvz-weight-strong);text-decoration:none}
+.ui-link:hover{text-decoration:underline}
+
+/* Fields: label above, 16px text so phones do not zoom. */
+.ui-field{display:grid;gap:6px;margin:0 0 var(--lvz-space-4);font-size:var(--lvz-text-sm);font-weight:var(--lvz-weight-strong)}
+.ui-input{display:block;width:100%;min-width:0;min-height:48px;padding:10px 12px;border:1px solid var(--lvz-line-input);border-radius:var(--lvz-radius-md);background:var(--lvz-surface);font-size:var(--lvz-text-md);font-weight:var(--lvz-weight-regular)}
+.ui-hint{font-size:var(--lvz-text-sm);font-weight:var(--lvz-weight-regular);color:var(--lvz-ink-quiet)}
+
+/* Notices: tone via data-tone="info|success|warning|danger". */
+.ui-notice{margin:var(--lvz-space-4) 0;padding:var(--lvz-space-3) var(--lvz-space-4);border-radius:var(--lvz-radius-md);background:var(--lvz-accent-soft);color:var(--lvz-ink);font-size:var(--lvz-text-sm)}
+.ui-notice[data-tone="success"]{background:var(--lvz-success-soft);color:var(--lvz-success)}
+.ui-notice[data-tone="warning"]{background:var(--lvz-warning-soft);color:var(--lvz-warning)}
+.ui-notice[data-tone="danger"]{background:var(--lvz-danger-soft);color:var(--lvz-danger)}
+
+/* Empty and loading states read like the rest of the product: a sentence and, if useful, one action. */
+.ui-empty{padding:var(--lvz-space-8) 0;color:var(--lvz-ink-quiet)}
+.ui-empty strong{display:block;color:var(--lvz-ink);font-size:var(--lvz-text-lg);margin-bottom:var(--lvz-space-1)}
+.ui-count{display:inline-grid;place-items:center;min-width:20px;height:20px;padding:0 6px;border-radius:var(--lvz-radius-round);background:var(--lvz-accent);color:var(--lvz-on-accent);font-size:var(--lvz-text-xs);font-weight:var(--lvz-weight-bold)}
+
+/* Sheets: native <dialog>, bottom sheet on phones, centered panel on wide screens. */
+.ui-sheet{width:100%;max-width:560px;max-height:88dvh;margin:auto auto 0;padding:0;border:0;border-radius:var(--lvz-radius-lg) var(--lvz-radius-lg) 0 0;background:var(--lvz-surface);color:var(--lvz-ink);box-shadow:var(--lvz-shadow-sheet)}
+.ui-sheet::backdrop{background:rgb(19 46 40 / 35%)}
+.ui-sheet-body{padding:var(--lvz-space-5) var(--lvz-gutter) calc(var(--lvz-space-6) + env(safe-area-inset-bottom,0px));overflow-y:auto}
+@media (min-width:700px){.ui-sheet{margin:auto;border-radius:var(--lvz-radius-lg)}}
+
+.ui-visually-hidden{position:absolute;width:1px;height:1px;margin:-1px;padding:0;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;border:0}
+@media (prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important;scroll-behavior:auto!important}}

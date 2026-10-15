@@ -1,0 +1,397 @@
+<title>LV Zion Look Options</title>
+<meta name="description" content="Three visual directions for the whole LV Zion app. Fictional example content only.">
+<style>
+/* Board chrome: a neutral reading surface so the three directions are judged on their own colors. */
+:root{
+ --bg:#f4f5f3;--fg:#1c2421;--quiet:#5f6b66;--line:#d9dfdb;--panel:#ffffff;--mark:#1f5c4d;
+ --sans:system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;
+ --serif:ui-serif,"New York",Georgia,"Times New Roman",serif;
+ --rounded:ui-rounded,"SF Pro Rounded",system-ui,-apple-system,"Segoe UI",Arial,sans-serif;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#141917;--fg:#e8ece9;--quiet:#9aa6a1;--line:#2b3430;--panel:#1b211f;--mark:#8cc9b5;color-scheme:dark}}
+:root[data-theme="dark"]{--bg:#141917;--fg:#e8ece9;--quiet:#9aa6a1;--line:#2b3430;--panel:#1b211f;--mark:#8cc9b5;color-scheme:dark}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--fg);font:15px/1.55 var(--sans);padding-inline:16px;padding-block:28px 64px}
+.wrap{max-width:1180px;margin:0 auto;display:grid;gap:56px}
+.intro{display:grid;gap:10px;max-width:68ch}
+.intro h1{font:600 30px/1.15 var(--sans);letter-spacing:-.02em;margin:0;text-wrap:balance}
+.intro p{margin:0;color:var(--quiet)}
+.rules{display:flex;flex-wrap:wrap;gap:6px 18px;margin:6px 0 0;padding:0;list-style:none;font-size:13px;color:var(--quiet)}
+.rules li:before{content:"";display:inline-block;width:6px;height:6px;border-radius:50%;background:var(--mark);margin-right:7px;vertical-align:middle}
+.dir{display:grid;gap:22px;border-top:1px solid var(--line);padding-top:28px}
+.dir-head{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:8px 20px;align-items:baseline}
+.dir-head h2{margin:0;font:600 24px/1.2 var(--sans);letter-spacing:-.015em}
+.dir-head .tag{font-size:12px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--mark)}
+.dir-head p{grid-column:1/-1;margin:0;max-width:70ch;color:var(--quiet)}
+.facts{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:14px 28px;margin:0}
+.facts div{min-width:0}
+.facts dt{font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--quiet)}
+.facts dd{margin:3px 0 0;font-size:14px}
+.screens{display:flex;flex-wrap:wrap;gap:20px;align-items:flex-start}
+.label{font-size:12px;color:var(--quiet);margin:0 0 8px}
+.phone{width:340px;max-width:100%;height:700px;border-radius:30px;overflow:hidden;position:relative;border:1px solid var(--line);box-shadow:0 10px 30px rgba(0,0,0,.08)}
+.desk-frame{flex:1 1 520px;min-width:0}
+.desk-box{width:100%;aspect-ratio:1100/680;position:relative;overflow:hidden;border-radius:12px;border:1px solid var(--line);box-shadow:0 10px 30px rgba(0,0,0,.08)}
+.desk{width:1100px;height:680px;transform-origin:0 0;transform:scale(var(--scale,.6));position:absolute;inset:0 auto auto 0}
+.trade{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:14px 28px;font-size:14px}
+.trade h3{margin:0 0 4px;font-size:13px;font-weight:700}
+.trade ul{margin:0;padding-left:18px;color:var(--quiet)}
+.pick{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:18px 20px;display:grid;gap:6px;max-width:72ch}
+.pick strong{font-size:16px}
+.pick p{margin:0;color:var(--quiet)}
+svg.i{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;flex:none}
+.mock *{box-sizing:border-box}
+.mock button{font:inherit;border:0;background:none;color:inherit;padding:0}
+.num{font-variant-numeric:tabular-nums}
+
+/* ============ Direction A: Day Sheet ============ */
+.A{--g:#f2f4f1;--s:#ffffff;--ink:#132e28;--q:#5a6d67;--l:#dce3df;--acc:#1f5c4d;--accs:#e2ede8;--done:#93a39d;
+ background:var(--g);color:var(--ink);font:15px/1.45 var(--sans);height:100%;display:flex;flex-direction:column}
+.A .top{display:flex;justify-content:space-between;align-items:center;padding:18px 20px 8px}
+.A .wm{font-weight:700;font-size:16px;letter-spacing:.01em}
+.A .wm span{color:var(--acc)}
+.A .av{width:34px;height:34px;border-radius:50%;background:var(--accs);color:var(--acc);display:grid;place-items:center;font-size:12px;font-weight:700}
+.A .scroll{flex:1;overflow:hidden;padding:6px 20px 0}
+.A .date{font-size:13px;color:var(--q)}
+.A h1{font:400 30px/1.12 var(--serif);letter-spacing:-.01em;margin:4px 0 6px}
+.A .place{font-size:13px;color:var(--q)}
+.A .tabs{display:flex;gap:22px;border-bottom:1px solid var(--l);margin:20px 0 6px}
+.A .tabs span{padding:8px 0 9px;font-size:14px;color:var(--q);font-weight:600}
+.A .tabs .on{color:var(--ink);box-shadow:inset 0 -2px 0 var(--acc)}
+.A .rail{list-style:none;margin:0;padding:0}
+.A .row{display:grid;grid-template-columns:62px 14px 1fr;gap:0 10px;padding:12px 0;align-items:start}
+.A .t{font-size:14px;font-weight:600;text-align:right;padding-top:1px}
+.A .t small{display:block;font-size:11px;font-weight:500;color:var(--q)}
+.A .dot{width:9px;height:9px;border-radius:50%;border:2px solid var(--acc);margin:6px auto 0;background:var(--s)}
+.A .what strong{display:block;font-size:15px;font-weight:600}
+.A .what span{font-size:13px;color:var(--q)}
+.A .row.past .t,.A .row.past .what strong{color:var(--done)}
+.A .row.past .dot{border-color:var(--done);background:var(--done)}
+.A .now{display:grid;grid-template-columns:62px 1fr;gap:10px;align-items:center;color:var(--acc);font-size:12px;font-weight:700}
+.A .now span{text-align:right}
+.A .now i{height:2px;background:var(--acc);display:block;border-radius:2px}
+.A h2{font-size:13px;font-weight:700;letter-spacing:.02em;margin:22px 0 10px;color:var(--q)}
+.A .apps{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+.A .app{display:grid;justify-items:center;gap:6px;font-size:11.5px;color:var(--ink);text-align:center}
+.A .app b{width:50px;height:50px;border-radius:14px;background:var(--s);border:1px solid var(--l);display:grid;place-items:center;color:var(--acc)}
+.A .bar{display:grid;grid-template-columns:repeat(3,1fr);background:var(--s);border-top:1px solid var(--l);padding:8px 0 22px}
+.A .bar span{display:grid;justify-items:center;gap:3px;font-size:11px;font-weight:600;color:var(--q);position:relative}
+.A .bar .on{color:var(--acc)}
+.A .bar em{position:absolute;top:0;left:calc(50% + 6px);width:7px;height:7px;border-radius:50%;background:#b4532a}
+/* A desktop */
+.Ad{height:100%;display:flex;flex-direction:column}
+.Ad .dtop{display:flex;align-items:center;justify-content:space-between;padding:20px 48px;border-bottom:1px solid var(--l);background:var(--s)}
+.Ad nav{display:flex;gap:30px;font-size:14px;font-weight:600;color:var(--q)}
+.Ad nav .on{color:var(--ink);box-shadow:inset 0 -2px 0 var(--acc);padding-bottom:4px}
+.Ad .cols{flex:1;display:grid;grid-template-columns:minmax(0,1fr) 320px;gap:56px;padding:36px 48px 0;overflow:hidden}
+.Ad h1{font-size:40px}
+.Ad aside{display:grid;align-content:start;gap:4px}
+.Ad aside h2{margin-top:0}
+.Ad .list a{display:flex;align-items:center;gap:12px;padding:11px 0;border-bottom:1px solid var(--l);font-size:14px;font-weight:600;color:var(--ink);text-decoration:none}
+.Ad .list a b{width:36px;height:36px;border-radius:10px;background:var(--accs);color:var(--acc);display:grid;place-items:center}
+.Ad .list a small{margin-left:auto;font-weight:500;color:var(--q)}
+.Ad .notice{margin-top:22px;background:var(--s);border:1px solid var(--l);border-radius:12px;padding:14px 16px;font-size:14px}
+.Ad .notice strong{display:block}
+.Ad .notice span{color:var(--q);font-size:13px}
+/* A sign-in */
+.As{height:100%;padding:56px 26px 0;display:flex;flex-direction:column;gap:14px}
+.As h1{font:400 34px/1.1 var(--serif);margin:26px 0 2px}
+.As p{margin:0 0 6px;color:var(--q);font-size:14px}
+.As label{display:grid;gap:6px;font-size:13px;font-weight:600}
+.As .f{height:46px;border-radius:10px;background:var(--s);border:1px solid #c9d3ce}
+.As .btn{height:48px;border-radius:10px;background:var(--acc);color:#fff;display:grid;place-items:center;font-weight:600;margin-top:6px}
+.As .links{display:grid;gap:12px;margin-top:10px;font-size:14px;color:var(--acc);font-weight:600}
+
+/* ============ Direction B: Module Board ============ */
+.B{--g:#ebeae5;--s:#faf9f6;--ink:#1c1c1a;--q:#66655f;--l:#d6d4cc;
+ --prayer:#36557a;--rooms:#5d6f31;--display:#8a553a;--contacts:#8a6418;--duty:#2b6964;
+ background:var(--g);color:var(--ink);font:15px/1.4 var(--sans);height:100%;display:flex;flex-direction:column}
+.B .top{display:flex;justify-content:space-between;align-items:center;padding:20px 18px 10px}
+.B .wm{font-weight:800;font-size:18px;letter-spacing:-.02em}
+.B .ic{display:flex;gap:10px;align-items:center}
+.B .ic span{width:36px;height:36px;border-radius:12px;background:var(--s);display:grid;place-items:center}
+.B .chips{display:flex;gap:6px;padding:4px 18px 12px}
+.B .chips span{padding:8px 14px;border-radius:12px;font-size:13px;font-weight:700;color:var(--q);background:transparent}
+.B .chips .on{background:var(--ink);color:var(--g)}
+.B .scroll{flex:1;overflow:hidden;padding:0 18px}
+.B .next{background:var(--ink);color:#f6f5f0;border-radius:22px;padding:18px;display:grid;gap:4px}
+.B .next small{font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;opacity:.7}
+.B .next strong{font-size:24px;font-weight:800;letter-spacing:-.02em;line-height:1.1}
+.B .next span{font-size:13px;opacity:.8}
+.B h2{font-size:26px;font-weight:800;letter-spacing:-.03em;margin:22px 0 12px}
+.B .grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.B .tile{border-radius:22px;min-height:118px;padding:14px;color:#fff;display:flex;flex-direction:column;justify-content:space-between}
+.B .tile strong{font-size:16px;font-weight:800;letter-spacing:-.01em;line-height:1.15}
+.B .tile small{font-size:12px;opacity:.85}
+.B .tile.wide{grid-column:span 2;min-height:84px;flex-direction:row;align-items:flex-end}
+/* B desktop */
+.Bd .dtop{padding:24px 40px 12px}
+.Bd .dchips{padding:0 40px 18px}
+.Bd .board{display:grid;grid-template-columns:repeat(4,1fr);grid-auto-rows:150px;gap:14px;padding:0 40px}
+.Bd .next{grid-column:span 2;grid-row:span 2;padding:28px;align-content:end}
+.Bd .next strong{font-size:40px}
+.Bd .tile{min-height:0}
+.Bd .tile strong{font-size:19px}
+/* B sign-in */
+.Bs{height:100%;display:flex;flex-direction:column}
+.Bs .band{background:var(--ink);color:#f6f5f0;padding:64px 22px 26px}
+.Bs .band strong{font-size:34px;font-weight:800;letter-spacing:-.03em;line-height:1.05;display:block}
+.Bs .band span{opacity:.75;font-size:14px}
+.Bs form{padding:22px;display:grid;gap:12px}
+.Bs label{display:grid;gap:6px;font-size:13px;font-weight:700}
+.Bs .f{height:50px;border-radius:14px;background:var(--s);border:2px solid var(--l)}
+.Bs .btn{height:52px;border-radius:14px;background:var(--ink);color:var(--g);display:grid;place-items:center;font-weight:800}
+.Bs .links{display:flex;flex-wrap:wrap;gap:8px;padding:0 22px}
+.Bs .links span{font-size:13px;font-weight:700;padding:8px 12px;border-radius:10px;background:var(--s)}
+
+/* ============ Direction C: First Light ============ */
+.C{--g:#0f1a21;--s:#17252e;--ink:#edf1f3;--q:#93a5b0;--l:#24353f;--acc:#efb25c;--accs:#3a2f1f;
+ background:var(--g);color:var(--ink);font:15px/1.45 var(--sans);height:100%;display:flex;flex-direction:column}
+.C .top{display:flex;justify-content:space-between;align-items:center;padding:20px 20px 6px}
+.C .wm{font-size:12px;font-weight:700;letter-spacing:.24em}
+.C .av{width:34px;height:34px;border-radius:50%;border:1px solid var(--l);display:grid;place-items:center;font-size:12px;font-weight:700;color:var(--q)}
+.C .scroll{flex:1;overflow:hidden;padding:8px 20px 0}
+.C .nowp{padding:18px 0 22px;border-bottom:1px solid var(--l)}
+.C .k{font-size:11px;font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:var(--acc)}
+.C .clock{font:600 76px/1 var(--rounded);letter-spacing:-.03em;margin:10px 0 4px}
+.C .clock small{font-size:22px;font-weight:600;color:var(--q);margin-left:6px;letter-spacing:0}
+.C .nowp strong{font-size:20px;font-weight:600;display:block}
+.C .nowp span{color:var(--q);font-size:14px}
+.C .meter{height:4px;border-radius:4px;background:var(--l);margin-top:16px;overflow:hidden}
+.C .meter i{display:block;height:100%;width:36%;background:var(--acc);border-radius:4px}
+.C .later{list-style:none;margin:8px 0 0;padding:0}
+.C .later li{display:flex;gap:14px;padding:12px 0;border-bottom:1px solid var(--l);align-items:baseline}
+.C .later b{font:600 17px var(--rounded);min-width:74px}
+.C .later span{font-size:14px}
+.C .later small{display:block;color:var(--q);font-size:12px}
+.C .strip{display:flex;gap:8px;margin-top:18px;overflow:hidden}
+.C .strip span{flex:none;display:flex;gap:8px;align-items:center;padding:10px 12px;border-radius:12px;background:var(--s);font-size:13px;font-weight:600}
+.C .strip svg{color:var(--acc)}
+.C .bar{display:grid;grid-template-columns:repeat(3,1fr);border-top:1px solid var(--l);padding:10px 0 22px;background:var(--g)}
+.C .bar span{display:grid;justify-items:center;gap:3px;font-size:11px;color:var(--q)}
+.C .bar .on{color:var(--acc)}
+/* C desktop */
+.Cd{height:100%;display:grid;grid-template-columns:440px 1fr}
+.Cd .left{background:var(--s);padding:30px 40px;display:flex;flex-direction:column;justify-content:space-between}
+.Cd .left .clock{font-size:128px}
+.Cd .right{padding:30px 44px;overflow:hidden}
+.Cd .right h3{font-size:12px;letter-spacing:.16em;text-transform:uppercase;color:var(--q);margin:0 0 6px}
+.Cd .cgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:26px}
+.Cd .cgrid span{padding:16px;border-radius:14px;background:var(--s);display:grid;gap:10px;font-size:14px;font-weight:600}
+.Cd .cgrid svg{color:var(--acc)}
+/* C sign-in */
+.Cs{height:100%;padding:70px 24px 0;display:flex;flex-direction:column;gap:14px}
+.Cs .clock{font-size:56px;margin:18px 0 0}
+.Cs p{margin:0 0 8px;color:var(--q);font-size:14px}
+.Cs label{display:grid;gap:6px;font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--q);font-weight:700}
+.Cs .f{height:48px;border-radius:12px;background:var(--s);border:1px solid var(--l)}
+.Cs .btn{height:50px;border-radius:12px;background:var(--acc);color:#1b1408;display:grid;place-items:center;font-weight:700}
+.Cs .links{display:grid;gap:12px;margin-top:8px;font-size:14px;color:var(--ink)}
+@media (max-width:420px){.phone{height:640px}}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+</style>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+ <symbol id="i-home" viewBox="0 0 24 24"><path d="M3 10l9-7 9 7v10a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/></symbol>
+ <symbol id="i-grid" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></symbol>
+ <symbol id="i-bell" viewBox="0 0 24 24"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/></symbol>
+ <symbol id="i-sunrise" viewBox="0 0 24 24"><path d="M12 2v6"/><path d="m4.9 10.9 1.4 1.4"/><path d="M2 18h2"/><path d="M20 18h2"/><path d="m19.1 10.9-1.4 1.4"/><path d="M22 22H2"/><path d="M16 18a4 4 0 0 0-8 0"/></symbol>
+ <symbol id="i-door" viewBox="0 0 24 24"><path d="M13 4h3a2 2 0 0 1 2 2v14"/><path d="M2 20h3"/><path d="M13 20h9"/><path d="M10 12v.01"/><path d="M13 4.6v16.1a1 1 0 0 1-1.2 1L5 20V5.6a2 2 0 0 1 1.5-1.9l4-1A2 2 0 0 1 13 4.6Z"/></symbol>
+ <symbol id="i-tv" viewBox="0 0 24 24"><rect width="20" height="14" x="2" y="3" rx="2"/><path d="M8 21h8"/><path d="M12 17v4"/></symbol>
+ <symbol id="i-book" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><circle cx="12" cy="11" r="3"/><path d="M7 22v-2a2 2 0 0 1 2-2h6a2 2 0 0 1 2 2v2"/></symbol>
+ <symbol id="i-duty" viewBox="0 0 24 24"><rect width="8" height="4" x="8" y="2" rx="1"/><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><path d="m9 14 2 2 4-4"/></symbol>
+ <symbol id="i-chev" viewBox="0 0 24 24"><path d="m9 18 6-6-6-6"/></symbol>
+</svg>
+
+<div class="wrap">
+ <header class="intro">
+  <h1>Three looks for the whole LV Zion app</h1>
+  <p>Each option sets the colors, type, spacing and layout that every part of the app will share: Home, sign in, Work Mission prayer, Study Rooms, Church Display, Contacts and Worship Duty. All names and times below are made-up examples.</p>
+  <ul class="rules">
+   <li>Phone first</li><li>Tap the header to go home</li><li>Swipe between tabs</li><li>No church imagery, no emoji</li><li>Large tap targets, readable contrast</li>
+  </ul>
+ </header>
+
+ <!-- A -->
+ <section class="dir" id="day-sheet">
+  <div class="dir-head"><h2>A. Day Sheet</h2><span class="tag">Recommended</span>
+   <p>Home reads like a printed order of the day: a single time line from morning to night with a "now" mark, and your apps underneath. Calm, orderly and easy to read at any age.</p></div>
+  <dl class="facts">
+   <div><dt>Feels</dt><dd>Calm, orderly, unhurried</dd></div>
+   <div><dt>Signature</dt><dd>The day line: times on the left, a thin "now" marker that moves through the day</dd></div>
+   <div><dt>Type</dt><dd>Phone system text for everything; a quiet serif only for the greeting and page titles</dd></div>
+   <div><dt>Color</dt><dd>Soft grey-green paper, white surfaces, one deep spruce green for actions</dd></div>
+  </dl>
+  <div class="screens">
+   <div><p class="label">Phone: Home</p><div class="phone mock"><div class="A">
+    <div class="top"><span class="wm">LV <span>Zion</span></span><span class="av">JE</span></div>
+    <div class="scroll">
+     <div class="date">Tuesday, October 14</div>
+     <h1>Good morning, Jordan.</h1>
+     <div class="place">Group 2 · Unit 1</div>
+     <div class="tabs"><span class="on">Today</span><span>Week</span><span>Month</span></div>
+     <ol class="rail">
+      <li class="row past"><span class="t num">5:00<small>AM</small></span><span class="dot"></span><span class="what"><strong>Morning prayer</strong><span>Work Mission</span></span></li>
+      <li class="now"><span class="num">6:12</span><i></i></li>
+      <li class="row"><span class="t num">7:00<small>PM</small></span><span class="dot"></span><span class="what"><strong>Study room B</strong><span>Reserved for 1 hour</span></span></li>
+      <li class="row"><span class="t num">8:00<small>PM</small></span><span class="dot"></span><span class="what"><strong>Worship duty: Sound</strong><span>Main hall</span></span></li>
+     </ol>
+     <h2>Your apps</h2>
+     <div class="apps">
+      <span class="app"><b><svg class="i"><use href="#i-sunrise"/></svg></b>Prayer</span>
+      <span class="app"><b><svg class="i"><use href="#i-door"/></svg></b>Rooms</span>
+      <span class="app"><b><svg class="i"><use href="#i-duty"/></svg></b>Duty</span>
+      <span class="app"><b><svg class="i"><use href="#i-grid"/></svg></b>All apps</span>
+     </div>
+    </div>
+    <div class="bar"><span class="on"><svg class="i"><use href="#i-home"/></svg>Home</span><span><svg class="i"><use href="#i-grid"/></svg>Apps</span><span><em></em><svg class="i"><use href="#i-bell"/></svg>Alerts</span></div>
+   </div></div></div>
+   <div><p class="label">Phone: Sign in</p><div class="phone mock"><div class="A"><div class="As">
+    <span class="wm">LV <span style="color:var(--acc)">Zion</span></span>
+    <h1>Sign in</h1><p>Use your email and password.</p>
+    <label>Email or username<span class="f"></span></label>
+    <label>Password<span class="f"></span></label>
+    <span class="btn">Sign in</span>
+    <div class="links"><span>Create an account</span><span>Forgot password</span><span>I have an invitation</span></div>
+   </div></div></div></div>
+   <div class="desk-frame"><p class="label">Desktop: Home</p><div class="desk-box"><div class="desk mock"><div class="A Ad">
+    <div class="dtop"><span class="wm">LV <span>Zion</span></span><nav><span class="on">Home</span><span>Apps</span><span>Alerts</span><span>Manage</span></nav><span class="av">JE</span></div>
+    <div class="cols">
+     <div>
+      <div class="date">Tuesday, October 14</div>
+      <h1>Good morning, Jordan.</h1>
+      <div class="place">Group 2 · Unit 1</div>
+      <div class="tabs"><span class="on">Today</span><span>Week</span><span>Month</span></div>
+      <ol class="rail">
+       <li class="row past"><span class="t num">5:00<small>AM</small></span><span class="dot"></span><span class="what"><strong>Morning prayer</strong><span>Work Mission</span></span></li>
+       <li class="now"><span class="num">6:12</span><i></i></li>
+       <li class="row"><span class="t num">7:00<small>PM</small></span><span class="dot"></span><span class="what"><strong>Study room B</strong><span>Reserved for 1 hour</span></span></li>
+       <li class="row"><span class="t num">8:00<small>PM</small></span><span class="dot"></span><span class="what"><strong>Worship duty: Sound</strong><span>Main hall</span></span></li>
+      </ol>
+     </div>
+     <aside>
+      <h2>Your apps</h2>
+      <div class="list">
+       <a><b><svg class="i"><use href="#i-sunrise"/></svg></b>Work Mission prayer<small>Today</small></a>
+       <a><b><svg class="i"><use href="#i-door"/></svg></b>Study Rooms<small>1 booking</small></a>
+       <a><b><svg class="i"><use href="#i-duty"/></svg></b>Worship Duty<small>Tonight</small></a>
+       <a><b><svg class="i"><use href="#i-tv"/></svg></b>Church Display</a>
+      </div>
+      <div class="notice"><strong>1 thing needs you</strong><span>A new member is waiting for placement.</span></div>
+     </aside>
+    </div>
+   </div></div></div></div>
+  </div>
+  <div class="trade">
+   <div><h3>Good for</h3><ul><li>Members of every age: plain lists, big readable times</li><li>Every module can use it easily (lists and forms, very little color to manage)</li><li>Closest to today's green, so the change feels familiar</li></ul></div>
+   <div><h3>Gives up</h3><ul><li>The least eye-catching of the three</li><li>Apps sit below your day, one scroll down on small phones</li></ul></div>
+   <div><h3>Will never be</h3><ul><li>A wall of cards or colored boxes</li><li>Gradients, glow or decorative circles</li><li>Pill badges on everything</li></ul></div>
+  </div>
+ </section>
+
+ <!-- B -->
+ <section class="dir" id="module-board">
+  <div class="dir-head"><h2>B. Module Board</h2><span class="tag">Apps first</span>
+   <p>Home is a board of your apps. Each app owns one muted color that follows it everywhere, so Prayer always looks like Prayer. Your next commitment sits on top in a dark block.</p></div>
+  <dl class="facts">
+   <div><dt>Feels</dt><dd>Direct, confident, quick to scan</dd></div>
+   <div><dt>Signature</dt><dd>One color per app, carried into that app's own screens</dd></div>
+   <div><dt>Type</dt><dd>Heavy system sans, large and tight, no serif</dd></div>
+   <div><dt>Color</dt><dd>Warm stone ground, near-black blocks, five muted app colors</dd></div>
+  </dl>
+  <div class="screens">
+   <div><p class="label">Phone: Home</p><div class="phone mock"><div class="B">
+    <div class="top"><span class="wm">LV ZION</span><span class="ic"><span><svg class="i"><use href="#i-bell"/></svg></span><span style="font-size:12px;font-weight:800">JE</span></span></div>
+    <div class="chips"><span class="on">Apps</span><span>My week</span><span>Alerts</span></div>
+    <div class="scroll">
+     <div class="next"><small>Next · 7:00 PM</small><strong>Study room B</strong><span>Reserved for 1 hour</span></div>
+     <h2>Your apps</h2>
+     <div class="grid">
+      <span class="tile" style="background:var(--prayer)"><svg class="i"><use href="#i-sunrise"/></svg><span><strong>Work Mission prayer</strong><br><small>Done at 5:00 AM</small></span></span>
+      <span class="tile" style="background:var(--rooms)"><svg class="i"><use href="#i-door"/></svg><span><strong>Study Rooms</strong><br><small>1 booking</small></span></span>
+      <span class="tile" style="background:var(--duty)"><svg class="i"><use href="#i-duty"/></svg><span><strong>Worship Duty</strong><br><small>Sound, 8:00 PM</small></span></span>
+      <span class="tile" style="background:var(--contacts)"><svg class="i"><use href="#i-book"/></svg><span><strong>Contacts</strong><br><small>2 follow-ups</small></span></span>
+      <span class="tile wide" style="background:var(--display)"><span><strong>Church Display</strong><br><small>Screens and slides</small></span></span>
+     </div>
+    </div>
+   </div></div></div>
+   <div><p class="label">Phone: Sign in</p><div class="phone mock"><div class="B"><div class="Bs">
+    <div class="band"><strong>LV ZION</strong><span>Sign in to your member space</span></div>
+    <form><label>Email or username<span class="f"></span></label><label>Password<span class="f"></span></label><span class="btn">Sign in</span></form>
+    <div class="links"><span>Create account</span><span>Forgot password</span><span>Invitation</span></div>
+   </div></div></div></div>
+   <div class="desk-frame"><p class="label">Desktop: Home</p><div class="desk-box"><div class="desk mock"><div class="B Bd">
+    <div class="top dtop"><span class="wm">LV ZION</span><span class="ic"><span><svg class="i"><use href="#i-bell"/></svg></span><span style="font-size:12px;font-weight:800">JE</span></span></div>
+    <div class="chips dchips"><span class="on">Apps</span><span>My week</span><span>Alerts</span><span>Manage</span></div>
+    <div class="board">
+     <div class="next"><small>Next · 7:00 PM</small><strong>Study room B</strong><span>Reserved for 1 hour · then Worship duty at 8:00 PM</span></div>
+     <span class="tile" style="background:var(--prayer)"><svg class="i"><use href="#i-sunrise"/></svg><span><strong>Work Mission prayer</strong><br><small>Done at 5:00 AM</small></span></span>
+     <span class="tile" style="background:var(--rooms)"><svg class="i"><use href="#i-door"/></svg><span><strong>Study Rooms</strong><br><small>1 booking</small></span></span>
+     <span class="tile" style="background:var(--duty)"><svg class="i"><use href="#i-duty"/></svg><span><strong>Worship Duty</strong><br><small>Sound, 8:00 PM</small></span></span>
+     <span class="tile" style="background:var(--contacts)"><svg class="i"><use href="#i-book"/></svg><span><strong>Contacts</strong><br><small>2 follow-ups</small></span></span>
+     <span class="tile" style="background:var(--display);grid-column:span 2"><svg class="i"><use href="#i-tv"/></svg><span><strong>Church Display</strong><br><small>Screens and slides</small></span></span>
+     <span class="tile" style="background:var(--s);color:var(--ink);grid-column:span 2"><span style="font-weight:800">1 thing needs you</span><small style="opacity:1;color:var(--q)">A new member is waiting for placement.</small></span>
+    </div>
+   </div></div></div></div>
+  </div>
+  <div class="trade">
+   <div><h3>Good for</h3><ul><li>Getting into an app in one tap</li><li>Each app is instantly recognizable by its color</li><li>Feels the most like a modern phone app</li></ul></div>
+   <div><h3>Gives up</h3><ul><li>Your day becomes a second tab instead of the first thing you see</li><li>Five app colors to keep readable and consistent; every module must stay in its lane</li><li>Bolder, less quiet in tone</li></ul></div>
+   <div><h3>Will never be</h3><ul><li>Bright or neon colors</li><li>Gradients or glossy tiles</li><li>Numbers-for-show dashboards</li></ul></div>
+  </div>
+ </section>
+
+ <!-- C -->
+ <section class="dir" id="first-light">
+  <div class="dir-head"><h2>C. First Light</h2><span class="tag">Dark first</span>
+   <p>Built for the early hours: a dark, low-glare screen where the next thing on your day is shown as a large clock with a countdown. A matching light version would follow the phone's setting.</p></div>
+  <dl class="facts">
+   <div><dt>Feels</dt><dd>Focused, quiet, low-glare</dd></div>
+   <div><dt>Signature</dt><dd>The big rounded clock and countdown bar for whatever is next</dd></div>
+   <div><dt>Type</dt><dd>Rounded numerals for times, small spaced capitals for labels</dd></div>
+   <div><dt>Color</dt><dd>Deep blue-slate night, one warm dawn amber for what matters now</dd></div>
+  </dl>
+  <div class="screens">
+   <div><p class="label">Phone: Home</p><div class="phone mock"><div class="C">
+    <div class="top"><span class="wm">LV ZION</span><span class="av">JE</span></div>
+    <div class="scroll">
+     <div class="nowp"><span class="k">Next · in 12 h 48 min</span><div class="clock num">7:00<small>PM</small></div><strong>Study room B</strong><span>Reserved for 1 hour</span><div class="meter"><i></i></div></div>
+     <ul class="later">
+      <li><b class="num">5:00 AM</b><span>Morning prayer<small>Work Mission · done</small></span></li>
+      <li><b class="num">8:00 PM</b><span>Worship duty: Sound<small>Main hall</small></span></li>
+     </ul>
+     <div class="strip"><span><svg class="i"><use href="#i-sunrise"/></svg>Prayer</span><span><svg class="i"><use href="#i-door"/></svg>Rooms</span><span><svg class="i"><use href="#i-duty"/></svg>Duty</span><span><svg class="i"><use href="#i-tv"/></svg>Display</span></div>
+    </div>
+    <div class="bar"><span class="on"><svg class="i"><use href="#i-home"/></svg>Now</span><span><svg class="i"><use href="#i-grid"/></svg>Apps</span><span><svg class="i"><use href="#i-bell"/></svg>Alerts</span></div>
+   </div></div></div>
+   <div><p class="label">Phone: Sign in</p><div class="phone mock"><div class="C"><div class="Cs">
+    <span class="wm">LV ZION</span><div class="clock num">6:12<small>AM</small></div><p>Sign in to see what is next.</p>
+    <label>Email or username<span class="f"></span></label><label>Password<span class="f"></span></label><span class="btn">Sign in</span>
+    <div class="links"><span>Create an account</span><span>Forgot password</span></div>
+   </div></div></div></div>
+   <div class="desk-frame"><p class="label">Desktop: Home</p><div class="desk-box"><div class="desk mock"><div class="C Cd">
+    <div class="left"><span class="wm">LV ZION</span><div><span class="k">Next · in 12 h 48 min</span><div class="clock num">7:00<small>PM</small></div><strong style="font-size:24px;display:block">Study room B</strong><span style="color:var(--q)">Reserved for 1 hour</span><div class="meter"><i></i></div></div><span style="color:var(--q);font-size:13px">Tuesday, October 14 · Group 2 · Unit 1</span></div>
+    <div class="right"><h3>Today</h3>
+     <ul class="later"><li><b class="num">5:00 AM</b><span>Morning prayer<small>Work Mission · done</small></span></li><li><b class="num">7:00 PM</b><span>Study room B<small>Reserved for 1 hour</small></span></li><li><b class="num">8:00 PM</b><span>Worship duty: Sound<small>Main hall</small></span></li></ul>
+     <div class="cgrid"><span><svg class="i"><use href="#i-sunrise"/></svg>Work Mission prayer</span><span><svg class="i"><use href="#i-door"/></svg>Study Rooms</span><span><svg class="i"><use href="#i-duty"/></svg>Worship Duty</span><span><svg class="i"><use href="#i-book"/></svg>Contacts</span><span><svg class="i"><use href="#i-tv"/></svg>Church Display</span><span><svg class="i"><use href="#i-bell"/></svg>1 thing needs you</span></div>
+    </div>
+   </div></div></div></div>
+  </div>
+  <div class="trade">
+   <div><h3>Good for</h3><ul><li>5 AM prayer without a bright screen</li><li>Matches a church TV display naturally</li><li>The most striking and memorable</li></ul></div>
+   <div><h3>Gives up</h3><ul><li>Dark screens are harder for some older members and in daylight</li><li>Two full color sets (dark and light) to keep equal, more work for every module</li><li>The big clock leaves less room for the list</li></ul></div>
+   <div><h3>Will never be</h3><ul><li>Pure black with neon accents</li><li>Glowing effects or star fields</li><li>Tiny low-contrast grey text</li></ul></div>
+  </div>
+ </section>
+
+ <div class="pick"><strong>My recommendation: A, Day Sheet.</strong><p>It is the easiest to read for every member, it lets the five apps share one quiet system without each inventing its own colors, and it keeps the green LV Zion already uses. B is the better pick if you want the app to feel like a launcher; C if early-morning use matters most.</p></div>
+</div>
+
+<script>
+(function(){
+ function fit(){document.querySelectorAll('.desk-box').forEach(function(b){var d=b.querySelector('.desk');if(d)d.style.setProperty('--scale',(b.clientWidth/1100).toFixed(4));});}
+ fit();
+ if('ResizeObserver' in window){var ro=new ResizeObserver(fit);document.querySelectorAll('.desk-box').forEach(function(b){ro.observe(b);});}
+ else window.addEventListener('resize',fit);
+})();
+</script>
