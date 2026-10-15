@@ -13,9 +13,9 @@
 
 ## Work Mission completion R5
 
-Work Mission operational code is ready for the requested actual-app release; see [R5 completion and Build log](morning-prayer/COMPLETION-R5.md). R4 was already merged/applied; R5 hosted migration `20261015010132` now replaces private functions without creating real dates or grants. Current readback: one active module owner grant, seven capabilities, 15 RLS tables, zero occurrences/publications/meeting references. Concurrent Church Display PR #39 is preserved. Final application deployment receipt is pending.
+Work Mission completion is released at [the actual module](https://lvz.app/modules/work-mission-prayer); see [R5 completion and Build log](morning-prayer/COMPLETION-R5.md). R4 was already merged/applied; R5 hosted migration `20261015010132` now replaces private functions without creating real dates or grants. Current readback: one active module owner grant, seven capabilities, 15 RLS tables, zero occurrences/publications/meeting references. Concurrent Church Display PR #39 is preserved. Deployment `dpl_8Jj8U36EVYvWaFRtvd2xBQxi8xKs` is READY at `caf5ba80849bbd460e24807e6878ec668611d93e` (merged PR #40), with lvz.app/www.lvz.app aliases verified. The compatible setup guard `20261015010537` is also installed. Verification: 375 app tests, 198 SQL assertions, 87 existing browser cases, six isolated Work Mission client cases, four native concurrency races and 15 live privacy/origin checks. Real hosted owner save, member join and physical-device acceptance remain unverified.
 
-## Current verified snapshot
+## Earlier verified snapshot (before Work Mission R5)
 
 Hosted counts checked October 14, 2026 at 23:26 UTC; production source refreshed after the concurrent Display merge. The actual app is [lvz.app](https://lvz.app), with [member management](https://lvz.app/members/manage). No new preview is authorized.
 
