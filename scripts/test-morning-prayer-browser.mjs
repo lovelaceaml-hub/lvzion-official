@@ -9,10 +9,8 @@ const port=3016;
 let server;
 try{
  await mkdir(join(dir,'app/modules/work-mission-prayer'),{recursive:true});
- await mkdir(join(dir,'components/morning-prayer'),{recursive:true});
  await mkdir(join(dir,'lib/morning-prayer'),{recursive:true});
- for(const name of ['MorningPrayerLive.tsx','MorningPrayerOperations.tsx','MorningPrayerVolunteer.tsx','morning-prayer.module.css','operations.module.css','volunteer.module.css'])
-  await cp(join(root,'components/morning-prayer',name),join(dir,'components/morning-prayer',name));
+ await cp(join(root,'components/morning-prayer'),join(dir,'components/morning-prayer'),{recursive:true});
  await cp(join(root,'lib/morning-prayer/time.ts'),join(dir,'lib/morning-prayer/time.ts'));
  await symlink(join(root,'node_modules'),join(dir,'node_modules'),'dir');
  await cp(join(root,'package.json'),join(dir,'package.json'));

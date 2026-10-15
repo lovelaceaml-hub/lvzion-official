@@ -1,10 +1,11 @@
 'use client';
 import {useEffect,useMemo,useState} from 'react';
-import type {WMOcc} from './MorningPrayerOperations';
+import {dayLabel} from './shared';
+import type {Occurrence} from './shared';
 import styles from './volunteer.module.css';
 export default function MorningPrayerVolunteer({
  month,rows,today,selected,onSelect,canVolunteer,busy,onSubmit
-}:{month:string;rows:WMOcc[];today:string;selected:string|null;onSelect:(id:string)=>void;
+}:{month:string;rows:Occurrence[];today:string;selected:string|null;onSelect:(id:string)=>void;
  canVolunteer:boolean;busy:boolean;onSubmit:(ids:string[])=>Promise<boolean>}){
  const [marked,setMarked]=useState<string[]>([]);
  useEffect(()=>setMarked([]),[month,rows.length]);
@@ -41,7 +42,7 @@ export default function MorningPrayerVolunteer({
    {!open.length?<p className={styles.empty}>No verified open hosting dates in this month.</p>:<>
     <div className={styles.openList}>{open.map(o=><label key={o.id}>
      <input type="checkbox" checked={marked.includes(o.id)} onChange={()=>toggle(o.id)}/>
-     <span>{new Intl.DateTimeFormat('en-US',{weekday:'short',month:'short',day:'numeric',timeZone:'UTC'}).format(new Date(o.date+'T12:00:00Z'))}</span>
+     <span>{dayLabel(o.date)}</span>
     </label>)}</div>
     <button disabled={busy||!marked.length} onClick={()=>{if(window.confirm('Submit '+marked.length+' hosting request(s) for review?'))void onSubmit(marked).then(saved=>{if(saved)setMarked([]);});}}>
      Submit {marked.length||''} hosting request{marked.length===1?'':'s'}
