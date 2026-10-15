@@ -1,6 +1,6 @@
 import {requireMember} from '../../../../lib/server/supabase';
 import {body,reply} from '../../../../lib/server/http';
-import {parseDisplaySlides,isUuid,safeInstant} from '../../../../lib/continuous-display/live-contract';
+import {parseDisplaySlides,isSlideId,isUuid,safeInstant} from '../../../../lib/continuous-display/live-contract';
 import {parseOperatingHours,parseDisplayMotionMode} from '../../../../lib/continuous-display/operations';
 import {createPairCode,deviceDigest,formatPairCode} from '../../../../lib/server/display';
 export const runtime='nodejs';
@@ -74,8 +74,9 @@ export async function POST(request:Request){
   if(action==='motion'){
    const version=n(input.expectedVersion);
    if(version===null)return reply({error:'Invalid screen configuration version.'},400);
-   let motionMode;try{motionMode=parseDisplayMotionMode(input.motionMode);}catch{return reply({error:'Unsupported display motion mode.'},400);}
+   // parseDisplayMotionMode defaults a missing value to standard, so a missing choice is rejected first.
    if(input.motionMode===undefined)return reply({error:'Choose a display motion mode.'},400);
+   let motionMode;try{motionMode=parseDisplayMotionMode(input.motionMode);}catch{return reply({error:'Unsupported display motion mode.'},400);}
    r=await client.rpc('display_set_motion',{p_screen:screenId,p_expected_version:version,p_mode:motionMode});
    if(r.error)return reply({error:'Motion settings could not be saved. Refresh and retry.'},status(r));
    return reply({configVersion:Number(r.data),motionMode});
@@ -90,8 +91,7 @@ export async function POST(request:Request){
   if(action==='override'){
    const generation=n(input.expectedGeneration);
    const seconds=n(input.durationSeconds);
-   if(generation===null||seconds===null||seconds<30||seconds>1800||
-     typeof input.slideId!=='string'||!/^[a-z0-9][a-z0-9-]{2,49}$/.test(input.slideId))
+   if(generation===null||seconds===null||seconds<30||seconds>1800||!isSlideId(input.slideId))
     return reply({error:'Choose an approved slide and a notice duration between 30 seconds and 30 minutes.'},400);
    r=await client.rpc('display_set_override',{p_screen:screenId,p_slide_id:input.slideId,p_seconds:seconds,p_expected_generation:generation});
    if(r.error)return reply({error:'The selected notice is not eligible or your publication changed.'},status(r));

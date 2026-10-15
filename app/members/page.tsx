@@ -6,6 +6,7 @@ import type{Workspace}from'../../lib/contracts';
 import '../../components/members.css';
 import{emptyModuleFeed,parseModuleFeed}from'../../lib/app-runtime';
 import type{ModuleFeed}from'../../lib/app-runtime';
+import {postJson} from '../../lib/post-json';
 export default function Members(){
  const [data,setData]=useState<Workspace|null>(null),[error,setError]=useState('');
  const [experience,setExperience]=useState<ModuleFeed>(emptyModuleFeed);
@@ -23,21 +24,19 @@ export default function Members(){
   window.addEventListener('focus',onFocus);
   return()=>{controller.abort();window.removeEventListener('focus',onFocus);};
  },[]);
- if(!data)return <main className="auth-box"><h1>My Week</h1><p role="status">{error||'Loading your authorized member space…'}</p>
+ if(!data)return <main className="auth-box"><a className="ui-wordmark auth-mark" href="/" aria-label="LV Zion home">LV<span>Zion</span></a><h1>My Week</h1><p role="status">{error||'Loading your authorized member space…'}</p>
   {error&&<p><a href="/sign-in">Sign in</a></p>}</main>;
  if(data.self.status==='intake'&&!data.permissions.organization)return <UnassignedMember data={data}/>;
  return <MemberHome workspace={data} manageHref="/members/manage" experience={experience}
  onFavoriteUpdate={async(moduleIds,expectedVersion)=>{
-  const response=await fetch('/api/members/experience/favorites',{method:'POST',
-   headers:{'Content-Type':'application/json'},body:JSON.stringify({moduleIds,expectedVersion})});
+  const response=await postJson('/api/members/experience/favorites',{moduleIds,expectedVersion});
   if(!response.ok)throw new Error('Favorites could not be updated.');
   const result=await response.json();
   setExperience(current=>({...current,favorites:result.favorites,favoriteVersion:result.favoriteVersion}));
   return result;
  }}
  onModuleNoticeRead={async noticeId=>{
-  const response=await fetch('/api/members/experience/notices',{method:'POST',
-   headers:{'Content-Type':'application/json'},body:JSON.stringify({noticeId})});
+  const response=await postJson('/api/members/experience/notices',{noticeId});
   if(!response.ok)throw new Error('Notification update failed.');
   setExperience(current=>({...current,notifications:current.notifications.map(n=>n.id===noticeId?{...n,readAt:new Date().toISOString()}:n)}));
  }}/>;

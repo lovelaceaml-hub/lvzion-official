@@ -34,7 +34,7 @@ async function setup(page:import('@playwright/test').Page,manager=true){
 test('manager can configure inventory while live booking remains disabled',async({page})=>{
  const f=await setup(page);
  await expect(page.getByRole('heading',{name:'Inventory & service calendar'})).toBeVisible();
- await expect(page.getByText(/Closed — original scheduler remains authoritative/)).toBeVisible();
+ await expect(page.getByText(/Closed. The original scheduler remains the booking authority/)).toBeVisible();
  await expect(page.getByRole('button',{name:/Bookings Not Open/})).toBeDisabled();
  await page.getByText('Add a room, whiteboard or TV').click();
  await page.getByLabel('New resource kind').selectOption('whiteboard');

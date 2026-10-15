@@ -24,6 +24,8 @@ Hosted Supabase `otecqlkqirncotytbfns` read-only check: only three foundation mi
 
 ## Fictional preview
 
+The preview screen component was removed in [R7](REFACTOR-R7.md); this section is kept as history.
+
 Route `/morning-prayer-preview`; canonical inactive module landing `/modules/work-mission-prayer`. Only in-memory fictional fixtures. Reload resets changes. Persona controls are demonstrations, not authentication. No arbitrary personal details are collected.
 
 Home prioritizes the next occurrence and conditionally simulates joining. PWP month/week content and reading dialogs use explicitly fictional placeholders. Schedule offers a weekday calendar, per-date details and multi-date volunteering. Me shows own hosting and request status, not attendance. Manage separates request review, occurrence/host administration and material editing/publication.

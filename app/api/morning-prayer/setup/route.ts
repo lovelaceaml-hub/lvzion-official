@@ -1,14 +1,13 @@
 import {requireMember} from '../../../../lib/server/supabase';
 import {NextResponse} from 'next/server';
+import {privateHeaders as headers,uuid} from '../../../../lib/morning-prayer/server';
 export const dynamic='force-dynamic';
-const headers={'Cache-Control':'private, no-store, max-age=0','Referrer-Policy':'no-referrer','X-Content-Type-Options':'nosniff'};
-const uuid=/^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 export async function POST(request:Request){
  if(request.headers.get('origin')!==new URL(request.url).origin)return NextResponse.json({error:'Not authorized.'},{status:403,headers});
  if(Number(request.headers.get('content-length')||0)>16000)return NextResponse.json({error:'Request too large.'},{status:413,headers});
  let data;try{data=await request.json();}catch{return NextResponse.json({error:'Invalid JSON.'},{status:400,headers});}
  if(!data||typeof data!=='object'||Array.isArray(data)||Object.keys(data).some(k=>!['key','expectedVersion','action'].includes(k))
- ||!uuid.test(data.key)||!Number.isSafeInteger(data.expectedVersion)||data.expectedVersion<1
+ ||!uuid(data.key)||!Number.isSafeInteger(data.expectedVersion)||data.expectedVersion<1
  ||!data.action||typeof data.action!=='object'||Array.isArray(data.action))
  return NextResponse.json({error:'Invalid command envelope.'},{status:400,headers});
  let client;try{client=await requireMember();}catch{return NextResponse.json({error:'Sign in required.'},{status:401,headers});}

@@ -1,89 +1,102 @@
-/* Continuous Church Display: completely scoped, 16:9, large-TV typography. */
-.cd-stage{width:100%;aspect-ratio:16/9;position:relative;overflow:hidden;container-type:inline-size;background:#e6ebdf;isolation:isolate}
-.cd-slide{position:absolute;inset:0;display:flex;align-items:center;isolation:isolate;overflow:hidden;color:#20382e;background:#e7ebdf;animation:cd-appear .45s ease-out both}
-.cd-copy{position:relative;z-index:2;width:76%;padding:6cqw;min-width:0;animation:cd-text-in .8s cubic-bezier(.2,.8,.2,1) both}
-.cd-eyebrow{font:700 1.6cqw/1.35 Arial,sans-serif;letter-spacing:.18em;margin:0 0 2.8cqw!important}
-.cd-copy h1{font:normal 7.1cqw/1.02 Georgia,serif;letter-spacing:-.04em;overflow-wrap:anywhere;max-width:12ch;margin:0 0 2.3cqw!important}
-.cd-body{font:normal 2.3cqw/1.35 Arial,sans-serif;max-width:30ch;overflow-wrap:anywhere;margin:0!important}
-.cd-art{position:absolute;inset:0;pointer-events:none;overflow:hidden;z-index:0}
-.cd-art i,.cd-art:before,.cd-art:after{position:absolute;content:"";display:block}
-.cd-preview-mark{position:absolute;bottom:2.4cqw;left:6cqw;z-index:5;font:600 1cqw Arial,sans-serif;letter-spacing:.17em;opacity:.6}
+/*
+ * Church Display TV surface, Day Sheet direction. A fixed 16:9 stage sized in container units so text
+ * stays readable from across a room. Decoration is only thin ruled lines and a slow "now" line that
+ * drifts like the marker on the day sheet: no circles, gradients or glow. Colors come from the tokens.
+ */
+.cd-stage{width:100%;aspect-ratio:16/9;position:relative;overflow:hidden;container-type:inline-size;background:var(--lvz-ground);isolation:isolate}
+.cd-slide{position:absolute;inset:0;display:flex;align-items:center;isolation:isolate;overflow:hidden;color:var(--lvz-ink);background:var(--lvz-ground);font-family:var(--lvz-font-sans);animation:cd-appear var(--lvz-duration-slow) var(--lvz-ease) both}
+.cd-copy{position:relative;z-index:2;width:68%;padding:0 6cqw;min-width:0;animation:cd-text-in calc(var(--lvz-duration-slow) * 2) var(--lvz-ease) both}
+.cd-eyebrow{margin:0 0 2cqw;font-size:2cqw;line-height:1.3;font-weight:var(--lvz-weight-strong);color:var(--lvz-accent)}
+.cd-copy h1{margin:0 0 2.4cqw;font:var(--lvz-weight-regular) 6.4cqw/1.05 var(--lvz-font-serif);letter-spacing:-.015em;max-width:14ch;overflow-wrap:anywhere;text-wrap:balance}
+.cd-body{margin:0;max-width:32ch;font-size:2.6cqw;line-height:1.4;overflow-wrap:anywhere}
+.cd-mark{position:absolute;left:6cqw;bottom:3.4cqw;z-index:2;margin:0;font-size:1.6cqw;font-weight:var(--lvz-weight-bold);color:var(--lvz-ink)}
+.cd-mark span{color:var(--lvz-accent);margin-left:.28em}
+.cd-preview-mark{position:absolute;right:4cqw;top:3cqw;z-index:5;font-size:1.6cqw;font-weight:var(--lvz-weight-strong);color:var(--lvz-ink-quiet)}
 @keyframes cd-appear{from{opacity:.2}to{opacity:1}}
-@keyframes cd-text-in{from{opacity:0;transform:translate3d(0,1.4cqw,0)}to{opacity:1;transform:translate3d(0,0,0)}}
-/* Editorial: slowly swaying organic landscape and a soft floating orb. */
-.cd-style-editorial{background:#e8ede2}
-.cd-style-editorial .cd-art i:nth-child(1){right:-3%;bottom:-10%;width:42%;height:110%;border-radius:52% 52% 0 0;background:#47715e;transform:rotate(17deg);animation:cd-sway-one 28s ease-in-out infinite alternate}
-.cd-style-editorial .cd-art i:nth-child(2){right:5%;bottom:-24%;width:23%;height:91%;border-radius:56% 56% 0 0;background:#aac2ab;transform:rotate(-11deg);animation:cd-sway-two 35s ease-in-out infinite alternate}
-.cd-style-editorial .cd-art i:nth-child(3){right:10%;top:22%;width:14%;aspect-ratio:1;border-radius:50%;background:#e4e7b8;animation:cd-float 30s ease-in-out infinite alternate}
-.cd-style-editorial .cd-art:before{right:-12%;top:-5%;width:51%;height:90%;background:radial-gradient(ellipse,rgba(255,247,208,.52),transparent 68%);animation:cd-breathe 19s ease-in-out infinite alternate}
-@keyframes cd-sway-one{to{transform:rotate(25deg) translate3d(-3%,2%,0) scale(1.04)}}
-@keyframes cd-sway-two{to{transform:rotate(-2deg) translate3d(6%,-3%,0) scale(1.04)}}
-@keyframes cd-float{to{transform:translate3d(-16%,-12%,0) scale(1.08)}}
-@keyframes cd-breathe{from{opacity:.36;transform:scale(.95)}to{opacity:.85;transform:scale(1.1)}}
-/* Schedule: date rail with atmospheric animated arcs. All activities remain stationary. */
-.cd-style-schedule{background:#2343bb;color:#fff}
-.cd-style-schedule .cd-copy{width:72%;padding:5cqw}
-.cd-style-schedule .cd-copy h1{font:700 4.8cqw/1.08 Arial,sans-serif;letter-spacing:-.03em;max-width:17ch}
-.cd-date-rail{position:relative;width:28%;height:100%;background:#e3ebff;color:#2441ac;z-index:2;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:3cqw;overflow:hidden}
-.cd-date-rail:before{position:absolute;content:"";inset:-70% -100%;background:linear-gradient(115deg,transparent 42%,rgba(255,255,255,.73) 50%,transparent 58%);animation:cd-sheen 24s linear infinite}
-.cd-date-rail span{position:relative;font:700 1.7cqw/1.35 Arial,sans-serif;letter-spacing:.13em;text-transform:uppercase}
-.cd-date-rail strong{position:relative;font:700 16cqw/1.1 Arial,sans-serif;letter-spacing:-.09em;margin-right:1cqw}
-.cd-rows{display:flex;flex-direction:column;gap:1cqw;max-width:95%}
-.cd-row{display:flex;flex-direction:column;gap:.6cqw;padding-top:1.6cqw;border-top:1px solid rgba(255,255,255,.32)}
-.cd-row strong{font:700 1.5cqw/1.25 Arial,sans-serif;color:#b9ccff}
-.cd-row span{font:500 2.15cqw/1.22 Arial,sans-serif;overflow-wrap:anywhere}
-.cd-style-schedule .cd-art i:nth-child(1){right:-13%;top:-24%;height:149%;width:58%;border:4cqw solid rgba(192,215,255,.12);border-radius:50%;animation:cd-ring 27s ease-in-out infinite alternate}
-.cd-style-schedule .cd-art i:nth-child(2){right:8%;bottom:-21%;width:32%;height:87%;border:2cqw solid rgba(255,255,255,.07);border-radius:50%;animation:cd-ring 33s ease-in-out infinite alternate-reverse}
-@keyframes cd-sheen{from{transform:translate3d(-55%,0,0)}to{transform:translate3d(65%,0,0)}}
-@keyframes cd-ring{to{transform:rotate(19deg) translate3d(-5%,3%,0) scale(1.07)}}
-/* Event: dimensional paper sculpture, warm terracotta with a moving sun. */
-.cd-style-event{background:#f3e2cb;color:#662f2a}
-.cd-style-event .cd-copy h1{font:800 6.9cqw/1 Arial,sans-serif;letter-spacing:-.044em}
-.cd-style-event .cd-art i:nth-child(1){right:-10%;top:-22%;width:52%;aspect-ratio:1;border-radius:50%;background:#c5684b;animation:cd-event-one 30s ease-in-out infinite alternate}
-.cd-style-event .cd-art i:nth-child(2){right:1%;top:35%;width:25%;aspect-ratio:1;border-radius:50%;background:#efbc69;animation:cd-event-two 25s ease-in-out infinite alternate}
-.cd-style-event .cd-art i:nth-child(3){right:6%;bottom:-20%;width:32%;height:55%;transform:rotate(-17deg);border-radius:2cqw;background:#c98b72;animation:cd-event-three 31s ease-in-out infinite alternate}
-.cd-event-meta{display:flex;flex-direction:column;gap:.6cqw;font:700 1.6cqw/1.35 Arial,sans-serif;margin-top:2.7cqw}
-.cd-event-meta span{font-weight:500}
-@keyframes cd-event-one{to{transform:translate3d(-4%,3%,0) scale(1.06)}}
-@keyframes cd-event-two{to{transform:translate3d(-19%,-10%,0) scale(.93)}}
-@keyframes cd-event-three{to{transform:rotate(-6deg) translate3d(-8%,-5%,0)}}
-/* Campaign: floating pastel bubbles/petals and orbit rings, distinct from Mother's Love. */
-.cd-style-campaign{background:#eddef2;color:#513768;justify-content:center;text-align:center}
-.cd-style-campaign .cd-copy{width:88%;padding:5cqw}
-.cd-style-campaign .cd-copy h1{max-width:14ch;margin-left:auto!important;margin-right:auto!important;font-style:italic}
-.cd-style-campaign .cd-body{margin:auto!important}
-.cd-style-campaign .cd-art i:nth-child(1){left:-16%;top:16%;width:35%;height:100%;border:5cqw solid #d3b1d8;border-radius:50%;transform:rotate(-33deg);animation:cd-campaign-left 40s ease-in-out infinite alternate}
-.cd-style-campaign .cd-art i:nth-child(2){right:-17%;top:-30%;width:45%;height:118%;border:5cqw solid #dfb7b2;border-radius:50%;transform:rotate(24deg);animation:cd-campaign-right 32s ease-in-out infinite alternate}
-.cd-style-campaign .cd-art i:nth-child(3){left:16%;bottom:-45%;width:58%;height:55%;border:5cqw solid #c8abd6;border-radius:50%;animation:cd-breathe 36s ease-in-out infinite alternate}
-.cd-style-campaign .cd-art:before{width:4%;aspect-ratio:1;border-radius:50%;top:15%;left:19%;background:radial-gradient(circle at 30% 25%,#fff,#dfbddf);box-shadow:17cqw 7cqw 0 -1cqw #f4c9d9,52cqw 3cqw 0 1cqw #f7ddca,65cqw 25cqw 0 .8cqw #dcc8ea,40cqw 30cqw 0 -1cqw #fff2db;animation:cd-float 22s ease-in-out infinite alternate}
-@keyframes cd-campaign-left{to{transform:rotate(-22deg) translate3d(3%,-4%,0) scale(1.08)}}
-@keyframes cd-campaign-right{to{transform:rotate(14deg) translate3d(-5%,2%,0) scale(.94)}}
-.cd-fallback{background:#e8eee3;text-align:center;justify-content:center}
-.cd-fallback .cd-copy{width:100%}
-.cd-fallback h1{max-width:none!important}
-.cd-screen{width:100vw;height:100dvh;background:#17211a;display:grid;place-items:center;overflow:hidden}
-.cd-screen .cd-stage{width:min(100vw,177.77778dvh);max-height:100dvh}
-.cd-screen input,.cd-screen button{font:inherit}
-.cd-device-pair{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2cqw;color:white;text-align:center;padding:5cqw;background:#14231d;width:100%;height:100%;font-family:Arial,sans-serif}
-.cd-device-pair h1{font-size:4.5cqw;max-width:90%}
-.cd-device-pair p{font-size:2cqw;max-width:70%}
-.cd-device-pair form{display:flex;gap:1cqw;max-width:85%;align-items:center}
-.cd-device-pair input{min-height:4.5cqw;padding:1cqw;font-size:2.1cqw;text-align:center;border:2px solid white;border-radius:.8cqw;letter-spacing:.16em;min-width:15cqw;background:#fff;color:#12281f}
-.cd-device-pair button{min-height:4.5cqw;border:0;border-radius:.8cqw;font-weight:700;padding:1cqw 2cqw;background:#d8e8d6;color:#22422e;cursor:pointer}
-.cd-device-pair .cd-pair-error{color:#ffe1c5}
-@media(prefers-reduced-motion:reduce){.cd-stage *, .cd-stage *:before,.cd-stage *:after{animation:none!important;transition:none!important;will-change:auto!important}}
-@media(max-width:700px){.cd-device-pair form{flex-wrap:wrap;justify-content:center}.cd-device-pair input{min-height:42px;font-size:18px}.cd-device-pair button{min-height:42px;font-size:16px}.cd-device-pair p{font-size:14px}}
+@keyframes cd-text-in{from{opacity:0;transform:translate3d(0,1.2cqw,0)}to{opacity:1;transform:none}}
 
-/* Independent approved per-device cinematic motion choices. Decorative animation is optional. */
+/* Ruled lines and the "now" line. Three <i> plus ::before; the per-screen motion settings below retime them. */
+.cd-art{position:absolute;inset:0;pointer-events:none;overflow:hidden;z-index:0}
+.cd-art i,.cd-art::before{position:absolute;content:"";display:block}
+.cd-art i{right:0;width:30%;height:max(1px,.12cqw);background:var(--lvz-line)}
+.cd-art i:nth-child(1){top:58%;right:-2%;width:34%;height:.35cqw;background:var(--lvz-accent);animation:cd-sway-one 28s ease-in-out infinite alternate}
+.cd-art i:nth-child(1)::before{content:"";position:absolute;left:-1.6cqw;top:50%;width:1.1cqw;height:1.1cqw;border-radius:var(--lvz-radius-round);background:var(--lvz-accent);transform:translateY(-50%)}
+.cd-art i:nth-child(2){top:34%;animation:cd-sway-two 35s ease-in-out infinite alternate}
+.cd-art i:nth-child(3){top:78%;animation:cd-float 30s ease-in-out infinite alternate}
+.cd-art::before{top:12%;bottom:12%;right:33%;width:max(1px,.12cqw);background:var(--lvz-line);animation:cd-breathe 19s ease-in-out infinite alternate}
+@keyframes cd-sway-one{from{transform:translate3d(0,-14cqw,0)}to{transform:translate3d(0,8cqw,0)}}
+@keyframes cd-sway-two{from{transform:translate3d(4%,0,0)}to{transform:translate3d(-8%,0,0)}}
+@keyframes cd-float{from{transform:translate3d(-6%,0,0)}to{transform:translate3d(6%,0,0)}}
+@keyframes cd-breathe{from{opacity:.4}to{opacity:1}}
+
+/* Schedule: date on the left, then time-first rows, like the day sheet itself. */
+.cd-style-schedule .cd-copy{width:66%;padding:0 5cqw}
+.cd-style-schedule .cd-copy h1{font:var(--lvz-weight-bold) 4.6cqw/1.08 var(--lvz-font-sans);letter-spacing:-.01em;max-width:18ch}
+.cd-date-rail{position:relative;z-index:2;flex:none;width:26%;height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:.6cqw;padding:3cqw;text-align:center;background:var(--lvz-surface);border-right:1px solid var(--lvz-line);overflow:hidden}
+.cd-date-rail::before{position:absolute;content:"";left:0;right:0;top:0;height:.35cqw;background:var(--lvz-accent);animation:cd-rail 24s linear infinite}
+.cd-date-rail span{position:relative;font-size:2cqw;font-weight:var(--lvz-weight-strong);color:var(--lvz-ink-quiet)}
+.cd-date-rail strong{position:relative;font:var(--lvz-weight-regular) 14cqw/1 var(--lvz-font-serif);color:var(--lvz-accent)}
+.cd-rows{display:flex;flex-direction:column;max-width:100%}
+.cd-row{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,2.4fr);gap:2.4cqw;align-items:baseline;padding:1.5cqw 0;border-top:max(1px,.12cqw) solid var(--lvz-line)}
+.cd-row strong{font-size:2.3cqw;font-weight:var(--lvz-weight-bold);color:var(--lvz-accent)}
+.cd-row span{font-size:2.5cqw;overflow-wrap:anywhere}
+.cd-style-schedule .cd-art i{width:12%}
+.cd-style-schedule .cd-mark{left:auto;right:4cqw}
+@keyframes cd-rail{from{transform:translate3d(0,0,0)}to{transform:translate3d(0,56.25cqw,0)}}
+
+/* Event: when first, then where, divided by hairlines. */
+.cd-style-event{background:var(--lvz-surface)}
+.cd-style-event .cd-copy h1{font:var(--lvz-weight-bold) 6cqw/1.04 var(--lvz-font-sans);letter-spacing:-.02em}
+.cd-event-meta{display:flex;flex-direction:column;margin-top:2.6cqw;font-size:2.5cqw}
+.cd-event-meta>*{padding:1.1cqw 0;border-top:max(1px,.12cqw) solid var(--lvz-line)}
+.cd-event-meta strong{font-weight:var(--lvz-weight-bold);color:var(--lvz-accent)}
+
+/* Campaign: the one full-color surface, centered, white on spruce. */
+.cd-style-campaign{background:var(--lvz-accent);color:var(--lvz-on-accent);justify-content:center;text-align:center}
+.cd-style-campaign .cd-copy{width:84%;padding:0 5cqw}
+.cd-style-campaign .cd-copy h1{max-width:16ch;margin-left:auto;margin-right:auto}
+.cd-style-campaign .cd-body{margin:auto}
+.cd-style-campaign .cd-eyebrow,.cd-style-campaign .cd-mark,.cd-style-campaign .cd-mark span{color:var(--lvz-on-accent)}
+.cd-style-campaign .cd-art i,.cd-style-campaign .cd-art::before{background:color-mix(in srgb,var(--lvz-on-accent) 22%,transparent)}
+.cd-style-campaign .cd-art i:nth-child(1),.cd-style-campaign .cd-art i:nth-child(1)::before{background:var(--lvz-on-accent);opacity:.7}
+.cd-style-campaign .cd-mark{left:50%;transform:translateX(-50%)}
+
+/* Neutral welcome when nothing is eligible, outside hours, or offline. */
+.cd-fallback{justify-content:center;text-align:center}
+.cd-fallback .cd-copy{width:100%}
+.cd-fallback .cd-copy h1{max-width:none}
+.cd-fallback .cd-body{margin:auto;color:var(--lvz-ink-quiet)}
+
+/* Centered and wide layouts keep the art at the edges, so the "now" line slides sideways along the bottom instead of crossing text. */
+.cd-fallback .cd-art::before,.cd-style-campaign .cd-art::before,.cd-style-schedule .cd-art::before{display:none}
+.cd-fallback .cd-art i:nth-child(1),.cd-style-campaign .cd-art i:nth-child(1){top:auto;bottom:14%;animation-name:cd-float}
+
+/* Full-screen player and the pairing screen. */
+.cd-screen{width:100vw;height:100dvh;background:var(--lvz-ink);display:grid;place-items:center;overflow:hidden}
+.cd-screen .cd-stage{width:min(100vw,177.77778dvh);max-height:100dvh}
+.cd-device-pair{display:flex;flex-direction:column;align-items:flex-start;justify-content:center;gap:2cqw;width:100%;height:100%;padding:0 8cqw;background:var(--lvz-ground);color:var(--lvz-ink);font-family:var(--lvz-font-sans)}
+.cd-device-pair .cd-mark{position:static;font-size:2.2cqw;color:var(--lvz-ink)}
+.cd-device-pair h1{margin:0;font:var(--lvz-weight-regular) 5.4cqw/1.08 var(--lvz-font-serif)}
+.cd-device-pair p{margin:0;max-width:52ch;font-size:2.1cqw;line-height:1.45;color:var(--lvz-ink-quiet)}
+.cd-device-pair form{display:flex;flex-wrap:wrap;gap:1.4cqw;align-items:center;max-width:100%}
+.cd-device-pair input{min-height:max(48px,5cqw);min-width:min(32cqw,100%);padding:0 1.6cqw;border:max(1px,.15cqw) solid var(--lvz-line-input);border-radius:var(--lvz-radius-md);background:var(--lvz-surface);color:var(--lvz-ink);font-size:max(16px,2.4cqw);letter-spacing:.14em;text-align:center}
+.cd-device-pair button{min-height:max(48px,5cqw);padding:0 3cqw;border:0;border-radius:var(--lvz-radius-md);background:var(--lvz-accent);color:var(--lvz-on-accent);font-size:max(16px,2.2cqw);font-weight:var(--lvz-weight-strong)}
+.cd-device-pair button:disabled{opacity:.55;cursor:not-allowed}
+.cd-device-pair .cd-pair-error{color:var(--lvz-danger)}
+@media (max-aspect-ratio:1/1){.cd-screen .cd-stage:has(.cd-device-pair){aspect-ratio:auto;width:100vw;height:100dvh;max-height:none}}
+@media (max-width:700px){.cd-device-pair{padding:0 var(--lvz-gutter);gap:10px}.cd-device-pair h1{font-size:24px}.cd-device-pair p{font-size:14px}.cd-device-pair .cd-mark{font-size:16px}}
+@media (prefers-reduced-motion:reduce){.cd-stage *,.cd-stage *::before,.cd-stage *::after{animation:none!important;transition:none!important}}
+
+/* Per-screen motion settings chosen by the display manager. Still and system reduced motion both stop everything. */
 .cd-motion-calm .cd-art i,.cd-motion-calm .cd-art::before,.cd-motion-calm .cd-art::after,
 .cd-motion-calm .cd-date-rail::before{animation-duration:55s!important}
 .cd-motion-lively .cd-art i,.cd-motion-lively .cd-art::before,.cd-motion-lively .cd-art::after,
 .cd-motion-lively .cd-date-rail::before{animation-duration:16s!important}
-.cd-motion-still *, .cd-motion-still *::before,.cd-motion-still *::after{
+.cd-motion-still *,.cd-motion-still *::before,.cd-motion-still *::after{
  animation:none!important;transition:none!important;will-change:auto!important
 }
-@media(prefers-reduced-motion:reduce){
- .cd-motion-calm *, .cd-motion-lively *, .cd-motion-standard *,
+@media (prefers-reduced-motion:reduce){
+ .cd-motion-calm *,.cd-motion-lively *,.cd-motion-standard *,
  .cd-motion-calm *::before,.cd-motion-lively *::before,.cd-motion-standard *::before,
  .cd-motion-calm *::after,.cd-motion-lively *::after,.cd-motion-standard *::after{
   animation:none!important;transition:none!important;will-change:auto!important

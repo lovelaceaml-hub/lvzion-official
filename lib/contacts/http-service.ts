@@ -23,29 +23,29 @@ async function boundedBody(request:Request):Promise<unknown>{
  try{return JSON.parse(new TextDecoder('utf-8',{fatal:true}).decode(bytes));}catch{throw new RequestError(400);}
 }
 const sqlError=(code?:string)=>code==='40001'||code==='23505'?reply({error:'This record changed. Reload and review before saving.'},409):code==='42501'?reply({error:'This record or action is not available.'},403):['22023','22P02','22007'].includes(code??'')?reply({error:'Review the request and try again.'},400):reply({error:'Contacts is temporarily unavailable.'},503);
+type Route={rpc:ContactsRpc;args:Record<string,unknown>;project:(value:unknown)=>unknown};
+/** The only accepted endpoints. Each parses its body strictly and projects the RPC result explicitly. */
+const routes:Record<string,(body:unknown)=>Route>={
+ workspace:body=>({rpc:'contacts_workspace_r3',args:{p_after:parseWorkspaceRequest(body)},project:parseWorkspace}),
+ detail:body=>({rpc:'contacts_detail_r3',args:{p_id:parseRecordId(body)},project:parseContactDetail}),
+ command:body=>{const parsed=parseDatabaseCommand(body);return {rpc:'contacts_command_r3',args:parsed,project:value=>parseReceipt(value,parsed.p_id)};},
+ duplicates:body=>({rpc:'contacts_duplicates_r3',args:{p_id:parseRecordId(body)},project:parseDuplicateResults}),
+ agenda:body=>{if(!body||typeof body!=='object'||Array.isArray(body)||Object.keys(body).length)throw new ContactsContractError();return {rpc:'contacts_agenda_r3',args:{},project:parseAgenda};}
+};
 export async function handleContactsRequest(request:Request,dependencies:ContactsDependencies):Promise<Response>{
  // This check runs before parsing input, opening a session or accessing the database.
  // Missing activation never falls back to fictional data or another project.
  if(!dependencies.released())return unavailable();
  const url=new URL(request.url);
- const paths=['workspace','detail','command','duplicates','agenda'];
  const path=url.pathname.split('/').filter(Boolean);
- if(url.search||path.length!==3||path[0]!=='api'||path[1]!=='contacts'||!paths.includes(path[2]))return reply({error:'Contacts endpoint unavailable.'},404);
+ if(url.search||path.length!==3||path[0]!=='api'||path[1]!=='contacts'||!Object.hasOwn(routes,path[2]))return reply({error:'Contacts endpoint unavailable.'},404);
  if(request.method!=='POST')return reply({error:'Use an authorized Contacts request.'},405);
  let origin:string;try{origin=dependencies.trustedOrigin();if(new URL(origin).origin!==origin)throw Error();}catch{return reply({error:'Contacts is temporarily unavailable.'},503);}
  if(request.headers.get('origin')!==origin||request.headers.get('sec-fetch-site')==='cross-site')return reply({error:'Request origin rejected.'},403);
  let session:ContactsSession;try{session=await dependencies.requireSession();}catch{return reply({error:'Sign in required.'},401);}
  try{
   const body=await boundedBody(request);
-  let rpc:ContactsRpc,args:Record<string,unknown>,project:(v:unknown)=>unknown;
-  switch(path[2]){
-   case 'workspace':rpc='contacts_workspace_r3';args={p_after:parseWorkspaceRequest(body)};project=parseWorkspace;break;
-   case 'detail':rpc='contacts_detail_r3';args={p_id:parseRecordId(body)};project=parseContactDetail;break;
-   case 'command':{const parsed=parseDatabaseCommand(body);rpc='contacts_command_r3';args=parsed;project=value=>parseReceipt(value,parsed.p_id);break;}
-   case 'duplicates':rpc='contacts_duplicates_r3';args={p_id:parseRecordId(body)};project=parseDuplicateResults;break;
-   case 'agenda':{const v=body;if(!v||typeof v!=='object'||Array.isArray(v)||Object.keys(v).length)throw new ContactsContractError();rpc='contacts_agenda_r3';args={};project=parseAgenda;break;}
-   default:return reply({error:'Contacts endpoint unavailable.'},404);
-  }
+  const {rpc,args,project}=routes[path[2]](body);
   const result=await session.rpc(rpc,args);
   if(result.error)return sqlError(result.error.code);
   // Do not forward arbitrary RPC JSON; explicit projection strips unapproved extra fields.

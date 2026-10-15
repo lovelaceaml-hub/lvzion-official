@@ -56,7 +56,8 @@ Open [Study Room Reservation](https://lvz.app/modules/study-rooms) while signed 
 
 **Current status:** The designated application owner has the sole active Study Room manager grant. The module shows actual inventory/availability, but **"Bookings Not Open"** is intentional. The original [Study Room Scheduler](https://lvrooms.web.app) remains the booking authority until a verified, approved transition. Do **not** use `lvz.app` for real new reservations yet.
 
-For an authorized Study Room manager, the page offers:
+For an authorized Study Room manager, the page offers the items below. On a phone the manager tools sit below the schedule; on a computer they sit in a column on the right. Tap **LV Zion** at the top to return home, and swipe left or right on the list to change tabs.
+
 
 1. **Availability / My Reservations / Manage bookings / History.** View the current date's resources and slots, owner-specific records and authorized private history. There are zero new-system bookings at the last verified check. The date chips span today and the next three days.
 2. **Resources & date closures.** Rename or enable/disable rooms, boards and TVs. Add or remove a date-specific closure for one resource or all resources, with a reason. A conflict with an existing slot is refused; historical records are preserved.

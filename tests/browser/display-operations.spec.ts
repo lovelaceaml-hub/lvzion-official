@@ -39,7 +39,7 @@ test('fictional phone editor supports screen switching and versioned operating h
  await page.getByRole('button',{name:'Save operating hours'}).click();
  await expect.poll(()=>writes.some(w=>w.action==='hours'&&w.hours.length===7)).toBeTruthy();
  await page.getByLabel('Display name').fill('Fellowship Hall TV');
- await page.getByRole('button',{name:'+ Add an unpaired display'}).click();
+ await page.getByRole('button',{name:'Add display'}).click();
  await expect(page.getByLabel('Choose display')).toHaveValue('30000000-0000-4000-8000-000000000002');
  await expect(page.getByText('Not paired yet')).toBeVisible();
  expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);
@@ -107,4 +107,21 @@ test('paired player respects Las Vegas operating hours and immediate approved em
  override=false;await page.clock.runFor(12100);await expect(page.locator('.cd-style-editorial')).toBeVisible();
  unavailable=true;await page.clock.runFor(32000);await expect(page.getByRole('heading',{name:'Welcome.'})).toBeVisible();
  expect(await page.locator('.cd-slide').count()).toBe(1);
+});
+test('manager fits a 320px phone on every tab and a sideways swipe changes tabs',async({page})=>{
+ await page.setViewportSize({width:320,height:700});
+ await page.route('**/api/display/manage',route=>route.fulfill({status:200,contentType:'application/json',body:JSON.stringify({screens:[baseScreen()]})}));
+ await page.goto('/display-operations-review');await expect(page.getByRole('heading',{name:'Church Display'})).toBeVisible();
+ for(const tab of ['Content','Playlist','Publish','Screens']){
+  await page.getByRole('button',{name:tab,exact:true}).click();
+  await expect(page.getByRole('button',{name:tab,exact:true})).toHaveAttribute('aria-current','page');
+  expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);
+ }
+ await page.getByRole('button',{name:'Content',exact:true}).click();
+ await page.locator('.cd-layout').evaluate(el=>{
+  const touch=(x:number)=>new Touch({identifier:1,target:el,clientX:x,clientY:300});
+  el.dispatchEvent(new TouchEvent('touchstart',{bubbles:true,touches:[touch(260)],changedTouches:[touch(260)]}));
+  el.dispatchEvent(new TouchEvent('touchend',{bubbles:true,touches:[],changedTouches:[touch(120)]}));
+ });
+ await expect(page.getByRole('button',{name:'Playlist',exact:true})).toHaveAttribute('aria-current','page');
 });

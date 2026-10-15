@@ -14,6 +14,7 @@ Start with the actual app at [lvz.app](https://lvz.app). Current documentation d
 - [Organization run index](runs/organization-workflow/INDEX.md)
 - [Documentation audit and validation](DOCUMENTATION-AUDIT.md)
 - [Product decisions, with later implementation updates](PRODUCT-DECISIONS.md)
+- [Design contract (Day Sheet), tokens and shared building blocks](design/LVZ-DESIGN-CONTRACT.md) and [design record](DESIGN.md)
 
 ## Module contracts and evidence
 
