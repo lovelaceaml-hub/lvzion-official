@@ -19,7 +19,7 @@ Start with the actual app at [lvz.app](https://lvz.app). Current documentation d
 
 | Module | Latest guide or release record | Limits |
 |---|---|---|
-| Contacts | [R5 owner experience](contacts/OWNER-EXPERIENCE-R5.md), [initial owner release](contacts/LIVE-OWNER-RELEASE.md) | Private owner scope; sharing/export/messages off; real owner save/reload acceptance outstanding |
+| Contacts | [Current owner scope](contacts/README.md), [user guide](contacts/USER-GUIDE.md), [operations](contacts/OPERATIONS.md), [verification](contacts/VERIFICATION.md), [R5 evidence](contacts/OWNER-EXPERIENCE-R5.md) | Private owner scope; sharing/export/messages off; real owner save/reload acceptance outstanding |
 | Study Rooms | [Current status](study-rooms/README.md), [cutover runbook](study-rooms/CUTOVER-RUNBOOK.md), [R4 controls](STUDY-ROOM-R4-LIVE.md) | Booking gate closed; legacy scheduler remains authoritative |
 | Continuous Display | [R2 operations](continuous-display/OPERATIONS-R2.md), [initial contract](continuous-display/LIVE-RELEASE.md), [initial verification](continuous-display/LIVE-VERIFICATION.md) | No published content/paired TV; R2 operations deployed; physical TV acceptance outstanding |
 | Work Mission Morning Prayer | [Live setup](morning-prayer/LIVE-SETUP.md) | Empty schedules/materials; member meeting access and outgoing distribution gated |
@@ -55,6 +55,10 @@ The catalog includes guides, historical plans, run records, JSON evidence, scree
 - [UI-SIGNUP-VERIFICATION.md](UI-SIGNUP-VERIFICATION.md)
 - [USER-MANUAL.md](USER-MANUAL.md)
 - [contacts/LIVE-OWNER-RELEASE.md](contacts/LIVE-OWNER-RELEASE.md)
+- [contacts/README.md](contacts/README.md)
+- [contacts/USER-GUIDE.md](contacts/USER-GUIDE.md)
+- [contacts/OPERATIONS.md](contacts/OPERATIONS.md)
+- [contacts/VERIFICATION.md](contacts/VERIFICATION.md)
 - [contacts/OWNER-EXPERIENCE-R5.md](contacts/OWNER-EXPERIENCE-R5.md)
 - [contacts/owner-pilot-schema.sql](contacts/owner-pilot-schema.sql)
 - [continuous-display/LIVE-RELEASE.md](continuous-display/LIVE-RELEASE.md)
@@ -84,3 +88,5 @@ The catalog includes guides, historical plans, run records, JSON evidence, scree
 - [screenshots/organization-live.jpg](screenshots/organization-live.jpg)
 - [study-rooms/CUTOVER-RUNBOOK.md](study-rooms/CUTOVER-RUNBOOK.md)
 - [study-rooms/README.md](study-rooms/README.md)
+
+- [Work Mission completion R5](morning-prayer/COMPLETION-R5.md): current scope, verification, hosted migration, rollback and owner setup.

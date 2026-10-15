@@ -1,3 +1,5 @@
+> Current implementation and release evidence: [Completion R5](COMPLETION-R5.md). R3 meeting-access-disabled wording below records the earlier release, superseded by the explicit Vault-backed R4/R5 broker. No actual meeting links or member rollout are seeded.
+
 # Work Mission Morning Prayer — live LV Zion integration
 
 > Live setup contract. The [current handoff](../HANDOFF.md) confirms the applied schema, approved module, one active module grant and enabled series with no occurrences or published materials. Historical R2 verification is separate; broader member activation remains gated.

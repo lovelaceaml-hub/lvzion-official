@@ -153,6 +153,46 @@
       "repository_state": "PR #32 merged during audit at de5dcdede5fc740873fddfa36467d9d47f318fd6. Repository source now exists on main. Refreshed Vercel alias lookup verified READY production from that SHA; no new runtime or hardware acceptance is claimed.",
       "source_pr": "https://github.com/lovelaceaml-hub/lvzion-official/pull/32",
       "applied_via": "Supabase MCP apply_migration"
+    },
+    {
+      "name": "morning_prayer_operations_r4",
+      "hosted_version": "20261014235216",
+      "repository_version": "20261014231657",
+      "status": "applied",
+      "verified_on": "2026-10-14",
+      "source": "supabase/migrations/20261014231657_morning_prayer_operations_r4.sql",
+      "applied_via": "Supabase MCP apply_migration",
+      "verification": "Hosted version/name checked. R5 function readback and 15 RLS tables, zero anonymous RPC execution, denied direct member-table access, one owner grant, zero occurrences/publications/meeting references verified. No semantic digest attestation claimed."
+    },
+    {
+      "name": "continuous_display_motion_r4",
+      "hosted_version": "20261015005420",
+      "repository_version": "20261015004620",
+      "status": "applied",
+      "verified_on": "2026-10-14",
+      "source": "supabase/migrations/20261015004620_continuous_display_motion_r4.sql",
+      "applied_via": "Supabase MCP apply_migration",
+      "verification": "Concurrent Display migration metadata confirmed; source preserved from PR #39, no replay."
+    },
+    {
+      "name": "morning_prayer_completion_r5",
+      "hosted_version": "20261015010132",
+      "repository_version": "20261015004856",
+      "status": "applied",
+      "verified_on": "2026-10-14",
+      "source": "supabase/migrations/20261015004856_morning_prayer_completion_r5.sql",
+      "applied_via": "Supabase MCP apply_migration",
+      "verification": "Hosted version/name checked. R5 function readback and 15 RLS tables, zero anonymous RPC execution, denied direct member-table access, one owner grant, zero occurrences/publications/meeting references verified. No semantic digest attestation claimed."
+    },
+    {
+      "name": "morning_prayer_setup_lock_guard",
+      "hosted_version": "20261015010537",
+      "repository_version": "20261015010421",
+      "status": "applied",
+      "source": "supabase/migrations/20261015010421_morning_prayer_setup_lock_guard.sql",
+      "applied_via": "Supabase MCP apply_migration",
+      "verified_on": "2026-10-14",
+      "verification": "Applied after targeted/application/database checks and four native race tests, preserves compatible setup callers and existing private function ACL. No real records seeded."
     }
   ],
   "normalization": {
@@ -161,7 +201,7 @@
     "purpose": "Comparison of known migration definitions, not cryptographic attestation or a full semantic/security review."
   },
   "unapplied_repository_migrations": [],
-  "warning": "Hosted versions differ from repository filenames. Never replay applied migrations or use blind db push. Display operations is applied and its code merged in PR #32; fetch current state before release. Study Room booking gate remains closed.",
-  "metadata_reconciled_at": "2026-10-14T23:26:33Z",
-  "metadata_reconciliation": "16 hosted versions/names observed. Existing digest attestations remain historical; added metadata entries do not assert definition equivalence."
+  "warning": "Hosted versions differ from repository filenames. Never replay applied migrations or use blind db push. R4 and R5 Morning Prayer and concurrent Display motion are applied; check current state before release. Study Room bookings remain closed.",
+  "metadata_reconciled_at": "2026-10-15T01:02:00Z",
+  "metadata_reconciliation": "20 applied hosted versions/names observed; R5 and compatible setup guard applied in this task."
 }

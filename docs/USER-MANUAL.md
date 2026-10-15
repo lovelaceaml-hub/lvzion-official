@@ -76,6 +76,24 @@ Use **Apps** to see modules explicitly assigned to your account. Signing up or r
 - [Contacts](https://lvz.app/modules/contacts): the current workspace is private to the authorized owner. Sharing, export and messages are unavailable.
 - [Study Rooms](https://lvz.app/modules/study-rooms): manager setup is available, but new bookings remain closed while the original scheduler is still the booking authority.
 - [Continuous Display](https://lvz.app/modules/continuous-display): owner setup is available. Review and approve the exact content before publishing, and pair a real screen only when authorized. No screen was paired during setup.
-- [Work Mission Morning Prayer](https://lvz.app/modules/work-mission-prayer): owner setup starts with empty schedules and materials. Check the real dates and approved wording before publishing. Member meeting-link access remains unavailable.
+- [Work Mission Morning Prayer](https://lvz.app/modules/work-mission-prayer): owner setup starts with empty schedules and materials. Check the real dates and approved wording before publishing. Joining requires an explicit grant, a verified date and encrypted link, and the authorized meeting window.
 
 See [all documentation](README.md) for each module's release evidence and remaining limits.
+
+## Contacts: authorized owner workspace
+
+Open [Contacts in LV Zion Official](https://lvz.app/modules/contacts) using your normal verified account and the authorized **Apps** selector. Only the individually granted owner sees Contacts; simply being a member, group leader or technical administrator is not sufficient.
+
+Under **My Contacts**, add a name, optional phone and preferred method. You can edit a name or preference later, but **not an existing saved phone number**. Search/filters inspect **loaded authorized names only**; use the next-page control for more records. Overview counts are partial until all pages have been loaded.
+
+On a contact, add **author-only notes**, schedule/complete/reschedule/cancel one active next step, mark do-not-contact, close, archive or restore without erasing the restriction. Possible duplicates are suggestions only, never automatic merges. Follow-Ups displays generic activity counts, not a full named task calendar; due dates on individual contacts are displayed in Las Vegas time. No email, SMS, Signal or call is sent by Contacts.
+
+The detailed [Contacts user guide](contacts/USER-GUIDE.md) covers every current control, errors and the sharing/export limitations. [Privacy status](contacts/README.md) and [verification](contacts/VERIFICATION.md) distinguish implemented owner-only functionality from unfinished shared features.
+
+## Work Mission corrections and schedule exceptions
+
+In [Morning Prayer](https://lvz.app/modules/work-mission-prayer), open Manage to add verified source dates, review weekday batches, move a gathering or mark an app day/cancellation. Restore as unverified gathering reopens a future exception without restoring its old host or meeting link. Verify the date again before assigning a host or configuring joining.
+
+Use Material to revise to correct the latest unpublished draft or a published reading/PWP. Changes create a new version; source confirmation resets when you edit wording. A publisher must review and publish the replacement. Me lists your future hosting dates across the selected calendar month. Access revocation does not erase assignment or audit history.
+
+Real dates, permitted Zoom links, host eligibility and member/coordinator access must be chosen by the accountable owner. The release sends no external messages and does not change the retired Firebase app. [Operational evidence and remaining setup](morning-prayer/COMPLETION-R5.md).

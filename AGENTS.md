@@ -4,7 +4,9 @@ Independent Next.js application. The original LV Zion applications and databases
 
 ## Read first
 
-Read README.md, docs/README.md, docs/HANDOFF.md, docs/ACTUAL-APP-SETUP.md and docs/RELEASE-GATES.md. The latest completed organization plan and its Build log are docs/ORGANIZATION-WORKFLOW.md; there is no active organization implementation section. Member instructions are in docs/USER-MANUAL.md. Documentation maintenance is recorded in docs/DOCUMENTATION-AUDIT.md. Reconcile all hosted/repository migrations with docs/HOSTED-MIGRATION-LEDGER.json, including applied work still awaiting a code merge. Other module work can continue independently; inspect current GitHub and production state before changing it.
+Read README.md, docs/README.md, docs/HANDOFF.md, docs/ACTUAL-APP-SETUP.md and docs/RELEASE-GATES.md. For the private Contacts module, also read docs/contacts/README.md, docs/contacts/OPERATIONS.md and docs/contacts/VERIFICATION.md. The latest completed organization plan and its Build log are docs/ORGANIZATION-WORKFLOW.md; there is no active organization implementation section. Member instructions are in docs/USER-MANUAL.md. Documentation maintenance is recorded in docs/DOCUMENTATION-AUDIT.md. Reconcile all hosted/repository migrations with docs/HOSTED-MIGRATION-LEDGER.json, including applied work still awaiting a code merge. Other module work can continue independently; inspect current GitHub and production state before changing it.
+
+For Work Mission, read docs/morning-prayer/COMPLETION-R5.md and its Build log. R4 and R5 are installed; check the hosted ledger and current production receipt before release. Real dates, materials, links and grants are owner-sourced. Run `npm run test:morning-prayer:browser` and `npm run test:morning-prayer:races` for this module (the latter requires local PostgreSQL binaries). No active organization implementation section is added by this module work.
 
 For the live Study Room module, also read docs/study-rooms/README.md, docs/STUDY-ROOM-R4-LIVE.md and docs/study-rooms/CUTOVER-RUNBOOK.md. The older R1-R3 reports are historical.
 
