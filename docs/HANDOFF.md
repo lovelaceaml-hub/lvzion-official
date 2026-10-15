@@ -11,7 +11,7 @@
 - [Study Room current status](study-rooms/README.md)
 - [Study Room cutover runbook](study-rooms/CUTOVER-RUNBOOK.md)
 
-## Shared core refactor and Day Sheet redesign (branch, not released)
+## Shared core refactor and Day Sheet redesign (released October 15, 2026)
 
 Anthony asked for a refactor and redesign of the whole app and chose the **Day Sheet** look on 2026-10-14 from three directions ([board](design/directions/direction-board.html)). Branch `claude/refactor-shared-core-1f518a` holds:
 
