@@ -21,3 +21,7 @@ For operational procedures and stop/rollback criteria, see [Study Room cutover r
 The [Contacts owner workspace](contacts/README.md) is active only for its explicitly granted verified account. The Production-only `LVZ_CONTACTS_OWNER_PILOT` switch, current authenticated member/session, module grant, forced private-table RLS, contact ownership, do-not-contact restrictions and audit/idempotency enforcement must remain in effect. An organizational or technical leadership role does **not** confer contact access.
 
 Before enabling sharing, reassignment, confidential oversight, full worklist/search, export or outgoing communications, approve and test the exact audience, consent/DNC, field/history visibility and retention policy. A green frontend build does not authorize a wider grant. See [Contacts verification](contacts/VERIFICATION.md) for current evidence and unexecuted owner-session acceptance.
+
+## Work Mission R5 release boundary
+
+[Completion R5](morning-prayer/COMPLETION-R5.md) and [release receipt](morning-prayer/RELEASE-R5.json) record the verified actual-app source, tests and compatible rollback deployment. Scheduling, grant management and the protected broker are live, while the hosted module remains one-owner-only and empty. No member grants, real schedule, meeting credentials, materials or outbound distribution were seeded. Real owner save/member join and physical-device acceptance remain separate operational checks. Do not replay the installed R4/R5/compatible setup migrations.

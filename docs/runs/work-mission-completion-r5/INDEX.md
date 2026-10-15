@@ -7,7 +7,7 @@ Execution: direct controller, one writer, isolated checkout. Starting repository
 | S1 Scheduling and hosting | Verified | Explicit date batches, exceptions and native revision race |
 | S2 Materials and private access | Verified | Draft/catalog tests, publication separation, native revoke races |
 | S3 Read projections and browser | Verified | Future hosting, date projections, six isolated phone cases |
-| S4 Production release | Pending deployment | Hosted R5 installed and read back, combined build passed |
+| S4 Production release | Released and verified | READY production source caf5ba8, custom aliases, 15 live checks, protected empty hosted state |
 
 [Completion, acceptance and Build log](../../morning-prayer/COMPLETION-R5.md).
 

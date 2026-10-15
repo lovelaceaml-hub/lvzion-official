@@ -1,0 +1,43 @@
+{
+  "module_url": "https://lvz.app/modules/work-mission-prayer",
+  "source_commit": "caf5ba80849bbd460e24807e6878ec668611d93e",
+  "pull_request": "https://github.com/lovelaceaml-hub/lvzion-official/pull/40",
+  "deployment_id": "dpl_8Jj8U36EVYvWaFRtvd2xBQxi8xKs",
+  "deployment_status": "READY",
+  "environment": "production",
+  "aliases": [
+    "lvz.app",
+    "www.lvz.app"
+  ],
+  "verified_local_date": "2026-10-14",
+  "supabase_project": "otecqlkqirncotytbfns",
+  "hosted_migrations": {
+    "morning_prayer_operations_r4": "20261014235216",
+    "morning_prayer_completion_r5": "20261015010132",
+    "morning_prayer_setup_lock_guard": "20261015010537"
+  },
+  "checks": {
+    "application_tests": 375,
+    "sql_assertions": 198,
+    "existing_browser_tests": 87,
+    "work_mission_client_tests": 6,
+    "native_two_connection_races": 4,
+    "live_anonymous_origin_checks": 15,
+    "new_work_mission_runtime_errors": 0
+  },
+  "hosted_state": {
+    "rls_tables": 15,
+    "active_module_grants": 1,
+    "active_capability_grants": 7,
+    "occurrences": 0,
+    "material_publications": 0,
+    "meeting_references": 0
+  },
+  "unverified": [
+    "real hosted owner save",
+    "real permitted member meeting join",
+    "physical iOS/Safari/Android"
+  ],
+  "outbound_distribution_enabled": false,
+  "rollback_deployment": "dpl_GTe6J1uz4wBFAcFgWLSU9DEyaC8J"
+}
