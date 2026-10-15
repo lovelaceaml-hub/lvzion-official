@@ -14,6 +14,7 @@ export async function openStudyRoute(page:Page,{manager=false,nowMinute=540}:{ma
  await page.route('**/api/study-rooms/history?**',r=>r.fulfill({json:previewHistory(bookings,parseHistoryQuery(new URL(r.request().url()).searchParams),manager)}));
  await page.route('**/api/study-rooms/command',async r=>{try{const command=r.request().postDataJSON();if(!receipts.has(command.requestId)){bookings=simulate(schedule(command.day??today),command).bookings;receipts.add(command.requestId);}await r.fulfill({json:{ok:true}});}catch(error){await r.fulfill({status:400,json:{error:(error as Error).message}});}});
  await page.route('**/api/study-rooms/admin',async r=>{try{if(r.request().method()==='POST')admin=simulateAdmin(admin,schedule(today),r.request().postDataJSON());await r.fulfill({json:admin});}catch(error){await r.fulfill({status:400,json:{error:(error as Error).message}});}});
+ await page.route('**/api/study-rooms/operations',r=>r.fulfill({json:{version:1,bookingsOpen:true,newSystemBookings:0,weekly:[],specialDays:[]}}));
  await page.goto('/modules/study-rooms');
  return {async setManager(value:boolean){manager=value;await page.evaluate(()=>window.dispatchEvent(new Event('focus')));}};
 }

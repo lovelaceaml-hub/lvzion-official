@@ -1,33 +1,23 @@
 'use client';
-import {useCallback,useEffect,useState} from 'react';
+import {useCallback,useEffect,useRef,useState} from 'react';
 import Link from 'next/link';
-import type {Action} from '../../lib/morning-prayer/domain';
+import {vegasInstant,vegasToday} from '../../lib/morning-prayer/time';
 import styles from './morning-prayer.module.css';
 import MorningPrayerOperations from './MorningPrayerOperations';
 import MorningPrayerVolunteer from './MorningPrayerVolunteer';
 type Capability='view_schedule'|'join_gathering'|'volunteer_host'|'review_requests'|'manage_schedule'|'view_materials'|'edit_materials'|'publish_materials';
 type Occ={id:string;date:string;originalDate:string;startsAt:string;endsAt:string;timezone:string;kind:'gathering'|'app_day'|'cancelled';host:string;isMine:boolean;hostConfirmed:boolean;verified:boolean;revision:number;readingKey?:string|null};
-type Req={id:string;occurrenceId:string;kind:'volunteer'|'change';status:string;revision:number;isMine:boolean;requester:string;note:string};
+type Req={id:string;occurrenceId:string;kind:'volunteer'|'change';status:string;revision:number;date:string;isMine:boolean;requester:string;note:string};
 type Material={key:string;kind:'pwp'|'reading';revision:number;body:{title:string;summary:string;items:string[];sourceLabel:string}};
 type Draft=Material&{id:string;sourceState:'checked'|'incomplete'};
 type Host={id:string;name:string};
-type Workspace={version:number;occurrences:Occ[];requests:Req[];materials?:Material[];capabilities:Capability[];drafts:Draft[];eligibleHosts:Host[];timezone:string;setupComplete:boolean;meetingAccessConfigured:boolean;upcoming?:Occ[];joinWindowMinutes?:number|null;meetingStates?:{occurrenceId:string;ready:boolean;configured:boolean}[];};
+type Workspace={version:number;occurrences:Occ[];requests:Req[];materials?:Material[];capabilities:Capability[];drafts:Draft[];eligibleHosts:Host[];timezone:string;setupComplete:boolean;meetingAccessConfigured:boolean;upcoming?:Occ[];ownHosting?:Occ[];materialCatalog?:Material[];joinWindowMinutes?:number|null;meetingStates?:{occurrenceId:string;ready:boolean;configured:boolean}[];};
 type Tab='home'|'schedule'|'me'|'manage';
 const zone='America/Los_Angeles';
 const pretty=(date:string)=>new Intl.DateTimeFormat('en-US',{weekday:'short',month:'short',day:'numeric',timeZone:'UTC'}).format(new Date(date+'T12:00:00Z'));
-const localDay=(date=new Date())=>new Intl.DateTimeFormat('en-CA',{timeZone:zone,year:'numeric',month:'2-digit',day:'2-digit'}).format(date).replace(/(\d\d)\/(\d\d)\/(\d{4})/,'$3-$1-$2');
+const localDay=vegasToday;
 const time=(iso:string)=>new Intl.DateTimeFormat('en-US',{timeZone:zone,hour:'numeric',minute:'2-digit'}).format(new Date(iso));
 const nextMonth=(m:string,delta:number)=>{const [y,month]=m.split('-').map(Number);return new Date(Date.UTC(y,month-1+delta,1)).toISOString().slice(0,7);};
-function laInstant(date:string,clock:string):string{
- if(!/^\d{4}-\d{2}-\d{2}$/.test(date)||!/^([01]\d|2[0-3]):[0-5]\d$/.test(clock))throw new Error('Choose a valid date and time.');
- const [y,mon,d]=date.split('-').map(Number),[h,min]=clock.split(':').map(Number);
- const target=Date.UTC(y,mon-1,d,h,min),fmt=new Intl.DateTimeFormat('en-US',{timeZone:zone,year:'numeric',month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit',hourCycle:'h23'});
- let candidate=target;
- for(let i=0;i<4;i++){const parts=fmt.formatToParts(new Date(candidate)),get=(k:string)=>Number(parts.find(p=>p.type===k)?.value);const represented=Date.UTC(get('year'),get('month')-1,get('day'),get('hour'),get('minute'));candidate+=target-represented;}
- const actual=Object.fromEntries(fmt.formatToParts(new Date(candidate)).map(p=>[p.type,p.value]));
- if([actual.year,actual.month,actual.day].join('-')!==date||[actual.hour,actual.minute].join(':')!==clock)throw new Error('This local time does not exist because of a clock change.');
- return new Date(candidate).toISOString();
-}
 async function json<T>(url:string,options?:RequestInit):Promise<T>{
  const r=await fetch(url,{...options,cache:'no-store',credentials:'same-origin'});
  let body;try{body=await r.json();}catch{throw new Error('Unable to read the server response.');}
@@ -35,6 +25,7 @@ async function json<T>(url:string,options?:RequestInit):Promise<T>{
  return body as T;
 }
 export default function MorningPrayerLive(){
+ const readSequence=useRef(0),readController=useRef<AbortController|null>(null);
  const [tab,setTab]=useState<Tab>('home'),[month,setMonth]=useState(()=>localDay().slice(0,7));
  const [data,setData]=useState<Workspace|null>(null),[error,setError]=useState(''),[message,setMessage]=useState(''),[busy,setBusy]=useState(false),[focus,setFocus]=useState<string|null>(null);
  const [date,setDate]=useState(()=>localDay()),[start,setStart]=useState('07:00'),[end,setEnd]=useState('07:30'),[kind,setKind]=useState<'gathering'|'app_day'|'cancelled'>('gathering');
@@ -42,12 +33,27 @@ export default function MorningPrayerLive(){
  const [hostSelection,setHostSelection]=useState(''),[readingSelection,setReadingSelection]=useState(''),[myWeek,setMyWeek]=useState(1);
  const cap=(key:Capability)=>!!data?.capabilities?.includes(key);
  const loader=useCallback(async()=>{
+  const sequence=++readSequence.current;
+  readController.current?.abort();
+  const controller=new AbortController();readController.current=controller;
   const first=month+'-01',last=new Date(Date.UTC(+month.slice(0,4),+month.slice(5,7),0)).toISOString().slice(0,10);
-  try{const result=await json<Workspace>('/api/morning-prayer?from='+first+'&to='+last);setData(result);setError('');}
-  catch(e){setData(null);setError(e instanceof Error?e.message:'Morning Prayer unavailable.');}
+  try{
+   const result=await json<Workspace>('/api/morning-prayer?from='+first+'&to='+last,{signal:controller.signal});
+   if(sequence!==readSequence.current||controller.signal.aborted)return;
+   setData(result);setError('');
+  }catch(e){
+   if(sequence!==readSequence.current||controller.signal.aborted)return;
+   setData(null);setError(e instanceof Error?e.message:'Morning Prayer unavailable.');
+  }
  },[month]);
- useEffect(()=>{void loader();const onFocus=()=>{void loader();};window.addEventListener('focus',onFocus);
-  return()=>window.removeEventListener('focus',onFocus);},[loader]);
+ useEffect(()=>{
+  setData(null);setError('');void loader();
+  const refresh=()=>{if(!document.hidden)void loader();};
+  const timer=window.setInterval(refresh,30000);
+  window.addEventListener('focus',refresh);document.addEventListener('visibilitychange',refresh);
+  return()=>{readSequence.current++;readController.current?.abort();window.clearInterval(timer);
+   window.removeEventListener('focus',refresh);document.removeEventListener('visibilitychange',refresh);};
+ },[loader]);
  async function post(action:Record<string,unknown>,setup=false){
   if(!data||busy)return;setBusy(true);setMessage('');
   try{const one=action.type==='create_occurrence';const url=one?'/api/morning-prayer/batch':setup?'/api/morning-prayer/setup':'/api/morning-prayer/command';
@@ -75,7 +81,7 @@ export default function MorningPrayerLive(){
  const next=upcoming[0]||future[0];
  const joinable=(id:string)=>cap('join_gathering')&&!!data?.meetingStates?.some(s=>s.occurrenceId===id&&s.ready);
  const active=focus?rows.find(o=>o.id===focus):future[0]||rows[0];
- const own=rows.filter(o=>o.isMine&&o.kind==='gathering'),requests=data?.requests||[];
+ const own=(data?.ownHosting||rows.filter(o=>o.isMine)).filter(o=>o.kind==='gathering'&&Date.parse(o.endsAt)>Date.now()),requests=data?.requests||[];
  const published=(data?.materials||[]);
  const pub=(key:string)=>published.find(m=>m.key===key);
  const pwp=pub('pwp-'+month+'-week-'+myWeek);
@@ -114,18 +120,18 @@ export default function MorningPrayerLive(){
        <span><b>{o.kind==='app_day'?'Pray Daily app day':o.kind==='cancelled'?'Cancelled':o.host}</b><small>{o.kind==='gathering'?time(o.startsAt)+' · '+(o.verified?'Schedule verified':'Pending verification'):'No live Zoom gathering'}</small></span><b>›</b>
        </button>)}
       {active&&active.date.slice(0,7)===month&&<section className={styles.card} data-testid="actual-gathering"><h2>{pretty(active.date)}</h2><p><strong>{active.kind==='gathering'?active.host:active.kind==='app_day'?'Pray Daily app day':'Cancelled'}</strong></p>
-       <p>{time(active.startsAt)} – {time(active.endsAt)} · America/Los_Angeles</p>
+       <p>{time(active.startsAt)} to {time(active.endsAt)} · America/Los_Angeles</p>
        {!active.verified&&<p className={styles.warning}>Schedule has not been verified by a coordinator.</p>}
        {active.kind==='gathering'&&(joinable(active.id)?<button className={styles.primary} disabled={busy} onClick={()=>void joinGathering(active.id)}>Join verified gathering ↗</button>:<p className={styles.muted}>Join access opens only with a verified date and encrypted link, during the authorized meeting window.</p>)}
        {canVolunteer(active)&&<button className={styles.primary} disabled={busy} onClick={()=>void post({type:'volunteer',occurrenceIds:[active.id]})}>Request to host this date →</button>}
-       {cap('view_materials')&&published.filter(m=>m.kind==='reading'&&m.key===active.readingKey).map(m=><p key={m.key}><strong>{m.body.title}</strong> — {m.body.summary}</p>)}
+       {cap('view_materials')&&published.filter(m=>m.kind==='reading'&&m.key===active.readingKey).map(m=><p key={m.key}><strong>{m.body.title}</strong>: {m.body.summary}</p>)}
       </section>}
     </>}
     {tab==='me'&&<>
       <section className={styles.card}><h2>Your hosting dates</h2>{own.length?own.map(o=><div className={styles.hostingRow} key={o.id}><strong>{pretty(o.date)} · {time(o.startsAt)}</strong><p>{o.hostConfirmed?'Confirmed':'Confirmation needed'}</p>
         {o.hostConfirmed?<button className={styles.secondary} disabled={busy} onClick={()=>void post({type:'request_change',occurrenceId:o.id,note:''})}>Request a change</button>:<button className={styles.secondary} disabled={busy} onClick={()=>void post({type:'confirm_host',occurrenceId:o.id})}>Confirm hosting</button>}
        </div>):<p className={styles.muted}>You do not have an upcoming hosting assignment.</p>}</section>
-      <section className={styles.card}><h2>Your requests</h2>{requests.filter(r=>r.isMine).length?requests.filter(r=>r.isMine).map(r=><div className={styles.requestRow} key={r.id}><strong>{r.kind==='volunteer'?'Volunteer':'Change'} · {r.status}</strong><p>{pretty(rows.find(o=>o.id===r.occurrenceId)?.date||today)}</p>{r.status==='pending'&&<button className={styles.secondary} disabled={busy} onClick={()=>void post({type:'withdraw',requestId:r.id})}>Withdraw request</button>}</div>):<p className={styles.muted}>No requests. Other members’ private requests are not shown.</p>}</section>
+      <section className={styles.card}><h2>Your requests</h2>{requests.filter(r=>r.isMine).length?requests.filter(r=>r.isMine).map(r=><div className={styles.requestRow} key={r.id}><strong>{r.kind==='volunteer'?'Volunteer':'Change'} · {r.status}</strong><p>{pretty(r.date||rows.find(o=>o.id===r.occurrenceId)?.date||today)}</p>{r.status==='pending'&&<button className={styles.secondary} disabled={busy} onClick={()=>void post({type:'withdraw',requestId:r.id})}>Withdraw request</button>}</div>):<p className={styles.muted}>No requests. Other members’ private requests are not shown.</p>}</section>
     </>}
     {tab==='manage'&&<>
       {!canManage?<section className={styles.empty}><h2>No management permission</h2><p>Management is assigned independently of group and department positions.</p></section>:<>
@@ -134,22 +140,22 @@ export default function MorningPrayerLive(){
        <label>Date<input className={styles.input} type="date" value={date} onChange={e=>setDate(e.target.value)}/></label>
        <div className={styles.two}><label>Start (Las Vegas)<input className={styles.input} type="time" value={start} onChange={e=>setStart(e.target.value)}/></label><label>End (Las Vegas)<input className={styles.input} type="time" value={end} onChange={e=>setEnd(e.target.value)}/></label></div>
        <label>Occurrence type<select value={kind} onChange={e=>setKind(e.target.value as typeof kind)}><option value="gathering">Live gathering</option><option value="app_day">Pray Daily app day</option><option value="cancelled">Cancelled occurrence</option></select></label>
-       <button disabled={busy} className={styles.primary} onClick={()=>{try{void post({type:'create_occurrence',date,startsAt:laInstant(date,start),endsAt:laInstant(date,end),timezone:zone,kind},true);}catch(e){setMessage(e instanceof Error?e.message:'Check the time.');}}}>Save date, pending verification →</button>
+       <button disabled={busy} className={styles.primary} onClick={()=>{try{void post({type:'create_occurrence',date,startsAt:vegasInstant(date,start),endsAt:vegasInstant(date,end),timezone:zone,kind},true);}catch(e){setMessage(e instanceof Error?e.message:'Check the time.');}}}>Save date, pending verification →</button>
       </section>}
       {cap('manage_schedule')&&rows.length>0&&<section className={styles.card}><h2>Manage entered dates</h2>{rows.filter(o=>o.date>=today).map(o=><div key={o.id} className={styles.requestRow}><strong>{pretty(o.date)} · {o.host}</strong><p>{o.verified?'Schedule verified':'Unverified'} · Version {o.revision}</p>
-       {published.some(m=>m.kind==='reading')&&<div><label>Reading for this date<select value={readingSelection} onChange={e=>setReadingSelection(e.target.value)}><option value="">Choose approved reading</option>{published.filter(m=>m.kind==='reading').map(m=><option key={m.key} value={m.key}>{m.body.title}</option>)}</select></label><button className={styles.secondary} disabled={busy||!readingSelection} onClick={()=>void post({type:'link_reading',occurrenceId:o.id,readingKey:readingSelection},true)}>Link reading</button></div>}<div className={styles.actions}><button disabled={busy||o.verified} onClick={()=>void post({type:'schedule',occurrenceId:o.id,mode:'verify'})}>Verify date/time</button><button disabled={busy||o.kind!=='gathering'} onClick={()=>void post({type:'schedule',occurrenceId:o.id,mode:'app_day'})}>App day</button><button disabled={busy||o.kind!=='gathering'} onClick={()=>void post({type:'schedule',occurrenceId:o.id,mode:'cancel'})}>Cancel</button></div>
+       {published.some(m=>m.kind==='reading')&&<div><label>Reading for this date<select value={readingSelection} onChange={e=>setReadingSelection(e.target.value)}><option value="">Choose approved reading</option>{published.filter(m=>m.kind==='reading').map(m=><option key={m.key} value={m.key}>{m.body.title}</option>)}</select></label><button className={styles.secondary} disabled={busy||!readingSelection} onClick={()=>void post({type:'link_reading',occurrenceId:o.id,readingKey:readingSelection},true)}>Link reading</button></div>}<div className={styles.actions}><button disabled={busy||o.verified} onClick={()=>void post({type:'schedule',occurrenceId:o.id,mode:'verify'})}>Verify date/time</button><button disabled={busy||o.kind!=='gathering'} onClick={()=>void post({type:'schedule',occurrenceId:o.id,mode:'app_day'})}>App day</button><button disabled={busy||o.kind!=='gathering'} onClick={()=>void post({type:'schedule',occurrenceId:o.id,mode:'cancel'})}>Cancel</button>{o.kind!=='gathering'&&<button disabled={busy} onClick={()=>void post({type:'schedule',occurrenceId:o.id,mode:'restore'})}>Restore as unverified gathering</button>}</div>
        {data.eligibleHosts.length>0&&o.verified&&o.kind==='gathering'&&<div><label>Eligible host<select value={hostSelection} onChange={e=>setHostSelection(e.target.value)}><option value="">Choose an eligible host</option>{data.eligibleHosts.map(h=><option key={h.id} value={h.id}>{h.name}</option>)}</select></label><button className={styles.secondary} disabled={!hostSelection||busy} onClick={()=>void post({type:'assign',occurrenceId:o.id,memberId:hostSelection})}>Assign host</button></div>}
       </div>)}</section>}
-      {cap('review_requests')&&<section className={styles.card}><h2>Hosting requests awaiting approval</h2>{requests.filter(r=>r.status==='pending').length?requests.filter(r=>r.status==='pending').map(r=><div key={r.id} className={styles.requestRow}><strong>{r.requester} · {r.kind==='volunteer'?'Volunteer':'Change'}</strong><p>{pretty(rows.find(o=>o.id===r.occurrenceId)?.date||today)}{r.note?' · Private note: '+r.note:''}</p><div className={styles.actions}><button disabled={busy} onClick={()=>void post({type:'review',requestId:r.id,decision:'approve'})}>Approve</button><button disabled={busy} onClick={()=>void post({type:'review',requestId:r.id,decision:'decline'})}>Decline</button></div></div>):<p className={styles.muted}>No pending requests.</p>}</section>}
+      {cap('review_requests')&&<section className={styles.card}><h2>Hosting requests awaiting approval</h2>{requests.filter(r=>r.status==='pending').length?requests.filter(r=>r.status==='pending').map(r=><div key={r.id} className={styles.requestRow}><strong>{r.requester} · {r.kind==='volunteer'?'Volunteer':'Change'}</strong><p>{pretty(r.date||rows.find(o=>o.id===r.occurrenceId)?.date||today)}{r.note?' · Private note: '+r.note:''}</p><div className={styles.actions}><button disabled={busy} onClick={()=>void post({type:'review',requestId:r.id,decision:'approve'})}>Approve</button><button disabled={busy} onClick={()=>void post({type:'review',requestId:r.id,decision:'decline'})}>Decline</button></div></div>):<p className={styles.muted}>No pending requests.</p>}</section>}
       {cap('edit_materials')&&<section className={styles.card}><h2>Create official reading or PWP draft</h2><p className={styles.muted}>Use source-supported wording only. Drafting never publishes automatically. Do not include personal information or private meeting credentials.</p>
        <label>Type<select value={materialKind} onChange={e=>setMaterialKind(e.target.value as typeof materialKind)}><option value="pwp">PWP</option><option value="reading">Daily reading</option></select></label>
        <label>Unique material key<input className={styles.input} value={materialKey} placeholder={'pwp-'+month+'-week-1'} onChange={e=>setMaterialKey(e.target.value)}/></label>
-       <label>Approved source title<input className={styles.input} value={title} onChange={e=>setTitle(e.target.value)}/></label>
-       <label>Source-supported summary<textarea className={styles.input} rows={3} value={summary} onChange={e=>setSummary(e.target.value)}/></label>
-       <label>Teaching points (one per line, maximum five)<textarea className={styles.input} rows={4} value={items} onChange={e=>setItems(e.target.value)}/></label>
-       <label>Source reference label<input className={styles.input} value={sourceLabel} onChange={e=>setSourceLabel(e.target.value)}/></label>
+       <label>Approved source title<input className={styles.input} value={title} onChange={e=>{setTitle(e.target.value);setSourceChecked(false);}}/></label>
+       <label>Source-supported summary<textarea className={styles.input} rows={3} value={summary} onChange={e=>{setSummary(e.target.value);setSourceChecked(false);}}/></label>
+       <label>Teaching points (one per line, maximum five)<textarea className={styles.input} rows={4} value={items} onChange={e=>{setItems(e.target.value);setSourceChecked(false);}}/></label>
+       <label>Source reference label<input className={styles.input} value={sourceLabel} onChange={e=>{setSourceLabel(e.target.value);setSourceChecked(false);}}/></label>
        <label><input type="checkbox" checked={sourceChecked} onChange={e=>setSourceChecked(e.target.checked)}/> I have checked the content against the permitted source.</label>
-       <button className={styles.primary} disabled={busy} onClick={()=>void post({type:'create_material',key:materialKey,kind:materialKind,body:{title,summary,items:items.split('\n').map(s=>s.trim()).filter(Boolean).slice(0,5),sourceLabel},sourceChecked},true)}>Save as an unpublished draft →</button>
+       <button className={styles.primary} disabled={busy} onClick={()=>void post({type:'create_material',key:materialKey,kind:materialKind,body:{title,summary,items:items.split('\n').map(s=>s.trim()).filter(Boolean),sourceLabel},sourceChecked},true)}>Save as an unpublished draft →</button>
       </section>}
       {cap('publish_materials')&&<section className={styles.card}><h2>Material publication review</h2>{data.drafts.length?data.drafts.map(m=><div key={m.id} className={styles.requestRow}><strong>{m.body.title}</strong><p>{m.key} · Revision {m.revision} · Source {m.sourceState}</p><p>{m.body.summary}</p><button className={styles.primary} disabled={busy||m.sourceState!=='checked'} onClick={()=>void post({type:'material_publish',materialId:m.id})}>Publish reviewed revision →</button></div>):<p className={styles.muted}>No material drafts awaiting publication.</p>}</section>}
       <MorningPrayerOperations data={data} onReload={loader} onNotice={setMessage}/>

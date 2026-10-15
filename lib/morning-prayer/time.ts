@@ -33,7 +33,7 @@ export function vegasToday(now=new Date()):string{
 export function scheduleCandidates(from:string,to:string,days:number[],starts:string,ends:string,kind:'gathering'|'app_day'|'cancelled',today=vegasToday()){
  if(!validDate(from)||!validDate(to)||!Array.isArray(days)||days.length===0||days.some(n=>!Number.isInteger(n)||n<0||n>6))throw new Error('Choose a valid date range and weekdays.');
  const a=Date.parse(from+'T12:00:00Z'),b=Date.parse(to+'T12:00:00Z');
- if(b<a||b-a>180*86400000||a<Date.parse(today+'T12:00:00Z'))throw new Error('Dates must be future and within the next 180 days.');
+ if(b<a||b-a>180*86400000||a<Date.parse(today+'T12:00:00Z')||b>Date.parse(today+'T12:00:00Z')+180*86400000)throw new Error('Dates must be future and within the next 180 days.');
  const result:{date:string;startsAt:string;endsAt:string;timezone:'America/Los_Angeles';kind:typeof kind}[]=[];
  const chosen=new Set(days);
  for(let t=a;t<=b;t+=86400000){
