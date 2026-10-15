@@ -2,6 +2,7 @@
 import {useRef,useState,useEffect} from 'react';
 import type {ReactNode} from 'react';
 import AppHeader from '../app-header';
+import AppSwitcher from '../app-switcher';
 import {CalendarDays,ChevronLeft,Clock3,Grid2X2,House,UsersRound,X} from '../home-icons';
 import {useSwipeTabs} from '../../lib/use-swipe-tabs';
 import {addDay,clock,startOptions,endOptions,purposes,validRange,bookingResources,kindLabels,purposeLabel,resourceNames} from '../../lib/study-rooms/domain';
@@ -32,6 +33,7 @@ export default function Reservations({schedule:s,changeDay,submit,refresh,loadDa
  const [start,setStart]=useState<number|null>(null),[end,setEnd]=useState<number|null>(null),[step,setStep]=useState(0),[hold,setHold]=useState(false);
  const [busy,setBusy]=useState(false),[message,setMessage]=useState(''),[error,setError]=useState('');
  const [selectedSlot,setSelectedSlot]=useState<{id:string;time:number;day:string}|null>(null);
+ const [appsOpen,setAppsOpen]=useState(false);
  const dialog=useRef<HTMLDialogElement>(null),requestId=useRef('');
  const cancelDialog=useRef<HTMLDialogElement>(null),[cancelId,setCancelId]=useState(''),[cancelVersion,setCancelVersion]=useState(1),[reason,setReason]=useState('');
  useEffect(()=>{if(cancelId)cancelDialog.current?.showModal();},[cancelId]);
@@ -115,7 +117,7 @@ export default function Reservations({schedule:s,changeDay,submit,refresh,loadDa
    <div className="sr-layout">
     <section className="sr-primary-column" aria-label="Reservations">
      {view==='schedule'&&<div className="sr-segment" role="group" aria-label="Resource type">{(Object.keys(kindLabels) as Kind[]).map(id=><button type="button" key={id} aria-pressed={kind===id} onClick={()=>setKind(id)}>{kindLabels[id]}</button>)}</div>}
-     <div className="sr-days" aria-label="Booking days">{Array.from({length:s.horizon},(_,i)=>addDay(s.today,i)).map((date,i)=><button type="button" key={date} aria-pressed={s.day===date} onClick={()=>changeDay(date)}><span>{i===0?'Today':weekday(date)}</span><strong>{Number(date.slice(-2))}</strong></button>)}</div>
+     <div className="sr-days" aria-label="Booking days">{Array.from({length:s.horizon},(_,i)=>addDay(s.today,i)).map((date,i)=><button type="button" key={date} aria-pressed={s.day===date} onClick={()=>changeDay(date)}><span>{i===0?'Today':weekday(date)}</span><strong>{new Date(date+'T12:00:00Z').toLocaleDateString('en-US',{month:'short',day:'numeric',timeZone:'UTC'})}</strong></button>)}</div>
      <div className="sr-quick-actions">
       <span>Las Vegas time · 30-minute slots</span>
       <div className="sr-sticky"><button type="button" className="ui-button" onClick={()=>open()} disabled={busy||!resources.length||closed}>{closed?'Bookings Not Open':'Reserve Now'}</button></div>
@@ -150,7 +152,7 @@ export default function Reservations({schedule:s,changeDay,submit,refresh,loadDa
   <nav className="sr-bottom-nav" aria-label="Study Room bottom navigation">
    <a href="/members" aria-label="Home"><House size={21}/><span>Home</span></a>
    <button type="button" onClick={()=>setView('schedule')} aria-current={view==='schedule'?'page':undefined}><CalendarDays size={21}/><span>Schedule</span></button>
-   <a href="/members?apps=1" className="sr-bottom-apps" aria-label="Open apps"><span className="sr-bottom-apps-icon"><Grid2X2 size={24}/></span><span>Apps</span></a>
+   <button type="button" className="sr-bottom-apps" aria-label="Open apps" onClick={()=>setAppsOpen(true)}><span className="sr-bottom-apps-icon"><Grid2X2 size={24}/></span><span>Apps</span></button>
    <button type="button" onClick={()=>setView('mine')} aria-current={view==='mine'?'page':undefined}><Clock3 size={21}/><span>Bookings</span></button>
    <button type="button" onClick={()=>setView(s.canManage?'managed':'history')} aria-current={view===(s.canManage?'managed':'history')?'page':undefined}><UsersRound size={21}/><span>{s.canManage?'Manage':'History'}</span></button>
   </nav>
@@ -158,6 +160,8 @@ export default function Reservations({schedule:s,changeDay,submit,refresh,loadDa
    <div><strong>{s.resources.find(r=>r.id===selectedSlot.id)?.name??'Resource'}</strong><small>{weekday(s.day)}, {new Date(s.day+'T12:00:00Z').toLocaleDateString('en-US',{month:'short',day:'numeric',timeZone:'UTC'})} · {clock(selectedSlot.time)} to {clock(selectedSlot.time+s.step)}</small></div>
    <button type="button" className="ui-button" onClick={()=>{open(selectedSlot.id,selectedSlot.time);setSelectedSlot(null);}}>Reserve</button>
   </aside>}
+
+  <AppSwitcher open={appsOpen} onClose={()=>setAppsOpen(false)}/>
 
   <dialog ref={dialog} className="ui-sheet sr-dialog" aria-label="Reserve a resource" onCancel={e=>{if(busy)e.preventDefault();}}><div className="ui-sheet-body">
    <div className="sr-sheet-head">
