@@ -8,7 +8,8 @@ test('actual Morning Prayer landing is member and module authorized',async()=>{
 });
 test('actual Morning Prayer GET API is private and server-session scoped',async()=>{
  const source=await readFile('app/api/morning-prayer/route.ts','utf8');
- assert.match(source,/requireMember/);assert.match(source,/mpg_live_home/);assert.match(source,/no-store/);
+ assert.match(source,/requireMember/);assert.match(source,/mpg_live_home/);assert.match(source,/privateHeaders/);
+ assert.match(await readFile('lib/morning-prayer/server.ts','utf8'),/'Cache-Control':'private, no-store, max-age=0'/);
  assert.doesNotMatch(source,/authAdminClient|service_role|firebase/);
 });
 test('mutations require origin, membership and server RPC authorization',async()=>{
