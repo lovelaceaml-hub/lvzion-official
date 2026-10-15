@@ -11,7 +11,7 @@ test('Room booking has ordered purposes, available time range, review and privat
  await openStudyRoute(page);await page.getByRole('button',{name:'Reserve Now'}).click();const form=page.getByRole('dialog',{name:'Reserve a resource'});
  await expect(form.getByLabel('Purpose',{exact:true}).locator('option')).toHaveText(['Contact','New Member','Other']);
  await form.getByLabel('Contact name').fill('Fictional private contact');await form.getByLabel('Start',{exact:true}).selectOption('780');await form.getByLabel('End',{exact:true}).selectOption('840');
- await form.getByRole('button',{name:'Review reservation'}).click();await expect(form.getByText('1:00 PM – 2:00 PM')).toBeVisible();await form.getByRole('button',{name:'Confirm reservation'}).click();
+ await form.getByRole('button',{name:'Review reservation'}).click();await expect(form.getByText('1:00 PM to 2:00 PM')).toBeVisible();await form.getByRole('button',{name:'Confirm reservation'}).click();
  await expect(page.locator('.sr-success[role=status]')).toContainText('Reservation confirmed');await expect(page.getByText('Fictional private contact')).toBeVisible();
  await page.getByRole('button',{name:'Availability',exact:true}).click();await expect(page.getByText('Fictional private contact')).toHaveCount(0);
 });

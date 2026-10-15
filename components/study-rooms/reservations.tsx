@@ -1,17 +1,32 @@
 'use client';
 import {useRef,useState,useEffect} from 'react';
 import type {ReactNode} from 'react';
-import {addDay,clock,startOptions,endOptions,purposes,validRange,bookingResources} from '../../lib/study-rooms/domain';
-import type {Schedule,Kind,Purpose,BookingCommand} from '../../lib/study-rooms/domain';
+import AppHeader from '../app-header';
+import {X} from '../home-icons';
+import {useSwipeTabs} from '../../lib/use-swipe-tabs';
+import {addDay,clock,startOptions,endOptions,purposes,validRange,bookingResources,kindLabels,purposeLabel,resourceNames} from '../../lib/study-rooms/domain';
+import type {Booking,Schedule,Kind,Purpose,BookingCommand} from '../../lib/study-rooms/domain';
 import './reservations.css';
 import {BookingChanges,ResourceManagement} from './changes';
 import {ResourceExtras} from './resource-extras';
 import {ReservationHistory} from './history';
 import type {HistoryPage,HistoryQuery} from '../../lib/study-rooms/history';
 import type {AdminCommand,AdminData} from '../../lib/study-rooms/admin';
-type Props={schedule:Schedule;demo?:boolean;changeDay:(day:string)=>void;submit:(command:BookingCommand)=>Promise<void>;refresh?:()=>void;loadDay?:(day:string)=>Promise<Schedule>;admin?:AdminData;saveAdmin?:(c:AdminCommand)=>Promise<void>;loadHistory?:(query:HistoryQuery)=>Promise<HistoryPage>;operations?:ReactNode};
-export default function Reservations({schedule:s,demo=false,changeDay,submit,refresh,loadDay,admin,saveAdmin,loadHistory,operations}:Props){
- const [kind,setKind]=useState<Kind>('room'),[view,setView]=useState<'schedule'|'mine'|'managed'|'history'>('schedule');
+
+type View='schedule'|'mine'|'managed'|'history';
+type Props={schedule:Schedule;changeDay:(day:string)=>void;submit:(command:BookingCommand)=>Promise<void>;refresh:()=>void;loadDay:(day:string)=>Promise<Schedule>;admin?:AdminData;saveAdmin:(c:AdminCommand)=>Promise<void>;loadHistory:(query:HistoryQuery)=>Promise<HistoryPage>;operations?:ReactNode;status?:ReactNode};
+
+const stateLabel=(b:Booking)=>b.state==='cancelled'?'Cancelled':b.state==='ended'?'Ended early':b.hold?'Hold':'Confirmed';
+const weekday=(date:string)=>new Date(date+'T12:00:00Z').toLocaleDateString('en-US',{weekday:'short',timeZone:'UTC'});
+const longDay=(date:string)=>new Date(date+'T12:00:00Z').toLocaleDateString('en-US',{weekday:'long',month:'long',day:'numeric',timeZone:'UTC'});
+
+/** Time first: start over end on the left, in tabular figures, like the Home day line. */
+export function TimeColumn({start,end}:{start:number;end:number}){
+ return <div className="sr-time"><span>{clock(start)}</span><span className="ui-visually-hidden"> to </span><small>{clock(end)}</small></div>;
+}
+
+export default function Reservations({schedule:s,changeDay,submit,refresh,loadDay,admin,saveAdmin,loadHistory,operations,status}:Props){
+ const [kind,setKind]=useState<Kind>('room'),[view,setView]=useState<View>('schedule');
  const [extras,setExtras]=useState<string[]>([]);
  const [resource,setResource]=useState(''),[purpose,setPurpose]=useState<Purpose>('contact'),[detail,setDetail]=useState('');
  const [start,setStart]=useState<number|null>(null),[end,setEnd]=useState<number|null>(null),[step,setStep]=useState(0),[hold,setHold]=useState(false);
@@ -20,33 +35,153 @@ export default function Reservations({schedule:s,demo=false,changeDay,submit,ref
  const cancelDialog=useRef<HTMLDialogElement>(null),[cancelId,setCancelId]=useState(''),[cancelVersion,setCancelVersion]=useState(1),[reason,setReason]=useState('');
  useEffect(()=>{if(cancelId)cancelDialog.current?.showModal();},[cancelId]);
  useEffect(()=>{if(view==='managed'&&!s.canManage)setView('mine');},[s.canManage,view]);
+
+ const closed=s.bookingsOpen===false;
+ const tabs:View[]=s.canManage?['schedule','mine','managed','history']:['schedule','mine','history'];
+ const swipe=useSwipeTabs(tabs,view,setView);
  const resources=s.resources.filter(r=>r.kind===kind&&r.active!==false),times=Array.from({length:(s.close-s.open)/s.step},(_,i)=>s.open+i*s.step);
  const visible=s.bookings.filter(b=>b.day===s.day&&(b.state==='confirmed'||b.state==='ended'));
+ const listed=s.bookings.filter(b=>b.day===s.day&&(b.mine||(view==='managed'&&s.canManage)));
  const selection=[resource,...extras];
  const ends=start===null?[]:endOptions(s,selection,start);
- function open(id?:string,time?:number,makeHold=false){if(s.bookingsOpen===false)return;setExtras([]);setResource(id??resources[0]?.id??'');setStart(time??null);setEnd(null);setDetail('');setPurpose('contact');setStep(0);setHold(makeHold);setError('');requestId.current=crypto.randomUUID();dialog.current?.showModal();}
+
+ function open(id?:string,time?:number,makeHold=false){if(closed)return;setExtras([]);setResource(id??resources[0]?.id??'');setStart(time??null);setEnd(null);setDetail('');setPurpose('contact');setStep(0);setHold(makeHold);setError('');requestId.current=crypto.randomUUID();dialog.current?.showModal();}
  function revise(){setStep(0);requestId.current=crypto.randomUUID();setError('');}
- async function confirm(){if(start===null||end===null)return;setBusy(true);setError('');try{await submit({requestId:requestId.current,action:hold?'hold':'reserve',resourceIds:selection,day:s.day,start,end,...(hold?{reason:detail}:{purpose,detail})});dialog.current?.close();setMessage(demo?'Demo reservation saved. No real room has been booked.':hold?'Resource hold confirmed.':'Reservation confirmed. Your My Week activity is updated.');setView('mine');}catch(e){setError(e instanceof Error?e.message:'Reservation failed. Please refresh and try again.');}finally{setBusy(false);}}
- async function cancel(){setBusy(true);setError('');try{await submit({requestId:requestId.current,action:'cancel',bookingId:cancelId,reason,expectedVersion:cancelVersion});cancelDialog.current?.close();setCancelId('');setMessage(demo?'Demo cancellation saved; history retained.':'Reservation cancelled; history retained.');}catch(e){setError(e instanceof Error?e.message:'Cancellation failed.');}finally{setBusy(false);}}
- return <main className="sr-app"><header><a href={demo?'/experience-preview':'/members'}>← LV ZION</a><span className="sr-badge">APP 01</span></header>
- {demo&&<aside className="sr-demo">Fictional test records · Simulated {clock(s.nowMinute)} clock · No real bookings</aside>}{s.bookingsOpen===false&&<aside role="status" className="sr-demo"><strong>Reservations are not open yet.</strong> The original Study Room Scheduler remains the booking authority. This screen is available to authorized setup managers for configuration review; no new bookings or holds can be placed here.</aside>}
- <section className="sr-hero"><span>STUDY & FELLOWSHIP</span><h1>Study Room<br/><em>Reservation</em></h1><p>A space for your next conversation.</p><div><b>10 AM – 11 PM</b><small>Las Vegas time · 30-minute intervals</small></div></section>
- <div className="sr-day-chips" aria-label="Booking days">{Array.from({length:s.horizon},(_,i)=>addDay(s.today,i)).map((date,i)=><button key={date} aria-pressed={s.day===date} onClick={()=>changeDay(date)}><span>{i===0?'Today':new Date(date+'T12:00:00Z').toLocaleDateString('en-US',{weekday:'short',timeZone:'UTC'})}</span><strong>{Number(date.slice(-2))}</strong></button>)}</div>
- <nav className="sr-tabs" aria-label="Reservation screens"><button onClick={()=>setView('schedule')} aria-pressed={view==='schedule'}>Availability</button><button onClick={()=>setView('mine')} aria-pressed={view==='mine'}>My Reservations</button>{s.canManage&&<button onClick={()=>setView('managed')} aria-pressed={view==='managed'}>Manage bookings</button>}{loadHistory&&<button onClick={()=>setView('history')} aria-pressed={view==='history'}>History</button>}</nav>
- {message&&<p role="status" className="sr-success">{message}</p>}
- {view==='history'&&loadHistory?<ReservationHistory today={s.today} canManage={s.canManage} resources={s.resources} read={loadHistory}/>:<section className="sr-card"><div className="sr-row"><div><small>PLAN YOUR VISIT</small><h2>{view==='mine'?'My reservations':view==='managed'?'Authorized reservations':s.day===s.today?'Today’s availability':'Availability'}</h2></div>{refresh&&<button onClick={refresh} className="sr-secondary">Refresh</button>}</div>
- <label className="sr-date">Date<input type="date" value={s.day} min={s.today} max={addDay(s.today,s.horizon-1)} onChange={e=>{if(e.target.value)changeDay(e.target.value);}}/></label>
- {view==='schedule'?<><div className="sr-resources" role="group" aria-label="Resource type">{([['room','Room'],['whiteboard','Whiteboard'],['tv','TV']] as const).map(([id,label])=><button key={id} aria-pressed={kind===id} onClick={()=>setKind(id)}>{label}</button>)}</div><div className="sr-legend"><span>● Available</span><span>● Reserved</span><span>● Unavailable</span></div>
- <div className="sr-scroll" tabIndex={0} aria-label="Full-day resource schedule; scroll horizontally for more resources"><table><thead><tr><th scope="col">Time</th>{resources.map(r=><th key={r.id} scope="col">{r.name}</th>)}</tr></thead><tbody>{times.map(time=><tr key={time}><th scope="row">{clock(time)}</th>{resources.map(r=>{const block=s.blocks.find(b=>(!b.resourceId||b.resourceId===r.id)&&time>=b.start&&time<b.end),booking=visible.find(b=>bookingResources(b).includes(r.id)&&time>=b.start&&time<b.end),openSlot=validRange(s,r.id,time,time+s.step);return <td key={r.id} className={block?'sr-block':booking?'sr-reserved':''}>{block?<span>{block.label}</span>:booking?<span><b>{booking.hold?'Unavailable':booking.label}</b>{booking.mine&&booking.purpose&&<small>{purposes.find(p=>p.id===booking.purpose)?.label}</small>}</span>:<button disabled={!openSlot||s.bookingsOpen===false} aria-label={`${r.name}, ${clock(time)}, ${s.bookingsOpen===false?'booking closed':openSlot?'available':'past'}`} onClick={()=>open(r.id,time)}>{s.bookingsOpen===false?'Not open':openSlot?'Available':'Past'}</button>}</td>;})}</tr>)}</tbody></table></div><p className="sr-note">Other-group bookings show occupancy, not member identities. Private purpose details never appear on this shared grid.</p></>:
- <div className="sr-my-list">{s.bookings.filter(b=>b.day===s.day&&(b.mine||(view==='managed'&&s.canManage))).map(b=><article key={b.id}><div className="sr-row"><h3>{bookingResources(b).map(id=>s.resources.find(r=>r.id===id)?.name??'Resource').join(' + ')}</h3><span className="sr-badge">{b.state==='cancelled'?'Cancelled':b.state==='ended'?'Ended early':b.hold?'Hold':'Confirmed'}</span></div>{view==='managed'&&<p>{b.label}</p>}<strong>{clock(b.start)} – {clock(b.end)}</strong>{b.version&&<span className="sr-revision"> · Revision {b.version}</span>}{b.originalEnd&&b.originalEnd!==b.end&&<p>Originally until {clock(b.originalEnd)}. Remaining slots released.</p>}{loadDay&&<BookingChanges booking={b} schedule={s} submit={submit} loadDay={loadDay} changeDay={changeDay}/>} {b.purpose&&<p>{purposes.find(p=>p.id===b.purpose)?.label}{b.detail?' · '+b.detail:''}</p>}{b.state==='confirmed'&&(!b.hold||s.canManage)&&(s.day>s.today||b.end>s.nowMinute)&&<button className="sr-secondary" onClick={()=>{requestId.current=crypto.randomUUID();setError('');setReason('');setCancelVersion(b.version??1);setCancelId(b.id);}}>Cancel {b.hold?'hold':'reservation'}</button>}</article>)}{!s.bookings.some(b=>b.day===s.day&&(b.mine||(view==='managed'&&s.canManage)))&&<p>No reservations for this date.</p>}</div>}
- </section>}{s.canManage&&<section className="sr-card"><small>EXPLICIT RESERVATION-MANAGER ACCESS</small><h2>Manage resources</h2><p>Place a resource hold or cancel an authorized booking. Neither action deletes its history.</p><button className="sr-secondary" disabled={s.bookingsOpen===false} onClick={()=>open(undefined,undefined,true)}>Place a hold</button></section>}
- {s.canManage&&admin&&saveAdmin&&<ResourceManagement data={admin} today={s.today} save={saveAdmin}/>}
- <div className={s.bookingsOpen===false?'sr-sticky sr-sticky-closed':'sr-sticky'}><button onClick={()=>open()} disabled={busy||!resources.length||s.bookingsOpen===false}>{s.bookingsOpen===false?'Bookings Not Open':'Reserve Now'} <span>→</span></button></div>
- <dialog ref={dialog} className="sr-dialog" aria-label="Reserve a resource" onCancel={e=>{if(busy)e.preventDefault();}}><div className="sr-row"><small>{hold?'RESOURCE HOLD':'NEW RESERVATION'} · {step===0?'1 OF 2':'2 OF 2'}</small><button disabled={busy} className="sr-close" aria-label="Close reservation" onClick={()=>dialog.current?.close()}>×</button></div><h2>{step===0?(hold?'Keep this resource free':'Reserve a space'):'Review your reservation'}</h2>
- {error&&<p role="alert" className="sr-error">{error}</p>}
- {step===0?<form onSubmit={e=>{e.preventDefault();setStep(1);}}><label>Resource<select aria-label="Resource" value={resource} required onChange={e=>{setResource(e.target.value);setExtras(extras.filter(id=>s.resources.find(r=>r.id===id)?.kind!==s.resources.find(r=>r.id===e.target.value)?.kind));setStart(null);setEnd(null);}}>{s.resources.filter(r=>r.active!==false).map(r=><option key={r.id} value={r.id}>{r.name} · {r.kind==='whiteboard'?'Whiteboard':r.kind==='tv'?'TV':'Room'}</option>)}</select></label><ResourceExtras resources={s.resources} primary={resource} value={extras} onChange={ids=>{setExtras(ids);setStart(null);setEnd(null);}}/>{!hold&&<label>Purpose<select aria-label="Purpose" value={purpose} onChange={e=>{setPurpose(e.target.value as Purpose);setDetail('');}}>{purposes.map(p=><option key={p.id} value={p.id}>{p.label}</option>)}</select></label>}<label>{hold?'Hold reason':purposes.find(p=>p.id===purpose)?.detail}<input value={detail} onChange={e=>setDetail(e.target.value)} required minLength={hold?5:1} maxLength={hold||purpose==='other'?240:120}/></label><p className="sr-note">Private to you and explicitly authorized reservation managers.</p><div className="sr-two"><label>Start<select aria-label="Start" value={start??''} required onChange={e=>{setStart(Number(e.target.value));setEnd(null);}}><option value="" disabled>Select start</option>{startOptions(s,selection).map(n=><option key={n} value={n}>{clock(n)}</option>)}</select></label><label>End<select aria-label="End" value={end??''} required disabled={start===null} onChange={e=>setEnd(Number(e.target.value))}><option value="" disabled>Select end</option>{ends.map(n=><option key={n} value={n}>{clock(n)}</option>)}</select></label></div>{!startOptions(s,selection).length&&<p role="status">No available times. Choose a different resource or date.</p>}<button className="sr-primary" disabled={end===null||start===null||!validRange(s,selection,start,end)||!detail.trim()}>Review reservation</button></form>:<><dl><dt>Resource</dt><dd>{selection.map(id=>s.resources.find(r=>r.id===id)?.name).join(' + ')}</dd><dt>Date</dt><dd>{s.day} · Las Vegas</dd><dt>Time</dt><dd>{clock(start!)} – {clock(end!)}</dd><dt>{hold?'Hold reason':'Purpose'}</dt><dd>{hold?detail:purposes.find(p=>p.id===purpose)?.label}</dd></dl><p className="sr-note">{demo?'This confirms a fictional preview reservation only.':'The server rechecks availability when you confirm.'}</p><button className="sr-primary" disabled={busy} onClick={()=>{void confirm();}}>{busy?'Saving…':'Confirm reservation'}</button><button className="sr-secondary" disabled={busy} onClick={revise}>Back to edit</button></>}
- </dialog>
- <dialog ref={cancelDialog} className="sr-dialog" aria-label="Cancel reservation" onClose={()=>setCancelId('')} onCancel={e=>{if(busy)e.preventDefault();}}><h2>Cancel this reservation?</h2><p>All resources in this reservation become available together; the record stays in your history.</p>{error&&<p role="alert" className="sr-error">{error}</p>}<label>Reason<input required minLength={5} maxLength={240} value={reason} onChange={e=>setReason(e.target.value)}/></label><button className="sr-primary" disabled={busy||reason.trim().length<5} onClick={()=>{void cancel();}}>Confirm cancellation</button><button className="sr-secondary" disabled={busy} onClick={()=>cancelDialog.current?.close()}>Keep reservation</button></dialog>
- {operations}
- </main>;
+ async function confirm(){
+  if(start===null||end===null)return;
+  setBusy(true);setError('');
+  try{
+   await submit({requestId:requestId.current,action:hold?'hold':'reserve',resourceIds:selection,day:s.day,start,end,...(hold?{reason:detail}:{purpose,detail})});
+   dialog.current?.close();setMessage(hold?'Resource hold confirmed.':'Reservation confirmed. Your My Week activity is updated.');setView('mine');
+  }catch(e){setError(e instanceof Error?e.message:'Reservation failed. Please refresh and try again.');}
+  finally{setBusy(false);}
+ }
+ async function cancel(){
+  setBusy(true);setError('');
+  try{await submit({requestId:requestId.current,action:'cancel',bookingId:cancelId,reason,expectedVersion:cancelVersion});cancelDialog.current?.close();setCancelId('');setMessage('Reservation cancelled; history retained.');}
+  catch(e){setError(e instanceof Error?e.message:'Cancellation failed.');}
+  finally{setBusy(false);}
+ }
+
+ const tab=(id:View,label:string)=><button type="button" className="ui-tab" onClick={()=>setView(id)} aria-current={view===id?'page':undefined}>{label}</button>;
+ const heading=view==='mine'?'My reservations':view==='managed'?'Authorized reservations':s.day===s.today?'Today’s availability':'Availability';
+
+ const schedule=<>
+  <div className="sr-segment" role="group" aria-label="Resource type">{(Object.keys(kindLabels) as Kind[]).map(id=><button type="button" key={id} aria-pressed={kind===id} onClick={()=>setKind(id)}>{kindLabels[id]}</button>)}</div>
+  <div className="sr-scroll" tabIndex={0} data-no-swipe aria-label="Full-day resource schedule; scroll horizontally for more resources"><table style={{minWidth:76+resources.length*96}}>
+   <thead><tr><th scope="col">Time</th>{resources.map(r=><th key={r.id} scope="col">{r.name}</th>)}</tr></thead>
+   <tbody>{times.map(time=><tr key={time}><th scope="row">{clock(time)}</th>{resources.map(r=>{
+    const block=s.blocks.find(b=>(!b.resourceId||b.resourceId===r.id)&&time>=b.start&&time<b.end);
+    const booking=visible.find(b=>bookingResources(b).includes(r.id)&&time>=b.start&&time<b.end);
+    const openSlot=validRange(s,r.id,time,time+s.step);
+    if(block)return <td key={r.id} className="sr-block"><span>{block.label}</span></td>;
+    if(booking)return <td key={r.id} className="sr-reserved"><span><b>{booking.hold?'Unavailable':booking.label}</b>{booking.mine&&booking.purpose&&<small>{purposeLabel(booking.purpose)}</small>}</span></td>;
+    return <td key={r.id}><button type="button" disabled={!openSlot||closed} aria-label={`${r.name}, ${clock(time)}, ${closed?'booking closed':openSlot?'available':'past'}`} onClick={()=>open(r.id,time)}>{closed?'Not open':openSlot?'Available':'Past'}</button></td>;
+   })}</tr>)}</tbody>
+  </table></div>
+  <p className="ui-hint sr-note">Other members’ bookings show as occupied, without names. Private purpose details never appear on this shared schedule.</p>
+ </>;
+
+ const list=<ul className="ui-list sr-my-list">
+  {listed.map(b=><li key={b.id}><article className="sr-item">
+   <TimeColumn start={b.start} end={b.end}/>
+   <div className="sr-item-body">
+    <h3>{resourceNames(s.resources,bookingResources(b),'Resource')}</h3>
+    <p className="sr-meta"><span className="sr-state" data-state={b.state}>{stateLabel(b)}</span>{b.version&&<span className="sr-revision"> · Revision {b.version}</span>}</p>
+    {view==='managed'&&<p>{b.label}</p>}
+    {b.purpose&&<p>{purposeLabel(b.purpose)}{b.detail?' · '+b.detail:''}</p>}
+    {b.originalEnd&&b.originalEnd!==b.end&&<p>Originally until {clock(b.originalEnd)}. Remaining slots released.</p>}
+    <div className="sr-action-row">
+     <BookingChanges booking={b} schedule={s} submit={submit} loadDay={loadDay} changeDay={changeDay}/>
+     {b.state==='confirmed'&&(!b.hold||s.canManage)&&(s.day>s.today||b.end>s.nowMinute)&&<button type="button" className="ui-button ui-button-secondary" onClick={()=>{requestId.current=crypto.randomUUID();setError('');setReason('');setCancelVersion(b.version??1);setCancelId(b.id);}}>Cancel {b.hold?'hold':'reservation'}</button>}
+    </div>
+   </div>
+  </article></li>)}
+  {!listed.length&&<li className="ui-empty">No reservations for this date.</li>}
+ </ul>;
+
+ return <div className="ui-page sr-app">
+  <AppHeader homeHref="/members"/>
+  <main className="ui-main sr-main">
+   <p className="ui-kicker">Study rooms</p>
+   <h1 className="ui-title">Study Room Reservation</h1>
+   <p className="ui-lede">Rooms, whiteboards and TVs, 10:00 AM to 11:00 PM Las Vegas time, in 30-minute slots.</p>
+   {status}
+   {closed&&<p role="status" className="ui-notice sr-gate" data-tone="warning"><strong>Reservations are not open yet.</strong> The original Study Room Scheduler remains the booking authority. This screen is available to authorized setup managers for configuration review; no new bookings or holds can be placed here.</p>}
+   {message&&<p role="status" className="ui-notice sr-success" data-tone="success">{message}</p>}
+
+   <div className="sr-layout">
+    <section className="sr-primary-column" aria-label="Reservations">
+     <div className={closed?'sr-sticky sr-sticky-closed':'sr-sticky'}>
+      <button type="button" className="ui-button ui-button-block" onClick={()=>open()} disabled={busy||!resources.length||closed}>{closed?'Bookings Not Open':'Reserve Now'}</button>
+     </div>
+     <div className="sr-days" aria-label="Booking days">{Array.from({length:s.horizon},(_,i)=>addDay(s.today,i)).map((date,i)=><button type="button" key={date} aria-pressed={s.day===date} onClick={()=>changeDay(date)}><span>{i===0?'Today':weekday(date)}</span><strong>{Number(date.slice(-2))}</strong></button>)}</div>
+     <nav className="ui-tabs" aria-label="Reservation screens">
+      {tab('schedule','Availability')}{tab('mine','My Reservations')}{s.canManage&&tab('managed','Manage bookings')}{tab('history','History')}
+     </nav>
+     <div className="sr-panel" {...swipe}>
+      {view==='history'?<ReservationHistory today={s.today} canManage={s.canManage} resources={s.resources} read={loadHistory}/>:<>
+       <div className="sr-panel-head">
+        <div><h2>{heading}</h2><p className="ui-hint">{longDay(s.day)}</p></div>
+        <button type="button" onClick={refresh} className="ui-button ui-button-quiet">Refresh</button>
+       </div>
+       <label className="ui-field sr-date">Date<input className="ui-input" type="date" value={s.day} min={s.today} max={addDay(s.today,s.horizon-1)} onChange={e=>{if(e.target.value)changeDay(e.target.value);}}/></label>
+       {view==='schedule'?schedule:list}
+      </>}
+     </div>
+    </section>
+
+    {s.canManage&&<aside className="sr-side" aria-label="Manager tools">
+     <section className="sr-section">
+      <h2>Manage resources</h2>
+      <p className="ui-hint">Place a resource hold or cancel an authorized booking. Neither action deletes its history.</p>
+      <button type="button" className="ui-button ui-button-secondary" disabled={closed} onClick={()=>open(undefined,undefined,true)}>Place a hold</button>
+     </section>
+     {admin&&<ResourceManagement data={admin} today={s.today} save={saveAdmin}/>}
+     {operations}
+    </aside>}
+   </div>
+
+  </main>
+
+  <dialog ref={dialog} className="ui-sheet sr-dialog" aria-label="Reserve a resource" onCancel={e=>{if(busy)e.preventDefault();}}><div className="ui-sheet-body">
+   <div className="sr-sheet-head">
+    <p className="ui-kicker">{hold?'Resource hold':'New reservation'}, step {step===0?1:2} of 2</p>
+    <button type="button" disabled={busy} className="ui-button ui-button-quiet sr-close" aria-label="Close reservation" onClick={()=>dialog.current?.close()}><X/></button>
+   </div>
+   <h2>{step===0?(hold?'Keep this resource free':'Reserve a space'):'Review your reservation'}</h2>
+   {error&&<p role="alert" className="ui-notice sr-error" data-tone="danger">{error}</p>}
+   {step===0?<form onSubmit={e=>{e.preventDefault();setStep(1);}}>
+    <label className="ui-field">Resource<select className="ui-input" aria-label="Resource" value={resource} required onChange={e=>{setResource(e.target.value);setExtras(extras.filter(id=>s.resources.find(r=>r.id===id)?.kind!==s.resources.find(r=>r.id===e.target.value)?.kind));setStart(null);setEnd(null);}}>{s.resources.filter(r=>r.active!==false).map(r=><option key={r.id} value={r.id}>{r.name} · {kindLabels[r.kind]}</option>)}</select></label>
+    <ResourceExtras resources={s.resources} primary={resource} value={extras} onChange={ids=>{setExtras(ids);setStart(null);setEnd(null);}}/>
+    {!hold&&<label className="ui-field">Purpose<select className="ui-input" aria-label="Purpose" value={purpose} onChange={e=>{setPurpose(e.target.value as Purpose);setDetail('');}}>{purposes.map(p=><option key={p.id} value={p.id}>{p.label}</option>)}</select></label>}
+    <label className="ui-field">{hold?'Hold reason':purposes.find(p=>p.id===purpose)?.detail}<input className="ui-input" value={detail} onChange={e=>setDetail(e.target.value)} required minLength={hold?5:1} maxLength={hold||purpose==='other'?240:120}/></label>
+    <p className="ui-hint sr-field-note">Private to you and explicitly authorized reservation managers.</p>
+    <div className="sr-two">
+     <label className="ui-field">Start<select className="ui-input" aria-label="Start" value={start??''} required onChange={e=>{setStart(Number(e.target.value));setEnd(null);}}><option value="" disabled>Select start</option>{startOptions(s,selection).map(n=><option key={n} value={n}>{clock(n)}</option>)}</select></label>
+     <label className="ui-field">End<select className="ui-input" aria-label="End" value={end??''} required disabled={start===null} onChange={e=>setEnd(Number(e.target.value))}><option value="" disabled>Select end</option>{ends.map(n=><option key={n} value={n}>{clock(n)}</option>)}</select></label>
+    </div>
+    {!startOptions(s,selection).length&&<p role="status" className="ui-hint">No available times. Choose a different resource or date.</p>}
+    <button className="ui-button ui-button-block" disabled={end===null||start===null||!validRange(s,selection,start,end)||!detail.trim()}>Review reservation</button>
+   </form>:<>
+    <dl className="sr-summary"><dt>Resource</dt><dd>{resourceNames(s.resources,selection)}</dd><dt>Date</dt><dd>{longDay(s.day)}, Las Vegas</dd><dt>Time</dt><dd>{clock(start!)} to {clock(end!)}</dd><dt>{hold?'Hold reason':'Purpose'}</dt><dd>{hold?detail:purposeLabel(purpose)}</dd></dl>
+    <p className="ui-hint">The server rechecks availability when you confirm.</p>
+    <div className="sr-sheet-actions">
+     <button type="button" className="ui-button ui-button-block" disabled={busy} onClick={()=>{void confirm();}}>{busy?'Saving…':'Confirm reservation'}</button>
+     <button type="button" className="ui-button ui-button-secondary ui-button-block" disabled={busy} onClick={revise}>Back to edit</button>
+    </div>
+   </>}
+  </div></dialog>
+
+  <dialog ref={cancelDialog} className="ui-sheet sr-dialog" aria-label="Cancel reservation" onClose={()=>setCancelId('')} onCancel={e=>{if(busy)e.preventDefault();}}><div className="ui-sheet-body">
+   <h2>Cancel this reservation?</h2>
+   <p className="ui-hint">All resources in this reservation become available together; the record stays in your history.</p>
+   {error&&<p role="alert" className="ui-notice sr-error" data-tone="danger">{error}</p>}
+   <label className="ui-field">Reason<input className="ui-input" required minLength={5} maxLength={240} value={reason} onChange={e=>setReason(e.target.value)}/></label>
+   <div className="sr-sheet-actions">
+    <button type="button" className="ui-button ui-button-danger ui-button-block" disabled={busy||reason.trim().length<5} onClick={()=>{void cancel();}}>Confirm cancellation</button>
+    <button type="button" className="ui-button ui-button-secondary ui-button-block" disabled={busy} onClick={()=>cancelDialog.current?.close()}>Keep reservation</button>
+   </div>
+  </div></dialog>
+ </div>;
 }
