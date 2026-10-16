@@ -1,30 +1,40 @@
 # LV Zion Official
 
-Independent Next.js application. The original LV Zion applications and databases are outside this repository's work.
+Self-contained, phone-first Next.js application at https://lvz.app, with its own Supabase database.
+
+## Authoritative product boundary — October 16, 2026
+
+Anthony requires a genuine fresh start. This applies to every module and supersedes conflicting historical documents, handoffs, tests and implementation assumptions.
+
+- Implement only requirements explicitly approved for LV Zion Official. A design reference approves appearance or interaction only, not data, schedules, operational policies or dependencies.
+- The product must have no knowledge of a separate application. Do not add references, links, imports, synchronization, fallback endpoints, migration prerequisites or handover gates involving another application.
+- Production schedules, service restrictions, assignments and events come only from records deliberately configured for this application. Start empty. Do not infer recurring schedules from conversation history or populate them from examples.
+- Empty schedules and configuration are valid. Show useful neutral empty states. Test fixtures remain isolated from production handlers and must never become fallback data.
+- Application rollout depends only on this application's own configuration, authorization, data integrity and verification. Do not require changes to another system before a module can function.
+- Preserve existing accounts, permissions, member history and intentionally entered records. Remove only positively identified unapproved defaults; audit any production correction.
+- Retain compact module headers and a prominent center Apps launcher in module bottom navigation.
 
 ## Read first
 
-Read README.md, docs/README.md, docs/HANDOFF.md, docs/ACTUAL-APP-SETUP.md and docs/RELEASE-GATES.md. For the private Contacts module, also read docs/contacts/README.md, docs/contacts/OPERATIONS.md and docs/contacts/VERIFICATION.md. The latest completed organization plan and its Build log are docs/ORGANIZATION-WORKFLOW.md; there is no active organization implementation section. Member instructions are in docs/USER-MANUAL.md. Documentation maintenance is recorded in docs/DOCUMENTATION-AUDIT.md. Reconcile all hosted/repository migrations with docs/HOSTED-MIGRATION-LEDGER.json, including applied work still awaiting a code merge. Other module work can continue independently; inspect current GitHub and production state before changing it.
+Read README.md, docs/README.md, docs/HANDOFF.md, docs/ACTUAL-APP-SETUP.md and docs/RELEASE-GATES.md. The boundary above takes precedence over older installation receipts. For Contacts, also read docs/contacts/README.md, docs/contacts/OPERATIONS.md and docs/contacts/VERIFICATION.md. Organization implementation and its Build log are in docs/ORGANIZATION-WORKFLOW.md. Member instructions are in docs/USER-MANUAL.md. Reconcile hosted schema changes with docs/HOSTED-MIGRATION-LEDGER.json before applying SQL. Inspect current GitHub and production state before changing either; preserve concurrent development.
 
-For Work Mission, read docs/morning-prayer/SIMPLER-R6.md for the simpler interface and docs/morning-prayer/COMPLETION-R5.md and its Build log. R4 and R5 are installed; check the hosted ledger and current production receipt before release. Real dates, materials, links and grants are owner-sourced. Run `npm run test:morning-prayer:browser` and `npm run test:morning-prayer:races` for this module (the latter requires local PostgreSQL binaries). No active organization implementation section is added by this module work.
+For Work Mission, read docs/morning-prayer/SIMPLER-R6.md and docs/morning-prayer/COMPLETION-R5.md. Real dates, materials, links and grants are owner-sourced. Run `npm run test:morning-prayer:browser` and `npm run test:morning-prayer:races` for changes to that module (the latter requires local PostgreSQL binaries).
 
-For the live Study Room module, also read docs/study-rooms/README.md, docs/STUDY-ROOM-R4-LIVE.md and docs/study-rooms/CUTOVER-RUNBOOK.md. The older R1-R3 reports are historical.
+For Study Rooms, use docs/study-rooms/README.md. Historical installation receipts are evidence of past tests, not current scheduling requirements.
 
 ## Verification
 
-Use Node 24. Run `npm ci --ignore-scripts`, `npm run build` and `npm run test:browser`. Browser tests run against a loopback-only server, with activation disabled. For real local Auth signup testing, run `LVZ_SIGNUP_INTEGRATION=true node tests/integration/start-stack.mjs`, then `LVZ_INTEGRATION_DIR=/tmp/lvz-integration node scripts/test-signup-integration.mjs`, then `node tests/integration/stop-stack.mjs`. The disposable integration directory must be new, and contains only fictional identities and ephemeral test credentials. Never commit or publish that directory. Never send a real address to local SMTP.
+Use Node 24. Run `npm ci --ignore-scripts`, `npm run build` and `npm run test:browser`. Browser tests use a loopback-only server with activation disabled. For real local Auth signup tests, run `LVZ_SIGNUP_INTEGRATION=true node tests/integration/start-stack.mjs`, then `LVZ_INTEGRATION_DIR=/tmp/lvz-integration node scripts/test-signup-integration.mjs`, then `node tests/integration/stop-stack.mjs`. Use a new disposable integration directory containing only fictional identities and ephemeral test credentials. Never commit or publish that directory or send real addresses to local SMTP.
 
-## Boundaries
+## Release and security boundaries
 
-- Anthony requires the actual application at https://lvz.app. Do not create or publish a preview unless he explicitly asks for that specific preview.
-- Automatic Git deployments are disabled in vercel.json. Private backup pushes must not publish previews or production. Releases are deliberate production deployments after validation.
-- Anthony authorized actual application setup and self-service signup on 2026-10-14. New accounts start Unassigned to age category, group and unit; only authorized leaders assign placement.
-- Use the existing LV Zion Official Supabase project, otecqlkqirncotytbfns. Production activation must validate this exact ref and https://lvz.app origin. Keep other apps and services untouched.
-- Apply only pending, tested migrations. Hosted foundation IDs differ from local filenames; reconcile with docs/HOSTED-MIGRATION-LEDGER.json rather than replaying existing CREATE statements.
-- The first owner uses the email Anthony supplied directly in this chat. Do not put that private email in Git. He chooses his password himself. Never create fictitious organizational labels to activate an owner account.
-- No secrets, private member records, email addresses or Auth tokens in logs, screenshots, Git or review exports. Use Keychain or provider secret stores.
-- Do not purchase services or incur new costs without specific approval. Original applications, real member imports and unrelated draft module branches remain out of scope.
-
-- **Study Room:** the module is deployed to `lvz.app` with an explicit single-owner manager grant, but `app_private.study_booking_activation.bookings_open=false` remains mandatory until a verified and approved cutover. R4 permits audited inventory and service-calendar configuration only; it cannot open bookings. Never grant all members access, use the public Firebase lobby as a booking export, or change/disable the original Firebase booking functions without the signed-off cutover runbook. Do not claim synthetic browser tests prove a real hosted member booking.
-
-Personal credentials for this project use Apple Passwords or macOS Keychain only. Do not access the user's work password store.
+- Target the actual application at https://lvz.app. Do not publish a preview unless Anthony explicitly requests that preview.
+- Automatic Git deployments remain disabled in vercel.json. Private code pushes do not authorize automatic publication. Release deliberately after validation.
+- Self-service signup is authorized. New accounts start Unassigned to age category, group and unit; only authorized leaders assign placement.
+- Use only Supabase project otecqlkqirncotytbfns and validate the https://lvz.app origin. Do not modify unrelated projects or services.
+- Apply only pending, tested schema migrations. Reconcile the hosted ledger rather than replaying applied CREATE statements.
+- Do not broaden module access or remove authorization checks as part of this correction. A booking pause may be used for maintenance or local readiness, never as an external-system dependency.
+- Do not place private emails, member records, credentials, Auth tokens or secrets in Git, logs, screenshots or exports. The owner chooses his password. Never invent organizational labels to activate an account.
+- Keep production credentials in provider stores. Personal credentials use Apple Passwords or macOS Keychain; do not access work password stores.
+- Do not purchase services or incur new costs without specific approval.
+- Report exactly which tests ran and which deployment was verified. Synthetic tests do not prove a real hosted member transaction.
