@@ -21,7 +21,8 @@ function exactKeys(value:Record<string,unknown>,valid:string[]){
  if(Object.keys(value).some(key=>!valid.includes(key)))throw Error('Unexpected management field.');
 }
 function validatedBlocks(input:unknown,weekly:boolean):ServiceInterval[]|WeeklyServiceInterval[]{
- if(!Array.isArray(input)||input.length>(weekly?70:26)||(weekly&&input.length===0))throw Error('Choose valid service intervals.');
+ // An explicit empty array is a valid calendar, not a request for defaults.
+ if(!Array.isArray(input)||input.length>(weekly?70:26))throw Error('Choose valid service intervals.');
  const result:(ServiceInterval|WeeklyServiceInterval)[]=[];
  for(const raw of input){
   const p=object(raw);
