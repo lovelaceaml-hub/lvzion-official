@@ -25,7 +25,7 @@ export function StudyOperationsManager({data,today,save}:{data:StudyOperationsDa
  return <section className="sr-section" aria-labelledby="sr-operations-title">
  <h2 id="sr-operations-title">Inventory & service calendar</h2>
  <p className="ui-hint">All times are Las Vegas time. Saving a calendar never cancels or displaces reservations. Changes are audited and must be refreshed before another manager can edit the same version.</p>
- <p className="ui-notice" role="status">New-system bookings: {data.newSystemBookings}. Booking status: <strong>{data.bookingsOpen?'Open':'Closed. The original scheduler remains the booking authority'}</strong>. Calendar and inventory setup cannot open the booking gate.</p>
+ <p className="ui-notice" role="status">Reservations: {data.newSystemBookings}. Booking status: <strong>{data.bookingsOpen?'Open':'Paused'}</strong>.</p>
  {error&&<p role="alert" className="ui-notice sr-error" data-tone="danger">{error}</p>}
  {message&&<p role="status" className="ui-notice sr-success" data-tone="success">{message}</p>}
  <details className="sr-disclosure"><summary>Add a room, whiteboard or TV</summary>
@@ -39,7 +39,8 @@ export function StudyOperationsManager({data,today,save}:{data:StudyOperationsDa
   </form>
  </details>
  <details className="sr-disclosure"><summary>Manage weekly service restrictions</summary>
-  <p className="ui-hint">Restrictions apply to all resources and every corresponding weekday, except dates with an approved special-day replacement. At least one weekly interval is required.</p>
+  <p className="ui-hint">Restrictions apply to all resources and every corresponding weekday, except dates with an approved special-day replacement. Add only the times you want to restrict. An empty weekly calendar is valid.</p>
+  {weekly.length===0&&<p className="ui-empty">No weekly restrictions configured.</p>}
   {weekly.map((item,i)=><div className="sr-ops-row" key={String(i)+'-'+data.version}>
    <label className="ui-field">Day<select className="ui-input" aria-label={'Weekly day '+(i+1)} value={item.weekday} onChange={e=>updateWeek(i,{...item,weekday:Number(e.target.value)})}>
     {days.map((x,dayIndex)=><option key={x} value={dayIndex}>{x}</option>)}
@@ -52,7 +53,7 @@ export function StudyOperationsManager({data,today,save}:{data:StudyOperationsDa
   <div className="sr-ops-actions"><button type="button" disabled={busy||weekly.length>=70} className="ui-button ui-button-secondary" onClick={()=>setWeekly(rows=>[...rows,{weekday:0,start:600,end:660,label:'Service restriction'}])}>Add weekly interval</button></div>
   <form className="sr-config-form" onSubmit={e=>{e.preventDefault();void send({action:'weekly.replace',blocks:weekly,reason:weeklyReason,expectedVersion:data.version});}}>
    <label className="ui-field">Reason for weekly schedule change<input className="ui-input" aria-label="Weekly change reason" value={weeklyReason} onChange={e=>setWeeklyReason(e.target.value)} required minLength={5} maxLength={240}/></label>
-   <button className="ui-button ui-button-secondary" disabled={busy||weekly.length===0}>Review and save weekly restrictions</button>
+   <button className="ui-button ui-button-secondary" disabled={busy}>Review and save weekly restrictions</button>
   </form>
  </details>
  <details className="sr-disclosure"><summary>Special dates & service overrides</summary>
