@@ -1,96 +1,30 @@
 # LV Zion Official documentation
 
-Start with the actual app at [lvz.app](https://lvz.app). Current documentation describes implemented behavior and explicit module limits. Historical test and preview records retain their original milestone scope and do not authorize further preview publication.
+Start with [lvz.app](https://lvz.app), `AGENTS.md` and the [current handoff](HANDOFF.md). All modules are part of one self-contained application. Schedules, materials, assignments and configuration are deliberately created for this system; empty calendars are valid.
 
-## Current guides and operational records
+## Current guides
 
 - [Current handoff and deployed source](HANDOFF.md)
+- [Fresh-start correction and verification — October 16, 2026](FRESH-START-2026-10-16.md)
 - [Member and organization guide](USER-MANUAL.md)
-- [Actual-app setup and chronological receipts](ACTUAL-APP-SETUP.md)
-- [Release controls](RELEASE-GATES.md)
-- [Domain and authentication email](DOMAIN-SETUP.md)
+- [Release and privacy controls](RELEASE-GATES.md)
 - [Hosted migration ledger](HOSTED-MIGRATION-LEDGER.json)
-- [Completed organization workflow and Build log](ORGANIZATION-WORKFLOW.md)
-- [Organization run index](runs/organization-workflow/INDEX.md)
-- [Documentation audit and validation](DOCUMENTATION-AUDIT.md)
-- [Product decisions, with later implementation updates](PRODUCT-DECISIONS.md)
+- [Organization workflow](ORGANIZATION-WORKFLOW.md)
+- [Product decisions](PRODUCT-DECISIONS.md)
+- [Day Sheet design contract](design/LVZ-DESIGN-CONTRACT.md)
+- [Authentication and domain setup](DOMAIN-SETUP.md)
 
-## Module contracts and evidence
+## Module guides
 
-Worship Duty production integration and current verification: [Launch record](worship-duty/LAUNCH.md). Historical Work handoff: [Worship guide](worship-duty/README.md).
-
-| Module | Latest guide or release record | Limits |
+| Module | Guides | Boundary |
 |---|---|---|
-| Contacts | [Current owner scope](contacts/README.md), [user guide](contacts/USER-GUIDE.md), [operations](contacts/OPERATIONS.md), [verification](contacts/VERIFICATION.md), [R5 evidence](contacts/OWNER-EXPERIENCE-R5.md) | Private owner scope; sharing/export/messages off; real owner save/reload acceptance outstanding |
-| Study Rooms | [Current status](study-rooms/README.md), [cutover runbook](study-rooms/CUTOVER-RUNBOOK.md), [R4 controls](STUDY-ROOM-R4-LIVE.md) | Booking gate closed; legacy scheduler remains authoritative |
-| Continuous Display | [R2 operations](continuous-display/OPERATIONS-R2.md), [initial contract](continuous-display/LIVE-RELEASE.md), [initial verification](continuous-display/LIVE-VERIFICATION.md) | No published content/paired TV; R2 operations deployed; physical TV acceptance outstanding |
-| Work Mission Morning Prayer | [Live setup](morning-prayer/LIVE-SETUP.md) | Empty schedules/materials; member meeting access and outgoing distribution gated |
+| Study Rooms | [Current operations](study-rooms/README.md) | Existing explicit grants; booking enabled; optional, explicitly configured restrictions; private history and conflict protection. |
+| Contacts | [Scope](contacts/README.md), [owner guide](contacts/USER-GUIDE.md), [operations](contacts/OPERATIONS.md), [verification](contacts/VERIFICATION.md) | Private owner workspace; sharing, export and communications remain separately controlled. |
+| Continuous Display | [Operations](continuous-display/OPERATIONS-R2.md) | Reviewed publications, explicit device pairing and separate physical-TV acceptance. |
+| Work Mission Prayer | [Completion](morning-prayer/COMPLETION-R5.md), [interface guide](morning-prayer/SIMPLER-R6.md) | Owner-supplied dates/materials/links; explicit host/member access and controlled distribution. |
 
-These module records contain historical test receipts and release prerequisites. Use the current handoff for the observed hosted snapshot. SQL review/activation files are references, never instructions to rerun completed migrations or broaden grants.
+## Evidence and historical milestones
 
-## Complete file catalog
+Milestone-specific test counts, schema reviews and screenshots describe the version named in that record. They are not current product requirements and must not override AGENTS.md, the current handoff or the October 16 fresh-start correction. Documentation commits alone do not redeploy runtime code.
 
-The catalog includes guides, historical plans, run records, JSON evidence, screenshots and SQL references. Files under design/ and older verification reports are historical, not representations of the current live app. Source code and tests remain in their normal repository directories.
-
-- [ACTUAL-APP-SETUP.md](ACTUAL-APP-SETUP.md)
-- [APP-INTEGRATION-FRAMEWORK.md](APP-INTEGRATION-FRAMEWORK.md)
-- [AUTONOMOUS-FOUNDATION-R6.md](AUTONOMOUS-FOUNDATION-R6.md)
-- [DOCUMENTATION-AUDIT.md](DOCUMENTATION-AUDIT.md)
-- [DOMAIN-SETUP.md](DOMAIN-SETUP.md)
-- [HANDOFF.md](HANDOFF.md)
-- [HOSTED-MIGRATION-LEDGER.json](HOSTED-MIGRATION-LEDGER.json)
-- [MEMBER-SYSTEM-IMPLEMENTATION.md](MEMBER-SYSTEM-IMPLEMENTATION.md)
-- [MEMBER-SYSTEM-VERIFICATION.md](MEMBER-SYSTEM-VERIFICATION.md)
-- [MOBILE-HOME-IMPLEMENTATION.md](MOBILE-HOME-IMPLEMENTATION.md)
-- [ONBOARDING-COMPLETION.md](ONBOARDING-COMPLETION.md)
-- [ORGANIZATION-WORKFLOW.md](ORGANIZATION-WORKFLOW.md)
-- [PLAN-SELF-SERVICE-SIGNUP.md](PLAN-SELF-SERVICE-SIGNUP.md)
-- [PRODUCT-DECISIONS.md](PRODUCT-DECISIONS.md)
-- [RELEASE-GATES.md](RELEASE-GATES.md)
-- [STUDY-ROOM-LAUNCH-READINESS.md](STUDY-ROOM-LAUNCH-READINESS.md)
-- [STUDY-ROOM-LIVE-RELEASE.md](STUDY-ROOM-LIVE-RELEASE.md)
-- [STUDY-ROOM-R2.md](STUDY-ROOM-R2.md)
-- [STUDY-ROOM-R3-VERIFICATION.md](STUDY-ROOM-R3-VERIFICATION.md)
-- [STUDY-ROOM-R3.md](STUDY-ROOM-R3.md)
-- [STUDY-ROOM-R4-LIVE.md](STUDY-ROOM-R4-LIVE.md)
-- [STUDY-ROOM-VERIFICATION.md](STUDY-ROOM-VERIFICATION.md)
-- [UI-SIGNUP-VERIFICATION.md](UI-SIGNUP-VERIFICATION.md)
-- [USER-MANUAL.md](USER-MANUAL.md)
-- [contacts/LIVE-OWNER-RELEASE.md](contacts/LIVE-OWNER-RELEASE.md)
-- [contacts/README.md](contacts/README.md)
-- [contacts/USER-GUIDE.md](contacts/USER-GUIDE.md)
-- [contacts/OPERATIONS.md](contacts/OPERATIONS.md)
-- [contacts/VERIFICATION.md](contacts/VERIFICATION.md)
-- [contacts/OWNER-EXPERIENCE-R5.md](contacts/OWNER-EXPERIENCE-R5.md)
-- [contacts/owner-pilot-schema.sql](contacts/owner-pilot-schema.sql)
-- [continuous-display/LIVE-RELEASE.md](continuous-display/LIVE-RELEASE.md)
-- [continuous-display/LIVE-VERIFICATION.md](continuous-display/LIVE-VERIFICATION.md)
-- [continuous-display/OPERATIONS-R2-SCHEMA-REVIEW.sql](continuous-display/OPERATIONS-R2-SCHEMA-REVIEW.sql)
-- [continuous-display/OPERATIONS-R2.md](continuous-display/OPERATIONS-R2.md)
-- [continuous-display/live-activation.sql](continuous-display/live-activation.sql)
-- [continuous-display/live-schema-review.sql](continuous-display/live-schema-review.sql)
-- [design/signup/signup-desktop.png](design/signup/signup-desktop.png)
-- [design/signup/signup-phone.png](design/signup/signup-phone.png)
-- [design/signup/unassigned-phone.png](design/signup/unassigned-phone.png)
-- [evidence/ORGANIZATION-LIVE.json](evidence/ORGANIZATION-LIVE.json)
-- [evidence/R6-VERIFICATION.json](evidence/R6-VERIFICATION.json)
-- [evidence/SELF-SERVICE-SIGNUP.json](evidence/SELF-SERVICE-SIGNUP.json)
-- [morning-prayer/LIVE-SETUP.md](morning-prayer/LIVE-SETUP.md)
-- [morning-prayer/README.md](morning-prayer/README.md)
-- [morning-prayer/VERIFICATION.md](morning-prayer/VERIFICATION.md)
-- [morning-prayer/schema-review.sql](morning-prayer/schema-review.sql)
-- [runs/organization-workflow/INDEX.md](runs/organization-workflow/INDEX.md)
-- [runs/organization-workflow/lanes/ST1.md](runs/organization-workflow/lanes/ST1.md)
-- [runs/organization-workflow/lanes/ST2.md](runs/organization-workflow/lanes/ST2.md)
-- [runs/organization-workflow/lanes/ST3.md](runs/organization-workflow/lanes/ST3.md)
-- [runs/self-service-signup/INDEX.md](runs/self-service-signup/INDEX.md)
-- [runs/self-service-signup/lanes/S1.md](runs/self-service-signup/lanes/S1.md)
-- [screenshots/actual-app-sign-in.jpg](screenshots/actual-app-sign-in.jpg)
-- [screenshots/actual-app-signup.jpg](screenshots/actual-app-signup.jpg)
-- [screenshots/organization-live.jpg](screenshots/organization-live.jpg)
-- [study-rooms/CUTOVER-RUNBOOK.md](study-rooms/CUTOVER-RUNBOOK.md)
-- [study-rooms/README.md](study-rooms/README.md)
-
-- [Work Mission completion R5](morning-prayer/COMPLETION-R5.md): current scope, verification, hosted migration, rollback and owner setup.
-
-- [Simpler Morning Prayer interface R6](morning-prayer/SIMPLER-R6.md): focused management, clear materials and phone/desktop evidence.
+Authentication and organization evidence remains in [actual-app setup](ACTUAL-APP-SETUP.md), [organization run index](runs/organization-workflow/INDEX.md), [signup run index](runs/self-service-signup/INDEX.md) and module-specific release records. Review SQL files are references, never instructions to replay completed migrations or widen permissions. Fixtures and screenshots containing fictional data must never be used as live schedules or member records.

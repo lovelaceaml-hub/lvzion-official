@@ -1,12 +1,12 @@
 import {requireMember} from '../../../lib/server/supabase';
 import {NextResponse} from 'next/server';
+import {privateHeaders as headers} from '../../../lib/morning-prayer/server';
+import {validDate} from '../../../lib/morning-prayer/time';
 export const dynamic='force-dynamic';
-const headers={'Cache-Control':'private, no-store, max-age=0','Referrer-Policy':'no-referrer','X-Content-Type-Options':'nosniff'};
-const dateOk=(s:string)=>/^\d{4}-\d{2}-\d{2}$/.test(s)&&!Number.isNaN(Date.parse(s))&&new Date(s+'T12:00:00Z').toISOString().slice(0,10)===s;
 export async function GET(request:Request){
  const p=new URL(request.url).searchParams;
  const from=p.get('from')??'',to=p.get('to')??'';
- if(!dateOk(from)||!dateOk(to)||Date.parse(to)<Date.parse(from)||Date.parse(to)-Date.parse(from)>62*86400000)
+ if(!validDate(from)||!validDate(to)||Date.parse(to)<Date.parse(from)||Date.parse(to)-Date.parse(from)>62*86400000)
   return NextResponse.json({error:'Select a valid range of up to 62 days.'},{status:400,headers});
  let client;
  try{client=await requireMember();}catch{return NextResponse.json({error:'Sign in to LV Zion Official to continue.'},{status:401,headers});}

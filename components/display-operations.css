@@ -1,32 +1,18 @@
+/* Church Display settings pieces (dates, hours, motion). Management only; the TV player never loads this file. */
+.cd-fieldset{min-width:0;margin:var(--lvz-space-4) 0 0;padding:0;border:0}
+.cd-fieldset>legend{padding:0;margin-bottom:var(--lvz-space-2);font-size:var(--lvz-text-sm);font-weight:var(--lvz-weight-bold);color:var(--lvz-ink-quiet)}
+.cd-check{display:flex;align-items:center;gap:var(--lvz-space-3);min-height:var(--lvz-tap);font-weight:var(--lvz-weight-strong)}
+.cd-check input,.cd-choice input{flex:none;width:20px;height:20px;margin:0;accent-color:var(--lvz-accent)}
+.cd-pair-fields{display:grid;grid-template-columns:minmax(0,3fr) minmax(0,2fr);column-gap:var(--lvz-space-3)}
+.cd-choice{cursor:pointer}
+.cd-choice:has(input:checked) strong{color:var(--lvz-accent)}
 
-/* Church Display operations R2; confined to management, never loaded by normal TV player. */
-.cd-screen-picker{display:flex;align-items:center;gap:12px;margin-top:10px;flex-wrap:wrap;color:#395742;font-weight:700;font-size:12px}
-.cd-screen-picker select{flex:1;min-width:170px;padding:11px;border:1px solid #cbd9c7;border-radius:10px;background:#fff;color:#244532;min-height:44px;font-size:16px}
-.cd-operations{border-top:1px solid #dfe8da;margin-top:28px;padding-top:20px;min-width:0}
-.cd-operations h3{margin:15px 0 10px}
-.cd-operation-fieldset{border:1px solid #d8e3d4;border-radius:13px;padding:15px;margin:18px 0 3px;min-width:0}
-.cd-operation-fieldset legend{font-weight:700;color:#355b40;padding:0 5px;font-size:12px}
-.cd-operation-fieldset p{font-size:12px;margin:12px 0 0;color:#728071}
-.cd-operation-toggle{display:flex!important;align-items:center!important;flex-direction:row!important;gap:9px!important;min-height:44px;font-weight:600;font-size:12px}
-.cd-operation-toggle input[type=checkbox]{width:19px;height:19px;accent-color:#395b43;flex:none}
-.cd-operation-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin:13px 0}
-.cd-operation-grid label,.cd-day>label,.cd-operations>label:not(.cd-operation-toggle){display:flex;flex-direction:column;gap:6px;font-size:12px;font-weight:700;color:#526b56;min-width:0}
-.cd-operation-grid input,.cd-operation-grid select,.cd-day input,.cd-operations>label input{
- display:block;width:100%;min-width:0;border:1px solid #cbd8ca;border-radius:10px;padding:10px;min-height:44px;background:white;color:#263f30;font:16px/1.2 Arial,sans-serif
+/* Hours: one row per day, the day name first like a time on the sheet. */
+.cd-days{margin-bottom:var(--lvz-space-4)}
+.cd-day{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:0 var(--lvz-space-3);align-items:end}
+.cd-day>.cd-check{grid-column:1/-1}
+.cd-day .ui-field{margin-bottom:0}
+@media (min-width:600px){
+ .cd-day{grid-template-columns:minmax(0,1.2fr) minmax(0,1fr) minmax(0,1fr)}
+ .cd-day>.cd-check{grid-column:auto;align-self:center}
 }
-.cd-operation-grid .cd-utc-label{margin-top:8px;font-weight:400;color:#6b796b}
-.cd-day-list{display:grid;gap:7px;margin:14px 0}
-.cd-day{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr) minmax(0,1fr);align-items:center;gap:9px;border-bottom:1px solid #e1e8de;padding:8px 0}
-.cd-day label{min-width:0}
-.cd-operation-alert{padding:12px;background:#eaf3e9;border:1px solid #cbd9c7;border-radius:11px}
-.cd-operation-error{color:#8f493d!important}
-.cd-operation-actions{display:flex;gap:8px;flex-wrap:wrap;margin:15px 0}
-.cd-operation-actions .cd-button{flex:1;min-width:160px}
-.cd-published-list{list-style:decimal outside;margin:12px 0 18px;padding-left:22px}
-.cd-published-list li{padding:9px 0;border-bottom:1px solid #e1e8de}
-.cd-published-list li strong{font-size:13px;display:block;color:#244733}
-.cd-published-list li span{font-size:11px;color:#718273}
-.cd-restore-list{margin:13px 0 18px}
-.cd-restore-row{display:flex;justify-content:space-between;align-items:center;gap:10px;border-bottom:1px solid #dfe8da;padding:8px 0;font-size:12px}
-.cd-restore-row .cd-button{flex-shrink:0}
-@media(max-width:600px){.cd-operation-grid{grid-template-columns:1fr}.cd-day{grid-template-columns:1fr 1fr;gap:7px}.cd-day>.cd-operation-toggle{grid-column:1/-1}.cd-screen-picker{flex-direction:column;align-items:stretch}.cd-operation-actions{flex-direction:column}}

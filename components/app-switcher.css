@@ -1,0 +1,14 @@
+/* Authorized Apps switcher shared by LV Zion modules. */
+.lvz-switcher .ui-sheet-body{padding-top:var(--lvz-space-5)}
+.lvz-switcher-heading{display:flex;align-items:center;justify-content:space-between;gap:var(--lvz-space-3);margin-bottom:var(--lvz-space-2)}
+.lvz-switcher-heading h2{margin:0;font-size:var(--lvz-text-xl);font-weight:var(--lvz-weight-bold)}
+.lvz-switcher-heading button{display:grid;place-items:center;width:var(--lvz-tap);height:var(--lvz-tap);border:0;border-radius:var(--lvz-radius-md);background:none;color:var(--lvz-ink)}
+.lvz-switcher-heading button:hover{background:var(--lvz-accent-soft)}
+.lvz-switcher .ui-hint{margin:0 0 var(--lvz-space-4)}
+.lvz-switcher-list{list-style:none;margin:0;padding:0;border-top:1px solid var(--lvz-line)}
+.lvz-switcher-list li{border-bottom:1px solid var(--lvz-line)}
+.lvz-switcher-list a{display:flex;align-items:center;gap:var(--lvz-space-3);min-height:60px;padding:var(--lvz-space-2) 0;color:var(--lvz-ink);text-decoration:none}
+.lvz-switcher-symbol{display:grid;place-items:center;flex:none;width:40px;height:40px;border-radius:var(--lvz-radius-md);background:var(--lvz-accent-soft);color:var(--lvz-accent);font-size:var(--lvz-text-xs);font-weight:var(--lvz-weight-bold)}
+.lvz-switcher-name{flex:1;min-width:0;font-weight:var(--lvz-weight-strong)}
+.lvz-switcher-list svg{flex:none;color:var(--lvz-ink-quiet)}
+.lvz-switcher-list a:hover .lvz-switcher-name{text-decoration:underline}

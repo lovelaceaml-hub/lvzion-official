@@ -237,3 +237,20 @@ test('PWP text fallback rejects an invalid month before creating a draft',async(
  expect(await month.evaluate(element=>(element as HTMLInputElement).validity.patternMismatch)).toBe(true);
  expect(f.commands).toHaveLength(0);
 });
+test('Day Sheet header goes home and a deliberate swipe changes tabs without wrapping',async({page})=>{
+ await setup(page);
+ await expect(page.getByRole('link',{name:'LV Zion home'})).toHaveAttribute('href','/members');
+ const content=page.locator('main [data-testid=wm-content]');
+ const swipe=async(dx:number,dy=0,ms=150)=>content.evaluate(async(el,[dx,dy,ms])=>{
+  const touch=(x:number,y:number)=>new Touch({identifier:1,target:el,clientX:x,clientY:y});
+  el.dispatchEvent(new TouchEvent('touchstart',{bubbles:true,touches:[touch(200,300)],changedTouches:[touch(200,300)]}));
+  await new Promise(r=>setTimeout(r,ms));
+  el.dispatchEvent(new TouchEvent('touchend',{bubbles:true,touches:[],changedTouches:[touch(200+dx,300+dy)]}));
+ },[dx,dy,ms]);
+ const current=()=>page.locator('nav[aria-label="Morning Prayer sections"]:visible [aria-current=page]');
+ await swipe(80);await expect(current()).toHaveText('Home');
+ await swipe(-80);await expect(current()).toHaveText('Schedule');
+ await swipe(-40);await expect(current()).toHaveText('Schedule');
+ await swipe(-80,70);await expect(current()).toHaveText('Schedule');
+ await swipe(-80,0,700);await expect(current()).toHaveText('Schedule');
+});

@@ -1,6 +1,6 @@
 /** America/Los_Angeles civil-time conversion; device timezone never changes the result. */
 const zone='America/Los_Angeles';
-const validDate=(value:string)=>{
+export const validDate=(value:string)=>{
  if(!/^[0-9]{4}-[0-9]{2}-[0-9]{2}$/.test(value))return false;
  const d=new Date(value+'T12:00:00Z');return Number.isFinite(+d)&&d.toISOString().slice(0,10)===value;
 };

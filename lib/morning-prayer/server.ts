@@ -1,5 +1,7 @@
 import 'server-only';
 import {NextResponse} from 'next/server';
+const UUID=/^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+export const uuid=(v:unknown):v is string=>typeof v==='string'&&UUID.test(v);
 export const privateHeaders={
  'Cache-Control':'private, no-store, max-age=0',
  'Referrer-Policy':'no-referrer','X-Content-Type-Options':'nosniff'
@@ -26,9 +28,8 @@ export function envelope(input:unknown):{key:string;expectedVersion:number;actio
  if(!input||typeof input!=='object'||Array.isArray(input))throw new Error('invalid');
  const v=input as Record<string,unknown>;
  if(Object.keys(v).some(x=>!['key','expectedVersion','action'].includes(x))||
- typeof v.key!=='string'||!/^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(v.key)||
+ !uuid(v.key)||
  !Number.isSafeInteger(v.expectedVersion)||(v.expectedVersion as number)<1||
  !v.action||typeof v.action!=='object'||Array.isArray(v.action))throw new Error('invalid');
  return {key:v.key,expectedVersion:v.expectedVersion as number,action:v.action as Record<string,unknown>};
 }
-export const uuid=(v:unknown):v is string=>typeof v==='string'&&/^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(v);

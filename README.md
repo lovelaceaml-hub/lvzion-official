@@ -1,36 +1,39 @@
 # LV Zion Official
 
-## Quick links
+A self-contained, phone-first Next.js application at [lvz.app](https://lvz.app), using its own Supabase database, authentication, records and scheduling.
 
-- **Actual app:** [lvz.app](https://lvz.app)
-- **Status:** Actual app and confirmed-email signup are live. The requested organization has 4 age categories, 8 groups and 16 empty units. Hierarchy management and member placement are live and verified.
-- **Member guide:** [Organization and member placement](docs/USER-MANUAL.md)
-- **Study Room module:** [Current status](docs/study-rooms/README.md) and [cutover runbook](docs/study-rooms/CUTOVER-RUNBOOK.md)
-- **Completed workflow:** [Organization completion](docs/ORGANIZATION-WORKFLOW.md)
-- **All documentation:** [Guides, release evidence and historical records](docs/README.md)
-- **Contacts owner instructions:** [How to use Contacts](docs/contacts/USER-GUIDE.md) · [Privacy and operational scope](docs/contacts/README.md)
-- **Repository:** [Private GitHub repository](https://github.com/lovelaceaml-hub/lvzion-official)
-- **Handoff:** [Current status](docs/HANDOFF.md)
-- **Setup:** [Behavior, validation and rollback](docs/ACTUAL-APP-SETUP.md)
+## Product boundary
 
-Independent phone-first Next.js application, using its own Supabase project. Original LV Zion apps and databases are outside scope. No new previews are published without Anthony's explicit request.
+Build only explicitly approved requirements for this application. Schedules and events start empty and are created deliberately within LV Zion Official. Design references do not supply data, recurring times or operational dependencies. Empty calendars are valid. Preserve existing accounts, permissions and intentionally entered records.
 
-Confirmed email signup creates an Unassigned member profile. Age category, group and unit stay unset until an authorized leader verifies membership and assigns placement. Unassigned members can view only their own records. The designated first owner can configure the actual organization while still Unassigned. The four categories and empty Group 1/Group 2 and Unit 1/Unit 2 placeholders were created from Anthony's instructions. No real member roster was imported.
+The authoritative development instructions are in [AGENTS.md](AGENTS.md). Compact module headers and a prominent center Apps launcher remain required. Production release is deliberate; automatic Git deployment and unrequested previews remain disabled.
 
-The actual routes include [signup](https://lvz.app/sign-up), [sign-in](https://lvz.app/sign-in), [members](https://lvz.app/members), [member management](https://lvz.app/members/manage), /request-access, /reset-password and /install. Fictional development routes redirect on production.
+## Current application
 
-## Current module boundaries
+Confirmed-email signup creates an Unassigned member profile. Age category, group and unit stay unset until an authorized leader verifies membership and assigns placement. Unassigned members see only their own records. Organization, department and technical authority remain independent; a leadership title does not confer module access.
 
-Read-only hosted verification on October 14, 2026 at 23:26 UTC found four approved modules, each with one active grant. These setup grants do not grant access to every signup.
+The organization workflow provides four owner-requested age categories, two groups per category and two units per group, with placement history and auditing. No roster was imported. See the [member guide](docs/USER-MANUAL.md) and [organization workflow](docs/ORGANIZATION-WORKFLOW.md).
 
-| Module | Available scope and remaining limits | Evidence |
-|---|---|---|
-| [Contacts](https://lvz.app/modules/contacts) | Private owner workspace; sharing, exports and messages disabled. Real owner save/reload acceptance remains outstanding. | [R5 release](docs/contacts/OWNER-EXPERIENCE-R5.md) |
-| [Study Rooms](https://lvz.app/modules/study-rooms) | Manager setup; booking gate closed. Original scheduler remains booking authority until an approved cutover. | [R4 controls and cutover gates](docs/STUDY-ROOM-R4-LIVE.md) |
-| [Continuous Display](https://lvz.app/modules/continuous-display) | Owner setup; one disabled screen, zero publications and zero active devices at verification. Physical TV pilot remains outstanding. | [R2 operations and release](docs/continuous-display/OPERATIONS-R2.md) |
-| [Work Mission Morning Prayer](https://lvz.app/modules/work-mission-prayer) | Live scheduling, host management, source revisions and protected meeting broker. One owner grant, zero real occurrences/materials/links. Distribution remains off. | [Completion and release](docs/morning-prayer/COMPLETION-R5.md) |
+| Module | Operational boundary |
+|---|---|
+| [Study Rooms](https://lvz.app/modules/study-rooms) | Booking enabled for the existing authorized audience. Weekly and special-date restrictions start empty. Inventory, reservation history, concurrency and privacy controls retained. [Current guide](docs/study-rooms/README.md). |
+| [Contacts](https://lvz.app/modules/contacts) | Private owner workspace. Sharing, export and outbound messaging remain disabled. [Owner guide](docs/contacts/USER-GUIDE.md). |
+| [Continuous Display](https://lvz.app/modules/continuous-display) | Authorized management, reviewed publication and explicitly paired devices. Physical TV acceptance remains separate. [Operations](docs/continuous-display/OPERATIONS-R2.md). |
+| [Work Mission Prayer](https://lvz.app/modules/work-mission-prayer) | Explicit scheduling, host/material management and protected meeting access. No invented dates, meeting credentials or lesson content. Distribution remains separately controlled. [Guide](docs/morning-prayer/COMPLETION-R5.md). |
 
-The production snapshot and repository main are distinct: documentation pushes do not deploy code. See the [handoff](docs/HANDOFF.md) and [documentation audit](docs/DOCUMENTATION-AUDIT.md) for exact source, hosted migration reconciliation and open work.
+Module access is explicitly granted and is not automatically provided to every signup. This correction does not broaden any audience.
+
+## Documentation
+
+- [Current handoff](docs/HANDOFF.md) and [documentation index](docs/README.md)
+- [Fresh-start correction and verification](docs/FRESH-START-2026-10-16.md)
+- [Release and security controls](docs/RELEASE-GATES.md)
+- [Database migration ledger](docs/HOSTED-MIGRATION-LEDGER.json)
+- [Design contract](docs/design/LVZ-DESIGN-CONTRACT.md)
+- [Authentication and setup evidence](docs/ACTUAL-APP-SETUP.md)
+- [Contacts confidentiality and verification](docs/contacts/README.md)
+
+Current instructions take precedence over milestone-specific historical installation records. Documentation commits do not themselves redeploy application code; release records distinguish repository and deployed source.
 
 ## Development
 
@@ -44,8 +47,6 @@ npm run build
 npm run test:browser
 ```
 
-Build checks types, application behavior and disposable PostgreSQL permissions. Browser tests run locally with fictional data. See AGENTS.md for isolated Auth/SMTP integration commands. Production requires explicit activation for the exact backend and https://lvz.app. Credentials belong in Keychain or provider stores, never Git. Automatic Git deployments are disabled; production release is deliberate.
+Build checks types, application behavior and disposable PostgreSQL permissions. Browser fixtures must never become production fallback data. Fictional development routes redirect in production. AGENTS.md contains isolated Auth/SMTP integration commands.
 
-Work Mission operations and completion evidence: [Morning Prayer R5](docs/morning-prayer/COMPLETION-R5.md). Actual-app release is verified at `caf5ba8`; real owner setup remains explicit.
-
-Simpler Morning Prayer interface work: [R6](docs/morning-prayer/SIMPLER-R6.md), existing operational foundations and privacy controls retained.
+Use only the approved production project and https://lvz.app origin. Keep credentials in Keychain or provider stores, never Git. Preserve confirmed-email signup, signup abuse protection, strict server authorization, private records and auditing. Apply only pending tested schema changes; never blindly replay the hosted ledger.

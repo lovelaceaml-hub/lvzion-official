@@ -1,0 +1,86 @@
+/* Contacts on the Day Sheet contract. Layout only: every value comes from styles/lvz-tokens.css,
+ * every shared piece (rows, buttons, fields, notices, tabs, sheet) from styles/lvz-ui.css. */
+
+.ct-header-actions{display:flex;align-items:center;gap:var(--lvz-space-1)}
+.ct-header-button{min-height:var(--lvz-tap);font-size:var(--lvz-text-sm)}
+.ct-main p{overflow-wrap:anywhere}
+.ct-loading,.ct-quiet{color:var(--lvz-ink-quiet);font-size:var(--lvz-text-sm)}
+.ct-quiet{margin:var(--lvz-space-2) 0 var(--lvz-space-3)}
+.ct-hint{margin:var(--lvz-space-2) 0 var(--lvz-space-4);font-size:var(--lvz-text-sm);color:var(--lvz-ink-quiet)}
+.ct-lead{margin:0 0 var(--lvz-space-3)}
+.ct-notice p{margin:0 0 var(--lvz-space-3)}
+.ct-notice-actions{display:flex;flex-wrap:wrap;align-items:center;gap:var(--lvz-space-4)}
+
+/* List pane */
+/* The shared tab strip scrolls sideways, which clips an outer focus ring; draw it inside instead. */
+.ct-list-pane .ui-tab:focus-visible{outline-offset:-3px}
+.ct-list-head{display:flex;align-items:flex-end;justify-content:space-between;gap:var(--lvz-space-3);margin-top:var(--lvz-space-6)}
+.ct-list-head .ui-section-title{margin:0 0 var(--lvz-space-2)}
+.ct-count{font-weight:var(--lvz-weight-regular);margin-left:var(--lvz-space-1)}
+.ct-filters{display:flex;gap:var(--lvz-space-2);margin-top:var(--lvz-space-4)}
+.ct-filters input{flex:1}
+.ct-filters select{flex:none;width:auto;max-width:42%}
+.ct-contact{cursor:pointer}
+.ct-contact:disabled{cursor:wait}
+.ct-contact[aria-current="true"]{box-shadow:inset 3px 0 0 var(--lvz-accent);padding-left:var(--lvz-space-3)}
+.ct-chevron{flex:none;color:var(--lvz-ink-quiet)}
+.ct-status{font-weight:var(--lvz-weight-strong);color:var(--lvz-ink)}
+.ct-status[data-tone="danger"]{color:var(--lvz-danger)}
+.ct-metric strong{font-size:var(--lvz-text-lg);font-weight:var(--lvz-weight-strong)}
+.ct-more{margin-top:var(--lvz-space-4)}
+
+/* Record pane */
+.ct-back{margin:var(--lvz-space-4) 0 0 calc(-1 * var(--lvz-space-2))}
+.ct-record-title{margin-top:var(--lvz-space-3);overflow-wrap:anywhere}
+.ct-record-title:focus,.ct-form-title:focus{outline:none}
+.ct-record-meta{margin:0;color:var(--lvz-ink-quiet);font-size:var(--lvz-text-sm)}
+.ct-timed{align-items:flex-start}
+.ct-when{display:flex;flex-direction:column;flex:none;width:64px;font-weight:var(--lvz-weight-strong)}
+.ct-when small{font-size:var(--lvz-text-xs);font-weight:var(--lvz-weight-regular);color:var(--lvz-ink-quiet)}
+.ct-note{white-space:pre-wrap;overflow-wrap:anywhere}
+.ct-next{margin-bottom:var(--lvz-space-3)}
+.ct-next .ui-row{border-bottom:0}
+.ct-actions{display:flex;flex-wrap:wrap;gap:var(--lvz-space-2);margin-top:var(--lvz-space-3)}
+.ct-inline{margin:var(--lvz-space-2) 0 0 calc(-1 * var(--lvz-space-2))}
+.ct-danger{color:var(--lvz-danger);border-color:var(--lvz-danger)}
+.ct-danger:hover{background:var(--lvz-danger-soft)}
+.ct-pane-empty{display:none}
+
+/* Form */
+.ct-form{margin-top:var(--lvz-space-6)}
+.ct-form-title{margin:0 0 var(--lvz-space-4);font-size:var(--lvz-text-xl);font-weight:var(--lvz-weight-strong)}
+.ct-form .ui-hint{margin:calc(-1 * var(--lvz-space-2)) 0 var(--lvz-space-4)}
+.ct-textarea{min-height:120px;resize:vertical}
+
+/* Apps sheet */
+.ct-sheet-head{display:flex;align-items:center;justify-content:space-between;gap:var(--lvz-space-3);margin-bottom:var(--lvz-space-2)}
+.ct-sheet-head h2{margin:0;font-size:var(--lvz-text-xl);font-weight:var(--lvz-weight-strong)}
+.ct-close{min-width:var(--lvz-tap);padding:0}
+
+/* Phone: one pane at a time. The record replaces the list until "Back to contacts". */
+@media (max-width:899px){
+ .ct-intro[data-pane="open"] :is(.ui-kicker,.ui-lede){display:none}
+ .ct-layout[data-pane="open"] .ct-list-pane{display:none}
+ .ct-layout[data-pane="closed"] .ct-record-pane{display:none}
+ .ct-list-head .ui-button{min-height:var(--lvz-tap)}
+ .ct-actions .ui-button{flex:1 1 auto}
+}
+@media (max-width:359px){
+ .ct-filters{flex-direction:column}
+ .ct-filters select{max-width:none;width:100%}
+}
+
+/* Desktop: the list stays on the left and the open record or form sits beside it. */
+@media (min-width:900px){
+ .ct-layout{display:grid;grid-template-columns:minmax(320px,400px) minmax(0,1fr);gap:var(--lvz-space-12);align-items:start}
+ .ct-record-pane{position:sticky;top:calc(var(--lvz-header-height) + var(--lvz-space-4));max-height:calc(100dvh - var(--lvz-header-height) - var(--lvz-space-8));overflow-y:auto;padding:0 var(--lvz-space-2) var(--lvz-space-8);border-left:1px solid var(--lvz-line);padding-left:var(--lvz-space-8)}
+ .ct-back{display:none}
+ .ct-pane-empty{display:block;padding-top:var(--lvz-space-12)}
+ .ct-record-title{margin-top:var(--lvz-space-5)}
+}
+
+/* Privacy: the private workspace is never printed. */
+@media print{
+ .ct-page{display:none!important}
+ body::after{content:'Printing Contacts is turned off. No contact data is exported.';font:var(--lvz-text-md) var(--lvz-font-sans)}
+}

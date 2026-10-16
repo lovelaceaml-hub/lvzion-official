@@ -1,5 +1,5 @@
 import test from 'node:test';import assert from 'node:assert/strict';
-import {parseDisplaySlides,parseDisplaySnapshot,activeDisplaySlides,churchTimeToUtc,churchLocal} from '../lib/continuous-display/live-contract.ts';
+import {parseDisplaySlides,parseDisplaySnapshot,activeDisplaySlides,churchTimeToUtc,churchLocal,offsetForChurchTime} from '../lib/continuous-display/live-contract.ts';
 const slide={id:'welcome',kind:'announcement',style:'editorial',title:'Welcome',body:'Approved example text',duration:12} as const;
 test('display live: basic anonymous-free text slide validates',()=>assert.equal(parseDisplaySlides([slide]).length,1));
 test('display live: unknown private records and HTML-bearing keys never pass',()=>assert.throws(()=>parseDisplaySlides([{...slide,privatePrayer:'x'}])));
@@ -13,3 +13,4 @@ test('display live: DST fallback ambiguity resolved with explicit offset',()=>{c
 test('display live: Pacific midnight unaffected by UTC date',()=>assert.equal(churchLocal('2026-10-15T06:59:00Z'),'2026-10-14T23:59'));
 test('display live: screen projection cannot add private fields',()=>assert.throws(()=>parseDisplaySnapshot({paired:true,screen:'TV',version:1,serverTime:'2026-10-14T12:00:00.000Z',leaseUntil:'2026-10-14T12:00:30.000Z',slides:[{...slide,memberId:'private'}]})));
 test('display live: snapshot must have bounded verification lease',()=>assert.throws(()=>parseDisplaySnapshot({paired:true,screen:'TV',version:1,serverTime:'2026-10-14T12:00:00.000Z',leaseUntil:'2026-10-14T12:12:30.000Z',slides:[slide]})));
+test('display live: daylight offset detected for times with seconds',()=>{assert.equal(offsetForChurchTime('2026-10-14T18:44:37.512Z'),'-07:00');assert.equal(offsetForChurchTime('2026-12-14T18:44:37.512Z'),'-08:00');assert.equal(offsetForChurchTime(churchTimeToUtc('2026-11-01T01:30','-08:00')),'-08:00');assert.equal(offsetForChurchTime(churchTimeToUtc('2026-11-01T01:30','-07:00')),'-07:00');});

@@ -5,7 +5,7 @@ export function createPairCode():string{
  const bytes=randomBytes(12);
  return Array.from(bytes,b=>alphabet[b%alphabet.length]).join('');
 }
-export function formatPairCode(value:string){return value.match(/.{1,4}/g)?.join('–')??value;}
+export function formatPairCode(value:string){return value.match(/.{1,4}/g)?.join('-')??value;}
 export function normalizePairCode(value:unknown):string|null{
  if(typeof value!=='string')return null;
  const code=value.toUpperCase().replace(/[\s–-]/g,'');
