@@ -1,27 +1,37 @@
 # Release controls
 
-Anthony authorized actual app setup at https://lvz.app on 2026-10-14. No new previews are authorized. Use the full replacement release path after the tests in AGENTS.md pass. The earlier development-only gates are historical and superseded for this main app setup. External security review was explicitly waived.
+The actual application is https://lvz.app. Use only Supabase project `otecqlkqirncotytbfns` and Vercel project `lvzion-official` in team `lvzion`. No unrequested previews, automatic Git publications, purchases or unrelated-project changes are authorized. External security review was previously waived by Anthony; this does not waive application tests or access controls.
 
-Keep email confirmation, own-record Unassigned privacy, independent leader placement, exact production configuration and bot/rate checks enabled. Verify sender delivery before opening public signup. The first owner confirms the privately designated email and chooses their own password. No fabricated placement or real roster import is authorized.
+## Self-contained application
 
-Keep production-only secrets in provider stores and personal integration credentials in Keychain. Original LV Zion apps and unrelated draft modules remain out of scope. Physical-device testing is still a useful follow-up and is not claimed complete.
+The October 16, 2026 owner correction is authoritative. All modules use their own deliberately created records, schedules and configuration. Empty calendars are valid. Only explicitly approved requirements govern implementation. A reference design does not authorize copying data, recurring schedules or external operational dependencies.
 
-Use the [handoff](HANDOFF.md) for current deployed source and module-specific gates, the [migration ledger](HOSTED-MIGRATION-LEDGER.json) before schema work, and [actual setup receipts](ACTUAL-APP-SETUP.md) for historical validation. A module tile, applied schema or open PR is not a completed rollout. Keep Study Room bookings closed until approved cutover, Contacts private, Display unpublished/unpaired until reviewed, and Morning Prayer member/join access gated. Documentation-only commits require link/JSON/diff/privacy checks, not a production deployment. Historical prototype fallbacks must not be promoted as a routine rollback for current modules.
+Read `AGENTS.md`, the [current handoff](HANDOFF.md), the [fresh-start release record](FRESH-START-2026-10-16.md) and the [hosted schema ledger](HOSTED-MIGRATION-LEDGER.json). Earlier milestone receipts document past execution, not current prerequisites. Do not blindly replay applied schema changes.
 
-## Study Room Reservation: independent booking-activation gate
+## Verification and privacy
 
-The **real Study Room module** and R4 owner-management controls are already published at [lvz.app/modules/study-rooms](https://lvz.app/modules/study-rooms); that release is **not** permission to open bookings. As of the October 14 production check, the module had exactly one explicit owner-manager grant, and the Supabase row `app_private.study_booking_activation.bookings_open` was **false**, with zero new bookings.
+Run the documented type, application, disposable-database and relevant browser checks before release. Verify the exact production source and aliases after deployment. Distinguish synthetic tests from genuine authenticated hosted transactions and physical-device acceptance. Documentation-only updates need accurate links, JSON and privacy checks, not a production redeployment.
 
-Keep the original [lvrooms.web.app](https://lvrooms.web.app) Firebase scheduler authoritative until its active/future reservation export is complete and verified, its **server-side** booking and administrator restore writes are demonstrably frozen, the records/slots are reconciled without inventing member identities, and genuine hosted signed-in member/manager booking, revocation, physical-device and backup/restore tests pass. Only a separate recorded scheduling-owner authorization may permit gate activation and explicitly scoped viewer/manager grants. Never allow overlapping independent writers.
+Keep email confirmation, signup abuse protections, Unassigned own-record privacy, independent leader placement and exact production configuration enabled. Preserve user-selected passwords and confirmed-name handling. Do not invent placements or import a real roster. Credentials remain in provider stores or personal Keychain; never Git, screenshots, logs or exports.
 
-For operational procedures and stop/rollback criteria, see [Study Room cutover runbook](study-rooms/CUTOVER-RUNBOOK.md); [verified R4 release evidence](STUDY-ROOM-R4-LIVE.md) distinguishes shipped code from unavailable booking access.
+## Study Rooms
 
-## Contacts: owner-only confidentiality boundary
+Booking is enabled for the existing authorized audience after the October 16 correction. Weekly and special-date calendars are empty; managers can deliberately configure restrictions, including none. No member or manager grants were added by this release.
 
-The [Contacts owner workspace](contacts/README.md) is active only for its explicitly granted verified account. The Production-only `LVZ_CONTACTS_OWNER_PILOT` switch, current authenticated member/session, module grant, forced private-table RLS, contact ownership, do-not-contact restrictions and audit/idempotency enforcement must remain in effect. An organizational or technical leadership role does **not** confer contact access.
+An application-local pause may stop new reservations and holds for maintenance while allowing supported cancellation and early release. Configuration changes retain idempotency, optimistic versions, overlap checks, auditing and privacy. Never displace active reservations silently. Do not reinstate the unapproved installation defaults. See [Study Rooms operations](study-rooms/README.md).
 
-Before enabling sharing, reassignment, confidential oversight, full worklist/search, export or outgoing communications, approve and test the exact audience, consent/DNC, field/history visibility and retention policy. A green frontend build does not authorize a wider grant. See [Contacts verification](contacts/VERIFICATION.md) for current evidence and unexecuted owner-session acceptance.
+## Contacts
 
-## Work Mission R5 release boundary
+The workspace remains restricted to its explicitly granted verified owner account. Preserve the production-only owner switch, current session/member checks, module grants, forced private-table RLS, ownership, do-not-contact restrictions, auditing and idempotency. Organization or technical leadership does not confer contact access.
 
-[Completion R5](morning-prayer/COMPLETION-R5.md) and [release receipt](morning-prayer/RELEASE-R5.json) record the verified actual-app source, tests and compatible rollback deployment. Scheduling, grant management and the protected broker are live, while the hosted module remains one-owner-only and empty. No member grants, real schedule, meeting credentials, materials or outbound distribution were seeded. Real owner save/member join and physical-device acceptance remain separate operational checks. Do not replay the installed R4/R5/compatible setup migrations.
+Sharing, reassignment, confidential oversight, exports and outgoing communications require separately approved and tested audiences, consent, field/history visibility and retention. A passing frontend build does not authorize broader grants. [Verification and owner acceptance](contacts/VERIFICATION.md) remain the reference.
+
+## Display and Work Mission
+
+Display content is published only after authorized review, and screens are explicitly paired. Physical TV playback acceptance must be reported separately from browser testing.
+
+Work Mission uses owner-supplied dates, hosts, materials and meeting credentials. Do not seed real occurrences or infer schedules. Member/join permissions and outbound distribution remain explicitly controlled. Preserve installed compatible schema changes and [completion evidence](morning-prayer/COMPLETION-R5.md).
+
+## Recovery
+
+Choose a verified deployment compatible with the current schema and enabled modules. Keep grants and history intact. Do not use additive-schema deletion, data erasure or reinstatement of unapproved defaults as rollback shortcuts. Recheck sign-in, signup and affected authorized routes after promotion or rollback.
