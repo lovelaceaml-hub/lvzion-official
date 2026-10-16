@@ -111,7 +111,7 @@ export default function Reservations({schedule:s,changeDay,submit,refresh,loadDa
    <button type="button" className="sr-topbar-bookings" aria-label="View bookings" onClick={()=>setView('mine')}><CalendarDays size={21}/></button>
   </header>
   <main className="ui-main sr-main">
-   {closed&&<p role="status" className="ui-notice sr-gate" data-tone="warning"><strong>Bookings not open yet.</strong> The original Study Room Scheduler still accepts reservations; this screen is for authorized setup review until the cutover is approved.</p>}
+   {closed&&<p role="status" className="ui-notice sr-gate" data-tone="warning"><strong>Bookings are paused.</strong> Availability and reservations are managed within LV Zion Official.</p>}
    {message&&<p role="status" className="ui-notice sr-success" data-tone="success">{message}</p>}
 
    <div className="sr-layout">
