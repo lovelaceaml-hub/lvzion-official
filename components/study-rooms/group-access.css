@@ -1,0 +1,10 @@
+/* Group leader "Who can book" switches. Shared tokens only. */
+.sr-access-row{border-bottom:1px solid var(--lvz-line)}
+.sr-switch{flex:none;position:relative;width:56px;min-height:var(--lvz-tap);padding:0;border:0;background:none;cursor:pointer}
+.sr-switch span{position:absolute;left:0;right:0;top:50%;height:32px;transform:translateY(-50%);border-radius:var(--lvz-radius-round);background:var(--lvz-line-input);transition:background var(--lvz-duration-fast) var(--lvz-ease)}
+.sr-switch span::after{content:'';position:absolute;top:3px;left:3px;width:26px;height:26px;border-radius:var(--lvz-radius-round);background:var(--lvz-surface);box-shadow:var(--lvz-shadow-pop);transition:transform var(--lvz-duration-fast) var(--lvz-ease)}
+.sr-switch[aria-checked="true"] span{background:var(--lvz-accent)}
+.sr-switch[aria-checked="true"] span::after{transform:translateX(24px)}
+.sr-switch:disabled{cursor:not-allowed;opacity:.55}
+.sr-switch:focus-visible{outline:2px solid var(--lvz-focus);outline-offset:2px;border-radius:var(--lvz-radius-round)}
+@media (prefers-reduced-motion:reduce){.sr-switch span,.sr-switch span::after{transition:none}}

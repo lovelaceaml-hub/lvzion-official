@@ -1,207 +1,239 @@
 {
-  "project_ref": "otecqlkqirncotytbfns",
-  "applied_via": "Supabase MCP apply_migration",
-  "verified_on": "2026-10-14",
-  "verification_mode": "The original six foundation/runtime/owner entries have stored normalized definition comparisons. Later module entries are recorded from connected Supabase list_migrations plus the entry-specific read-only checks, not a complete new semantic audit or definition-hash comparison.",
-  "entries": [
-    {
-      "name": "member_system_foundation",
-      "hosted_version": "20261014051733",
-      "repository_version": "20261014020617",
-      "hosted_statement_count": 1,
-      "hosted_raw_md5": "105feee1655614884706025cec0eadf9",
-      "normalized_characters": 34491,
-      "normalized_md5": "19a7f6018c35e0329c22a5fc7e3031e2",
-      "repository_normalized_match": true
-    },
-    {
-      "name": "member_command_hardening",
-      "hosted_version": "20261014051804",
-      "repository_version": "20261014043055",
-      "hosted_statement_count": 1,
-      "hosted_raw_md5": "3930da87add5d14d5657e207d2f12bed",
-      "normalized_characters": 2858,
-      "normalized_md5": "e4b22adb8e5ecb00a7e467d49531d83b",
-      "repository_normalized_match": true
-    },
-    {
-      "name": "member_onboarding",
-      "hosted_version": "20261014051924",
-      "repository_version": "20261014045521",
-      "hosted_statement_count": 1,
-      "hosted_raw_md5": "3b134fed267a4a8b3fbda14d398aea89",
-      "normalized_characters": 17956,
-      "normalized_md5": "0a24114044ee6cdcad5890a49ad7c33d",
-      "repository_normalized_match": true
-    },
-    {
-      "name": "module_runtime_foundation",
-      "hosted_version": "20261014191416",
-      "repository_version": "20261014074214",
-      "hosted_statement_count": 1,
-      "normalized_characters": 11302,
-      "normalized_md5": "b5408eab5224f3ad3a57f39cc9c91d87",
-      "repository_normalized_match": true,
-      "normalization": "Whitespace removed only; this hosted batch preserves comments and transaction wrappers."
-    },
-    {
-      "name": "self_service_unassigned_enrollment",
-      "hosted_version": "20261014191423",
-      "repository_version": "20261014155148",
-      "hosted_statement_count": 1,
-      "normalized_characters": 13917,
-      "normalized_md5": "a91cf1555f4d28fbdb5d2dcedeb50c77",
-      "repository_normalized_match": true,
-      "normalization": "Whitespace removed only; this hosted batch preserves comments and transaction wrappers."
-    },
-    {
-      "name": "production_owner_setup",
-      "hosted_version": "20261014193244",
-      "repository_version": "20261014190128",
-      "hosted_statement_count": 1,
-      "normalized_characters": 5954,
-      "normalized_md5": "faa797d5da869aebe92a0509815efe01",
-      "repository_normalized_match": true,
-      "normalization": "Whitespace removed only; this hosted batch preserves comments and transaction wrappers."
-    },
-    {
-      "name": "study_rooms_core_live",
-      "hosted_version": "20261014221429",
-      "repository_version": "20261014221015",
-      "applied_via": "Supabase MCP apply_migration",
-      "status": "applied",
-      "verification": "migration success, hosted list_migrations, RLS table list; no canonical digest attestation for this entry"
-    },
-    {
-      "name": "study_rooms_changes_live",
-      "hosted_version": "20261014221435",
-      "repository_version": "20261014221018",
-      "applied_via": "Supabase MCP apply_migration",
-      "status": "applied",
-      "verification": "migration success, hosted list_migrations, RLS table list; no canonical digest attestation for this entry"
-    },
-    {
-      "name": "study_rooms_bundles_live",
-      "hosted_version": "20261014221437",
-      "repository_version": "20261014221021",
-      "applied_via": "Supabase MCP apply_migration",
-      "status": "applied",
-      "verification": "migration success, hosted list_migrations, RLS table list; no canonical digest attestation for this entry"
-    },
-    {
-      "name": "study_rooms_owner_review_gate",
-      "hosted_version": "20261014222303",
-      "repository_version": "20261014221636",
-      "applied_via": "Supabase MCP apply_migration",
-      "status": "applied",
-      "verification": "migration success, hosted list_migrations, RLS table list; no canonical digest attestation for this entry"
-    },
-    {
-      "name": "contacts_private_owner_pilot_v1",
-      "hosted_version": "20261014224708",
-      "repository_version": "20261014224708",
-      "applied_via": "Supabase MCP apply_migration",
-      "status": "applied",
-      "verification": "migration accepted; hosted list_migrations and read-only checks verified six RLS/FORCE RLS tables, zero anonymous function grants, zero direct authenticated reads, one owner grant, zero real contacts. Dedicated PGlite tests exercise identity-aware setup. No live-contact fixture inserted.",
-      "source": "supabase/migrations/20261014224708_contacts_private_owner_pilot_v1.sql"
-    },
-    {
-      "name": "continuous_display_live_schema",
-      "hosted_version": "20261014224840",
-      "repository_version": "20261014223341",
-      "status": "applied",
-      "verified_on": "2026-10-14",
-      "verification": "Read-only hosted migration metadata confirms version and name; no definition digest or new migration execution claimed by documentation audit.",
-      "source": "supabase/migrations/20261014223341_continuous_display_live_schema.sql",
-      "applied_via": "Supabase MCP apply_migration"
-    },
-    {
-      "name": "study_room_policy_operations",
-      "hosted_version": "20261014225514",
-      "repository_version": "20261014224006",
-      "applied_via": "Supabase MCP apply_migration",
-      "status": "applied",
-      "verified_on": "2026-10-14",
-      "verification": "Hosted version, closed gate, original weekly rules, RLS/anonymous-execute verified."
-    },
-    {
-      "name": "morning_prayer_live_core",
-      "hosted_version": "20261014225825",
-      "repository_version": "20261014224129",
-      "status": "applied",
-      "verified_on": "2026-10-14",
-      "verification": "Read-only hosted migration metadata confirms version and name; no definition digest or new migration execution claimed by documentation audit.",
-      "source": "supabase/migrations/20261014224129_morning_prayer_live_core.sql",
-      "applied_via": "Supabase MCP apply_migration"
-    },
-    {
-      "name": "member_signup_names",
-      "hosted_version": "20261014225857",
-      "repository_version": "20261014223500",
-      "applied_via": "Supabase MCP apply_migration",
-      "status": "applied",
-      "verification": "Additive RLS-enabled private signup-names table; three-argument enrollment RPC granted only to authenticated; anonymous/direct client table access denied; existing member and enrollment counts unchanged. Production Next build and disposable SQL checks completed."
-    },
-    {
-      "name": "continuous_display_operations",
-      "hosted_version": "20261014232519",
-      "repository_version": "20261014230147",
-      "status": "applied",
-      "verified_on": "2026-10-14",
-      "verification": "Read-only hosted migration metadata confirms version and name; no definition digest or new migration execution claimed by documentation audit.",
-      "source": "supabase/migrations/20261014230147_continuous_display_operations.sql",
-      "repository_state": "PR #32 merged during audit at de5dcdede5fc740873fddfa36467d9d47f318fd6. Repository source now exists on main. Refreshed Vercel alias lookup verified READY production from that SHA; no new runtime or hardware acceptance is claimed.",
-      "source_pr": "https://github.com/lovelaceaml-hub/lvzion-official/pull/32",
-      "applied_via": "Supabase MCP apply_migration"
-    },
-    {
-      "name": "morning_prayer_operations_r4",
-      "hosted_version": "20261014235216",
-      "repository_version": "20261014231657",
-      "status": "applied",
-      "verified_on": "2026-10-14",
-      "source": "supabase/migrations/20261014231657_morning_prayer_operations_r4.sql",
-      "applied_via": "Supabase MCP apply_migration",
-      "verification": "Hosted version/name checked. R5 function readback and 15 RLS tables, zero anonymous RPC execution, denied direct member-table access, one owner grant, zero occurrences/publications/meeting references verified. No semantic digest attestation claimed."
-    },
-    {
-      "name": "continuous_display_motion_r4",
-      "hosted_version": "20261015005420",
-      "repository_version": "20261015004620",
-      "status": "applied",
-      "verified_on": "2026-10-14",
-      "source": "supabase/migrations/20261015004620_continuous_display_motion_r4.sql",
-      "applied_via": "Supabase MCP apply_migration",
-      "verification": "Concurrent Display migration metadata confirmed; source preserved from PR #39, no replay."
-    },
-    {
-      "name": "morning_prayer_completion_r5",
-      "hosted_version": "20261015010132",
-      "repository_version": "20261015004856",
-      "status": "applied",
-      "verified_on": "2026-10-14",
-      "source": "supabase/migrations/20261015004856_morning_prayer_completion_r5.sql",
-      "applied_via": "Supabase MCP apply_migration",
-      "verification": "Hosted version/name checked. R5 function readback and 15 RLS tables, zero anonymous RPC execution, denied direct member-table access, one owner grant, zero occurrences/publications/meeting references verified. No semantic digest attestation claimed."
-    },
-    {
-      "name": "morning_prayer_setup_lock_guard",
-      "hosted_version": "20261015010537",
-      "repository_version": "20261015010421",
-      "status": "applied",
-      "source": "supabase/migrations/20261015010421_morning_prayer_setup_lock_guard.sql",
-      "applied_via": "Supabase MCP apply_migration",
-      "verified_on": "2026-10-14",
-      "verification": "Applied after targeted/application/database checks and four native race tests, preserves compatible setup callers and existing private function ACL. No real records seeded."
-    }
-  ],
-  "normalization": {
-    "repository": "Strip block and line comments, remove whitespace, remove outer begin; and commit; only.",
-    "hosted": "Remove whitespace from each stored statement; these stored statements already omit comments and outer transaction wrappers.",
-    "purpose": "Comparison of known migration definitions, not cryptographic attestation or a full semantic/security review."
+ "project_ref": "otecqlkqirncotytbfns",
+ "applied_via": "Supabase MCP apply_migration",
+ "verified_on": "2026-10-14",
+ "fresh_start_verified_on": "2026-10-16",
+ "verification_mode": "The original six foundation/runtime/owner entries have stored normalized definition comparisons. Later entries retain their entry-specific verification scope. The October 16 correction was tested, applied and read back; this update is not a complete re-hash of all hosted migrations.",
+ "entries": [
+  {
+   "name": "member_system_foundation",
+   "hosted_version": "20261014051733",
+   "repository_version": "20261014020617",
+   "hosted_statement_count": 1,
+   "hosted_raw_md5": "105feee1655614884706025cec0eadf9",
+   "normalized_characters": 34491,
+   "normalized_md5": "19a7f6018c35e0329c22a5fc7e3031e2",
+   "repository_normalized_match": true
   },
-  "unapplied_repository_migrations": [],
-  "warning": "Hosted versions differ from repository filenames. Never replay applied migrations or use blind db push. R4 and R5 Morning Prayer and concurrent Display motion are applied; check current state before release. Study Room bookings remain closed.",
-  "metadata_reconciled_at": "2026-10-15T01:02:00Z",
-  "metadata_reconciliation": "20 applied hosted versions/names observed; R5 and compatible setup guard applied in this task."
+  {
+   "name": "member_command_hardening",
+   "hosted_version": "20261014051804",
+   "repository_version": "20261014043055",
+   "hosted_statement_count": 1,
+   "hosted_raw_md5": "3930da87add5d14d5657e207d2f12bed",
+   "normalized_characters": 2858,
+   "normalized_md5": "e4b22adb8e5ecb00a7e467d49531d83b",
+   "repository_normalized_match": true
+  },
+  {
+   "name": "member_onboarding",
+   "hosted_version": "20261014051924",
+   "repository_version": "20261014045521",
+   "hosted_statement_count": 1,
+   "hosted_raw_md5": "3b134fed267a4a8b3fbda14d398aea89",
+   "normalized_characters": 17956,
+   "normalized_md5": "0a24114044ee6cdcad5890a49ad7c33d",
+   "repository_normalized_match": true
+  },
+  {
+   "name": "module_runtime_foundation",
+   "hosted_version": "20261014191416",
+   "repository_version": "20261014074214",
+   "hosted_statement_count": 1,
+   "normalized_characters": 11302,
+   "normalized_md5": "b5408eab5224f3ad3a57f39cc9c91d87",
+   "repository_normalized_match": true,
+   "normalization": "Whitespace removed only; this hosted batch preserves comments and transaction wrappers."
+  },
+  {
+   "name": "self_service_unassigned_enrollment",
+   "hosted_version": "20261014191423",
+   "repository_version": "20261014155148",
+   "hosted_statement_count": 1,
+   "normalized_characters": 13917,
+   "normalized_md5": "a91cf1555f4d28fbdb5d2dcedeb50c77",
+   "repository_normalized_match": true,
+   "normalization": "Whitespace removed only; this hosted batch preserves comments and transaction wrappers."
+  },
+  {
+   "name": "production_owner_setup",
+   "hosted_version": "20261014193244",
+   "repository_version": "20261014190128",
+   "hosted_statement_count": 1,
+   "normalized_characters": 5954,
+   "normalized_md5": "faa797d5da869aebe92a0509815efe01",
+   "repository_normalized_match": true,
+   "normalization": "Whitespace removed only; this hosted batch preserves comments and transaction wrappers."
+  },
+  {
+   "name": "study_rooms_core_live",
+   "hosted_version": "20261014221429",
+   "repository_version": "20261014221015",
+   "applied_via": "Supabase MCP apply_migration",
+   "status": "applied",
+   "verification": "migration success, hosted list_migrations, RLS table list; no canonical digest attestation for this entry"
+  },
+  {
+   "name": "study_rooms_changes_live",
+   "hosted_version": "20261014221435",
+   "repository_version": "20261014221018",
+   "applied_via": "Supabase MCP apply_migration",
+   "status": "applied",
+   "verification": "migration success, hosted list_migrations, RLS table list; no canonical digest attestation for this entry"
+  },
+  {
+   "name": "study_rooms_bundles_live",
+   "hosted_version": "20261014221437",
+   "repository_version": "20261014221021",
+   "applied_via": "Supabase MCP apply_migration",
+   "status": "applied",
+   "verification": "migration success, hosted list_migrations, RLS table list; no canonical digest attestation for this entry"
+  },
+  {
+   "name": "study_rooms_owner_review_gate",
+   "hosted_version": "20261014222303",
+   "repository_version": "20261014221636",
+   "applied_via": "Supabase MCP apply_migration",
+   "status": "applied",
+   "verification": "migration success, hosted list_migrations, RLS table list; no canonical digest attestation for this entry",
+   "superseded_operating_state_by": "20261016173939_study_rooms_fresh_calendar"
+  },
+  {
+   "name": "contacts_private_owner_pilot_v1",
+   "hosted_version": "20261014224708",
+   "repository_version": "20261014224708",
+   "applied_via": "Supabase MCP apply_migration",
+   "status": "applied",
+   "verification": "migration accepted; hosted list_migrations and read-only checks verified six RLS/FORCE RLS tables, zero anonymous function grants, zero direct authenticated reads, one owner grant, zero real contacts. Dedicated PGlite tests exercise identity-aware setup. No live-contact fixture inserted.",
+   "source": "supabase/migrations/20261014224708_contacts_private_owner_pilot_v1.sql"
+  },
+  {
+   "name": "continuous_display_live_schema",
+   "hosted_version": "20261014224840",
+   "repository_version": "20261014223341",
+   "status": "applied",
+   "verified_on": "2026-10-14",
+   "verification": "Read-only hosted migration metadata confirms version and name; no definition digest or new migration execution claimed by documentation audit.",
+   "source": "supabase/migrations/20261014223341_continuous_display_live_schema.sql",
+   "applied_via": "Supabase MCP apply_migration"
+  },
+  {
+   "name": "study_room_policy_operations",
+   "hosted_version": "20261014225514",
+   "repository_version": "20261014224006",
+   "applied_via": "Supabase MCP apply_migration",
+   "status": "applied",
+   "verified_on": "2026-10-14",
+   "verification": "Installation snapshot verified hosted version, initial gate/calendar state and RLS/anonymous-execute denials. Calendar and gate state were subsequently corrected by 20261016173939; the installation snapshot is not current scheduling policy."
+  },
+  {
+   "name": "morning_prayer_live_core",
+   "hosted_version": "20261014225825",
+   "repository_version": "20261014224129",
+   "status": "applied",
+   "verified_on": "2026-10-14",
+   "verification": "Read-only hosted migration metadata confirms version and name; no definition digest or new migration execution claimed by documentation audit.",
+   "source": "supabase/migrations/20261014224129_morning_prayer_live_core.sql",
+   "applied_via": "Supabase MCP apply_migration"
+  },
+  {
+   "name": "member_signup_names",
+   "hosted_version": "20261014225857",
+   "repository_version": "20261014223500",
+   "applied_via": "Supabase MCP apply_migration",
+   "status": "applied",
+   "verification": "Additive RLS-enabled private signup-names table; three-argument enrollment RPC granted only to authenticated; anonymous/direct client table access denied; existing member and enrollment counts unchanged. Production Next build and disposable SQL checks completed."
+  },
+  {
+   "name": "continuous_display_operations",
+   "hosted_version": "20261014232519",
+   "repository_version": "20261014230147",
+   "status": "applied",
+   "verified_on": "2026-10-14",
+   "verification": "Read-only hosted migration metadata confirms version and name; no definition digest or new migration execution claimed by documentation audit.",
+   "source": "supabase/migrations/20261014230147_continuous_display_operations.sql",
+   "repository_state": "PR #32 merged during audit at de5dcdede5fc740873fddfa36467d9d47f318fd6. Repository source now exists on main. Refreshed Vercel alias lookup verified READY production from that SHA; no new runtime or hardware acceptance is claimed.",
+   "source_pr": "https://github.com/lovelaceaml-hub/lvzion-official/pull/32",
+   "applied_via": "Supabase MCP apply_migration"
+  },
+  {
+   "name": "morning_prayer_operations_r4",
+   "hosted_version": "20261014235216",
+   "repository_version": "20261014231657",
+   "status": "applied",
+   "verified_on": "2026-10-14",
+   "source": "supabase/migrations/20261014231657_morning_prayer_operations_r4.sql",
+   "applied_via": "Supabase MCP apply_migration",
+   "verification": "Hosted version/name checked. R5 function readback and 15 RLS tables, zero anonymous RPC execution, denied direct member-table access, one owner grant, zero occurrences/publications/meeting references verified. No semantic digest attestation claimed."
+  },
+  {
+   "name": "continuous_display_motion_r4",
+   "hosted_version": "20261015005420",
+   "repository_version": "20261015004620",
+   "status": "applied",
+   "verified_on": "2026-10-14",
+   "source": "supabase/migrations/20261015004620_continuous_display_motion_r4.sql",
+   "applied_via": "Supabase MCP apply_migration",
+   "verification": "Concurrent Display migration metadata confirmed; source preserved from PR #39, no replay."
+  },
+  {
+   "name": "morning_prayer_completion_r5",
+   "hosted_version": "20261015010132",
+   "repository_version": "20261015004856",
+   "status": "applied",
+   "verified_on": "2026-10-14",
+   "source": "supabase/migrations/20261015004856_morning_prayer_completion_r5.sql",
+   "applied_via": "Supabase MCP apply_migration",
+   "verification": "Hosted version/name checked. R5 function readback and 15 RLS tables, zero anonymous RPC execution, denied direct member-table access, one owner grant, zero occurrences/publications/meeting references verified. No semantic digest attestation claimed."
+  },
+  {
+   "name": "morning_prayer_setup_lock_guard",
+   "hosted_version": "20261015010537",
+   "repository_version": "20261015010421",
+   "status": "applied",
+   "source": "supabase/migrations/20261015010421_morning_prayer_setup_lock_guard.sql",
+   "applied_via": "Supabase MCP apply_migration",
+   "verified_on": "2026-10-14",
+   "verification": "Applied after targeted/application/database checks and four native race tests, preserves compatible setup callers and existing private function ACL. No real records seeded."
+  },
+  {
+   "name": "study_rooms_fresh_calendar",
+   "hosted_version": "20261016173939",
+   "repository_version": "20261016180000",
+   "source": "supabase/migrations/20261016180000_study_rooms_fresh_calendar.sql",
+   "status": "applied",
+   "verified_on": "2026-10-16",
+   "applied_via": "Supabase MCP apply_migration",
+   "verification": "Complete production build passed 382 tests and 198 additional PostgreSQL permission assertions before application. Guarded cleanup removed the exact four never-edited calendar defaults. Hosted readback: weekly=[], specialDays=[], version=2, bookingsOpen=true, reservations=0, one existing Study Room manager grant, one correction audit event. Anonymous operations/command function execution remains denied. No new identity, reservation or grant created. No whole-ledger digest comparison claimed."
+  },
+  {
+   "name": "study_rooms_leader_access",
+   "hosted_version": "20261016200000",
+   "repository_version": "20261016200000",
+   "source": "supabase/migrations/20261016200000_study_rooms_leader_access.sql",
+   "status": "applied",
+   "verified_on": "2026-10-16",
+   "applied_via": "Supabase CLI db query --linked (Management API), then schema_migrations row recorded",
+   "verification": "Before applying, live module_allowed and member_module_home definitions were byte-identical (md5) to the repository versions. Readback: study_group_access present, module_allowed includes study_leader_access, anon cannot execute the wrapper, authenticated can, the internal helper is not executable by authenticated."
+  }
+ ],
+ "normalization": {
+  "repository": "Strip block and line comments, remove whitespace, remove outer begin; and commit; only.",
+  "hosted": "Remove whitespace from each stored statement; these stored statements already omit comments and outer transaction wrappers.",
+  "purpose": "Comparison of known migration definitions, not cryptographic attestation or a full semantic/security review."
+ },
+ "unapplied_repository_migrations": [],
+ "warning": "Hosted versions differ from repository filenames. Never replay applied migrations or use blind db push. Re-read current hosted metadata before release, including concurrent module work. The fresh calendar correction is applied: Study Room booking is enabled for existing grants and weekly restrictions are empty. Do not reinstate superseded defaults.",
+ "metadata_reconciled_at": "2026-10-15T01:02:00Z",
+ "metadata_reconciliation": "Historical full reconciliation observed 20 applied versions. October 16 adds the verified fresh-calendar mapping; it is not a new exhaustive reconciliation of unrelated concurrent module migrations.",
+ "latest_correction_record": "FRESH-START-2026-10-16.md",
+ "owner_data_steps": [
+  {
+   "name": "study_rooms_service_times",
+   "source": "supabase/owner-data/20261016_study_rooms_service_times.sql",
+   "applied_on": "2026-10-16",
+   "approved_by": "Anthony (owner), 2026-10-16",
+   "verification": "Readback: four weekly restrictions (Tue 19:30-20:30; Sat 10:00-11:00, 14:30-15:30, 19:30-20:30), calendar version 3, one audit event study_rooms.owner_service_times, bookings open unchanged."
+  }
+ ]
 }

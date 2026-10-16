@@ -27,6 +27,7 @@ const vegasTime=()=>new Date().toLocaleTimeString('en-US',{hour:'numeric',minute
 export default function StudyRooms(){
  const [day,setDay]=useState(''),[data,setData]=useState<Schedule|null>(null),[admin,setAdmin]=useState<AdminData>(),[operations,setOperations]=useState<StudyOperationsData>();
  const [error,setError]=useState(''),[warning,setWarning]=useState(''),[lastRefresh,setLastRefresh]=useState('');
+ const [leadsGroup,setLeadsGroup]=useState(false);
  const sequence=useRef(0),controller=useRef<AbortController|null>(null);
  const access=useRef(createAccessEpoch()).current;
 
@@ -70,6 +71,8 @@ export default function StudyRooms(){
   }
  },[access,cancelReads,clearAccess,clearScreen]);
 
+ // Group leaders get a link to turn booking on for members of their group.
+ useEffect(()=>{fetch('/api/study-rooms/access',{cache:'no-store'}).then(r=>setLeadsGroup(r.ok)).catch(()=>setLeadsGroup(false));},[]);
  useEffect(()=>{setDay(vegasDay());return ()=>{access.invalidate();cancelReads();};},[access,cancelReads]);
  useEffect(()=>{if(!day)return;clearScreen();void load(day);return subscribeStudyRefresh(()=>load(day));},[day,load,clearScreen]);
 
@@ -113,6 +116,7 @@ export default function StudyRooms(){
 
  const status=<>
   {warning&&<p role="status" className="ui-notice" data-tone="warning">{warning}</p>}
+  {leadsGroup&&<p className="sr-group-access"><a className="ui-link" href="/modules/study-rooms/members">Who can book in your group</a></p>}
   <p className="ui-hint sr-freshness">Updated {lastRefresh} Las Vegas time. Refreshes while this screen is open.</p>
  </>;
  return <Reservations status={status} schedule={data} changeDay={setDay} refresh={()=>{void load(day);}} loadDay={loadDay} loadHistory={loadHistory}
