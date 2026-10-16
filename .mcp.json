@@ -1,0 +1,12 @@
+{
+  "mcpServers": {
+    "supabase-lvz": {
+      "type": "http",
+      "url": "https://mcp.supabase.com/mcp?project_ref=otecqlkqirncotytbfns&features=database,docs,debugging,development"
+    },
+    "vercel-lvz": {
+      "type": "http",
+      "url": "https://mcp.vercel.com/lvzion/lvzion-official"
+    }
+  }
+}
