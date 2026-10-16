@@ -37,7 +37,7 @@ export function overlap(a:number,b:number,c:number,d:number):boolean{return a<d&
 /** First whole slot boundary at or after now; early release frees time from here. */
 export function nextSlot(nowMinute:number,step=SLOT_MINUTES):number{return Math.ceil(nowMinute/step)*step;}
 
-/** One booking can occupy one unit of each kind; old single-resource records remain valid. */
+/** One booking can occupy one unit of each kind; single-resource records remain valid. */
 export function bookingResources(b:Booking):string[]{return b.resourceIds??[b.resourceId];}
 export function resourceNames(resources:Resource[],ids:string[],fallback=''):string{return ids.map(id=>resources.find(r=>r.id===id)?.name??fallback).join(' + ');}
 export function purposeLabel(id:Purpose|undefined):string|undefined{return purposes.find(p=>p.id===id)?.label;}
@@ -91,10 +91,9 @@ export function parseBookingCommand(raw:unknown):BookingCommand{
  return p as unknown as BookingCommand;
 }
 
+/** No weekday has implicit restrictions. Live calendars are supplied by the database. */
 export function serviceBlocks(day:string):Block[]{
- const weekday=new Date(dayKey(day)+'T12:00:00Z').getUTCDay();
- if(weekday===6)return [{start:600,end:660,label:'Morning service'},{start:870,end:930,label:'Afternoon service'},{start:1170,end:1230,label:'Evening service'}];
- if(weekday===2)return [{start:1170,end:1230,label:'Evening service'}];
+ dayKey(day);
  return [];
 }
 /** Fictional test fixture for unit and browser tests; never imported by server handlers. */
