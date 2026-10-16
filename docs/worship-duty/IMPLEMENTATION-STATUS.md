@@ -1,4 +1,4 @@
-# Worship Duty — implementation status and feature boundaries
+# Worship Duty: implementation status and feature boundaries
 
 **Snapshot: October 14, 2026.** The production integration is **draft PR #25**. Check GitHub `main`, the PR head, Vercel and Supabase again before acting; concurrent teams continue to change them. This is a documentation update, not new proof of an operational release.
 
@@ -21,8 +21,8 @@ The current production app remains authoritative for login, member IDs, age/grou
 
 ## Duty rules, permissions and privacy
 
-- Eight audited legacy departments, **27 stable duty IDs**. Active assignments are for an exact service, not the entire date. Maintain exact Las Vegas service times.
-- Normal limit: **one duty per member per service**. Built-in exception: exactly one **Thanks or Closing Prayer** plus one actual usher (`usher_door`, `usher_front`, `usher_back`, `usher_1`, `usher_2`). **Opening Prayer never pairs**, Lobby Security is not an usher, and three duties are rejected. Any additional pairs require **separate recorded approval**; never import unknown legacy overrides.
+- Eight departments, **27 stable duty IDs**. Active assignments are for an exact service, not the entire date. Maintain exact Las Vegas service times.
+- Normal limit: **one duty per member per service**. Built-in exception: exactly one **Thanks or Closing Prayer** plus one actual usher (`usher_door`, `usher_front`, `usher_back`, `usher_1`, `usher_2`). **Opening Prayer never pairs**, Lobby Security is not an usher, and three duties are rejected. Any additional pairs require **separate recorded approval**; none are seeded or imported.
 - Member eligibility requires active foundation membership, active department membership, qualification and module access, plus availability. A newly signed-up Unassigned/intake account is **not** a qualified worker by default. The verified owner may administer initial setup via a specific bootstrap-backed grant without fabricating their placement.
 - Organizational, unit, group, technical and department administration are **not interchangeable**. Duty writes require an actual relevant department-management scope **and** explicit Worship manager access. Song editing requires assigned Presider or separate song-editor appointment. Setup authority must be expressly bounded to the verified bootstrap owner or an independently approved later grant.
 - The server resolves identity from the existing verified Supabase Auth session and checks roles, service, department and grant in PostgreSQL. Never trust a browser-supplied `actorId`, `role`, `isAdmin` or selected fictional persona.
@@ -35,12 +35,12 @@ R1/R2 contain member duty cards, exact-service Presider song plans, manual sched
 
 Current user-visible production setup is **not implemented** for service creation, publication, cancellation, qualification, song catalog, manager/access grants or full month operations. SQL-only operations in an unapplied draft migration must not be called 'ready'.
 
-The original `Usual`, `Auto`, `Rotation` and `Random` Fill methods, full recurrence, advanced per-service availability, live song catalog/history, external notifications and calendars remain separate parity work. The R3 fictional open-slot suggestion is **not** any of the historical Fill methods.
+Automatic fill, full recurrence, advanced per-service availability, song history analytics, external notifications and calendars are not implemented and need separately approved requirements. The R3 fictional open-slot suggestion is **not** an automatic fill feature.
 
 ## Historical test provenance
 
 Old development PR #5 reported 198 Node tests, 111 foundation permission assertions, and separate R2/R3 fictional browser runs. These results are **not transferable** to PR #25's live production integration after rebasing on changed member/Study Rooms/Contacts/display code. Use [VERIFICATION-PLAN.md](VERIFICATION-PLAN.md) and record new tests against the exact merged source.
 
-## Rollback and original system
+## Rollback
 
-No migration from or synchronization with `lv-zion-duties.web.app` was carried out. The Firebase app, its authentication, data and Sheets remain operational and unchanged. A code rollback must not delete or rewrite member history. See [production release checklist](PRODUCTION-RELEASE-CHECKLIST.md).
+No data was imported or synchronized from any other source; schedules start empty. A code rollback must not delete or rewrite member history. See [production release checklist](PRODUCTION-RELEASE-CHECKLIST.md).

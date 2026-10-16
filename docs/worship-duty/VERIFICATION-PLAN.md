@@ -1,4 +1,4 @@
-# Worship Duty — verification plan and evidence integrity
+# Worship Duty: verification plan and evidence integrity
 
 ## What has *not* been verified on the live branch
 
@@ -39,7 +39,7 @@ Before real DDL or enabling the module, also validate all of the following with 
 | Regression | Existing signup, organization/placement, Study Rooms, Contacts, display, morning-prayer modules remain functional |
 | Operations | Backup + restore rehearsal, production build/alias verification, rollback target, accessibility and physical-phone review |
 
-The current legacy Firebase system remains operational; do not use real production records as test fixtures, send notifications, create user identities or import rosters without explicit separate authorization.
+Do not use real production records as test fixtures, send notifications, create user identities or import rosters without explicit separate authorization.
 
 ## Evidence discipline
 

@@ -1,6 +1,6 @@
 # Worship Duty production integration
 
-Target: https://lvz.app/modules/worship-duty, within the existing official member application. Original Firebase applications, data and schedules remain untouched.
+Target: https://lvz.app/modules/worship-duty, within the existing official member application. Schedules start empty and come only from records configured in this app.
 
 ## Release status
 
@@ -51,7 +51,7 @@ The local harness creates the verified fictional owner through real Auth and enr
 
 ## Scope limits
 
-No original records are imported. No invitations, Signal messages, external notifications or purchases are sent. Suggestions are explicitly reviewed eligible-member proposals, not claimed legacy Usual, Auto, Rotation or Random parity. Workspace limits are visible (80 services over 90 days, 120 setup services over a year, 200 active personnel and 500 songs). Physical-device and real multi-member operating acceptance remain separate from emulated browser checks.
+No records are imported. No invitations, Signal messages, external notifications or purchases are sent. Suggestions are explicitly reviewed eligible-member proposals, not an automatic fill feature. Workspace limits are visible (80 services over 90 days, 120 setup services over a year, 200 active personnel and 500 songs). Physical-device and real multi-member operating acceptance remain separate from emulated browser checks.
 
 ## Rollback
 
@@ -59,7 +59,7 @@ Retain the previous READY Vercel production deployment. Disable `LVZ_WORSHIP_DUT
 
 ## Build log
 
-- Reconciled initial Worship head c14ea76 with production main f4a888b in isolated branch feature/worship-duty-live, leaving the original checkout untouched.
+- Reconciled initial Worship head c14ea76 with production main f4a888b in isolated branch feature/worship-duty-live, leaving the other checkout untouched.
 - Fixed unsupported UUID aggregation, required service input checks and manager access revocation before hosted application.
 - Added owner setup UI/API, independently scoped personnel grants, manual-only preferences, versioned service availability and song management.
 - Added atomic persisted batch scheduling and draft-publication activity projection with qualification/availability revalidation.
@@ -67,3 +67,4 @@ Retain the previous READY Vercel production deployment. Disable `LVZ_WORSHIP_DUT
 - Concurrent main advanced again during verification. A final reconciliation and rerun are required before release.
 - Phase 1 cleanup (branch claude/refactor-worship-duty-3b2f97, no behavior change): removed the unreachable fictional rehearsal transport, its fixtures and the in-memory scheduling simulation that only its own tests used; the catalog, pairing and applicability rules and their tests remain. Shared field validators, Las Vegas date helpers, duty labels, periods, suggestions and the private JSON reply are now defined once. Unused style rules were removed. SQL, grants and API contracts are unchanged. Verified with npm run build (438 Node tests, 198 PostgreSQL assertions, Worship PGlite suites) and 87 phone browser regressions. The native Worship stack was not rerun because another agent's stack occupies its fixed directory and ports.
 - Phase 2 redesign (same branch): the module screens now follow the locked Day Sheet contract with shared tokens, header, underlined swipe tabs, time-first hairline lists and a desktop side column. Accessible names used by the native browser script are unchanged; permissions, SQL and API contracts are untouched. Evidence and gaps: docs/design/worship-duty/UI-QUALITY-REPORT.md.
+- Fresh-start docs alignment (same branch, docs only): the Worship docs now follow the October 16 boundary in AGENTS.md. References to a separate duty application, its hosting and its spreadsheet, the migration framing and the handover gates that depended on another system were removed; schedules start empty from records configured in this app. Duty rules, permissions, migration status and verification history are unchanged. The fifth repository migration is now listed; the hosted ledger still has no Worship entries.

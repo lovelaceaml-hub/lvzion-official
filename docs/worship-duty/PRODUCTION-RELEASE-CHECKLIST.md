@@ -1,4 +1,4 @@
-# Worship Duty — production release checklist
+# Worship Duty: production release checklist
 
 **Target:** `https://lvz.app/modules/worship-duty` inside the existing authenticated LV Zion Official app. **Current result: NOT RELEASED.** Do not check an item merely because a SQL file or UI component exists.
 
@@ -8,8 +8,8 @@ For current workstreams and evidence, start at [README.md](README.md) and [WORK-
 
 - [ ] Read current `main`, the latest PR #25 head, all unrelated merged modules, `AGENTS.md`, this project's active migration ledger and actual production deployment.
 - [ ] Merge/reconcile current `main` **without** undoing signup, organization, Study Rooms, Contacts, Morning Prayer or Continuous Display features.
-- [ ] Audit every Worship-specific file for dependencies on retired draft branches, preview personas or old Firebase/Sheets/PIN authentication; no alternate member identity.
-- [ ] Confirm no unapproved hosted identity, real roster, imported assignment, third-party messaging, paid provider or old-app write is required.
+- [ ] Audit every Worship-specific file for dependencies on retired draft branches, preview personas, any separate application, external data source or PIN authentication; no alternate member identity.
+- [ ] Confirm no unapproved hosted identity, real roster, imported assignment, third-party messaging or paid provider is required. Services and assignments start empty.
 
 ## B. Complete minimal owner-only operational setup
 
@@ -24,13 +24,13 @@ For current workstreams and evidence, start at [README.md](README.md) and [WORK-
 
 ## C. Database review and safe migration
 
-- [ ] Read four pending migrations in [MIGRATION-STATUS.md](MIGRATION-STATUS.md); fix setup SQL issues found during tests.
+- [ ] Read five pending migrations in [MIGRATION-STATUS.md](MIGRATION-STATUS.md); fix setup SQL issues found during tests.
 - [ ] Confirm existing hosted schema and exact migration versions at time of change (the earlier foundation filenames differ from hosted versions). No blanket `db push`.
-- [ ] Run all four SQL changes successfully on a disposable current-foundation database; test RLS, private function invoker/definer boundaries and direct-access denial.
+- [ ] Run all five SQL changes successfully on a disposable current-foundation database; test RLS, private function invoker/definer boundaries and direct-access denial.
 - [ ] Validate transaction rollback on invalid edits, same transaction lock as account/permission revocation, stale versions and two independent sessions.
 - [ ] Run security advisors. Prefer private RLS + deny direct table access and limited public `SECURITY INVOKER` RPC wrappers. Review role-specific scope and search-path handling.
 - [ ] Establish a backup/restore plan before real schema writes.
-- [ ] Apply only individually verified additive migrations to **Supabase project `otecqlkqirncotytbfns`**, and record actual hosted versions in the root ledger and module evidence. Verify there are no unexpected new accounts, placements or legacy records.
+- [ ] Apply only individually verified additive migrations to **Supabase project `otecqlkqirncotytbfns`**, and record actual hosted versions in the root ledger and module evidence. Verify there are no unexpected new accounts, placements or imported records.
 - [ ] Check exact registered module status, owner grant, song setup grant, all required functions and underlying table RLS after installation.
 
 ## D. Behavioral/security acceptance
@@ -52,13 +52,12 @@ For current workstreams and evidence, start at [README.md](README.md) and [WORK-
 - [ ] Confirm production Vercel environment still uses exact `https://lvz.app` and `otecqlkqirncotytbfns` with existing secrets; only then enable `LVZ_WORSHIP_DUTY_ENABLED=true`.
 - [ ] Perform a **deliberate production build/deploy**, since automatic Git deployments and unsolicited previews are disabled. Use a tested production build; verify the immutable deployment ID before attaching `lvz.app`.
 - [ ] On the actual domain, verify module appears in authorized user's Apps/My Week, owner can complete a real safe setup write and reload persistent state, and an unauthenticated request gets 401/403 or 503 as intended. Do not expose owner records on anonymous pages.
-- [ ] Verify old `lv-zion-duties.web.app` still works independently and the original Firebase records are untouched.
 - [ ] Update docs, PR review/merge state, screenshots and machine-readable evidence with final Git SHA, hosted SQL ledger and verified Vercel deployment. **Only then claim launched.**
 
 ## Scope limits for later phases
 
-Full persistent month planner, source-accurate `Usual/Auto/Rotation/Random` Fill, full member recurring/exception availability, song-history analytics, export/calendar subscriptions and external reminders are **not present as production-proven behavior** in PR #25. Any initial owner-only launch must clearly disclose deferred features rather than claim historical parity.
+Full persistent month planner, automatic fill, full member recurring/exception availability, song-history analytics, export/calendar subscriptions and external reminders are **not present as production-proven behavior** in PR #25. Any initial owner-only launch must clearly disclose deferred features rather than imply they exist.
 
 ## Rollback without data loss
 
-If validation fails **before deployment**, keep Worship disabled, stop migrations and leave production unchanged. If a production release fails **after additive migrations**, disable the **Worship-only** runtime flag/registration as appropriate and restore the last verified production deployment. Keep migrated Worship tables, audit, existing member history and all unrelated modules; no destructive schema rollback. The legacy Firebase app remains the operational backup until an explicitly approved future cutover.
+If validation fails **before deployment**, keep Worship disabled, stop migrations and leave production unchanged. If a production release fails **after additive migrations**, disable the **Worship-only** runtime flag/registration as appropriate and restore the last verified production deployment. Keep migrated Worship tables, audit, existing member history and all unrelated modules; no destructive schema rollback.

@@ -1,14 +1,14 @@
-# Worship Duty — independent data model
+# Worship Duty: data model
 
 > **Source migration review, not an installed schema.** This R1 model now forms the base of the real [draft integration PR #25](https://github.com/lovelaceaml-hub/lvzion-official/pull/25), which also contains R2 query, proposed owner-registration and unfinished owner-setup migrations. The real LV Zion **member + module runtime is already live**, but there were **zero Worship tables/RPCs** in hosted Supabase at the October 14, 2026 inspection. Read [MIGRATION-STATUS.md](MIGRATION-STATUS.md) for current intended order and [README.md](README.md) for launch status. Historical lines below describe R1 only unless qualified.
 
-Status: **unapplied review migration**. Created with `supabase migration new worship_duty_review` in a disposable workspace; filename `20261014103007_worship_duty_review.sql`. The hosted project `otecqlkqirncotytbfns` was read only for its migration ledger. No hosted migration, branch database, test Auth account, production member or original-app data was created by this work.
+Status: **unapplied review migration**. Created with `supabase migration new worship_duty_review` in a disposable workspace; filename `20261014103007_worship_duty_review.sql`. The hosted project `otecqlkqirncotytbfns` was read only for its migration ledger. No hosted migration, branch database, test Auth account or production member was created by this work.
 
 ## Dependencies and isolation
 
 Requires the **already deployed** member-foundation migrations and generic module-runtime schema on live `main`. Its original R1 draft was stacked on member foundation PR #2 (now superseded by live integration). The Worship module itself remains unapplied; do not depend on or overwrite Study Rooms/Contacts/other modules. Reconcile local filenames with actual hosted versions; never blindly push repository SQL.
 
-New records use `public.members` UUIDs and existing primary placements and department memberships. There is no duplicate login system, parallel member directory, Firebase dependency, legacy PIN/name identity, original database connection, Sheet connector or imported roster. Only duty/department labels are seeded. The department mappings initially have null IDs and must be mapped by an explicitly authorized operator. No module registry approval, module grants, song editors or custom conflict pairs are seeded.
+New records use `public.members` UUIDs and existing primary placements and department memberships. There is no duplicate login system, parallel member directory, external data source, PIN/name identity or imported roster. Only duty/department labels are seeded. The department mappings initially have null IDs and must be mapped by an explicitly authorized operator. No module registry approval, module grants, song editors or custom conflict pairs are seeded.
 
 ## Relations
 
@@ -36,7 +36,7 @@ Each call resolves the current member through the existing verified Auth user + 
 
 Workspace output is a bounded, whitelisted projection. Ordinary members see own/group names only; department managers see the names relevant to their authorized duty departments. Hidden identities return neither UUID nor name. Foreign availability details are hidden. Song plans and change requests have independent access checks.
 
-Commands accept strict operation-specific fields; browser-supplied actor or role fields are rejected. Supported operations are assign/clear, request, withdraw, resolve (replacement/open/decline/stale closure), own day-off availability, and exact-service song-plan replacement. The schema is not a claim that the production frontend is activated or that every original administrator capability is ported.
+Commands accept strict operation-specific fields; browser-supplied actor or role fields are rejected. Supported operations are assign/clear, request, withdraw, resolve (replacement/open/decline/stale closure), own day-off availability, and exact-service song-plan replacement. The schema is not a claim that the production frontend is activated or that every planned administrator capability exists.
 
 ## Integrity and concurrency design
 
@@ -46,6 +46,6 @@ A database trigger checks service applicability, active department membership, q
 
 Published assignment changes project personal activities and generic in-app notices into the foundation's module framework. No email, push, calendar, Signal or other external delivery runs. Production subscriptions and actual hosted cross-session execution remain release gates.
 
-## Activation sequence — NOT performed for Worship Duty
+## Activation sequence: NOT performed for Worship Duty
 
 Reconcile and review the migration ledger; test on an empty disposable hosted development database; use the now-verified application owner only for **explicit Worship setup grants**, not inferred scheduling authority; finish missing setup UI/API; validate real Auth sessions using existing production guard without bypass; connect the authenticated frontend to tested scope projections/commands; test two independent sessions, races and revocation; complete backup/restore and device review; then run the requested deliberate, fully tested real production release. The user already requested the live integration; engineering gates remain. Fictional fixtures must never be installed in production.

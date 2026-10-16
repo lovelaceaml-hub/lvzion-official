@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import {CATALOG,DEPARTMENTS,PRAYERS,USHERS,allowedTogether,departmentOf,dutyLabel,hasChoir,hasDuty,hasThanks,pairKey} from '../lib/worship-duty/domain.ts';
 import {serviceLabel,vegasDate} from '../lib/worship-duty/service-time.ts';
 import type {Duty} from '../lib/worship-duty/domain.ts';
-test('worship catalog preserves 27 duties across eight departments without legacy identities',()=>{assert.equal(CATALOG.length,27);assert.equal(DEPARTMENTS.length,8);assert.equal(new Set(CATALOG.map(d=>d.id)).size,27);});
+test('worship catalog preserves 27 duties across eight departments without imported identities',()=>{assert.equal(CATALOG.length,27);assert.equal(DEPARTMENTS.length,8);assert.equal(new Set(CATALOG.map(d=>d.id)).size,27);});
 test('worship exhaustively preserves every ordered pair: only prayer and usher by default',()=>{
  for(const a of CATALOG)for(const b of CATALOG){const expected=a.id!==b.id&&((PRAYERS.includes(a.id)&&USHERS.includes(b.id))||(USHERS.includes(a.id)&&PRAYERS.includes(b.id)));assert.equal(allowedTogether([a.id,b.id]),expected,`${a.id}/${b.id}`);}
 });
