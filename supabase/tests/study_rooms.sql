@@ -1,8 +1,8 @@
 -- Fictional identities only. All application and identity writes roll back.
 begin;
-insert into auth.users(id,email,email_confirmed_at) select ('99999999-9999-4999-8999-'||lpad(n::text,12,'0'))::uuid,'study-'||n||'@example.invalid',now()-interval '1 day' from unnest(array[101,103,105,107])n;
-insert into auth.sessions(id,user_id,created_at) select ('aaaaaaaa-aaaa-4aaa-8aaa-'||lpad(n::text,12,'0'))::uuid,('99999999-9999-4999-8999-'||lpad(n::text,12,'0'))::uuid,now()-interval '1 hour' from unnest(array[101,103,105,107])n;
-insert into app_private.account_links(member_id,auth_user_id,username) select ('44444444-4444-4444-8444-'||lpad(n::text,12,'0'))::uuid,('99999999-9999-4999-8999-'||lpad(n::text,12,'0'))::uuid,'study_'||n from unnest(array[101,103,105,107])n;
+insert into auth.users(id,email,email_confirmed_at) select ('99999999-9999-4999-8999-'||lpad(n::text,12,'0'))::uuid,'study-'||n||'@example.invalid',now()-interval '1 day' from unnest(array[101,103,104,105,107])n;
+insert into auth.sessions(id,user_id,created_at) select ('aaaaaaaa-aaaa-4aaa-8aaa-'||lpad(n::text,12,'0'))::uuid,('99999999-9999-4999-8999-'||lpad(n::text,12,'0'))::uuid,now()-interval '1 hour' from unnest(array[101,103,104,105,107])n;
+insert into app_private.account_links(member_id,auth_user_id,username) select ('44444444-4444-4444-8444-'||lpad(n::text,12,'0'))::uuid,('99999999-9999-4999-8999-'||lpad(n::text,12,'0'))::uuid,'study_'||n from unnest(array[101,103,104,105,107])n;
 create function pg_temp.login(n integer) returns void language plpgsql as $$begin
  perform set_config('request.jwt.claim.sub','99999999-9999-4999-8999-'||lpad(n::text,12,'0'),true);
  perform set_config('request.jwt.claims',jsonb_build_object('session_id','aaaaaaaa-aaaa-4aaa-8aaa-'||lpad(n::text,12,'0'))::text,true);
@@ -17,7 +17,9 @@ reset role;
 update app_private.app_modules set status='approved',approved_at=now() where module_key='study-rooms';
 insert into app_private.module_access_grants(member_id,module_id,permission,granted_at,reason) select ('44444444-4444-4444-8444-'||lpad(n::text,12,'0'))::uuid,'91000000-0000-4000-8000-000000000001',case n when 101 then 'manager' else 'viewer' end,now()-interval '1 day','Fictional study-module test grant' from unnest(array[101,103,107])n;
 select pg_temp.login(105);set local role authenticated;
-select pg_temp.denied('select public.study_room_schedule(pg_temp.tomorrow())','42501','pastoral title does not confer app access');
+select pg_temp.pass(public.study_room_schedule(pg_temp.tomorrow()) ? 'resources','pastoral staff use Study Rooms by owner decision (2026-10-16)');
+reset role;select pg_temp.login(104);set local role authenticated;
+select pg_temp.denied('select public.study_room_schedule(pg_temp.tomorrow())','42501','technical title does not confer app access');
 reset role;
 select pg_temp.login(107);set local role authenticated;
 select pg_temp.pass(jsonb_array_length(public.study_room_schedule(pg_temp.tomorrow())->'resources')=12,'authorized member sees 12 resources');

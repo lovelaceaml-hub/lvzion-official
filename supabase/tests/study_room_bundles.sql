@@ -1,8 +1,8 @@
 -- Fictional identities only. All application and identity writes roll back.
 begin;
-insert into auth.users(id,email,email_confirmed_at) select ('99999999-9999-4999-8999-'||lpad(n::text,12,'0'))::uuid,'study-'||n||'@example.invalid',now()-interval '1 day' from unnest(array[101,103,105,107])n;
-insert into auth.sessions(id,user_id,created_at) select ('aaaaaaaa-aaaa-4aaa-8aaa-'||lpad(n::text,12,'0'))::uuid,('99999999-9999-4999-8999-'||lpad(n::text,12,'0'))::uuid,now()-interval '1 hour' from unnest(array[101,103,105,107])n;
-insert into app_private.account_links(member_id,auth_user_id,username) select ('44444444-4444-4444-8444-'||lpad(n::text,12,'0'))::uuid,('99999999-9999-4999-8999-'||lpad(n::text,12,'0'))::uuid,'study_'||n from unnest(array[101,103,105,107])n;
+insert into auth.users(id,email,email_confirmed_at) select ('99999999-9999-4999-8999-'||lpad(n::text,12,'0'))::uuid,'study-'||n||'@example.invalid',now()-interval '1 day' from unnest(array[101,103,104,105,107])n;
+insert into auth.sessions(id,user_id,created_at) select ('aaaaaaaa-aaaa-4aaa-8aaa-'||lpad(n::text,12,'0'))::uuid,('99999999-9999-4999-8999-'||lpad(n::text,12,'0'))::uuid,now()-interval '1 hour' from unnest(array[101,103,104,105,107])n;
+insert into app_private.account_links(member_id,auth_user_id,username) select ('44444444-4444-4444-8444-'||lpad(n::text,12,'0'))::uuid,('99999999-9999-4999-8999-'||lpad(n::text,12,'0'))::uuid,'study_'||n from unnest(array[101,103,104,105,107])n;
 create function pg_temp.login(n integer) returns void language plpgsql as $$begin
  perform set_config('request.jwt.claim.sub','99999999-9999-4999-8999-'||lpad(n::text,12,'0'),true);
  perform set_config('request.jwt.claims',jsonb_build_object('session_id','aaaaaaaa-aaaa-4aaa-8aaa-'||lpad(n::text,12,'0'))::text,true);
@@ -92,7 +92,7 @@ select pg_temp.pass((select count(*)=0 from app_private.study_slots where bookin
 select pg_temp.pass((select count(*)=2 from app_private.study_booking_resources where booking_id=current_setting('test.cancelbid')::uuid),'cancellation preserves bundled inventory history');
 select pg_temp.login(103);set local role authenticated;
 select pg_temp.pass((public.study_room_history(pg_temp.tomorrow(),pg_temp.tomorrow())->'bookings'->0->>'cancelReason')='Fictional cancellation of bundle','owner can read cancellation detail');
-reset role;select pg_temp.login(105);set local role authenticated;
+reset role;select pg_temp.login(104);set local role authenticated;
 select pg_temp.denied('select public.study_room_history(pg_temp.tomorrow(),pg_temp.tomorrow())','42501','member without module grant cannot read history');
 select pg_temp.denied('select public.study_room_command(pg_temp.bundle(10,array[4,14,21],810,840))','42501','ungranted identity cannot create a bundle');
 reset role;

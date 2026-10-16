@@ -10,6 +10,17 @@ Verified October 16, 2026. Study Rooms is an integrated application at [lvz.app/
 - At verification there were zero reservations. Inventory and existing account, member and permission records were retained.
 - Availability is computed from this application's stored reservations, explicit restrictions and closures. PostgreSQL remains authoritative. A booking pause is a local maintenance control, not an integration prerequisite.
 
+## Who can book and service times (owner decisions, October 16, 2026)
+
+Anthony decided on 2026-10-16:
+
+- **Leaders book automatically.** Any member with an active unit leader, group leader or pastoral staff appointment can use Study Rooms while the appointment is active. Ending the appointment ends this access. Department, member administration and technical roles do not give access on their own.
+- **Group leaders choose members.** A group leader opens **Who can book in your group** (`/modules/study-rooms/members`) and turns booking on or off for active members currently placed in a group they lead. Each change records who made it and when, as a viewer grant plus an audit event. Group leaders cannot change members of other groups, leaders' automatic access or a reservation-manager grant.
+- **Service times.** The weekly restrictions are Tuesday 7:30 to 8:30 PM (Evening service) and Saturday 10:00 to 11:00 AM (Morning service), 2:30 to 3:30 PM (Afternoon service) and 7:30 to 8:30 PM (Evening service), Las Vegas time. They are production data applied once by `supabase/owner-data/20261016_study_rooms_service_times.sql`, not application defaults. Managers can still edit them in Manage.
+- **Independence.** LV Zion Official has no connection to any other application. Nothing is imported from, linked to or synchronized with another scheduler.
+
+Schema: `supabase/migrations/20261016200000_study_rooms_leader_access.sql` (adds `study_leader_access`, extends `module_allowed` and the Apps list for Study Rooms only, adds `study_group_access`). Tests: `tests/study-group-access-database.test.ts`, `tests/study-owner-service-times-database.test.ts`, `tests/study-group-access.test.ts`, `tests/browser/study-group-access.spec.ts`.
+
 ## Member workflow
 
 Choose a date and resource type, select an available time, review the resource, purpose and interval, then confirm. A reservation may combine up to one room, one whiteboard and one TV. Availability is rechecked when saved. My Reservations and History retain changes and cancellations; other members' bookings do not disclose private names or purpose details.
