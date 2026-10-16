@@ -19,6 +19,21 @@ Keep compact module headers and the prominent center Apps launcher. The launcher
 
 Documentation-only commits after the runtime source do not require another deployment. Read current provider state rather than assuming a recorded snapshot cannot change. Automatic Git deployments remain disabled; no unrequested previews are authorized.
 
+## Study Rooms leader access and service times (released October 16, 2026)
+
+Owner decisions from Anthony on 2026-10-16, released through [PR #53](https://github.com/lovelaceaml-hub/lvzion-official/pull/53) at main `10703aba00f092ebe7105cef1b1e3ba7626a8431`:
+
+- Active unit leaders, group leaders and pastoral staff use Study Rooms automatically while appointed (Study Rooms only).
+- Group leaders turn booking on or off for current members of a group they lead at [Who can book](https://lvz.app/modules/study-rooms/members), with grant history and audit events. Manager grants and other groups cannot be changed by them.
+- Weekly service times: Tuesday 7:30 to 8:30 PM; Saturday 10 to 11 AM, 2:30 to 3:30 PM and 7:30 to 8:30 PM (owner data step, calendar version 3, audited).
+- The application stays independent of any other scheduler.
+
+Production deployment `dpl_99bVq58phv1XR6dKcpvkruaXsQ21` is READY on `lvz.app`; rollback is `dpl_HxTFTX6mRCn4JAUH3Mv4mSsuj7ZC` (schema compatible: the new database function is additive and unused by the older code). Hosted migration `20261016200000_study_rooms_leader_access` was applied after confirming the live `module_allowed` and `member_module_home` definitions matched the repository exactly; see the [ledger](HOSTED-MIGRATION-LEDGER.json). The Vercel build passed 386 tests including 33 leader-access SQL assertions, plus 198 permission assertions. Signed-out live checks were unchanged and the new access endpoint returns 401 signed out.
+
+At release the live database had zero active leader appointments and zero placed members, so nobody gained access yet. Access starts as leaders are appointed and members are placed.
+
+Not verified: a real signed-in group leader turning a member on, and physical phones. Six existing Study Rooms browser tests fail on main independently of this release (they also fail on `d44e6cc`).
+
 ## Study Rooms — correction completed
 
 The application now accepts deliberately empty weekly restrictions and has no implicit weekday service blocks. The owner-directed cleanup removed the exact four never-edited installation restrictions, retained existing records and wrote one audit event. Hosted readback: weekly list empty, special dates empty, policy version 2, booking enabled, zero reservations.
