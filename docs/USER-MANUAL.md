@@ -6,7 +6,7 @@
 
 ## Sign up and sign in
 
-Create an account with your own first and last names, personal email and a password of at least six characters. Open the confirmation email and confirm your account. If an older confirmation link says it could not finish, sign in with the password you chose.
+Create an account with your own first and last names, personal email and a password of at least six characters. Open the confirmation email and confirm your account. If a confirmation link says it could not finish, sign in with the password you chose.
 
 New accounts start Unassigned to age category, group and unit. An authorized member administrator verifies the person and places them. Unassigned accounts can see only their own records.
 
@@ -20,7 +20,7 @@ Open Member management. Authorized organization administrators see **Age categor
 4. To rename a placeholder, open **Rename or archive** beside the entry. Renaming keeps existing member placements and history.
 5. Archive only an empty entry. The app blocks archival while children, member placements or appointments still depend on it. History is retained.
 
-The initial structure has four age categories, two placeholder groups per category and two placeholder units per group. The placeholders are named Group 1, Group 2, Unit 1 and Unit 2. They can be renamed as the actual organization is established.
+The owner-requested initial structure has four age categories, two placeholder groups per category and two placeholder units per group. The placeholders are named Group 1, Group 2, Unit 1 and Unit 2. They can be renamed as the actual organization is established.
 
 ## Verify and assign a registered member
 
@@ -30,7 +30,7 @@ The initial structure has four age categories, two placeholder groups per catego
 4. Choose **I independently verified membership and identity** and enter the verification and placement reason.
 5. Select **Verify and assign member**. The member becomes active in that placement; the decision and placement history are retained.
 
-Changing the age category clears the old group and unit choices. Changing the group clears the old unit choice. Email confirmation alone does not verify church membership.
+Changing the age category clears the previous group and unit choices. Changing the group clears the previous unit choice. Email confirmation alone does not verify church membership.
 
 ## Add an existing member and invite them
 
@@ -52,53 +52,54 @@ Keep the form unchanged and retry after a connection failure. Organization chang
 
 ## Study Room Reservation owner setup
 
-Open [Study Room Reservation](https://lvz.app/modules/study-rooms) while signed in to your LV Zion member account. The app appears in **Apps** only for members with an active explicit Study Room grant; technical, department, pastoral and group positions do **not** grant access automatically.
+Open [Study Rooms](https://lvz.app/modules/study-rooms) while signed in to your LV Zion member account. The app appears in **Apps** only for members with an active explicit Study Room grant. Technical, department, pastoral and group positions do not grant access automatically.
 
-**Current status:** The designated application owner has the sole active Study Room manager grant. The module shows actual inventory/availability, but **"Bookings Not Open"** is intentional. The original [Study Room Scheduler](https://lvrooms.web.app) remains the booking authority until a verified, approved transition. Do **not** use `lvz.app` for real new reservations yet.
+**Current status:** Booking is enabled for the existing authorized audience. Weekly and special-date restrictions start empty. The October 16 correction did not add access grants or delete reservations.
 
-For an authorized Study Room manager, the page offers the items below. On a phone the manager tools sit below the schedule; on a computer they sit in a column on the right. Tap **LV Zion** at the top to return home, and swipe left or right on the list to change tabs.
+Choose a date and resource type, then select an open time or **Reserve Now**. Review the resource, time and Contact / New Member / Other purpose before confirming. A booking may include up to one room, one whiteboard and one TV. The server rechecks availability on save. My Reservations and History show your authorized records; private details are not disclosed on shared availability.
 
+The compact header has a home control. The bottom navigation includes a prominent **Apps** button in the center. Use it to switch between authorized modules. Date chips span today and the next three days; all times are Las Vegas time.
 
-1. **Availability / My Reservations / Manage bookings / History.** View the current date's resources and slots, owner-specific records and authorized private history. There are zero new-system bookings at the last verified check. The date chips span today and the next three days.
-2. **Resources & date closures.** Rename or enable/disable rooms, boards and TVs. Add or remove a date-specific closure for one resource or all resources, with a reason. A conflict with an existing slot is refused; historical records are preserved.
-3. **Inventory & service calendar → Add a room, whiteboard or TV.** Pick the kind, enter a unique descriptive resource name and a management reason, then save. The change is version-checked and audited.
-4. **Manage weekly service restrictions.** Review each day/time block (Las Vegas time), edit or add intervals and a reason, then save all intervals together. Times must lie on the 10:00 AM–11:00 PM half-hour grid and cannot overlap for the same weekday.
-5. **Special dates & service overrides.** Choose the date, add service blocks (or intentionally leave none), enter a reason and save. A special-day override **replaces**, not adds to, the usual week's service blocks on that date. **Restore normal weekly schedule** removes the override. Resource/date closures remain separate.
-6. If the server reports a stale configuration version or overlapping existing booking, **refresh and review** rather than forcing the change. Manager settings cannot open the booking gate, and no existing reservation may be silently displaced.
+Authorized managers also have these controls:
 
-The booking backend supports combined room + board + TV reservations with atomic release and private history, but those actions are **not enabled for real members**. When a future approved cutover activates them, members will choose an available resource/time and one of the Contact / New Member / Other purposes; the server rechecks availability and My Week is updated without revealing private purpose details to other groups. Do not promise this workflow is already active.
+1. **Resources and date closures:** rename or enable/disable inventory, and create or remove date-specific closures with a reason. Conflicting changes are refused; records are retained.
+2. **Add a room, whiteboard or TV:** choose the kind, enter a descriptive unique name and a reason, then save.
+3. **Manage weekly service restrictions:** add only approved intervals for this application. An empty list is valid, and the final interval can be removed. Times use the 10:00 AM–11:00 PM half-hour grid and may not overlap on the same weekday. Save with a reason.
+4. **Special dates and service overrides:** choose a date, add restrictions or intentionally leave none, enter a reason and save. The override replaces weekly restrictions on that date. Restoring the normal weekly schedule removes the override. Resource closures remain separate.
 
-The [current Study Room status](study-rooms/README.md) and [cutover runbook](study-rooms/CUTOVER-RUNBOOK.md) explain precisely what remains before bookings can open.
+Refresh and review a stale version or a conflicting reservation rather than forcing a change. Calendar changes never silently displace existing reservations. During an application maintenance pause, the page says **Bookings are paused** and creation controls are disabled.
+
+See [Study Rooms operations](study-rooms/README.md) for the current verification scope.
 
 ## Open an authorized app
 
 Use **Apps** to see modules explicitly assigned to your account. Signing up or receiving a placement does not automatically grant every app.
 
-- [Contacts](https://lvz.app/modules/contacts): the current workspace is private to the authorized owner. Sharing, export and messages are unavailable.
-- [Study Rooms](https://lvz.app/modules/study-rooms): manager setup is available, but new bookings remain closed while the original scheduler is still the booking authority.
-- [Continuous Display](https://lvz.app/modules/continuous-display): owner setup is available. Review and approve the exact content before publishing, and pair a real screen only when authorized. No screen was paired during setup.
-- [Work Mission Morning Prayer](https://lvz.app/modules/work-mission-prayer): owner setup starts with empty schedules and materials. Check the real dates and approved wording before publishing. Joining requires an explicit grant, a verified date and encrypted link, and the authorized meeting window.
+- **Contacts:** private authorized workspace; sharing, export and messages are unavailable.
+- **Study Rooms:** availability, reservations and explicit calendar management for the authorized audience.
+- **Continuous Display:** prepare and review content before publishing; pair a real screen only when authorized.
+- **Work Mission Prayer:** create approved dates and materials within this application. Joining requires explicit access, a verified date, an encrypted meeting link and the authorized window.
 
-See [all documentation](README.md) for each module's release evidence and remaining limits.
+See [all documentation](README.md) for detailed module guides.
 
 ## Contacts: authorized owner workspace
 
-Open [Contacts in LV Zion Official](https://lvz.app/modules/contacts) using your normal verified account and the authorized **Apps** selector. Only the individually granted owner sees Contacts; simply being a member, group leader or technical administrator is not sufficient.
+Open [Contacts](https://lvz.app/modules/contacts) using your normal verified account and **Apps**. Only the individually granted owner sees Contacts; being a member, group leader or technical administrator is not sufficient.
 
-Under **My Contacts**, add a name, optional phone and preferred method. You can edit a name or preference later, but **not an existing saved phone number**. Search/filters inspect **loaded authorized names only**; use the next-page control for more records. Overview counts are partial until all pages have been loaded.
+Under **My Contacts**, add a name, optional phone and preferred method. You can edit a name or preference later, but not an existing saved phone number. Search and filters inspect loaded authorized names only; use the next-page control for more records. Overview counts are partial until all pages have been loaded.
 
-On a contact, add **author-only notes**, schedule/complete/reschedule/cancel one active next step, mark do-not-contact, close, archive or restore without erasing the restriction. Possible duplicates are suggestions only, never automatic merges. Follow-Ups displays generic activity counts, not a full named task calendar; due dates on individual contacts are displayed in Las Vegas time. No email, SMS, Signal or call is sent by Contacts.
+On a contact, add author-only notes, schedule/complete/reschedule/cancel one active next step, mark do-not-contact, close, archive or restore without erasing the restriction. Possible duplicates are suggestions, never automatic merges. Follow-Ups displays generic activity counts, not a full named task calendar; dates use Las Vegas time. Contacts does not send email, SMS, Signal messages or calls.
 
-The detailed [Contacts user guide](contacts/USER-GUIDE.md) covers every current control, errors and the sharing/export limitations. [Privacy status](contacts/README.md) and [verification](contacts/VERIFICATION.md) distinguish implemented owner-only functionality from unfinished shared features.
+The [Contacts user guide](contacts/USER-GUIDE.md) covers controls, errors and sharing/export limits. [Privacy status](contacts/README.md) and [verification](contacts/VERIFICATION.md) distinguish the implemented owner workspace from features not yet enabled.
 
 ## Work Mission corrections and schedule exceptions
 
-In [Morning Prayer](https://lvz.app/modules/work-mission-prayer), open Manage to add verified source dates, review weekday batches, move a gathering or mark an app day/cancellation. Restore as unverified gathering reopens a future exception without restoring its old host or meeting link. Verify the date again before assigning a host or configuring joining.
+In [Morning Prayer](https://lvz.app/modules/work-mission-prayer), open Manage to add verified source dates, review weekday batches, move a gathering or mark an app day/cancellation. Restore as unverified gathering reopens a future exception without restoring its previous host or meeting link. Verify the date again before assigning a host or configuring joining.
 
-Use Material to revise to correct the latest unpublished draft or a published reading/PWP. Changes create a new version; source confirmation resets when you edit wording. A publisher must review and publish the replacement. Me lists your future hosting dates across the selected calendar month. Access revocation does not erase assignment or audit history.
+Use Material to revise to correct the latest unpublished draft or a published reading/PWP. Changes create a new version; source confirmation resets when wording changes. A publisher must review and publish the replacement. Me lists your future hosting dates across the selected calendar month. Access revocation does not erase assignment or audit history.
 
-Real dates, permitted Zoom links, host eligibility and member/coordinator access must be chosen by the accountable owner. The release sends no external messages and does not change the retired Firebase app. [Operational evidence and remaining setup](morning-prayer/COMPLETION-R5.md).
+Real dates, permitted meeting links, host eligibility and member/coordinator access must be chosen by the accountable owner. The release sends no external messages. [Operational evidence and remaining setup](morning-prayer/COMPLETION-R5.md).
 
 ## Simpler Morning Prayer management
 
-Open [Morning Prayer](https://lvz.app/modules/work-mission-prayer), then Manage. Choose Schedule, Materials or People. Schedule has a month selector and expandable date controls. Materials lets you prepare a reading or choose the PWP month and week, with no internal key to type. Open Review draft to read all wording and its source before publishing. In People, choose an access level; custom permissions are available under Customize access. Owner and coordinator permissions remain enforced separately.
+Open Morning Prayer, then Manage. Choose Schedule, Materials or People. Schedule has a month selector and expandable date controls. Materials lets you prepare a reading or choose the PWP month and week, with no internal key to type. Open Review draft to read all wording and its source before publishing. In People, choose an access level; custom permissions are under Customize access. Owner and coordinator permissions remain separately enforced.
