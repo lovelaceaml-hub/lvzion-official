@@ -38,6 +38,9 @@ export default function Reservations({schedule:s,changeDay,submit,refresh,loadDa
  const [selectedSlot,setSelectedSlot]=useState<{id:string;time:number;day:string}|null>(null);
  const [appsOpen,setAppsOpen]=useState(false);
  const dateSelect=useRef<HTMLSelectElement>(null);
+ const scheduleScroll=useRef<HTMLDivElement>(null),scheduleCanvas=useRef<HTMLDivElement>(null);
+ const positionedSchedule=useRef('');
+ const [nowTop,setNowTop]=useState<number|null>(null);
  const dialog=useRef<HTMLDialogElement>(null),requestId=useRef('');
  const cancelDialog=useRef<HTMLDialogElement>(null),[cancelId,setCancelId]=useState(''),[cancelVersion,setCancelVersion]=useState(1),[reason,setReason]=useState('');
  useEffect(()=>{if(cancelId)cancelDialog.current?.showModal();},[cancelId]);
@@ -54,6 +57,38 @@ export default function Reservations({schedule:s,changeDay,submit,refresh,loadDa
  const selectedAvailable=selectedSlot?.day===s.day&&resources.some(r=>r.id===selectedSlot.id)&&validRange(s,selectedSlot.id,selectedSlot.time,selectedSlot.time+s.step);
  const lastDay=addDay(s.today,Math.max(0,s.horizon-1));
  const ends=start===null?[]:endOptions(s,selection,start);
+
+ // Use the server's Las Vegas clock. Refresh moves the indicator, never the reader's scroll.
+ useEffect(()=>{
+  if(view!=='schedule'){positionedSchedule.current='';setNowTop(null);return;}
+  const scroller=scheduleScroll.current,canvas=scheduleCanvas.current;
+  if(!scroller||!canvas)return;
+  const key=s.day+':'+kind;
+  function position(){
+   if(!scroller||!canvas)return;
+   const rows=Array.from(canvas.querySelectorAll<HTMLTableRowElement>('tbody tr[data-minute]'));
+   const today=s.day===s.today;
+   const inHours=today&&s.nowMinute>=s.open&&s.nowMinute<s.close;
+   const index=Math.max(0,Math.min(rows.length-1,Math.floor((s.nowMinute-s.open)/s.step)));
+   const row=rows[index];
+   let top:number|null=null;
+   if(inHours&&row){
+    const rect=row.getBoundingClientRect(),origin=canvas.getBoundingClientRect();
+    const next=rows[index+1]?.getBoundingClientRect();
+    const height=next?next.top-rect.top:rect.height;
+    top=rect.top-origin.top+((s.nowMinute-Number(row.dataset.minute))/s.step)*height;
+   }
+   setNowTop(top);
+   if(positionedSchedule.current!==key){
+    positionedSchedule.current=key;
+    const header=canvas.querySelector('thead')?.getBoundingClientRect().height??44;
+    scroller.scrollTop=today?(top===null?(s.nowMinute>=s.close?scroller.scrollHeight:0):Math.max(0,top-header-scroller.clientHeight*.2)):0;
+   }
+  }
+  position();
+  const observer=new ResizeObserver(position);observer.observe(canvas);observer.observe(scroller);
+  return ()=>observer.disconnect();
+ },[view,kind,s.day,s.today,s.nowMinute,s.open,s.close,s.step,resources.length]);
 
  function open(id?:string,time?:number,makeHold=false){if(closed)return;setExtras([]);setResource(id??resources[0]?.id??'');setStart(time??null);setEnd(time===undefined?null:time+s.step);setDetail('');setPurpose('contact');setStep(0);setHold(makeHold);setError('');requestId.current=crypto.randomUUID();dialog.current?.showModal();}
  function revise(){setStep(0);requestId.current=crypto.randomUUID();setError('');}
@@ -77,9 +112,9 @@ export default function Reservations({schedule:s,changeDay,submit,refresh,loadDa
  const heading=view==='mine'?'My reservations':view==='managed'?'Authorized reservations':s.day===s.today?'Today’s availability':'Availability';
 
  const schedule=<>
-  <div className="sr-scroll" tabIndex={0} data-no-swipe aria-label="Full-day resource schedule; scroll horizontally for more resources"><table style={{minWidth:Math.max(280,48+resources.length*60)}}>
+  <div ref={scheduleScroll} className="sr-scroll" tabIndex={0} data-no-swipe aria-label="Full-day resource schedule; scroll horizontally for more resources"><div ref={scheduleCanvas} className="sr-grid-canvas" style={{minWidth:Math.max(280,48+resources.length*60)}}><table>
    <thead><tr><th scope="col">Time</th>{resources.map(r=><th key={r.id} scope="col">{r.name}</th>)}</tr></thead>
-   <tbody>{times.map(time=><tr key={time}><th scope="row" aria-label={clock(time)} className={time%60===0||time===s.open?'sr-hour':'sr-half-hour'}><span aria-hidden="true">{time%60===0||time===s.open?clock(time).replace(':00',''):''}</span></th>{resources.map(r=>{
+   <tbody>{times.map(time=><tr key={time} data-minute={time}><th scope="row" aria-label={clock(time)} className={time%60===0||time===s.open?'sr-hour':'sr-half-hour'}><span aria-hidden="true">{time%60===0||time===s.open?clock(time).replace(':00',''):''}</span></th>{resources.map(r=>{
     const block=s.blocks.find(b=>(!b.resourceId||b.resourceId===r.id)&&time>=b.start&&time<b.end);
     const booking=visible.find(b=>bookingResources(b).includes(r.id)&&time>=b.start&&time<b.end);
     const openSlot=validRange(s,r.id,time,time+s.step);
@@ -88,7 +123,9 @@ export default function Reservations({schedule:s,changeDay,submit,refresh,loadDa
     if(booking)return <td key={r.id} className="sr-reserved"><span><b>{booking.hold?'Unavailable':booking.mine?'Yours':'Booked'}</b></span></td>;
     return <td key={r.id} className={chosen?'sr-slot-selected':undefined}><button type="button" aria-pressed={chosen} data-available={openSlot&&!closed} disabled={!openSlot||closed} aria-label={`${r.name}, ${clock(time)}, ${closed?'booking closed':openSlot?'available':'past'}`} onClick={()=>setSelectedSlot({id:r.id,time,day:s.day})}>{closed?'Closed':!openSlot?'Past':<span aria-hidden="true">{chosen?'✓':'+ Open'}</span>}</button></td>;
    })}</tr>)}</tbody>
-  </table></div>
+  </table>
+  {s.day===s.today&&nowTop!==null&&<div className="sr-now-marker" role="img" style={{top:nowTop}} aria-label={`Current time ${clock(s.nowMinute)}, Las Vegas`}><span>Now {clock(s.nowMinute)}</span></div>}
+  </div></div>
 
  </>;
 

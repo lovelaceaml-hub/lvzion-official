@@ -24,6 +24,7 @@
  --lvz-focus:#1f5c4d;
  --lvz-alert:#b4532a;
  --lvz-danger:#a3361f;
+ --lvz-time-marker:#c62828;
  --lvz-danger-soft:#f8e7e2;
  --lvz-warning:#7a5200;
  --lvz-warning-soft:#f8efd9;
@@ -85,3 +86,4 @@
 @media (min-width:900px){
  :root{--lvz-gutter:var(--lvz-gutter-wide)}
 }
+
