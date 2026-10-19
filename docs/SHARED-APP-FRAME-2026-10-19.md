@@ -32,3 +32,7 @@ Study Rooms reserves space above the new bottom bar for Reserve, keeps the grid 
 ## Recovery
 
 Previous production: `dpl_42BtndGorthbRt2eL2gej53Cyi4Z`, runtime `0858627804a20269650569c7769af4bb2fd5580d`. Rollback requires no database change.
+
+## Production release
+
+PR #60 merged as `ebbedbdd486a87a835855307c501b99fe78ea7ba`. Explicit production deployment `dpl_B4CDgswkqhY3kU7hjtajQ98thg97` is READY with lvz.app and www.lvz.app aliases. Provider readback confirms the exact merged source. Live HTTP checks through the Vercel connector returned 200 for Study Rooms and sign-in with the shared frame, 200 for full-screen `/display` without the frame, and 401 for anonymous `/api/members/avatar`. Study Rooms HTML identifies the exact new deployment. Direct executor network checks timed out at the network proxy; provider connector verification succeeded. No authenticated hosted member transaction was performed.
