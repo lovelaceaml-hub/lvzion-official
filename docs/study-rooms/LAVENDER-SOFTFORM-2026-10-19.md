@@ -35,7 +35,7 @@ There are no database migrations, grant changes, activation changes or new depen
 
 ## Verification
 
-Local verification used Node 24.19.0 and the pinned lockfile, installed with `npm ci --offline --ignore-scripts`. The production build passed TypeScript, all **386 application/disposable-database tests**, **198 additional PostgreSQL permission assertions**, and the optimized Next.js build. A final type check also passed after the test-fixture additions.
+Local verification used Node 24.19.0 and the pinned lockfile, installed with `npm ci --offline --ignore-scripts`. The final production build passed TypeScript, all **387 application/disposable-database tests**, **198 additional PostgreSQL permission assertions**, and the optimized Next.js build. A final type check also passed after the browser-test fixture additions.
 
 The final complete browser suite passed **131 of 131 checks**, with no exclusions. It used the existing activation-disabled loopback server and an installed Chromium executable selected through a local-only Playwright config. The source configuration remains portable.
 
@@ -44,6 +44,8 @@ Responsive checks at **320, 390 and 1280 px** verified attached resource tabs, d
 Visual review caught a production CSS compatibility issue: when the prefixed backdrop declaration followed the standard declaration, minification retained only the prefixed property and Chromium lost the blur. The declarations now keep the standard property last. A browser regression checks the computed filters on the loaded production CSS. The more transparent tray keeps its approved low opacity while the blur prevents underlying grid text from competing with its summary. The now-label background also covers the full time-label area.
 
 The first full run exposed four unrelated fixture failures. The Display fixture now derives its mocked server time and leases from the same frozen browser clock. The three preexisting sign-in/resend failures now use an explicit HTTP-loopback-only fixture for the pinned BotID client challenge; production authentication code and settings are unchanged. Their API, privacy and denial assertions were retained, and a focused four-case run passed before the final complete suite.
+
+The initial production candidate (`69b5686cb8b725a323967c7ee9069971f253eb8f`, deployment `dpl_DbaFDZuHL2hVqRuqxXdcXiEqn7US`) stopped during its disposable-database tests near Las Vegas midnight. An existing Work Mission fixture moved an event five minutes forward but retained today's local date. The fixture now derives its date, end and access expiry from one future start timestamp. A deterministic regression covers daylight time, standard time and year rollover, and verifies that the existing database guard still rejects the wrong date. The rebuilt 387-test gate passed. Application runtime files are unchanged from the 131-case browser verification; this follow-up changes only the fixture and release documentation. The failed candidate never replaced the previous live release.
 
 Browser fixtures use synthetic data on the real module route. They do not represent a real member's production reservation, hosted BotID acceptance or physical-device acceptance. The exact production receipt is recorded after deliberate deployment.
 
