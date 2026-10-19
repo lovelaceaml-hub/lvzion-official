@@ -1,6 +1,8 @@
 import {expect,test} from '@playwright/test';
+import {mockLocalBotChallenge} from './local-bot-challenge';
 
-test('confirmation resend requires a deliberate action, handles refresh and never stores an email',async({page})=>{
+test('confirmation resend requires a deliberate action, handles refresh and never stores an email',async({page,baseURL})=>{
+ await mockLocalBotChallenge(page,baseURL);
  const requests:{email:string}[]=[];
  await page.route('**/api/auth/resend-confirmation',async route=>{
   requests.push(route.request().postDataJSON());
@@ -25,7 +27,8 @@ test('confirmation resend requires a deliberate action, handles refresh and neve
  expect(requests).toHaveLength(1);
 });
 
-test('confirmation resend keeps user on the email step when delivery is unavailable',async({page})=>{
+test('confirmation resend keeps user on the email step when delivery is unavailable',async({page,baseURL})=>{
+ await mockLocalBotChallenge(page,baseURL);
  await page.route('**/api/auth/resend-confirmation',route=>route.fulfill({
   status:503,contentType:'application/json',body:JSON.stringify({error:'Confirmation emails are temporarily unavailable.'})
  }));

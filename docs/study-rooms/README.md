@@ -2,6 +2,10 @@
 
 Verified October 16, 2026. Study Rooms is an integrated application at [lvz.app/modules/study-rooms](https://lvz.app/modules/study-rooms), using LV Zion Official authentication, its own calendar, reservations and permissions.
 
+## Current interface — Lavender Softform, October 19, 2026
+
+The owner's latest approved design places Rooms, Whiteboards and TVs as tabs attached to the compact header, followed by the date window and a continuous half-hour grid reaching the screen bottom. A transparent selection/Reserve tray floats above the grid and the persistent five-item dock. Lavender/plum surfaces and the raised Apps rounded square follow the selected prototype. This supersedes the older visual descriptions below. See [current implementation and verification](LAVENDER-SOFTFORM-2026-10-19.md).
+
 ## Current state
 
 - Booking is enabled for the existing explicitly authorized audience. This release does not add member or manager grants.

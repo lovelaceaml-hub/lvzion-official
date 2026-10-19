@@ -1,12 +1,18 @@
 # LV Zion Official — current handoff
 
-Updated October 16, 2026. This handoff and `AGENTS.md` describe the application to build and operate now. Milestone-specific release records are evidence, not additional product requirements.
+Updated October 19, 2026. This handoff and `AGENTS.md` describe the application to build and operate now. Milestone-specific release records are evidence, not additional product requirements.
 
 ## Authoritative requirements
 
 LV Zion Official is a self-contained, phone-first application at https://lvz.app. Only explicitly approved requirements govern its modules. All schedules, assignments and events are deliberately configured within this application; empty calendars are valid. A design reference supplies appearance or interaction, not data or scheduling policy. Preserve existing accounts, grants, organizational history and intentionally entered records.
 
 Keep compact module headers and the prominent center Apps launcher. The launcher shows only server-authorized modules. Continue the approved [Day Sheet design contract](design/LVZ-DESIGN-CONTRACT.md), shared tokens, accessible controls and phone-first layouts.
+
+## Current Study Rooms design — Lavender Softform
+
+The owner selected prototype 06, refined its layout, and requested implementation in the real app. Resource tabs attach to the shared header, dates sit below them, and the continuous half-hour grid fills the viewport beneath a transparent floating selection/Reserve tray and the shared dock. Lavender/plum styling is scoped to Study Rooms, including its raised Apps rounded square. This supersedes earlier Study Rooms color, time-tile and date/resource ordering descriptions. [Current scope, verification and release record](study-rooms/LAVENDER-SOFTFORM-2026-10-19.md).
+
+Local release gates passed: 386 application tests, 198 additional PostgreSQL permission assertions, TypeScript/production build, and the complete 131-case browser suite with no exclusions. The older sign-in/resend and time-dependent Display fixture failures were repaired in tests only. Responsive screenshots and real-route synthetic bookings were checked at 320, 390 and 1280 px; this is not physical-phone or real hosted booking acceptance.
 
 ## Infrastructure and verified release
 
