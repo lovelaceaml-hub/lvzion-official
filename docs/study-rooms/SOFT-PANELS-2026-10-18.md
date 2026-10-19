@@ -25,3 +25,11 @@ Coverage: booking/review/confirm, bundling, cancellation, editing, early release
 Final browser result: **50/50 Study Rooms and group-access checks passed** on a clean production build. The full application browser run was **110 passed, 3 failed**. The same three failures were reproduced after restoring the original Study Rooms source from main `2ab00311b771a783f0b8c4296013858e67406187` and rebuilding: the fail-closed sign-in message expectation and both confirmation-resend tests. They are unrelated baseline failures and were not changed in this design task.
 
 The standard browser download was unavailable in this workspace. Browser verification used an isolated Chromium 153 package with Playwright 1.64; the repository dependency lockfile and normal browser configuration are unchanged. Temporary browser configuration and synthetic screenshots are not application runtime assets.
+
+## Production release
+
+Merged PR #57. Runtime source: `aaca121bdeb652b2eb882037d94b4b88983f2894`. Deployment `dpl_EW2kSavK6oHXme3AxLg7BhZTRytU` is READY in Vercel project `lvzion-official`, team `lvzion`, target production. Provider readback confirms this exact source and the `lvz.app` / `www.lvz.app` aliases.
+
+Live verification on October 18 (Las Vegas): `/modules/study-rooms` and `/sign-in` returned 200; the served CSS contains the new date strip and final Soft Panels sizing, and the served JavaScript contains the new More management control. Anonymous availability, admin, operations and history endpoints all returned 401 with private/no-store caching. No signed-in hosted reservation was created. No preview was published. Database and permissions were unchanged.
+
+The preceding deployment `dpl_99bVq58phv1XR6dKcpvkruaXsQ21` remains a schema-compatible rollback target. This release receipt is documentation only and does not require redeployment.
