@@ -71,3 +71,7 @@ Anthony selected Soft Panels as the main Study Rooms interface with glass accent
 ### Later Study Rooms layout correction
 
 Anthony supplied a second October 18 layout reference. Study Rooms now uses separate rounded time tiles, an hourly rail, resource tabs at the top and a full-width Reserve action above the bottom Apps navigation. See [implementation and verification](study-rooms/TILE-LAYOUT-2026-10-18.md). This supersedes the continuous raised columns described in the earlier Soft Panels release.
+
+## Shared application frame — October 18 request
+
+The root frame now provides a persistent compact module header, circular profile avatar and matching bottom navigation, with a raised center Apps button. `FrameControls` registers each module’s neighboring actions. This supersedes separate module bars and the older wordmark-only header. See [shared frame details and release evidence](SHARED-APP-FRAME-2026-10-19.md). Profile photos are not yet a stored feature; the circle uses authenticated initials. No grants, operational records or schema changes are included.

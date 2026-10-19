@@ -118,3 +118,7 @@ Anthony selected the Soft Panels reference as the Study Rooms design, with Float
 ### Study Rooms layout refinement — later October 18 reference
 
 The owner's later reference uses separate rounded `+ Open` tiles and hour labels spanning half-hour rows, superseding continuous raised resource columns. The schedule begins with icon-labelled resource tabs and uses a full-width Reserve button above the required bottom navigation. Glass remains accent-only. Details: [layout correction](../study-rooms/TILE-LAYOUT-2026-10-18.md).
+
+## Shared persistent frame — approved October 18, 2026
+
+Anthony requested a persistent matching header and bottom control across pages, based on the supplied raised/glass Apps button references. This supersedes the wordmark header, desktop top navigation and no-glass restrictions for shared navigation. Use `AppFrame` in the root layout and register real module actions with `FrameControls`; do not add separate module bottom bars. The header shows the module symbol/title and circular member avatar. Home, centered Apps and More remain stable; the two neighboring actions follow the module. Glass stays an accent and content stays opaque. Full-screen TV playback remains immersive. See [implementation, mapping and verification](../SHARED-APP-FRAME-2026-10-19.md).

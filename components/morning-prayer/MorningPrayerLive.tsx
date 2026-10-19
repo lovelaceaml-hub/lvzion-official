@@ -1,6 +1,6 @@
 'use client';
 import {useCallback,useEffect,useRef,useState} from 'react';
-import AppHeader from '../app-header';
+import {FrameControls} from '../app-frame';
 import {CalendarDays,Clock3,House,Pencil} from '../home-icons';
 import {useSwipeTabs} from '../../lib/use-swipe-tabs';
 import {vegasToday} from '../../lib/morning-prayer/time';
@@ -91,7 +91,7 @@ export default function MorningPrayerLive(){
  const swipe=useSwipeTabs(tabs,tab,setTab);
  const screen={data:data!,rows,today,published,busy,cap,post,joinable,joinGathering};
  return <div className="ui-page">
-  <AppHeader homeHref="/members"/>
+  <FrameControls left={{label:'Schedule',icon:'calendar',onClick:()=>setTab('schedule'),active:tab==='schedule',disabled:!data}} right={{label:'Me',icon:'user',onClick:()=>setTab('me'),active:tab==='me',disabled:!data}} more={[{label:'Overview',icon:'home',onClick:()=>setTab('home')},...(canManage?[{label:'Manage',icon:'people' as const,onClick:()=>setTab('manage')}]:[])]}/>
   <main className={'ui-main '+styles.main}>
    <p className="ui-kicker">Work Mission</p>
    <h1 className="ui-title">Morning Prayer</h1>
@@ -120,11 +120,7 @@ export default function MorningPrayerLive(){
      onReload={loader} onNotice={setMessage}/>}
    </div>}
   </main>
-  {data&&<nav className={styles.bottomBar} aria-label="Morning Prayer sections">
-   {tabs.map(x=>{const Icon=TAB_ICONS[x];return <button key={x} type="button" aria-current={tab===x?'page':undefined} onClick={()=>setTab(x)}>
-    <Icon size={22}/><span>{TAB_LABELS[x]}</span>
-   </button>;})}
-  </nav>}
+
  </div>;
 }
 /** Props every tab receives from the shell. `data` is always loaded when a tab renders. */
@@ -132,3 +128,4 @@ export type Screen={
  data:Workspace;rows:Occurrence[];today:string;published:NonNullable<Workspace['materials']>;busy:boolean;
  cap:(key:Capability)=>boolean;post:Post;joinable:(id:string)=>boolean;joinGathering:(id:string)=>Promise<void>;
 };
+

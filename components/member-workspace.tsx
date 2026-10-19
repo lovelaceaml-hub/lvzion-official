@@ -2,7 +2,7 @@
 import { useState, useRef, useEffect } from 'react';
 import type { Action,Command,Person,Workspace } from '../lib/contracts';
 import './members.css';
-import AppHeader from './app-header';
+import {FrameControls} from './app-frame';
 import {useSwipeTabs} from '../lib/use-swipe-tabs';
 import OnboardingPanel from './onboarding-panel';
 import type {InvitationInput} from './onboarding-panel';
@@ -25,7 +25,8 @@ export default function MemberWorkspace({data:w,execute,demo=false,invite}:Props
  const candidates=[...new Map([...w.directory,...w.managedMembers,...w.departments.flatMap(d=>d.members)].map(m=>[m.id,m])).values()];
  const tabKeys=['week','people',...(manage?['manage']:[]),'profile'];
  const swipe=useSwipeTabs(tabKeys,tab,next=>{setTab(next);setMessage('');});
- return <main className="members-app" {...swipe}><AppHeader homeHref="/members"><button onClick={()=>setTab('profile')} aria-label="Open my profile" className="avatar">{initials(w.self.name)}</button></AppHeader>
+ return <main className="members-app" {...swipe}><FrameControls name={w.self.name} left={{label:'My Group',icon:'people',onClick:()=>setTab('people'),active:tab==='people'}} right={{label:'Profile',icon:'user',onClick:()=>setTab('profile'),active:tab==='profile'}} more={manage?[{label:'Manage',icon:'people',onClick:()=>setTab('manage')}]:[]}/>
+
  {demo&&<a className="demo-experience-link" href="/experience-preview">Explore the next-generation Home and My Week experience →</a>}
  {demo&&<p className="demo-note">Fictional preview · Changes stay in this page session · Not a real login</p>}
  <section className="member-welcome"><span className="overline">{tab==='manage'?'Your responsibilities':'Your community'}</span><h1>{tab==='manage'?'Manage with care.':`Hello, ${w.self.name.split(' ')[0]}.`}</h1><p>{group} <span aria-hidden="true">/</span> {unit}</p></section>
@@ -49,3 +50,4 @@ export default function MemberWorkspace({data:w,execute,demo=false,invite}:Props
  <footer className="member-footer">LV Zion Official · {demo?'Synthetic records only':'Permission-scoped member workspace'}</footer></main>;
 }
 function Reason(){return <label>Reason for this change<input name="reason" required minLength={5} maxLength={500} placeholder="Explain what changed and why"/></label>;}
+

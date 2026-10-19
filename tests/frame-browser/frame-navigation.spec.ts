@@ -1,0 +1,25 @@
+import {test,expect} from '@playwright/test';
+test('Contacts uses shared actions and keeps its privacy guard',async({page})=>{
+ let denied=false;
+ await page.route('**/api/members/avatar',r=>r.fulfill({json:{initials:'FE'}}));
+ await page.route('**/api/members/experience',r=>r.fulfill({json:{modules:[],activities:[],notifications:[],favorites:[],favoriteVersion:0}}));
+ await page.route('**/api/contacts/workspace',r=>r.fulfill(denied?{status:403,json:{error:'Denied'}}:{json:{memberId:'fictional-owner',contacts:[],nextCursor:null}}));
+ await page.route('**/api/contacts/agenda',r=>r.fulfill({json:[]}));
+ await page.goto('/modules/contacts');
+ const nav=page.getByRole('navigation',{name:'Main navigation'});
+ await expect(page.getByRole('banner')).toContainText('Contacts');
+ await expect(nav.getByRole('button',{name:'Contacts',exact:true})).toBeEnabled();
+ await nav.getByRole('button',{name:'Follow-ups',exact:true}).click();
+ await expect(page.getByRole('heading',{name:'Your assigned follow-ups'})).toBeVisible();
+ await nav.getByRole('button',{name:'More',exact:true}).click();
+ await page.getByRole('dialog',{name:'More options'}).getByRole('button',{name:'Overview',exact:true}).click();
+ await expect(page.getByRole('heading',{name:'Your contacts at a glance'})).toBeVisible();
+ await nav.getByRole('button',{name:'Open apps'}).click();
+ await expect(page.getByRole('dialog',{name:'Apps',exact:true})).toContainText('No applications have been assigned');
+ await page.keyboard.press('Escape');
+ denied=true;
+ await nav.getByRole('button',{name:'More',exact:true}).click();
+ await page.getByRole('dialog',{name:'More options'}).getByRole('button',{name:'Reload',exact:true}).click();
+ await expect(nav.getByRole('button',{name:'Contacts',exact:true})).toBeDisabled();
+ await expect(page.getByRole('heading',{name:'Your contacts at a glance'})).toHaveCount(0);
+});
