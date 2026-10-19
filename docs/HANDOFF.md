@@ -75,3 +75,7 @@ Anthony supplied a second October 18 layout reference. Study Rooms now uses sepa
 ## Shared application frame — October 18 request
 
 The root frame now provides a persistent compact module header, circular profile avatar and matching bottom navigation, with a raised center Apps button. `FrameControls` registers each module’s neighboring actions. This supersedes separate module bars and the older wordmark-only header. See [shared frame details and release evidence](SHARED-APP-FRAME-2026-10-19.md). Profile photos are not yet a stored feature; the circle uses authenticated initials. No grants, operational records or schema changes are included.
+
+### Glass/date refinement
+
+The subsequent October 18 request puts four glass date buttons above slimmer resource tabs, strengthens Reserve/Apps depth, adds today shimmer and Tuesday/Saturday decoration, and makes the shared header edge-to-edge. See [current refinement and verification](GLASS-REFINEMENT-2026-10-19.md). Booking policy and data remain server-sourced.

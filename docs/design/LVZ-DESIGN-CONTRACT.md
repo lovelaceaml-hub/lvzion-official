@@ -122,3 +122,7 @@ The owner's later reference uses separate rounded `+ Open` tiles and hour labels
 ## Shared persistent frame — approved October 18, 2026
 
 Anthony requested a persistent matching header and bottom control across pages, based on the supplied raised/glass Apps button references. This supersedes the wordmark header, desktop top navigation and no-glass restrictions for shared navigation. Use `AppFrame` in the root layout and register real module actions with `FrameControls`; do not add separate module bottom bars. The header shows the module symbol/title and circular member avatar. Home, centered Apps and More remain stable; the two neighboring actions follow the module. Glass stays an accent and content stays opaque. Full-screen TV playback remains immersive. See [implementation, mapping and verification](../SHARED-APP-FRAME-2026-10-19.md).
+
+### Later October 18 glass/date refinement
+
+Owner explicitly approved stronger reflective glass on dates and Reserve, a detailed shimmering Apps circle and today button, decorative Tuesday/Saturday glow, edge-to-edge square-corner header, and a deeper bottom dock. Dates precede a slim resource selector and show today plus three days within the configured booking horizon. Keep 44px targets, readable content, reduced-motion/transparency fallbacks and unchanged availability rules. See [refinement details](../GLASS-REFINEMENT-2026-10-19.md).

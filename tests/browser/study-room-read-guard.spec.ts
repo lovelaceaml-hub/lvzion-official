@@ -31,9 +31,9 @@ test('midnight refresh switches yesterday to the new Las Vegas booking day',asyn
  await page.clock.setFixedTime(new Date('2026-10-15T06:59:00Z'));
  const days:string[]=[];
  await page.route('**/api/study-rooms?**',route=>{const day=new URL(route.request().url()).searchParams.get('day')!;days.push(day);return route.fulfill({status:200,json:demoSchedule(day)});});
- await page.goto('/modules/study-rooms');await expect(page.getByLabel('Booking date',{exact:true})).toHaveValue('2026-10-14');
+ await page.goto('/modules/study-rooms');await expect(page.locator('.sr-day[aria-pressed="true"]')).toHaveAttribute('data-date','2026-10-14');
  await page.clock.setFixedTime(new Date('2026-10-15T07:01:00Z'));await page.evaluate(()=>window.dispatchEvent(new Event('focus')));
- await expect(page.getByLabel('Booking date',{exact:true})).toHaveValue('2026-10-15');expect(days).toEqual(['2026-10-14','2026-10-15']);
+ await expect(page.locator('.sr-day[aria-pressed="true"]')).toHaveAttribute('data-date','2026-10-15');expect(days).toEqual(['2026-10-14','2026-10-15']);
 });
 test('write access denial clears data without a second automatic read restoring it',async({page})=>{
  const fixture=demoSchedule(vegasDay());let reads=0;

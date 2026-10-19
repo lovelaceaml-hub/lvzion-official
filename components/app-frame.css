@@ -28,3 +28,17 @@
 @media(prefers-reduced-transparency:reduce){.app-frame-header,.app-frame-nav{background:var(--lvz-surface);backdrop-filter:none}}
 .app-frame-content>.ui-page{min-height:calc(100dvh - var(--frame-top) - var(--frame-bottom))}
 .app-frame-content .lvz-experience{padding-bottom:0}
+
+/* Edge-to-edge header and a clearly separated, jewel-like Apps dock. */
+.app-frame{--frame-top:calc(60px + env(safe-area-inset-top,0px));--frame-bottom:calc(100px + env(safe-area-inset-bottom,0px))}
+.app-frame-header{top:0;left:0;right:0;max-width:none;min-height:var(--frame-top);border:0;border-bottom:1px solid var(--lvz-line);border-radius:0;padding:calc(var(--lvz-space-1) + env(safe-area-inset-top,0px)) var(--lvz-space-4) var(--lvz-space-1);box-shadow:0 3px 12px color-mix(in srgb,var(--lvz-ink) 8%,transparent)}
+.app-frame-nav{bottom:calc(var(--lvz-space-3) + env(safe-area-inset-bottom,0px));min-height:76px;border:1px solid var(--lvz-surface);background:linear-gradient(145deg,color-mix(in srgb,var(--lvz-surface) 94%,transparent),color-mix(in srgb,var(--lvz-accent-soft) 88%,transparent));box-shadow:inset 0 2px 2px var(--lvz-surface),inset 0 -3px 5px color-mix(in srgb,var(--lvz-accent) 12%,transparent),0 12px 28px color-mix(in srgb,var(--lvz-ink) 24%,transparent),0 0 0 5px color-mix(in srgb,var(--lvz-surface) 55%,transparent)}
+.app-frame-nav .app-frame-apps{width:72px;height:72px;min-height:72px;justify-self:center;align-self:center;margin: -14px 0 0;padding:8px 0 6px;gap:2px;border:1px solid var(--lvz-surface);border-radius:50%;overflow:hidden;background:radial-gradient(ellipse at 30% 12%,var(--lvz-surface),var(--lvz-accent-soft) 52%,color-mix(in srgb,var(--lvz-accent) 30%,var(--lvz-surface)) 100%);box-shadow:inset 0 0 0 3px color-mix(in srgb,var(--lvz-surface) 65%,transparent),inset 0 -5px 9px color-mix(in srgb,var(--lvz-accent) 20%,transparent),inset 0 4px 7px var(--lvz-surface),0 6px 13px color-mix(in srgb,var(--lvz-ink) 27%,transparent),0 0 16px color-mix(in srgb,var(--lvz-accent-soft) 80%,transparent)}
+.app-frame-apps:before{inset:4px;top:4px;width:auto;height:auto;border:1px solid color-mix(in srgb,var(--lvz-surface) 80%,transparent);background:none;box-shadow:none}
+.app-frame-apps:after{content:"";position:absolute;inset:0;z-index:-1;pointer-events:none;background:linear-gradient(115deg,transparent 25%,color-mix(in srgb,var(--lvz-surface) 85%,transparent) 48%,transparent 70%);background-size:250% 100%;animation:lvz-glass-shimmer 7s ease-in-out infinite}
+.app-frame-apps .app-frame-orb{height:32px;width:40px}
+.app-frame-orb svg{fill:color-mix(in srgb,var(--lvz-accent) 85%,transparent);stroke:var(--lvz-accent-strong);stroke-width:1.2;filter:drop-shadow(0 1px 1px var(--lvz-surface))}
+.app-frame-content .sr-reserve-dock{bottom:calc(var(--frame-bottom) + 6px)}
+@keyframes lvz-glass-shimmer{0%,65%,100%{background-position:180% 0}35%{background-position:-80% 0}}
+@media(prefers-reduced-motion:reduce){.app-frame-apps:after{animation:none}}
+@media(prefers-reduced-transparency:reduce){.app-frame-nav{background:var(--lvz-surface);backdrop-filter:none}}
