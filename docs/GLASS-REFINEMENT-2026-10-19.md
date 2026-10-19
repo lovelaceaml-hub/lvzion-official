@@ -17,3 +17,7 @@ Production build, 386 application tests and 198 disposable SQL permission assert
 Previous production for rollback: `dpl_B4CDgswkqhY3kU7hjtajQ98thg97`, source `ebbedbdd486a87a835855307c501b99fe78ea7ba`. No database rollback required.
 
 After the server-horizon correction, the final production compilation and all 61 focused shared-frame/Study Rooms/group-access browser checks passed, including navigation beyond the first four dates. Combined with the broader run, 121 distinct browser cases passed. No new failure was excluded.
+
+## Production receipt
+
+PR #61 merged at `7f1128f7b85d93db58ff739e35dc08b15e8e374f`. Deployment `dpl_DieNhYCz7injBNmDtRUBaTDb6qs6` is READY on lvz.app and www.lvz.app. Provider readback confirms the exact source. Live Study Rooms returned HTTP 200 with the matching deployment identifier, and all three referenced stylesheets were fetched: four-date layout, glass shimmer and raised Apps styles are present. Verification used the Vercel connector; no hosted member transaction or booking was created.
