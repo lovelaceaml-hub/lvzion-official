@@ -17,3 +17,9 @@ The sample image supplies appearance only. Actual inventory, availability, dates
 Production build, TypeScript, 386 application tests and 198 disposable PostgreSQL permission assertions passed. Browser verification covers the actual module route with synthetic API fixtures and activation disabled, including phone/tablet layout, booking lifecycle, permission denials, stale reads and the authorized Apps launcher. Physical phones and genuine hosted member transactions remain separate acceptance checks.
 
 Final result: 51/51 Study Rooms and group-access browser checks passed on a clean production build. Screenshots reviewed at 320, 390 and 1280 pixels, including selected tile and reservation sheet. Browser runtime used the isolated Chromium package documented in the prior Soft Panels receipt. The previously reproduced unrelated sign-in/resend baseline failures are unchanged.
+
+## Production receipt
+
+PR #58 merged. Runtime source `0970a05efe43a53a76226df9a7aa14a4cae93404`, deployment `dpl_4WQDMt4aAxLmd83N8MANPyuMJ5sZ`, target production, project `lvzion-official`, team `lvzion`. Provider readback confirmed READY and the `lvz.app` / `www.lvz.app` aliases.
+
+Live Study Rooms returned HTTP 200. Served CSS contains the new Reserve dock and served JavaScript contains both the dock and hourly rail. Anonymous availability and admin APIs returned 401 with private/no-store caching. No real booking was created. Previous deployment `dpl_EW2kSavK6oHXme3AxLg7BhZTRytU` is a schema-compatible rollback target. This receipt is documentation only.
