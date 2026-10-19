@@ -110,3 +110,7 @@ WCAG 2.2 AA: text contrast at least 4.5:1, interface borders at least 3:1, visib
 ## Ownership
 
 The shared-core owner changes `styles/lvz-tokens.css`, `styles/lvz-ui.css`, `components/app-header.tsx`, `lib/use-swipe-tabs.ts`, `lib/design-tokens.ts` and this file. Module owners may request additions. `tests/design-tokens.test.ts` keeps script and CSS tokens in step and checks the swipe rule.
+
+## Study Rooms exception — approved October 18, 2026
+
+Anthony selected the Soft Panels reference as the Study Rooms design, with Floating Glass used only for accents. This supersedes the no-shadow/no-gradient and underline-navigation rules for this module only. Keep the shared palette, compact header, accessible controls and center Apps launcher. The booking grid stays opaque and readable: raised white resource columns, muted booked cells, green selection and a contextual Continue bar. Glass is limited to navigation and action accents. Resource inventory, dates and bookings come from this application's actual records; reference-image sample data is never seeded.

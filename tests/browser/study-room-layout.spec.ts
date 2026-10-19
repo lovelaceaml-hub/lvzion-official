@@ -1,3 +1,5 @@
+import {openManagement} from './study-navigation';
+import {startReservation} from './study-navigation';
 import {test,expect,type Page} from '@playwright/test';
 import {demoSchedule,vegasDay} from '../../lib/study-rooms/domain';
 import {openStudyRoute} from './study-route-fixture';
@@ -12,12 +14,12 @@ async function checkLayout(page:Page){
 for(const width of [320,390,1280])test(`member view at ${width}px keeps 44px targets and no sideways scroll`,async({page})=>{
  await page.setViewportSize({width,height:width>900?900:780});
  await openStudyRoute(page);
- await expect(page.getByRole('button',{name:'Reserve Now'})).toBeVisible();
+ await expect(page.getByRole('button',{name:'Schedule',exact:true})).toBeVisible();
  await checkLayout(page);await capture(page,`member-availability-${width}`);
- await page.getByRole('button',{name:'My Reservations',exact:true}).click();
+ await page.getByRole('button',{name:'Bookings',exact:true}).click();
  await expect(page.locator('.sr-my-list')).toContainText('Example contact');
  await checkLayout(page);await capture(page,`member-mine-${width}`);
- await page.getByRole('button',{name:'Reserve Now'}).click();
+ await startReservation(page);
  await expect(page.getByRole('dialog',{name:'Reserve a resource'})).toBeVisible();
  await capture(page,`member-reserve-sheet-${width}`);
 });
@@ -28,7 +30,8 @@ for(const width of [390,1280])test(`owner setup view at ${width}px keeps the clo
  await page.route('**/api/study-rooms/admin',route=>route.fulfill({status:200,json:{resources:schedule.resources.map(r=>({...r,active:true,version:1})),closures:[]}}));
  await page.route('**/api/study-rooms/operations',route=>route.fulfill({status:200,json:{version:1,bookingsOpen:false,newSystemBookings:0,weekly:[{weekday:2,start:1170,end:1230,label:'Evening service'}],specialDays:[]}}));
  await page.goto('/modules/study-rooms');
- await expect(page.getByRole('button',{name:/Bookings Not Open/})).toBeDisabled();
+ await expect(page.locator('.sr-gate')).toContainText('Bookings are paused.');
+ await openManagement(page);
  await expect(page.getByRole('heading',{name:'Inventory & service calendar'})).toBeVisible();
  await checkLayout(page);await capture(page,`owner-setup-${width}`);
 });
@@ -39,16 +42,16 @@ test('signed-out shell explains access and offers sign in',async({page})=>{
  await expect(page.getByRole('status')).not.toHaveText('Checking your reservation access…');
  await checkLayout(page);await capture(page,'signed-out-390');
 });
-test('header wordmark goes home and tab content swipes',async({page})=>{
+test('Home navigation and swipe between booking views work',async({page})=>{
  await openStudyRoute(page);
- await expect(page.getByRole('button',{name:'Reserve Now'})).toBeVisible();
- await expect(page.getByRole('link',{name:'LV Zion home',exact:true})).toHaveAttribute('href','/members');
- await expect(page.getByRole('button',{name:'Availability',exact:true})).toHaveAttribute('aria-current','page');
+ await expect(page.getByRole('button',{name:'Schedule',exact:true})).toBeVisible();
+ await expect(page.getByRole('link',{name:'Home',exact:true})).toHaveAttribute('href','/members');
+ await expect(page.getByRole('button',{name:'Schedule',exact:true})).toHaveAttribute('aria-current','page');
  const panel=page.locator('.sr-panel');const box=(await panel.boundingBox())!;
  const y=box.y+40;
  await panel.dispatchEvent('touchstart',{touches:[{identifier:1,clientX:300,clientY:y}],changedTouches:[{identifier:1,clientX:300,clientY:y}]});
  await panel.dispatchEvent('touchend',{touches:[],changedTouches:[{identifier:1,clientX:150,clientY:y+5}]});
- await expect(page.getByRole('button',{name:'My Reservations',exact:true})).toHaveAttribute('aria-current','page');
+ await expect(page.getByRole('button',{name:'Bookings',exact:true})).toHaveAttribute('aria-current','page');
 });
 
 test('selecting an open 30-minute cell prepares a reservation without saving it',async({page})=>{
@@ -58,7 +61,7 @@ test('selecting an open 30-minute cell prepares a reservation without saving it'
  const summary=page.locator('.sr-selection-bar');
  await expect(summary).toContainText('Room 2');
  await expect(page.getByRole('button',{name:'Room 2, 11:00 AM, available'})).toHaveAttribute('aria-pressed','true');
- await summary.getByRole('button',{name:'Reserve'}).click();
+ await summary.getByRole('button',{name:'Continue'}).click();
  const dialog=page.getByRole('dialog',{name:'Reserve a resource'});
  await expect(dialog).toBeVisible();
  await expect(dialog.getByLabel('Start',{exact:true})).toHaveValue('660');
@@ -83,4 +86,40 @@ test('center Apps button opens only authorized modules without leaving Study Roo
  await dialog.getByRole('button',{name:'Close apps'}).click();
  await expect(dialog).not.toBeVisible();
  await checkLayout(page);
+});
+
+
+test('date strip stays within the booking window and clears a selection',async({page})=>{
+ await openStudyRoute(page);
+ await expect(page.getByRole('button',{name:'Previous day',exact:true})).toBeDisabled();
+ await page.getByRole('button',{name:'Room 2, 11:00 AM, available',exact:true}).click();
+ await expect(page.getByRole('button',{name:'Continue',exact:true})).toBeVisible();
+ const dates=await page.getByLabel('Booking date',{exact:true}).locator('option').evaluateAll(es=>es.map(e=>(e as HTMLOptionElement).value));
+ await page.getByRole('button',{name:'Next day',exact:true}).click();
+ await expect(page.getByLabel('Booking date',{exact:true})).toHaveValue(dates[1]);
+ await expect(page.getByRole('button',{name:'Continue',exact:true})).toHaveCount(0);
+ await page.getByLabel('Booking date',{exact:true}).selectOption(dates.at(-1)!);
+ await expect(page.getByRole('button',{name:'Next day',exact:true})).toBeDisabled();
+});
+
+test('fresh occupied slot removes Continue without writing a reservation',async({page})=>{
+ const day=vegasDay(),s={...demoSchedule(day,day),nowMinute:540,bookingsOpen:true};
+ let taken=false,writes=0;
+ await page.route('**/api/study-rooms?**',r=>r.fulfill({json:{...s,bookings:taken?[...s.bookings,{id:'synthetic-competing-booking',resourceId:s.resources[1].id,day,start:660,end:690,state:'confirmed',mine:false,label:'Occupied'}]:s.bookings}}));
+ await page.route('**/api/study-rooms/command',r=>{writes++;return r.fulfill({json:{ok:true}});});
+ await page.goto('/modules/study-rooms');
+ await page.getByRole('button',{name:'Room 2, 11:00 AM, available',exact:true}).click();
+ await expect(page.getByRole('button',{name:'Continue',exact:true})).toBeVisible();
+ taken=true;await page.evaluate(()=>window.dispatchEvent(new Event('focus')));
+ await expect(page.getByRole('button',{name:'Continue',exact:true})).toHaveCount(0);
+ expect(writes).toBe(0);
+});
+
+test('an empty inventory has no invented rooms or reservation action',async({page})=>{
+ const day=vegasDay();
+ await page.route('**/api/study-rooms?**',r=>r.fulfill({json:{...demoSchedule(day,day),resources:[],bookings:[],blocks:[],bookingsOpen:true}}));
+ await page.goto('/modules/study-rooms');
+ await expect(page.getByText(/No room available/)).toBeVisible();
+ await expect(page.locator('.sr-scroll')).toHaveCount(0);
+ await expect(page.getByRole('button',{name:'Continue',exact:true})).toHaveCount(0);
 });

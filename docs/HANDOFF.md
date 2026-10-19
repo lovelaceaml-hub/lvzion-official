@@ -63,3 +63,7 @@ Work Mission uses owner-supplied dates, hosts, materials and meeting links. Sche
 Follow [release controls](RELEASE-GATES.md). Reconcile the [hosted ledger](HOSTED-MIGRATION-LEDGER.json), including the October 16 correction, before applying SQL. Do not replay applied migrations or use a blind database push. Never use fictional fixtures against production; the fixture seed now explicitly refuses hosted Auth schemas.
 
 Keep secrets in provider stores or personal Keychain. Preserve all existing authorization boundaries. Test the changed workflow and its denial paths, then verify exact deployed source and aliases. Choose a schema-compatible verified deployment for recovery; do not delete history, restore unapproved defaults or widen permissions as a rollback shortcut.
+
+## Study Rooms Soft Panels — October 18, 2026
+
+Anthony selected Soft Panels as the main Study Rooms interface with glass accents only, superseding the earlier Day Sheet visual rules for this module. The implementation preserves the compact header and authorized center Apps launcher; date navigation, the availability grid and Continue form the main flow. Manager tools and history are under More. See [design and verification](study-rooms/SOFT-PANELS-2026-10-18.md) for scope and test evidence.
