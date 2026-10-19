@@ -28,6 +28,7 @@ export default function StudyRooms(){
  const [day,setDay]=useState(''),[data,setData]=useState<Schedule|null>(null),[admin,setAdmin]=useState<AdminData>(),[operations,setOperations]=useState<StudyOperationsData>();
  const [error,setError]=useState(''),[warning,setWarning]=useState(''),[lastRefresh,setLastRefresh]=useState('');
  const [leadsGroup,setLeadsGroup]=useState(false);
+ const bookingHorizon=useRef(4);
  const sequence=useRef(0),controller=useRef<AbortController|null>(null);
  const access=useRef(createAccessEpoch()).current;
 
@@ -46,7 +47,7 @@ export default function StudyRooms(){
  },[access,clearAccess]);
 
  const load=useCallback(async(date:string):Promise<boolean>=>{
-  const nextDay=refreshBookingDay(date,vegasDay());
+  const nextDay=refreshBookingDay(date,vegasDay(),bookingHorizon.current);
   if(nextDay!==date){cancelReads();clearScreen();setDay(nextDay);return false;}
   const ticket=access.capture(),id=++sequence.current;
   controller.current?.abort();
@@ -59,6 +60,7 @@ export default function StudyRooms(){
     :[undefined,undefined];
    access.assert(ticket);
    if(id!==sequence.current)return false;
+   if(Number.isSafeInteger(schedule.horizon)&&schedule.horizon>=1&&schedule.horizon<=31)bookingHorizon.current=schedule.horizon;
    setData(schedule);setAdmin(config);setOperations(policy);setError('');setWarning('');
    setLastRefresh(vegasTime());
    return true;
@@ -123,3 +125,4 @@ export default function StudyRooms(){
    admin={admin} saveAdmin={c=>post('/api/study-rooms/admin',c)} submit={c=>post('/api/study-rooms/command',c)}
    operations={data.canManage&&operations?<StudyOperationsManager data={operations} today={data.today} save={c=>post('/api/study-rooms/operations',c)}/>:null}/>;
 }
+

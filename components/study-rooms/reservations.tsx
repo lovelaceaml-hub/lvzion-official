@@ -36,7 +36,6 @@ export default function Reservations({schedule:s,changeDay,submit,refresh,loadDa
  const [start,setStart]=useState<number|null>(null),[end,setEnd]=useState<number|null>(null),[step,setStep]=useState(0),[hold,setHold]=useState(false);
  const [busy,setBusy]=useState(false),[message,setMessage]=useState(''),[error,setError]=useState('');
  const [selectedSlot,setSelectedSlot]=useState<{id:string;time:number;day:string}|null>(null);
- const dateSelect=useRef<HTMLSelectElement>(null);
  const scheduleScroll=useRef<HTMLDivElement>(null),scheduleCanvas=useRef<HTMLDivElement>(null);
  const positionedSchedule=useRef('');
  const [nowTop,setNowTop]=useState<number|null>(null);
@@ -55,6 +54,9 @@ export default function Reservations({schedule:s,changeDay,submit,refresh,loadDa
  const selection=[resource,...extras];
  const selectedAvailable=selectedSlot?.day===s.day&&resources.some(r=>r.id===selectedSlot.id)&&validRange(s,selectedSlot.id,selectedSlot.time,selectedSlot.time+s.step);
  const lastDay=addDay(s.today,Math.max(0,s.horizon-1));
+ const selectedDayIndex=Math.max(0,Math.round((Date.parse(s.day+'T12:00:00Z')-Date.parse(s.today+'T12:00:00Z'))/86400000));
+ const dateWindow=Math.floor(selectedDayIndex/4)*4;
+ const shownDays=Array.from({length:Math.min(4,Math.max(0,s.horizon-dateWindow))},(_,i)=>addDay(s.today,dateWindow+i));
  const ends=start===null?[]:endOptions(s,selection,start);
 
  // Use the server's Las Vegas clock. Refresh moves the indicator, never the reader's scroll.
@@ -155,12 +157,18 @@ export default function Reservations({schedule:s,changeDay,submit,refresh,loadDa
 
    <div className="sr-layout">
     <section className="sr-primary-column" aria-label="Reservations">
+     {view!=='more'&&<div className="sr-date-window" role="group" aria-label="Booking days">
+      <button type="button" className="sr-date-arrow" aria-label="Previous day" disabled={s.day<=s.today} onClick={()=>changeDay(addDay(s.day,-1))}><ChevronLeft size={20}/></button>
+      <div className="sr-date-days">{shownDays.map(date=>{
+       const value=new Date(date+'T12:00:00Z'),special=[2,6].includes(value.getUTCDay());
+       return <button type="button" key={date} className="sr-day" data-date={date} data-today={date===s.today} data-special={special} aria-label={longDay(date)+(date===s.today?', today':'')} aria-pressed={date===s.day} onClick={()=>changeDay(date)}>
+        <span>{date===s.today?'Today':value.toLocaleDateString('en-US',{weekday:'short',timeZone:'UTC'})}</span><strong>{value.toLocaleDateString('en-US',{month:'short',day:'numeric',timeZone:'UTC'})}</strong>{special&&<i aria-hidden="true">✦</i>}
+       </button>;
+      })}</div>
+      <button type="button" className="sr-date-arrow" aria-label="Next day" disabled={s.day>=lastDay} onClick={()=>changeDay(addDay(s.day,1))}><ChevronLeft className="sr-next" size={20}/></button>
+     </div>}
      {view==='schedule'&&<div className="sr-segment" role="group" aria-label="Resource type">{(Object.keys(kindLabels) as Kind[]).map(id=><button type="button" key={id} aria-pressed={kind===id} onClick={()=>setKind(id)}><ResourceIcon kind={id}/><span>{id==='room'?'Study rooms':id==='whiteboard'?'Whiteboards':'TVs'}</span></button>)}</div>}
-     {view!=='more'&&<div className="sr-schedule-heading"><div className="sr-date-strip" aria-label="Booking days">
-      <button type="button" aria-label="Previous day" disabled={s.day<=s.today} onClick={()=>changeDay(addDay(s.day,-1))}><ChevronLeft size={20}/></button>
-      <select ref={dateSelect} aria-label="Booking date" value={s.day} onChange={e=>changeDay(e.target.value)}>{Array.from({length:s.horizon},(_,i)=>addDay(s.today,i)).map(date=><option key={date} value={date}>{new Date(date+'T12:00:00Z').toLocaleDateString('en-US',{weekday:'long',month:'short',day:'numeric',timeZone:'UTC'})}</option>)}</select>
-      <button type="button" aria-label="Next day" disabled={s.day>=lastDay} onClick={()=>changeDay(addDay(s.day,1))}><ChevronLeft className="sr-next" size={20}/></button>
-     </div>{view==='schedule'&&<p>Choose an open time to reserve it.</p>}</div>}
+     {view==='schedule'&&<p className="sr-choose-hint">Choose an open time to reserve it.</p>}
      {(view==='managed'||view==='history')&&<nav className="ui-tabs" aria-label="Reservation screens">{s.canManage&&tab('managed','Manage bookings')}{tab('history','History')}</nav>}
      <div className="sr-panel" {...swipe}>
       {view==='more'?<section className="sr-more"><h2>More</h2><button type="button" className="ui-row" onClick={()=>setView('history')}>Reservation history</button>{s.canManage&&<button type="button" className="ui-row" onClick={()=>setView('managed')}>Manage bookings & resources</button>}<button type="button" className="ui-row" onClick={refresh}>Refresh availability</button></section>:view==='history'?<ReservationHistory today={s.today} canManage={s.canManage} resources={s.resources} read={loadHistory}/>:<>

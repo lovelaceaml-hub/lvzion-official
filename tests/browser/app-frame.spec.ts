@@ -34,3 +34,32 @@ test('frame adapts to another module and remains on access-denied screens',async
 test('avatar endpoint denies anonymous access without caching profile data',async({request})=>{
  const r=await request.get('/api/members/avatar');expect(r.status()).toBe(401);expect(r.headers()['cache-control']).toContain('no-store');expect(await r.json()).not.toHaveProperty('initials');
 });
+test('date strip leads slim resources and glass effects respect reduced motion',async({page})=>{
+ await page.setViewportSize({width:320,height:760});
+ await openStudyRoute(page);
+ const days=page.locator('.sr-day');await expect(days).toHaveCount(4);
+ await expect(days.first()).toHaveAttribute('data-today','true');
+ const dates=await days.evaluateAll(items=>items.map(el=>({day:el.getAttribute('data-date')!,special:el.getAttribute('data-special')})));
+ for(const date of dates)expect(date.special).toBe(String([2,6].includes(new Date(date.day+'T12:00:00Z').getUTCDay())));
+ const dateBox=await page.locator('.sr-date-window').boundingBox(),resourceBox=await page.locator('.sr-segment').boundingBox();
+ expect(dateBox!.y+dateBox!.height).toBeLessThan(resourceBox!.y+1);expect(resourceBox!.height).toBeLessThanOrEqual(50);
+ const header=await page.locator('.app-frame-header').boundingBox();expect(header!.x).toBe(0);expect(header!.width).toBe(320);
+ const orb=await page.locator('.app-frame-apps').boundingBox();expect(orb!.width).toBe(orb!.height);
+ await page.emulateMedia({reducedMotion:'reduce'});
+ expect(await page.locator('.app-frame-apps').evaluate(el=>getComputedStyle(el,'::after').animationName)).toBe('none');
+ expect(await days.first().evaluate(el=>getComputedStyle(el,'::after').animationName)).toBe('none');
+});
+test('four-date groups advance through longer authorized booking windows',async({page})=>{
+ const {demoSchedule,addDay,vegasDay}=await import('../../lib/study-rooms/domain');
+ const today=vegasDay();
+ await page.route('**/api/study-rooms?**',r=>{const day=new URL(r.request().url()).searchParams.get('day')??today;return r.fulfill({json:{...demoSchedule(day,today),day,horizon:9}});});
+ await page.goto('/modules/study-rooms');
+ await expect(page.locator('.sr-day')).toHaveCount(4);
+ for(let i=1;i<=4;i++){await page.getByRole('button',{name:'Next day',exact:true}).click();await expect(page.locator('.sr-day[aria-pressed="true"]')).toHaveAttribute('data-date',addDay(today,i));}
+ await expect(page.locator('.sr-day').first()).toHaveAttribute('data-date',addDay(today,4));
+ await page.locator('.sr-day').last().click();
+ await expect(page.locator('.sr-day[aria-pressed="true"]')).toHaveAttribute('data-date',addDay(today,7));
+ await page.getByRole('button',{name:'Next day',exact:true}).click();
+ await expect(page.locator('.sr-day')).toHaveCount(1);
+ await expect(page.getByRole('button',{name:'Next day',exact:true})).toBeDisabled();
+});

@@ -20,9 +20,7 @@ test('today opens at current time and refresh preserves manual scrolling',async(
  await fixture.setNowMinute(856);
  await expect(page.getByRole('img',{name:'Current time 2:16 PM, Las Vegas'})).toBeAttached();
  expect(await scroll.evaluate(el=>el.scrollTop)).toBe(50);
- const select=page.getByLabel('Booking date');
- const next=await select.locator('option').nth(1).getAttribute('value');
- await select.selectOption(next!);
+ await page.locator('.sr-day').nth(1).click();
  await expect(page.locator('.sr-now-marker')).toHaveCount(0);
  await expect.poll(()=>scroll.evaluate(el=>el.scrollTop)).toBe(0);
 });

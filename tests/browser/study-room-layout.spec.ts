@@ -94,11 +94,11 @@ test('date strip stays within the booking window and clears a selection',async({
  await expect(page.getByRole('button',{name:'Previous day',exact:true})).toBeDisabled();
  await page.getByRole('button',{name:'Room 2, 11:00 AM, available',exact:true}).click();
  await expect(page.getByRole('button',{name:'Reserve',exact:true})).toBeVisible();
- const dates=await page.getByLabel('Booking date',{exact:true}).locator('option').evaluateAll(es=>es.map(e=>(e as HTMLOptionElement).value));
+ const dates=await page.locator('.sr-day').evaluateAll(es=>es.map(e=>e.getAttribute('data-date')));
  await page.getByRole('button',{name:'Next day',exact:true}).click();
- await expect(page.getByLabel('Booking date',{exact:true})).toHaveValue(dates[1]);
+ await expect(page.locator('.sr-day[aria-pressed="true"]')).toHaveAttribute('data-date',dates[1]!);
  await expect(page.locator('.sr-selection-summary')).toHaveCount(0);
- await page.getByLabel('Booking date',{exact:true}).selectOption(dates.at(-1)!);
+ await page.locator('.sr-day').last().click();
  await expect(page.getByRole('button',{name:'Next day',exact:true})).toBeDisabled();
 });
 
