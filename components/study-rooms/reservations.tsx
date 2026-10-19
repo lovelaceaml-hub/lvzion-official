@@ -1,7 +1,7 @@
 'use client';
 import {useRef,useState,useEffect} from 'react';
 import type {ReactNode} from 'react';
-import AppSwitcher from '../app-switcher';
+import {FrameControls} from '../app-frame';
 import {ArrowRight,CalendarDays,ChevronLeft,Clock3,Grid2X2,House,X} from '../home-icons';
 import {useSwipeTabs} from '../../lib/use-swipe-tabs';
 import {addDay,clock,startOptions,endOptions,purposes,validRange,bookingResources,kindLabels,purposeLabel,resourceNames} from '../../lib/study-rooms/domain';
@@ -36,7 +36,6 @@ export default function Reservations({schedule:s,changeDay,submit,refresh,loadDa
  const [start,setStart]=useState<number|null>(null),[end,setEnd]=useState<number|null>(null),[step,setStep]=useState(0),[hold,setHold]=useState(false);
  const [busy,setBusy]=useState(false),[message,setMessage]=useState(''),[error,setError]=useState('');
  const [selectedSlot,setSelectedSlot]=useState<{id:string;time:number;day:string}|null>(null);
- const [appsOpen,setAppsOpen]=useState(false);
  const dateSelect=useRef<HTMLSelectElement>(null);
  const scheduleScroll=useRef<HTMLDivElement>(null),scheduleCanvas=useRef<HTMLDivElement>(null);
  const positionedSchedule=useRef('');
@@ -148,12 +147,9 @@ export default function Reservations({schedule:s,changeDay,submit,refresh,loadDa
  </ul>;
 
  return <div className="ui-page sr-app" data-view={view} data-selection={Boolean(selectedSlot&&selectedAvailable&&view==='schedule'&&!closed)}>
-  {view!=='schedule'&&<header className="sr-topbar">
-   <h1>Study Rooms</h1>
-   <button type="button" className="sr-topbar-bookings" aria-label="Choose booking date" onClick={()=>{setView('schedule');requestAnimationFrame(()=>dateSelect.current?.focus());}}><CalendarDays size={21}/></button>
-  </header>}
+  <FrameControls left={{label:'Schedule',icon:'calendar',onClick:()=>setView('schedule'),active:view==='schedule'}} right={{label:'Bookings',icon:'clock',onClick:()=>setView('mine'),active:view==='mine'}} onMore={()=>setView('more')} moreActive={['more','managed','history'].includes(view)}/>
   <main className="ui-main sr-main">
-   {view==='schedule'&&<h1 className="ui-visually-hidden">Study Rooms</h1>}
+   <h1 className="ui-visually-hidden">Study Rooms</h1>
    {closed&&<p role="status" className="ui-notice sr-gate" data-tone="warning"><strong>Bookings are paused.</strong> Availability and reservations are managed within LV Zion Official.</p>}
    {message&&<p role="status" className="ui-notice sr-success" data-tone="success">{message}</p>}
 
@@ -190,20 +186,13 @@ export default function Reservations({schedule:s,changeDay,submit,refresh,loadDa
    {status}
   </main>
 
-  <nav className="sr-bottom-nav" aria-label="Study Room bottom navigation">
-   <a href="/members" aria-label="Home"><House size={21}/><span>Home</span></a>
-   <button type="button" onClick={()=>setView('schedule')} aria-current={view==='schedule'?'page':undefined}><CalendarDays size={21}/><span>Schedule</span></button>
-   <button type="button" className="sr-bottom-apps" aria-label="Open apps" onClick={()=>setAppsOpen(true)}><span className="sr-bottom-apps-icon"><Grid2X2 size={24}/></span><span>Apps</span></button>
-   <button type="button" onClick={()=>setView('mine')} aria-current={view==='mine'?'page':undefined}><Clock3 size={21}/><span>Bookings</span></button>
-   <button type="button" onClick={()=>setView('more')} aria-current={['more','managed','history'].includes(view)?'page':undefined}><span className="sr-more-icon" aria-hidden="true">•••</span><span>More</span></button>
-  </nav>
   {view==='schedule'&&resources.length>0&&<aside className="sr-reserve-dock" aria-label="Reservation action">
    {selectedSlot&&selectedAvailable&&!closed&&<div className="sr-selection-summary" role="status"><strong>{s.resources.find(r=>r.id===selectedSlot.id)?.name??'Resource'}</strong><span>{clock(selectedSlot.time)} – {clock(selectedSlot.time+s.step)}</span></div>}
    {selectedSlot&&!selectedAvailable&&!closed&&<p role="status" className="ui-hint">That time is no longer available. Choose another open time.</p>}
    <button type="button" className="ui-button" disabled={busy||closed||Boolean(selectedSlot&&!selectedAvailable)} onClick={()=>open(selectedSlot?.id,selectedSlot?.time)}><span>{closed?'Bookings paused':'Reserve'}</span><ArrowRight size={22}/></button>
   </aside>}
 
-  <AppSwitcher open={appsOpen} onClose={()=>setAppsOpen(false)}/>
+
 
   <dialog ref={dialog} className="ui-sheet sr-dialog" aria-label="Reserve a resource" onCancel={e=>{if(busy)e.preventDefault();}}><div className="ui-sheet-body">
    <div className="sr-sheet-head">

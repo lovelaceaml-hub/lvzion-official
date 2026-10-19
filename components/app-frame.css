@@ -1,0 +1,30 @@
+/* Shared glass accents surround opaque, readable module content. */
+.app-frame{--frame-top:calc(68px + env(safe-area-inset-top,0px));--frame-bottom:calc(88px + env(safe-area-inset-bottom,0px));padding-top:var(--frame-top);padding-bottom:var(--frame-bottom);min-height:100dvh}
+.app-frame-header,.app-frame-nav{position:fixed;left:var(--lvz-space-2);right:var(--lvz-space-2);margin:auto;max-width:900px;z-index:40;border:1px solid var(--lvz-surface);background:color-mix(in srgb,var(--lvz-surface) 94%,var(--lvz-accent-soft));box-shadow:inset 0 1px 2px var(--lvz-surface),0 4px 20px color-mix(in srgb,var(--lvz-ink) 9%,transparent)}
+.app-frame-header{top:calc(var(--lvz-space-2) + env(safe-area-inset-top,0px));min-height:52px;border-radius:var(--lvz-radius-round);padding:var(--lvz-space-1) var(--lvz-space-2) var(--lvz-space-1) var(--lvz-space-4);display:flex;align-items:center;justify-content:space-between;gap:var(--lvz-space-2)}
+.app-frame-heading{display:flex;align-items:center;gap:var(--lvz-space-2);min-width:0;font-size:var(--lvz-text-lg);font-weight:var(--lvz-weight-bold);line-height:1.2}
+.app-frame-heading svg{flex:none;color:var(--lvz-accent)}
+.app-frame-avatar{flex:none;display:grid;place-items:center;width:44px;height:44px;border-radius:var(--lvz-radius-round);border:1px solid var(--lvz-line);background:linear-gradient(145deg,var(--lvz-surface),var(--lvz-accent-soft));color:var(--lvz-accent-strong);font-size:var(--lvz-text-sm);font-weight:var(--lvz-weight-bold);text-decoration:none;box-shadow:inset 0 1px 2px var(--lvz-surface)}
+.app-frame-nav{bottom:calc(var(--lvz-space-2) + env(safe-area-inset-bottom,0px));display:grid;grid-template-columns:repeat(5,minmax(0,1fr));align-items:center;border-radius:var(--lvz-radius-round);padding:var(--lvz-space-1) var(--lvz-space-2);min-height:72px}
+.app-frame-nav>a,.app-frame-nav>button{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:var(--lvz-space-1);min-width:0;min-height:60px;border:0;padding:var(--lvz-space-1) 0;background:none;color:var(--lvz-ink-quiet);font-size:var(--lvz-text-xs);line-height:1.2;text-align:center;text-decoration:none;border-radius:var(--lvz-radius-md)}
+.app-frame-nav [aria-current="page"]{color:var(--lvz-accent-strong);font-weight:var(--lvz-weight-bold)}
+.app-frame-nav .app-frame-apps{color:var(--lvz-accent-strong);font-weight:var(--lvz-weight-bold);position:relative;isolation:isolate;gap:2px;margin-top:-12px}
+.app-frame-orb{width:52px;height:48px;display:grid;place-items:center}
+.app-frame-apps:before{content:"";position:absolute;z-index:-1;top:-4px;width:72px;height:72px;border-radius:var(--lvz-radius-round);border:1px solid var(--lvz-surface);background:radial-gradient(circle at 30% 20%,var(--lvz-surface),var(--lvz-accent-soft) 70%);box-shadow:inset 0 0 8px var(--lvz-surface),0 3px 12px color-mix(in srgb,var(--lvz-accent) 18%,transparent)}
+.app-frame-menu-heading{display:flex;justify-content:space-between;align-items:center}
+.app-frame-menu button,.app-frame-menu a{display:flex;align-items:center;gap:var(--lvz-space-3);min-height:48px;border:0;background:none;color:var(--lvz-ink);text-decoration:none;font-size:var(--lvz-text-md)}
+.app-frame-menu-heading button{min-width:44px;justify-content:center}
+.app-frame-page-actions:empty{display:none}
+.app-frame-page-actions{max-width:var(--lvz-content-max);margin:auto;padding:var(--lvz-space-2) var(--lvz-gutter)}
+.app-frame-content .lvz-body{padding-top:var(--lvz-space-3)}
+.app-frame-content .lvz-experience{min-height:0}
+.app-frame-content .sr-app[data-view="schedule"] .sr-main{padding-top:var(--lvz-space-2)}
+.app-frame-content .sr-scroll,.app-frame-content .sr-app[data-selection="true"] .sr-scroll{max-height:calc(100dvh - 380px - env(safe-area-inset-top,0px) - env(safe-area-inset-bottom,0px))}
+.app-frame-content .sr-reserve-dock{bottom:var(--frame-bottom);z-index:35}
+.app-frame-content .sr-main,.app-frame-content .sr-app[data-view="schedule"] .sr-main{padding-bottom:100px}
+@supports(backdrop-filter:blur(16px)){
+ .app-frame-header,.app-frame-nav{background:color-mix(in srgb,var(--lvz-surface) 84%,transparent);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px)}
+}
+@media(prefers-reduced-transparency:reduce){.app-frame-header,.app-frame-nav{background:var(--lvz-surface);backdrop-filter:none}}
+.app-frame-content>.ui-page{min-height:calc(100dvh - var(--frame-top) - var(--frame-bottom))}
+.app-frame-content .lvz-experience{padding-bottom:0}

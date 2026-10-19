@@ -1,6 +1,6 @@
 'use client';
 import {useEffect,useRef,useState} from 'react';
-import AppHeader from './app-header';
+import {FrameControls} from './app-frame';
 import {ArrowDown,ArrowUp,X} from './home-icons';
 import {useSwipeTabs} from '../lib/use-swipe-tabs';
 import DisplayVisual from './display-visual';
@@ -142,7 +142,7 @@ export default function DisplayManager(){
  </aside>;
  const moveSlide=(from:number,to:number)=>{update(a=>{const copy=[...a];[copy[from],copy[to]]=[copy[to],copy[from]];return copy;});setSelected(to);};
  return <div className="ui-page cd-manage">
-  <AppHeader homeHref="/members"/>
+  <FrameControls title="Church Display" left={{label:'Content',icon:'display',onClick:()=>setTab('content'),active:tab==='content'}} right={{label:'Screens',icon:'display',onClick:()=>setTab('screens'),active:tab==='screens'}} more={[{label:'Playlist',icon:'calendar',onClick:()=>setTab('playlist')},{label:'Publish',icon:'display',onClick:()=>setTab('publish')}]}/>
   <main className="ui-main">
    <p className="ui-kicker">{screen?.label||'Your displays'}</p>
    <h1 className="ui-title">Church Display</h1>
@@ -203,3 +203,4 @@ export default function DisplayManager(){
   </main>
  </div>;
 }
+

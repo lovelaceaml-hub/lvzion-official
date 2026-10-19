@@ -34,7 +34,7 @@ test('fictional phone editor supports screen switching and versioned operating h
    body:JSON.stringify(data.action==='createScreen'?{screenId:'30000000-0000-4000-8000-000000000002'}:{configVersion:1})});
  });
  await page.goto('/display-operations-review');await expect(page.getByRole('heading',{name:'Church Display'})).toBeVisible();
- await page.getByRole('button',{name:'Screens',exact:true}).click();
+ await page.locator('.ui-tabs').getByRole('button',{name:'Screens',exact:true}).click();
  await page.getByLabel('Limit playback to selected hours').check();
  await page.getByRole('button',{name:'Save operating hours'}).click();
  await expect.poll(()=>writes.some(w=>w.action==='hours'&&w.hours.length===7)).toBeTruthy();
@@ -82,7 +82,7 @@ test('fictional management never publishes unsaved per-slide scheduling edits',a
  await page.getByLabel('Show only during specific dates and times').check();
  await page.getByRole('button',{name:'Publish',exact:true}).click();
  await expect(page.getByRole('button',{name:'Publish approved playlist'})).toBeDisabled();
- await page.getByRole('button',{name:'Content',exact:true}).click();
+ await page.locator('.ui-tabs').getByRole('button',{name:'Content',exact:true}).click();
  await page.getByRole('button',{name:'Save draft'}).click();
  await expect.poll(()=>writes.some(w=>w.action==='save'&&w.slides[0].startsAt&&w.slides[0].endsAt)).toBeTruthy();
  expect(writes.every(w=>w.action!=='publish')).toBe(true);
@@ -113,11 +113,11 @@ test('manager fits a 320px phone on every tab and a sideways swipe changes tabs'
  await page.route('**/api/display/manage',route=>route.fulfill({status:200,contentType:'application/json',body:JSON.stringify({screens:[baseScreen()]})}));
  await page.goto('/display-operations-review');await expect(page.getByRole('heading',{name:'Church Display'})).toBeVisible();
  for(const tab of ['Content','Playlist','Publish','Screens']){
-  await page.getByRole('button',{name:tab,exact:true}).click();
-  await expect(page.getByRole('button',{name:tab,exact:true})).toHaveAttribute('aria-current','page');
+  await page.locator('.ui-tabs').getByRole('button',{name:tab,exact:true}).click();
+  await expect(page.locator('.ui-tabs').getByRole('button',{name:tab,exact:true})).toHaveAttribute('aria-current','page');
   expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);
  }
- await page.getByRole('button',{name:'Content',exact:true}).click();
+ await page.locator('.ui-tabs').getByRole('button',{name:'Content',exact:true}).click();
  await page.locator('.cd-layout').evaluate(el=>{
   const touch=(x:number)=>new Touch({identifier:1,target:el,clientX:x,clientY:300});
   el.dispatchEvent(new TouchEvent('touchstart',{bubbles:true,touches:[touch(260)],changedTouches:[touch(260)]}));
@@ -125,3 +125,4 @@ test('manager fits a 320px phone on every tab and a sideways swipe changes tabs'
  });
  await expect(page.getByRole('button',{name:'Playlist',exact:true})).toHaveAttribute('aria-current','page');
 });
+

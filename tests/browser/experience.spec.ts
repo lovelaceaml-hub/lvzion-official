@@ -6,7 +6,7 @@ test('new phone home provides Today, Week and 42-cell Calendar views',async({pag
  await expect(page.getByText('Example Activity 01').first()).toBeVisible();
  await page.getByRole('button',{name:'Week',exact:true}).click();
  await expect(page.getByRole('heading',{name:'This week'})).toBeVisible();
- await page.getByRole('button',{name:'Calendar',exact:true}).click();
+ await page.locator('.lvz-period-tabs').getByRole('button',{name:'Calendar',exact:true}).click();
  await expect(page.locator('.lvz-day')).toHaveCount(42);
  await page.getByRole('button',{name:'Next month'}).click();
  await page.getByRole('button',{name:'Previous month'}).click();
@@ -67,3 +67,4 @@ test('member roster preview links to home and honors profile/directory deep link
  await expect(page).toHaveURL(/tab=profile/);
  await expect(page.getByRole('heading',{name:'My profile'})).toBeVisible();
 });
+

@@ -15,6 +15,7 @@ import type{MemberActivity,ModuleEntry}from'../lib/member-experience';
 import type{ModuleFeed,ModuleNotice}from'../lib/app-runtime';
 import {useSwipeTabs} from '../lib/use-swipe-tabs';
 import './member-home.css';
+import {FrameControls} from './app-frame';
 
 type Props={
  workspace:Workspace;demo?:boolean;manageHref:string;experience?:ModuleFeed;
@@ -143,18 +144,10 @@ export default function MemberHome({workspace:w,demo=false,manageHref,experience
  }
  const appIcon=(a:ModuleEntry,className:string)=><span className={className} aria-hidden="true">{a.shortName}</span>;
  return <div className="lvz-experience">
-  <header className="lvz-experience-header">
-   <button className="lvz-wordmark" type="button" onClick={resetHome} aria-label="LV Zion home">LV<span>Zion</span></button>
-   <nav className="lvz-bottom-nav" aria-label="Main navigation">
-    <button type="button" className={section==='home'?'lvz-nav-active':''} onClick={resetHome} aria-label="Home" aria-current={section==='home'?'page':undefined}><House size={21}/><span>Home</span></button>
-    <button type="button" className="lvz-apps-trigger" onClick={openApps} aria-label="Open apps"><Grid2X2 size={21}/><span>Apps</span></button>
-    <button type="button" className={section==='notifications'?'lvz-nav-active':''} onClick={()=>switchSection('notifications')} aria-label="Notifications" aria-current={section==='notifications'?'page':undefined}>
-     <span className="lvz-bell-wrapper"><Bell size={21}/>{notices.length>0&&<i/>}</span><span>Notifications</span></button>
-   </nav>
-   <div className="lvz-header-right">{demo&&<span className="lvz-private-label">Example</span>}
-    <a href={route('profile')} className="lvz-user-avatar" aria-label="My profile">{initials(w.self.name)}</a>
-   </div>
-  </header>
+  <FrameControls name={w.self.name} profileHref={route('profile')} onHome={resetHome} onApps={openApps}
+   left={{label:'Calendar',icon:'calendar',onClick:()=>{setSection('home');choosePeriod('calendar');},active:section==='home'&&period==='calendar'}}
+   right={{label:'Notifications',icon:'bell',onClick:()=>switchSection('notifications'),active:section==='notifications'}}
+   more={userManages?[{label:'Manage',icon:'people',onClick:()=>switchSection('manage')}]:[]}/>
   {demo&&<div className="lvz-demo-banner"><Info size={16}/><span>Fictional content only. No official activities or apps are connected.</span></div>}
   <main className="lvz-body">
   {section==='home'&&<div className="lvz-home-grid">
@@ -283,3 +276,4 @@ export default function MemberHome({workspace:w,demo=false,manageHref,experience
   </dialog>
  </div>;
 }
+

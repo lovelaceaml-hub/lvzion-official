@@ -24,17 +24,17 @@ test('swiping the day view moves between Today, Week and Calendar without wrappi
  await swipe(page,'.lvz-feature-section',120);
  await expect(tab('Today')).toHaveAttribute('aria-pressed','true');
 });
-test('tapping the wordmark returns to Home from any section',async({page})=>{
+test('persistent Home returns from any section',async({page})=>{
  await page.goto('/experience-preview');
  await page.getByRole('button',{name:'Notifications'}).click();
  await expect(page.getByRole('heading',{name:'Notifications',exact:true})).toBeVisible();
- await page.getByRole('button',{name:'LV Zion home'}).click();
+ await page.getByRole('button',{name:'Home',exact:true}).click();
  await expect(page.getByRole('heading',{name:/^Good (morning|afternoon|evening), /})).toBeVisible();
 });
 test('member workspace tabs also switch by swipe',async({page})=>{
  await page.goto('/member-preview');
  await swipe(page,'.members-app',-120);
- await expect(page.getByRole('button',{name:'My Group',exact:true})).toHaveAttribute('aria-current','page');
+ await expect(page.locator('.member-tabs').getByRole('button',{name:'My Group',exact:true})).toHaveAttribute('aria-current','page');
 });
 for(const path of ['/sign-in','/sign-up','/experience-preview','/member-preview','/install']){
  test(`${path} fits a 320px phone and uses the Day Sheet ground`,async({page})=>{
@@ -43,3 +43,4 @@ for(const path of ['/sign-in','/sign-up','/experience-preview','/member-preview'
   expect(await page.evaluate(()=>getComputedStyle(document.body).backgroundColor)).toBe('rgb(242, 244, 241)');
  });
 }
+

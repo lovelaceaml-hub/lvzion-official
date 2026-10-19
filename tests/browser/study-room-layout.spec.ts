@@ -76,7 +76,7 @@ test('center Apps button opens only authorized modules without leaving Study Roo
   activities:[],notifications:[],favorites:[],favoriteVersion:0
  }}));
  await openStudyRoute(page);
- const nav=page.getByRole('navigation',{name:'Study Room bottom navigation'});
+ const nav=page.getByRole('navigation',{name:'Main navigation'});
  await expect(nav.locator(':scope > *').nth(2)).toHaveAttribute('aria-label','Open apps');
  await nav.getByRole('button',{name:'Open apps'}).click();
  const dialog=page.getByRole('dialog',{name:'Apps'});
