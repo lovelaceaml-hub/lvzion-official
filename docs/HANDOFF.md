@@ -14,13 +14,17 @@ The owner selected prototype 06, refined its layout, and requested implementatio
 
 Local release gates passed: 387 application tests, 198 additional PostgreSQL permission assertions, TypeScript/production build, and the complete 131-case browser suite with no exclusions. The older sign-in/resend, time-dependent Display and midnight-sensitive Work Mission fixture failures were repaired in tests only. Responsive screenshots and real-route synthetic bookings were checked at 320, 390 and 1280 px; this is not physical-phone or real hosted booking acceptance.
 
+Released October 19 at 07:09 UTC from `2f80bbd773e61cda59eaf9d01b12337fba766496`. Deployment `dpl_J9vTBQ2woZQ8a6abcCKicnUBxzVj` is READY with `lvz.app` and `www.lvz.app` aliases. The live Study Rooms page returns HTTP 200 and identifies this exact deployment; its three loaded CSS chunks include the lavender/plum tokens, attached tabs, viewport layout and standard 6 px / 12 px glass blur. The canonical `www` redirect returns 308 to `lvz.app`.
+
+Read-only live GET checks of Study Rooms availability and administration returned HTTP 401 without an application member session. No production booking transaction was used for this verification.
+
 ## Infrastructure and verified release
 
 - Repository: `lovelaceaml-hub/lvzion-official`.
 - Vercel: `lvzion-official`, project `prj_4icc6S1jw8OVKWD9AOI1oiB5fwYe`, team `lvzion`.
 - Supabase: `otecqlkqirncotytbfns`, Las Vegas Zion organization.
-- Production source: `dfad3817911f2ba195a21762986f54cceed46d78`.
-- Production deployment: `dpl_HxTFTX6mRCn4JAUH3Mv4mSsuj7ZC`, READY, `lvz.app` and `www.lvz.app` aliases verified.
+- Production source: `2f80bbd773e61cda59eaf9d01b12337fba766496`.
+- Production deployment: `dpl_J9vTBQ2woZQ8a6abcCKicnUBxzVj`, READY, `lvz.app` and `www.lvz.app` aliases verified.
 - Fresh calendar correction: repository migration `20261016180000_study_rooms_fresh_calendar.sql`, applied hosted version `20261016173939`.
 
 Documentation-only commits after the runtime source do not require another deployment. Read current provider state rather than assuming a recorded snapshot cannot change. Automatic Git deployments remain disabled; no unrequested previews are authorized.
@@ -38,7 +42,7 @@ Production deployment `dpl_99bVq58phv1XR6dKcpvkruaXsQ21` is READY on `lvz.app`; 
 
 At release the live database had zero active leader appointments and zero placed members, so nobody gained access yet. Access starts as leaders are appointed and members are placed.
 
-Not verified: a real signed-in group leader turning a member on, and physical phones. Six existing Study Rooms browser tests fail on main independently of this release (they also fail on `d44e6cc`).
+Not verified: a real signed-in group leader turning a member on, and physical phones. At that release, six existing Study Rooms browser tests failed independently of the change (they also failed on `d44e6cc`). The current Lavender Softform release supersedes that browser-test status with a complete 131-case pass.
 
 ## Study Rooms — correction completed
 

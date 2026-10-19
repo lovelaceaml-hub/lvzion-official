@@ -47,7 +47,31 @@ The first full run exposed four unrelated fixture failures. The Display fixture 
 
 The initial production candidate (`69b5686cb8b725a323967c7ee9069971f253eb8f`, deployment `dpl_DbaFDZuHL2hVqRuqxXdcXiEqn7US`) stopped during its disposable-database tests near Las Vegas midnight. An existing Work Mission fixture moved an event five minutes forward but retained today's local date. The fixture now derives its date, end and access expiry from one future start timestamp. A deterministic regression covers daylight time, standard time and year rollover, and verifies that the existing database guard still rejects the wrong date. The rebuilt 387-test gate passed. Application runtime files are unchanged from the 131-case browser verification; this follow-up changes only the fixture and release documentation. The failed candidate never replaced the previous live release.
 
-Browser fixtures use synthetic data on the real module route. They do not represent a real member's production reservation, hosted BotID acceptance or physical-device acceptance. The exact production receipt is recorded after deliberate deployment.
+Browser fixtures use synthetic data on the real module route. They do not represent a real member's production reservation, hosted BotID acceptance or physical-device acceptance.
+
+## Production release receipt
+
+The deliberately requested production deployment became READY at **2026-10-19 07:09:01 UTC**. The source and live assets were verified on October 19 after promotion.
+
+| Release field | Verified value |
+| --- | --- |
+| Application | [Study Rooms on lvz.app](https://lvz.app/modules/study-rooms) |
+| Source commit | `2f80bbd773e61cda59eaf9d01b12337fba766496` |
+| Source tree | `ccbe1f41e3afd8569293290caf7e2c5da3055c54` |
+| Design change | [PR #63](https://github.com/lovelaceaml-hub/lvzion-official/pull/63) |
+| Midnight fixture correction | [PR #64](https://github.com/lovelaceaml-hub/lvzion-official/pull/64) |
+| Deployment | `dpl_J9vTBQ2woZQ8a6abcCKicnUBxzVj` |
+| Deployment URL | `lvzion-official-rm5y8r5mw-lvzion.vercel.app` |
+| Target and state | `production`, `READY`, no alias error |
+| Production aliases | `lvz.app`, `www.lvz.app` |
+| Production build | 387 application tests, 198 additional PostgreSQL permission assertions, TypeScript and optimized Next.js build passed |
+| Browser verification | 131 of 131 passed; application runtime unchanged by the fixture-only follow-up |
+
+The live `https://lvz.app/modules/study-rooms` response returned **HTTP 200** with `data-dpl-id="dpl_J9vTBQ2woZQ8a6abcCKicnUBxzVj"`. The `www` route returned **308** to the canonical `lvz.app` route. All three CSS assets referenced by that live document returned HTTP 200. Their contents retain the route-scoped lavender/plum tokens, attached-header tabs, viewport frame mode, uncapped schedule scroll region, 28%/18% translucent Reserve surface, standard 6 px Reserve blur and 12 px dock blur, and reduced-motion/reduced-transparency fallbacks.
+
+Read-only production requests without an application member session returned **HTTP 401** for `/api/study-rooms?day=2026-10-19` at 07:19:29 UTC and `/api/study-rooms/admin` at 07:19:45 UTC. These checks used the deployment provider's fetch service; provider-level access does not supply an application member session. The returned summaries did not expose the cache-control header, so no live cache-policy claim is made from those responses. Booking interactions and denial/cache-policy assertions remain covered by the complete synthetic browser and application suites.
+
+This receipt is a documentation-only follow-up to the deployed source. It does not change application runtime or require another deployment. The concurrent Work Mission documentation updates were preserved.
 
 ## Recovery
 
