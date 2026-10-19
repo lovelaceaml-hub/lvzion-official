@@ -1,0 +1,57 @@
+{
+  "module_url": "https://lvz.app/modules/work-mission-prayer",
+  "milestone": "R6 historical interface cleanup",
+  "source_commit": "04583159c090c43d790458e4f4197d6a62e9b245",
+  "pull_requests": [
+    "https://github.com/lovelaceaml-hub/lvzion-official/pull/42",
+    "https://github.com/lovelaceaml-hub/lvzion-official/pull/43"
+  ],
+  "deployment_id": "dpl_5nkVQyVZowo3ovS67NdrNwMdQY32",
+  "deployment_status_at_release": "READY",
+  "environment": "production",
+  "aliases_at_release": ["lvz.app", "www.lvz.app"],
+  "verified_local_date_at_release": "2026-10-14",
+  "supabase_project": "otecqlkqirncotytbfns",
+  "database_changes_in_r6": false,
+  "historical_checks_2026_10_14": {
+    "application_tests": 375,
+    "sql_assertions": 198,
+    "existing_browser_tests": 87,
+    "work_mission_client_tests": 15,
+    "live_anonymous_origin_checks": 15,
+    "new_work_mission_runtime_error_clusters": 0
+  },
+  "follow_up_2026_10_18": {
+    "observed_live_source": "7f1128f7b85d93db58ff739e35dc08b15e8e374f",
+    "observed_live_deployment": "dpl_DieNhYCz7injBNmDtRUBaTDb6qs6",
+    "observed_live_status": "READY",
+    "observed_live_aliases": ["lvz.app", "www.lvz.app"],
+    "r6_is_ancestor_of_current_main": true,
+    "focused_live_smoke_checks": 8,
+    "full_suite_run": false,
+    "application_changes": false,
+    "hosted_state": {
+      "rls_tables": 15,
+      "active_module_grants": 1,
+      "active_capability_grants": 7,
+      "occurrences": 0,
+      "material_publications": 0,
+      "meeting_references": 0
+    }
+  },
+  "owner_sourced_details_remaining": [
+    "authoritative gathering dates and exceptions",
+    "verified meeting links and joining window",
+    "approved material wording and source review",
+    "eligible hosts and explicit coordinator/member access"
+  ],
+  "unverified": [
+    "real hosted owner save",
+    "real permitted member meeting join",
+    "physical iOS/Safari/Android acceptance",
+    "full accessibility certification"
+  ],
+  "outbound_distribution_enabled": false,
+  "historical_r6_rollback_deployment": "dpl_8Jj8U36EVYvWaFRtvd2xBQxi8xKs",
+  "rollback_notice": "Historical R6 compatibility only. Revalidate later schema and concurrent modules before choosing any current rollback."
+}

@@ -56,7 +56,7 @@ Contacts remains an explicitly granted private owner workspace. Preserve forced 
 
 Continuous Display uses approved publications and explicitly paired devices. Do not confuse a browser test with physical TV acceptance. [Operations](continuous-display/OPERATIONS-R2.md).
 
-Work Mission uses owner-supplied dates, hosts, materials and meeting links. Schedule/material/people management and the protected meeting broker remain intact. Do not infer dates or enable outbound distribution. Real owner save/member join and physical-device acceptance remain distinct checks. [Completion](morning-prayer/COMPLETION-R5.md), [interface](morning-prayer/SIMPLER-R6.md).
+Work Mission uses owner-supplied dates, hosts, materials and meeting links. Schedule/material/people management and the protected meeting broker remain intact. Do not infer dates or enable outbound distribution. Real owner save/member join and physical-device acceptance remain distinct checks. [Completion](morning-prayer/COMPLETION-R5.md), [historical R6 interface and October 18 focused verification](morning-prayer/SIMPLER-R6.md), [release receipt](morning-prayer/RELEASE-R6.json). The October 18 read-only check still found one module grant, seven capabilities and zero gatherings/publications/meeting references. Eight live signed-out/origin checks passed on the newer READY shared-frame release; no full suite was rerun.
 
 ## Development and recovery
 
