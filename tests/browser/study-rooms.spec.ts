@@ -3,7 +3,7 @@ import {startReservation} from './study-navigation';
 import {openStudyRoute} from './study-route-fixture';
 import {test,expect} from '@playwright/test';
 test('Study Rooms opens with room, whiteboard and TV availability',async({page})=>{
- await openStudyRoute(page);await expect(page.getByRole('heading',{name:'Study Rooms'})).toBeVisible();
+ await openStudyRoute(page);await expect(page.getByRole('group',{name:'Resource type'})).toBeVisible();
  await expect(page.getByRole('button',{name:'Schedule',exact:true})).toBeVisible();await expect(page.getByRole('columnheader',{name:'Room 4'})).toBeVisible();
  await page.getByRole('button',{name:'Whiteboards',exact:true}).click();await expect(page.getByRole('columnheader',{name:'Board 5'})).toBeVisible();
  await page.getByRole('button',{name:'TVs',exact:true}).click();await expect(page.getByRole('columnheader',{name:'TV 3'})).toBeVisible();

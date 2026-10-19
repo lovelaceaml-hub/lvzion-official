@@ -93,7 +93,7 @@ test('special-day override can intentionally contain no service restrictions',as
 });
 test('a regular member cannot see private manager policy controls',async({page})=>{
  await setup(page,false);
- await expect(page.getByRole('button',{name:'Bookings'})).toBeVisible();
+ await expect(page.getByRole('button',{name:'Bookings',exact:true})).toBeVisible();
  await expect(page.getByRole('heading',{name:'Inventory & service calendar'})).toHaveCount(0);
  await expect(page.locator('.sr-gate')).toContainText('Bookings are paused.');
 });
