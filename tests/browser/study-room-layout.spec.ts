@@ -58,10 +58,10 @@ test('selecting an open 30-minute cell prepares a reservation without saving it'
  await page.setViewportSize({width:390,height:780});
  await openStudyRoute(page);
  await page.getByRole('button',{name:'Room 2, 11:00 AM, available'}).click();
- const summary=page.locator('.sr-selection-bar');
- await expect(summary).toContainText('Room 2');
+ const summary=page.locator('.sr-reserve-dock');
+ await expect(summary).toContainText('Room 2');await capture(page,'selected-tile-390');
  await expect(page.getByRole('button',{name:'Room 2, 11:00 AM, available'})).toHaveAttribute('aria-pressed','true');
- await summary.getByRole('button',{name:'Continue'}).click();
+ await summary.getByRole('button',{name:'Reserve'}).click();
  const dialog=page.getByRole('dialog',{name:'Reserve a resource'});
  await expect(dialog).toBeVisible();
  await expect(dialog.getByLabel('Start',{exact:true})).toHaveValue('660');
@@ -93,25 +93,25 @@ test('date strip stays within the booking window and clears a selection',async({
  await openStudyRoute(page);
  await expect(page.getByRole('button',{name:'Previous day',exact:true})).toBeDisabled();
  await page.getByRole('button',{name:'Room 2, 11:00 AM, available',exact:true}).click();
- await expect(page.getByRole('button',{name:'Continue',exact:true})).toBeVisible();
+ await expect(page.getByRole('button',{name:'Reserve',exact:true})).toBeVisible();
  const dates=await page.getByLabel('Booking date',{exact:true}).locator('option').evaluateAll(es=>es.map(e=>(e as HTMLOptionElement).value));
  await page.getByRole('button',{name:'Next day',exact:true}).click();
  await expect(page.getByLabel('Booking date',{exact:true})).toHaveValue(dates[1]);
- await expect(page.getByRole('button',{name:'Continue',exact:true})).toHaveCount(0);
+ await expect(page.locator('.sr-selection-summary')).toHaveCount(0);
  await page.getByLabel('Booking date',{exact:true}).selectOption(dates.at(-1)!);
  await expect(page.getByRole('button',{name:'Next day',exact:true})).toBeDisabled();
 });
 
-test('fresh occupied slot removes Continue without writing a reservation',async({page})=>{
+test('fresh occupied slot disables Reserve without writing a reservation',async({page})=>{
  const day=vegasDay(),s={...demoSchedule(day,day),nowMinute:540,bookingsOpen:true};
  let taken=false,writes=0;
  await page.route('**/api/study-rooms?**',r=>r.fulfill({json:{...s,bookings:taken?[...s.bookings,{id:'synthetic-competing-booking',resourceId:s.resources[1].id,day,start:660,end:690,state:'confirmed',mine:false,label:'Occupied'}]:s.bookings}}));
  await page.route('**/api/study-rooms/command',r=>{writes++;return r.fulfill({json:{ok:true}});});
  await page.goto('/modules/study-rooms');
  await page.getByRole('button',{name:'Room 2, 11:00 AM, available',exact:true}).click();
- await expect(page.getByRole('button',{name:'Continue',exact:true})).toBeVisible();
+ await expect(page.getByRole('button',{name:'Reserve',exact:true})).toBeVisible();
  taken=true;await page.evaluate(()=>window.dispatchEvent(new Event('focus')));
- await expect(page.getByRole('button',{name:'Continue',exact:true})).toHaveCount(0);
+ await expect(page.getByRole('button',{name:'Reserve',exact:true})).toBeDisabled();
  expect(writes).toBe(0);
 });
 
@@ -121,5 +121,21 @@ test('an empty inventory has no invented rooms or reservation action',async({pag
  await page.goto('/modules/study-rooms');
  await expect(page.getByText(/No room available/)).toBeVisible();
  await expect(page.locator('.sr-scroll')).toHaveCount(0);
- await expect(page.getByRole('button',{name:'Continue',exact:true})).toHaveCount(0);
+ await expect(page.getByRole('button',{name:'Reserve',exact:true})).toHaveCount(0);
+});
+
+test('reference layout uses separate open tiles and a labelled hourly rail',async({page})=>{
+ await openStudyRoute(page);
+ await expect(page.getByRole('button',{name:'Study rooms',exact:true})).toHaveAttribute('aria-pressed','true');
+ await expect(page.getByRole('columnheader',{name:'Time',exact:true})).toBeVisible();
+ const hour=page.getByRole('rowheader',{name:'11:00 AM',exact:true});
+ await expect(hour).toHaveText('11 AM');
+ await expect(page.getByRole('rowheader',{name:'11:30 AM',exact:true})).toBeEmpty();
+ const tile=page.getByRole('button',{name:'Room 2, 11:00 AM, available',exact:true});
+ await expect(tile).toHaveText('+ Open');
+ await expect(page.getByRole('button',{name:'Reserve',exact:true})).toBeEnabled();
+ await tile.click();
+ await expect(page.locator('.sr-selection-summary')).toContainText('11:00 AM');
+ await page.getByRole('button',{name:'Reserve',exact:true}).click();
+ await expect(page.getByRole('dialog',{name:'Reserve a resource'})).toBeVisible();
 });

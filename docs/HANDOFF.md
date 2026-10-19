@@ -67,3 +67,7 @@ Keep secrets in provider stores or personal Keychain. Preserve all existing auth
 ## Study Rooms Soft Panels — October 18, 2026
 
 Anthony selected Soft Panels as the main Study Rooms interface with glass accents only, superseding the earlier Day Sheet visual rules for this module. The implementation preserves the compact header and authorized center Apps launcher; date navigation, the availability grid and Continue form the main flow. Manager tools and history are under More. See [design and verification](study-rooms/SOFT-PANELS-2026-10-18.md) for scope and test evidence.
+
+### Later Study Rooms layout correction
+
+Anthony supplied a second October 18 layout reference. Study Rooms now uses separate rounded time tiles, an hourly rail, resource tabs at the top and a full-width Reserve action above the bottom Apps navigation. See [implementation and verification](study-rooms/TILE-LAYOUT-2026-10-18.md). This supersedes the continuous raised columns described in the earlier Soft Panels release.

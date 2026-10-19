@@ -53,3 +53,7 @@ Use incremental, tested schema changes and reconcile the [hosted ledger](../HOST
 ## Soft Panels interface — October 18, 2026
 
 The owner-selected Soft Panels redesign replaces the crowded date/tab rows with a date strip, raised room columns and contextual Continue action. Glass is limited to accents. Home, Schedule, center Apps, Bookings and More remain at the bottom. History, refresh and authorized management are under More. See [design and verification](SOFT-PANELS-2026-10-18.md). Existing records and permissions are unchanged.
+
+### Updated layout reference
+
+The later October 18 reference supersedes the continuous column layout: individual rounded `+ Open` tiles, an hourly time rail, icon-labelled resource tabs and an always-visible full-width Reserve action above the Apps navigation. See [layout correction](TILE-LAYOUT-2026-10-18.md).
