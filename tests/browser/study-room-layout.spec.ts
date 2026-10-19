@@ -8,7 +8,7 @@ const shots=process.env.LVZ_SCREENSHOT_DIR;
 async function capture(page:Page,name:string){if(shots)await page.screenshot({path:`${shots}/${name}.png`,fullPage:true});}
 async function checkLayout(page:Page){
  expect(await page.evaluate(()=>document.documentElement.scrollWidth<=window.innerWidth)).toBe(true);
- const small=await page.evaluate(()=>[...document.querySelectorAll<HTMLElement>('.sr-app button:not(:disabled),.sr-app a,.sr-app summary')].filter(e=>e.offsetParent&&!e.closest('dialog:not([open])')).map(e=>({name:(e.getAttribute('aria-label')||e.textContent||'').trim().slice(0,40),h:e.getBoundingClientRect().height})).filter(x=>x.h<44));
+ const small=await page.evaluate(()=>[...document.querySelectorAll<HTMLElement>('.sr-app button:not(:disabled),.sr-app a,.sr-app summary,.app-frame-header-content button:not(:disabled),.app-frame-nav > button:not(:disabled),.app-frame-nav > a')].filter(e=>e.offsetParent&&!e.closest('dialog:not([open])')).map(e=>({name:(e.getAttribute('aria-label')||e.textContent||'').trim().slice(0,40),h:e.getBoundingClientRect().height})).filter(x=>x.h<44));
  expect(small).toEqual([]);
 }
 for(const width of [320,390,1280])test(`member view at ${width}px keeps 44px targets and no sideways scroll`,async({page})=>{
@@ -77,7 +77,9 @@ test('center Apps button opens only authorized modules without leaving Study Roo
  }}));
  await openStudyRoute(page);
  const nav=page.getByRole('navigation',{name:'Main navigation'});
- await expect(nav.locator(':scope > *').nth(2)).toHaveAttribute('aria-label','Open apps');
+ const actions=nav.locator(':scope > button, :scope > a');
+ await expect(actions).toHaveCount(5);
+ await expect(actions.nth(2)).toHaveAttribute('aria-label','Open apps');
  await nav.getByRole('button',{name:'Open apps'}).click();
  const dialog=page.getByRole('dialog',{name:'Apps'});
  await expect(dialog).toBeVisible();
@@ -124,15 +126,15 @@ test('an empty inventory has no invented rooms or reservation action',async({pag
  await expect(page.getByRole('button',{name:'Reserve',exact:true})).toHaveCount(0);
 });
 
-test('reference layout uses separate open tiles and a labelled hourly rail',async({page})=>{
+test('schedule labels every half-hour and selected slots open the reservation form',async({page})=>{
  await openStudyRoute(page);
  await expect(page.getByRole('button',{name:'Study rooms',exact:true})).toHaveAttribute('aria-pressed','true');
  await expect(page.getByRole('columnheader',{name:'Time',exact:true})).toBeVisible();
  const hour=page.getByRole('rowheader',{name:'11:00 AM',exact:true});
- await expect(hour).toHaveText('11 AM');
- await expect(page.getByRole('rowheader',{name:'11:30 AM',exact:true})).toBeEmpty();
+ await expect(hour).toHaveText('11:00');
+ await expect(page.getByRole('rowheader',{name:'11:30 AM',exact:true})).toHaveText('11:30');
  const tile=page.getByRole('button',{name:'Room 2, 11:00 AM, available',exact:true});
- await expect(tile).toHaveText('+ Open');
+ await expect(tile).toBeEnabled();
  await expect(page.getByRole('button',{name:'Reserve',exact:true})).toBeEnabled();
  await tile.click();
  await expect(page.locator('.sr-selection-summary')).toContainText('11:00 AM');

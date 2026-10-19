@@ -93,15 +93,19 @@ test('paired player respects Las Vegas operating hours and immediate approved em
  let off=true,override=false,unavailable=false;
  await page.route('**/api/display/device',async route=>{
   if(unavailable){await route.fulfill({status:503,contentType:'application/json',body:'{}'});return;}
+  // Route handlers run in Node, whose wall clock is not frozen by page.clock.
+  const serverNow=await page.evaluate(()=>Date.now());
   const hours=Array.from({length:7},(_,day)=>({day,enabled:off?day!==3:true,start:420,end:1380}));
   await route.fulfill({status:200,contentType:'application/json',body:JSON.stringify({
-   paired:true,screen:'Lobby Display',version:1,serverTime:new Date(Date.now()).toISOString(),
-   leaseUntil:new Date(Date.now()+30000).toISOString(),slides:[intro,event],
+   paired:true,screen:'Lobby Display',version:1,serverTime:new Date(serverNow).toISOString(),
+   leaseUntil:new Date(serverNow+30000).toISOString(),slides:[intro,event],
    operatingHours:hours,overrideSlideId:override?'sample-event':null,
-   overrideUntil:override?new Date(Date.now()+300000).toISOString():null
+   overrideUntil:override?new Date(serverNow+300000).toISOString():null
   })});
  });
- await page.goto('/display');await expect(page.getByRole('heading',{name:'Welcome.'})).toBeVisible();
+ const firstPacket=page.waitForResponse(response=>new URL(response.url()).pathname==='/api/display/device'&&response.ok());
+ await page.goto('/display');await firstPacket;await page.clock.runFor(300);
+ await expect(page.getByRole('heading',{name:'Welcome.'})).toBeVisible();
  off=false;await page.clock.runFor(12100);await expect(page.locator('.cd-style-editorial')).toBeVisible();
  override=true;await page.clock.runFor(12100);await expect(page.locator('.cd-style-event')).toBeVisible();
  override=false;await page.clock.runFor(12100);await expect(page.locator('.cd-style-editorial')).toBeVisible();

@@ -4,6 +4,8 @@ Status: locked. Anthony chose direction **A. Day Sheet** on 2026-10-14 from thre
 
 Evidence: [direction board](directions/direction-board.html) with phone and desktop exports in [directions/](directions/), and the earlier look in [before/](before/).
 
+The latest approved Study Rooms exception is [Lavender Softform](../study-rooms/LAVENDER-SOFTFORM-2026-10-19.md). Its resource tabs, dates, continuous grid and floating controls supersede earlier Study Rooms appearance rules below; the base contract still governs other module content.
+
 Every screen in lvz.app follows this contract: Home, sign in and sign up, member management, and every module (Work Mission prayer, Study Rooms, Church Display, Contacts, Worship Duty). Material changes to it go back to Anthony.
 
 ## The idea
@@ -126,3 +128,9 @@ Anthony requested a persistent matching header and bottom control across pages, 
 ### Later October 18 glass/date refinement
 
 Owner explicitly approved stronger reflective glass on dates and Reserve, a detailed shimmering Apps circle and today button, decorative Tuesday/Saturday glow, edge-to-edge square-corner header, and a deeper bottom dock. Dates precede a slim resource selector and show today plus three days within the configured booking horizon. Keep 44px targets, readable content, reduced-motion/transparency fallbacks and unchanged availability rules. See [refinement details](../GLASS-REFINEMENT-2026-10-19.md).
+
+### Latest Study Rooms direction — Lavender Softform, October 19, 2026 UTC
+
+The owner selected prototype 06 and explicitly requested implementation in the real app. Study Rooms now uses scoped lavender/plum tokens and soft raised surfaces. Rooms, Whiteboards and TVs are tabs connected to the shared header; dates follow below. The continuous ruled grid reaches the viewport bottom, with half-hour labels and plus-only open cells. The selected cell remains visible behind a more transparent floating selection/Reserve tray, above the shared dock and its raised plum Apps rounded square. The scroll area must not shrink on selection, and its final interval must scroll clear of the floating controls.
+
+This approval supersedes the earlier green palette, separate time tiles, hour-spanning rail, dates-before-resources and Apps-circle rules for Study Rooms only. Keep shared token ownership, 44px targets, readable states, keyboard access, reduced-motion/transparency fallbacks and server-sourced data. See [implementation and verification](../study-rooms/LAVENDER-SOFTFORM-2026-10-19.md).

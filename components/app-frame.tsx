@@ -1,5 +1,5 @@
 'use client';
-import {createContext,useContext,useEffect,useLayoutEffect,useMemo,useRef,useState,type ReactNode} from 'react';
+import {createContext,useContext,useEffect,useLayoutEffect,useRef,useState,type ReactNode} from 'react';
 import {usePathname} from 'next/navigation';
 import AppSwitcher from './app-switcher';
 import {Bell,CalendarDays,Clock3,Grid2X2,House,Info,Monitor,DoorOpen,UsersRound,UserRound,MoreHorizontal,X} from './home-icons';
@@ -7,13 +7,17 @@ import './app-frame.css';
 const icons={home:House,calendar:CalendarDays,clock:Clock3,apps:Grid2X2,people:UsersRound,user:UserRound,display:Monitor,room:DoorOpen,bell:Bell,info:Info,more:MoreHorizontal};
 type IconName=keyof typeof icons;
 export type FrameAction={label:string;icon:IconName;onClick?:()=>void;href?:string;active?:boolean;disabled?:boolean};
-type Controls={left:FrameAction;right:FrameAction;more?:FrameAction[];onMore?:()=>void;moreActive?:boolean;onHome?:()=>void;onApps?:()=>void;name?:string;profileHref?:string;title?:string};
+type Controls={left:FrameAction;right:FrameAction;more?:FrameAction[];onMore?:()=>void;moreActive?:boolean;onHome?:()=>void;onApps?:()=>void;name?:string;profileHref?:string;title?:string;headerContent?:ReactNode;viewport?:boolean};
 type Registration={path:string;controls:Controls};
 const Register=createContext<((value:Registration|null)=>void)|null>(null);
 /** Modules provide real view actions; the root owns the persistent chrome. */
 export function FrameControls(props:Controls){
  const register=useContext(Register),path=usePathname();
- useLayoutEffect(()=>{register?.({path,controls:props});return()=>register?.(null);},[register,path,props]);
+ // Update controls without clearing the frame between changes to the module view.
+ // The setter supplied by AppFrame is stable, so a frame repaint does not notify
+ // this context or re-register the module's controls.
+ useLayoutEffect(()=>{register?.({path,controls:props});},[register,path,props]);
+ useLayoutEffect(()=>()=>register?.(null),[register,path]);
  return null;
 }
 function routeDetails(path:string):{title:string;icon:IconName}{
@@ -44,18 +48,18 @@ export default function AppFrame({children}:{children:ReactNode}){
  },[memberRoute,path]);
  useEffect(()=>{setApps(false);setMore(false);},[path]);
  useEffect(()=>{if(more)menu.current?.showModal();else menu.current?.close();},[more]);
- const provider=useMemo(()=>setRegistration,[]);
  const left=controls?.left??{label:'My Week',icon:'calendar' as const,href:'/members'};
  const right=controls?.right??{label:'Profile',icon:'user' as const,href:'/members/manage?tab=profile'};
  const avatar=controls?.name?initials(controls.name):name;
  function action(item:FrameAction){const Symbol=icons[item.icon];const inner=<><Symbol size={22}/><span>{item.label}</span></>;
   return item.href?<a href={item.href} aria-current={item.active?'page':undefined}>{inner}</a>:<button type="button" disabled={item.disabled} aria-current={item.active?'page':undefined} onClick={item.onClick}>{inner}</button>;
  }
- return <Register.Provider value={provider}>
-  {immersive?children:<div className="app-frame" data-route={path}>
+ return <Register.Provider value={setRegistration}>
+  {immersive?children:<div className="app-frame" data-route={path} data-header-content={Boolean(controls?.headerContent)} data-viewport={Boolean(controls?.viewport)}>
    <header className="app-frame-header" aria-label="Application header">
     <div className="app-frame-heading"><Icon size={24}/><span>{controls?.title??details.title}</span></div>
     <a className="app-frame-avatar" href={controls?.profileHref??"/members/manage?tab=profile"} aria-label="My profile">{avatar||<UserRound size={23}/>}</a>
+    {controls?.headerContent?<div className="app-frame-header-content">{controls.headerContent}</div>:null}
    </header>
    <div className="app-frame-content">{children}</div>
    <nav className="app-frame-nav" aria-label="Main navigation">
