@@ -1,0 +1,27 @@
+{
+  "url": "https://lvz.app/appearance",
+  "httpStatus": 200,
+  "choices": 25,
+  "themeApplied": true,
+  "reloadPersists": true,
+  "resetRestores": true,
+  "studyDefault": "#eee8fa",
+  "deploymentInHtml": true,
+  "statuses": {
+    "/sign-in": 200,
+    "/sign-up": 200,
+    "/api/members/avatar": 401,
+    "/api/study-rooms?day=2026-10-19": 401
+  },
+  "browserErrorCount": 0,
+  "checkedAt": "2026-10-20T02:21:45.626Z",
+  "deployment": "dpl_HVSBqrSGcvVaTQupPhwaAkU7FDVk",
+  "sourceCommit": "0197e83f1ee5fd28ceaaea3cc339b1a9ab800580",
+  "state": "READY",
+  "aliases": [
+    "lvz.app",
+    "www.lvz.app"
+  ],
+  "fullSuiteRun": false,
+  "rollbackDeployment": "dpl_J9vTBQ2woZQ8a6abcCKicnUBxzVj"
+}
