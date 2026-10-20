@@ -19,4 +19,10 @@ Implementation: `lib/appearance-themes.ts`, `lib/appearance.ts`, `styles/lvz-the
 
 No full repository/application test suite, full database suite or complete browser suite was run. The package `build` wrapper invokes full suites; release builds for this change must use an explicit deployment-only `buildCommand` override that runs type checking and Next.js compilation without that wrapper. It must not change the project's default command or silently enable automatic deployments.
 
-The preceding live deployment is `dpl_J9vTBQ2woZQ8a6abcCKicnUBxzVj`, verified READY before this change. There are no schema changes; this is a compatible presentation rollback target. A release receipt must separately record the final commit, deployment and verified aliases before describing the preference picker as live.
+## Production release — October 19, 2026 (Las Vegas)
+
+Released from `0197e83f1ee5fd28ceaaea3cc339b1a9ab800580` through [PR #65](https://github.com/lovelaceaml-hub/lvzion-official/pull/65). Deployment `dpl_HVSBqrSGcvVaTQupPhwaAkU7FDVk` is **READY** with `lvz.app` and `www.lvz.app` aliases and no alias error. The per-deployment build used `npm ci --ignore-scripts` and `npm run typecheck && node node_modules/next/dist/bin/next build --webpack`. The full-suite wrapper and automatic Git deployments were not enabled.
+
+The live [Appearance page](https://lvz.app/appearance) returned HTTP 200 and identified this exact deployment. A fresh, anonymous browser found 25 choices (the existing app design plus 24 themes), applied Liquid Opal, retained it after refresh, and restored the current design. Study Rooms then retained its approved lavender background. No browser JavaScript errors were observed. Read-only live checks returned HTTP 200 for sign-in/sign-up and HTTP 401 for anonymous avatar and Study Rooms availability requests. No hosted member booking, real account mutation or published display change was performed.
+
+The machine-readable [release receipt](APPEARANCE-RELEASE.json) records this verification. The preceding deployment `dpl_J9vTBQ2woZQ8a6abcCKicnUBxzVj` remains a schema-compatible rollback target. This record is a documentation-only follow-up; it does not require another deployment.

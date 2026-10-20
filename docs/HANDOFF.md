@@ -8,9 +8,11 @@ LV Zion Official is a self-contained, phone-first application at https://lvz.app
 
 Keep compact module headers and the prominent center Apps launcher. The launcher shows only server-authorized modules. Continue the approved [Day Sheet design contract](design/LVZ-DESIGN-CONTRACT.md), shared tokens, accessible controls and phone-first layouts.
 
-## Current Study Rooms design — Lavender Softform
+## Device appearance — released October 19, 2026
 
-The October 19 [device appearance implementation](design/APPEARANCE.md) adds **More → Appearance** with 24 optional themes. **Current app design** retains the default styles described here. Its implementation and focused checks are separate from the Lavender production receipt below; the new picker is not live until its own deployment receipt is recorded.
+**More → Appearance** now offers 24 optional device themes on the [real app](https://lvz.app/appearance). **Current app design** restores the existing module defaults, including Study Rooms’ Lavender Softform. Source `0197e83f1ee5fd28ceaaea3cc339b1a9ab800580`, deployment `dpl_HVSBqrSGcvVaTQupPhwaAkU7FDVk`, READY with both production aliases verified. Type checking, 9 selected unit checks, 13 selected browser checks, optimized compilation and 7 compiled-app browser checks passed. Live theme persistence/reset and anonymous denials were verified; no full suite or real hosted booking was run. See [scope and verification](design/APPEARANCE.md) and the [release receipt](design/APPEARANCE-RELEASE.json).
+
+## Current Study Rooms design — Lavender Softform
 
 The owner selected prototype 06, refined its layout, and requested implementation in the real app. Resource tabs attach to the shared header, dates sit below them, and the continuous half-hour grid fills the viewport beneath a transparent floating selection/Reserve tray and the shared dock. Lavender/plum styling is scoped to Study Rooms, including its raised Apps rounded square. This supersedes earlier Study Rooms color, time-tile and date/resource ordering descriptions. [Current scope, verification and release record](study-rooms/LAVENDER-SOFTFORM-2026-10-19.md).
 
@@ -25,8 +27,8 @@ Read-only live GET checks of Study Rooms availability and administration returne
 - Repository: `lovelaceaml-hub/lvzion-official`.
 - Vercel: `lvzion-official`, project `prj_4icc6S1jw8OVKWD9AOI1oiB5fwYe`, team `lvzion`.
 - Supabase: `otecqlkqirncotytbfns`, Las Vegas Zion organization.
-- Production source: `2f80bbd773e61cda59eaf9d01b12337fba766496`.
-- Production deployment: `dpl_J9vTBQ2woZQ8a6abcCKicnUBxzVj`, READY, `lvz.app` and `www.lvz.app` aliases verified.
+- Production source: `0197e83f1ee5fd28ceaaea3cc339b1a9ab800580`.
+- Production deployment: `dpl_HVSBqrSGcvVaTQupPhwaAkU7FDVk`, READY, `lvz.app` and `www.lvz.app` aliases verified.
 - Fresh calendar correction: repository migration `20261016180000_study_rooms_fresh_calendar.sql`, applied hosted version `20261016173939`.
 
 Documentation-only commits after the runtime source do not require another deployment. Read current provider state rather than assuming a recorded snapshot cannot change. Automatic Git deployments remain disabled; no unrequested previews are authorized.
