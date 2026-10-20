@@ -10,6 +10,8 @@ Keep compact module headers and the prominent center Apps launcher. The launcher
 
 ## Current Study Rooms design — Lavender Softform
 
+The October 19 [device appearance implementation](design/APPEARANCE.md) adds **More → Appearance** with 24 optional themes. **Current app design** retains the default styles described here. Its implementation and focused checks are separate from the Lavender production receipt below; the new picker is not live until its own deployment receipt is recorded.
+
 The owner selected prototype 06, refined its layout, and requested implementation in the real app. Resource tabs attach to the shared header, dates sit below them, and the continuous half-hour grid fills the viewport beneath a transparent floating selection/Reserve tray and the shared dock. Lavender/plum styling is scoped to Study Rooms, including its raised Apps rounded square. This supersedes earlier Study Rooms color, time-tile and date/resource ordering descriptions. [Current scope, verification and release record](study-rooms/LAVENDER-SOFTFORM-2026-10-19.md).
 
 Local release gates passed: 387 application tests, 198 additional PostgreSQL permission assertions, TypeScript/production build, and the complete 131-case browser suite with no exclusions. The older sign-in/resend, time-dependent Display and midnight-sensitive Work Mission fixture failures were repaired in tests only. Responsive screenshots and real-route synthetic bookings were checked at 320, 390 and 1280 px; this is not physical-phone or real hosted booking acceptance.
