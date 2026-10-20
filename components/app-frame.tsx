@@ -21,6 +21,7 @@ export function FrameControls(props:Controls){
  return null;
 }
 function routeDetails(path:string):{title:string;icon:IconName}{
+ if(path==='/appearance')return{title:'Appearance',icon:'more'};
  if(path.startsWith('/modules/study-rooms'))return{title:'Study Rooms',icon:'room'};
  if(path.startsWith('/modules/contacts'))return{title:'Contacts',icon:'people'};
  if(path.startsWith('/modules/work-mission-prayer'))return{title:'Morning Prayer',icon:'calendar'};
@@ -73,7 +74,7 @@ export default function AppFrame({children}:{children:ReactNode}){
    <dialog ref={menu} className="ui-sheet app-frame-menu" aria-label="More options" onClose={()=>setMore(false)}><div className="ui-sheet-body">
     <div className="app-frame-menu-heading"><h2>More</h2><button type="button" aria-label="Close more options" onClick={()=>setMore(false)}><X/></button></div>
     {controls?.more?.map(item=><div key={item.label}>{action({...item,onClick:()=>{setMore(false);item.onClick?.();}})}</div>)}
-    <a href="/members/manage?tab=profile"><UserRound/>My profile</a><a href="/install"><Grid2X2/>Install app</a>
+    <a href="/members/manage?tab=profile"><UserRound/>My profile</a><a href="/appearance"><Grid2X2/>Appearance</a><a href="/install"><Grid2X2/>Install app</a>
    </div></dialog>
   </div>}
  </Register.Provider>;

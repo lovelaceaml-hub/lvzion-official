@@ -166,7 +166,7 @@ export default function Reservations({schedule:s,changeDay,submit,refresh,loadDa
      </div>}
      {(view==='managed'||view==='history')&&<nav className="ui-tabs" aria-label="Reservation screens">{s.canManage&&tab('managed','Manage bookings')}{tab('history','History')}</nav>}
      <div className="sr-panel" {...swipe}>
-      {view==='more'?<section className="sr-more"><h2>More</h2><button type="button" className="ui-row" onClick={()=>setView('history')}>Reservation history</button>{s.canManage&&<button type="button" className="ui-row" onClick={()=>setView('managed')}>Manage bookings & resources</button>}<button type="button" className="ui-row" onClick={refresh}>Refresh availability</button></section>:view==='history'?<ReservationHistory today={s.today} canManage={s.canManage} resources={s.resources} read={loadHistory}/>:<>
+      {view==='more'?<section className="sr-more"><h2>More</h2><button type="button" className="ui-row" onClick={()=>setView('history')}>Reservation history</button>{s.canManage&&<button type="button" className="ui-row" onClick={()=>setView('managed')}>Manage bookings & resources</button>}<a className="ui-row" href="/appearance">Appearance</a><button type="button" className="ui-row" onClick={refresh}>Refresh availability</button></section>:view==='history'?<ReservationHistory today={s.today} canManage={s.canManage} resources={s.resources} read={loadHistory}/>:<>
        {view!=='schedule'&&<div className="sr-panel-head">
         <div><h2>{heading}</h2><p className="ui-hint">{longDay(s.day)}</p></div>
         <button type="button" onClick={refresh} className="ui-button ui-button-quiet">Refresh</button>

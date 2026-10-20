@@ -1,6 +1,8 @@
 # LV Zion design contract: Day Sheet
 
-Status: locked. Anthony chose direction **A. Day Sheet** on 2026-10-14 from three options (A Day Sheet, B Module Board, C First Light). His selection, as given: "A. Day Sheet (Recommended)". No extra note.
+Status: default design contract. Anthony chose direction **A. Day Sheet** on 2026-10-14 from three options (A Day Sheet, B Module Board, C First Light). His selection, as given: "A. Day Sheet (Recommended)". No extra note.
+
+October 19 appearance exception: Anthony requested applying the theme collection to the current app. The [device appearance options](APPEARANCE.md) add 24 explicit light/dark presentation choices. With **Current app design**, existing defaults remain unchanged, including Study Rooms' later approved Lavender Softform design. These optional overrides supersede this document's palette/material restrictions only while a device theme is selected; layout, authorization and accessibility requirements remain applicable.
 
 Evidence: [direction board](directions/direction-board.html) with phone and desktop exports in [directions/](directions/), and the earlier look in [before/](before/).
 
