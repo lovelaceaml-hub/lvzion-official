@@ -39,12 +39,14 @@ update app_private.app_modules set status='approved',approved_at=now();
 select pg_temp.pass(pg_temp.study(101),'unit leader may use Study Rooms automatically');
 select pg_temp.pass(pg_temp.study(103),'group leader may use Study Rooms automatically');
 select pg_temp.pass(pg_temp.study(105),'pastoral staff may use Study Rooms automatically');
-select pg_temp.pass(not pg_temp.study(102),'department manager alone has no Study Rooms access');
-select pg_temp.pass(not pg_temp.study(104),'technical admin alone has no Study Rooms access');
-select pg_temp.pass(not pg_temp.study(107),'ordinary member has no Study Rooms access by default');
+-- Open access (owner decision 2026-10-24): every signed-in member uses every approved app.
+select pg_temp.pass(pg_temp.study(102),'signed-in department manager uses Study Rooms');
+select pg_temp.pass(pg_temp.study(104),'signed-in technical admin uses Study Rooms');
+select pg_temp.pass(pg_temp.study(107),'signed-in ordinary member uses Study Rooms by default');
+select pg_temp.pass(not pg_temp.study(106),'inactive former member has no Study Rooms access');
 select pg_temp.pass(pg_temp.in_apps(101),'leader sees Study Rooms in Apps');
-select pg_temp.pass(not pg_temp.in_apps(107),'ordinary member does not see Study Rooms in Apps');
-select pg_temp.pass((select count(*)>0 and bool_and(not app_private.module_allowed(pg_temp.m(101),id)) from app_private.app_modules where id<>'91000000-0000-4000-8000-000000000001'),'leader role does not open any other app');
+select pg_temp.pass(pg_temp.in_apps(107),'ordinary member sees Study Rooms in Apps');
+select pg_temp.pass((select count(*)>0 and bool_and(not app_private.module_manager(pg_temp.m(101),id)) from app_private.app_modules),'leader role gives no manager rights in any app');
 select pg_temp.pass(not has_function_privilege('authenticated','app_private.study_leader_access(uuid)','execute'),'leader helper is not directly callable');
 select pg_temp.pass(not has_function_privilege('anon','public.study_group_access(jsonb)','execute'),'signed-out visitors cannot call group access');
 
@@ -78,7 +80,8 @@ select pg_temp.pass((select count(*)=1 from app_private.audit_events where opera
 select pg_temp.pass((select bool_or((e->>'enabled')::boolean) from jsonb_array_elements(pg_temp.cmd('list',103)->'groups'->0->'members') e where e->>'name'='Hugo Example'),'list shows the member as turned on');
 
 select pg_temp.cmd('disable',108);
-select pg_temp.pass(not pg_temp.study(108),'group leader turned the member off again');
+select pg_temp.pass((select count(*)=0 from app_private.module_access_grants where member_id=pg_temp.m(108) and ended_at is null),'group leader ended the explicit grant');
+select pg_temp.pass(pg_temp.study(108),'a signed-in member still books under open access');
 select pg_temp.pass((select count(*)=1 from app_private.audit_events where operation='study_rooms.group_access.disable' and target_member_id=pg_temp.m(108)),'turning off is audited');
 select pg_temp.pass((select count(*)=1 and bool_and(ended_by=pg_temp.m(103)) from app_private.module_access_grants where member_id=pg_temp.m(108)),'ended grant keeps its history');
 
@@ -91,7 +94,8 @@ select pg_temp.pass(pg_temp.study(104),'manager grant is still active');
 
 -- Ending a leader role ends the automatic access.
 update app_private.role_assignments set ended_at=clock_timestamp() where member_id=pg_temp.m(101) and role_key='unit_leader';
-select pg_temp.pass(not pg_temp.study(101),'ending the unit leader role ends automatic access');
+select pg_temp.pass(not app_private.study_leader_access(pg_temp.m(101)),'ending the unit leader role ends leader access');
+select pg_temp.pass(pg_temp.study(101),'the former leader keeps ordinary member access');
 update app_private.role_assignments set ended_at=clock_timestamp() where member_id=pg_temp.m(103) and role_key='group_leader';
 select pg_temp.login(103);
 select pg_temp.denied($$select pg_temp.cmd('list',103)$$,'42501','former group leader cannot manage group access');

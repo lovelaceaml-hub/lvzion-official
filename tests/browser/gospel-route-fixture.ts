@@ -29,7 +29,7 @@ function setup(places:boolean){
 
 export async function openGospel(page:Page,{as,places=true}:{as:number;places?:boolean}){
  const db=new PGlite();
- const migrations=(await readdir('supabase/migrations')).filter(p=>p.endsWith('.sql')&&p!=='20261014224708_contacts_private_owner_pilot_v1.sql').sort();
+ const migrations=(await readdir('supabase/migrations')).filter(p=>p.endsWith('.sql')&&p!=='20261014224708_contacts_private_owner_pilot_v1.sql'&&!/worship_duty_(live_activation|live_setup|operations)/.test(p)).sort();
  for(const path of ['supabase/tests/bootstrap.sql',...migrations.map(p=>'supabase/migrations/'+p),'supabase/seed/fictional_members.sql'])await db.exec(await readFile(path,'utf8'));
  await db.exec(setup(places));
  let actor=as;
@@ -45,7 +45,7 @@ export async function openGospel(page:Page,{as,places=true}:{as:number;places?:b
    await route.fulfill({json:await call('select public.gospel_planning_workspace($1::date) as value',[week])});
   }catch(error){
    const f=fail(error);
-   await route.fulfill(f.status===403?{status:403,json:{code:'FORBIDDEN',error:'Groups & Gospel Planning has not been assigned to your account.'}}:f);
+   await route.fulfill(f.status===403?{status:403,json:{code:'FORBIDDEN',error:'Groups & Gospel Planning is not available for this account or group.'}}:f);
   }
  });
  await page.route('**/api/gospel-planning/command',async route=>{

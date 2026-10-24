@@ -63,9 +63,15 @@ select pg_temp.ok(jsonb_array_length(public.member_workspace()->'transfers')=1,'
 select public.member_command('transfer.decide',jsonb_build_object('id',public.member_workspace()->'transfers'->0->>'id','decision','accepted','reason','Receiving group accepts fictional member'),gen_random_uuid());
 reset role;
 select pg_temp.login(101); set local role authenticated;
-select pg_temp.denied($q$select public.member_command('member.rename','{"memberId":"44444444-4444-4444-8444-000000000107","name":"Changed","reason":"Former unit authority attempt"}',gen_random_uuid())$q$,'42501','departure revokes old unit authority');
+-- Leadership is independent of placement (2026-10-24): the unit appointment keeps its scope after the leader moves.
+select pg_temp.ok(app_private.can_manage_member('44444444-4444-4444-8444-000000000107'),'a moved unit leader keeps authority over the unit the appointment names');
 reset role;
 select pg_temp.ok(exists(select 1 from app_private.role_assignments where member_id='44444444-4444-4444-8444-000000000101' and ended_at is null),'appointment history is retained until manually ended');
+update app_private.role_assignments set ended_at=clock_timestamp() where member_id='44444444-4444-4444-8444-000000000101' and role_key='unit_leader' and ended_at is null;
+select pg_temp.login(101); set local role authenticated;
+select pg_temp.denied($q$select public.member_command('member.rename','{"memberId":"44444444-4444-4444-8444-000000000107","name":"Changed","reason":"Former unit authority attempt"}',gen_random_uuid())$q$,'42501','ending the appointment revokes old unit authority');
+reset role;
+update app_private.role_assignments set ended_at=null where member_id='44444444-4444-4444-8444-000000000101' and role_key='unit_leader';
 select pg_temp.ok(exists(select 1 from public.department_memberships where member_id='44444444-4444-4444-8444-000000000101' and ended_at is null),'group transfer retains independent departments');
 select pg_temp.ok((select count(*)=2 from public.member_placements where member_id='44444444-4444-4444-8444-000000000101'),'transfer retains historical placement');
 select pg_temp.login(105); set local role authenticated;

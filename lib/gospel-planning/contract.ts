@@ -24,9 +24,11 @@ export type OverseerRequest={id:string;version:number;week:string;status:'open'|
 export type Grant={id:string;capability:Capability;memberId:string;member:string;group:string;unit:string|null;effective:boolean;grantedAt:string};
 export type Capability='publish'|'schedule'|'oversee';
 export type Workspace={week:string;today:string;now:string;
- me:{id:string;name:string;placed:boolean;groupId:string|null;groupName:string|null;unitId:string|null;unitName:string|null;
+ me:{id:string;name:string;placed:boolean;groupId:string|null;groupName:string|null;ownGroupId:string|null;inGroup:boolean;unitId:string|null;unitName:string|null;
   groupLeader:boolean;unitLeader:boolean;publisher:boolean;scheduler:boolean;overseer:boolean;manager:boolean};
- candidates:{id:string;name:string;unitId:string;self:boolean}[];
+ candidates:{id:string;name:string;unitId:string|null;self:boolean}[];
+ /** Groups this member may open: their own group and any group they lead by appointment. */
+ groups:{id:string;name:string;own:boolean;leader:boolean}[];
  units:{id:string;name:string;canWrite:boolean}[];
  locations:{id:string;label:string}[];
  availability:{version:number;ranges:Range[];windows:{start:string;end:string}[];savedAt?:string};
@@ -90,6 +92,9 @@ export const ACTIONS=['availability.save','session.create','session.revise','ses
  'location.add','location.retire','capability.grant','capability.end'] as const;
 export type Action=typeof ACTIONS[number];
 export type Command={action:Action;requestId:string;payload:Json};
+/** Actions that act on one group. They may name a group the member leads; the database checks the appointment. */
+export const GROUP_SCOPED:readonly Action[]=['session.create','plan.save','plan.publish','update.create','request.create'];
+function group(p:Json,payload:Json):Json{if(p.groupId!==undefined&&p.groupId!==null)payload.groupId=uuid(p.groupId);return payload;}
 
 /** Strict server-side parser. Unknown fields (including any actor, role or scope field) are rejected. */
 export function parseCommand(input:unknown):Command{
@@ -102,7 +107,7 @@ export function parseCommand(input:unknown):Command{
    keys(p,['expected','ranges']);
    if(!Array.isArray(p.ranges)||p.ranges.length>14)fail('Use at most 14 time ranges.');
    payload={expected:natural(p.expected),ranges:(p.ranges as unknown[]).map(range)};break;
-  case 'session.create':keys(p,['date','from','to','locationId','participants']);payload=sessionFields(p);break;
+  case 'session.create':keys(p,['date','from','to','locationId','participants'],['groupId']);payload=group(p,sessionFields(p));break;
   case 'session.revise':keys(p,['id','expected','date','from','to','locationId','participants']);payload={...id(),...sessionFields(p)};break;
   case 'session.publish':case 'session.cancel':keys(p,['id','expected']);payload=id();break;
   case 'session.respond':keys(p,['id','expected','expectedResponse','response']);
@@ -114,20 +119,20 @@ export function parseCommand(input:unknown):Command{
    if(expectedReport>0)payload.reason=text(p.reason,600,true);else if(p.reason!==undefined)payload.reason=text(p.reason,600,false);
    break;}
   case 'plan.save':{
-   keys(p,['week','expected','review','plan','nextAction'],['responsibleId']);
+   keys(p,['week','expected','review','plan','nextAction'],['responsibleId','groupId']);
    const review=text(p.review,1200,false),plan=text(p.plan,1200,false);
    if(!review&&!plan)fail('Add a Gospel Review or a Gospel Plan before saving.');
-   payload={week:weekKey(p.week),expected:natural(p.expected),review,plan,nextAction:text(p.nextAction,300,false),responsibleId:optionalUuid(p.responsibleId)};break;}
-  case 'plan.publish':keys(p,['week','expected']);payload={week:weekKey(p.week),expected:natural(p.expected)};break;
+   payload=group(p,{week:weekKey(p.week),expected:natural(p.expected),review,plan,nextAction:text(p.nextAction,300,false),responsibleId:optionalUuid(p.responsibleId)});break;}
+  case 'plan.publish':keys(p,['week','expected'],['groupId']);payload=group(p,{week:weekKey(p.week),expected:natural(p.expected)});break;
   case 'update.create':
-   keys(p,['week','unitId','body','support','nextAction'],['aboutMemberId','assigneeId']);
-   payload={week:weekKey(p.week),unitId:uuid(p.unitId),body:text(p.body,1200,true),support:text(p.support,600,false),nextAction:text(p.nextAction,300,false),
-    aboutMemberId:optionalUuid(p.aboutMemberId),assigneeId:optionalUuid(p.assigneeId)};break;
+   keys(p,['week','unitId','body','support','nextAction'],['aboutMemberId','assigneeId','groupId']);
+   payload=group(p,{week:weekKey(p.week),unitId:uuid(p.unitId),body:text(p.body,1200,true),support:text(p.support,600,false),nextAction:text(p.nextAction,300,false),
+    aboutMemberId:optionalUuid(p.aboutMemberId),assigneeId:optionalUuid(p.assigneeId)});break;
   case 'update.edit':
    keys(p,['id','expected','body','support','nextAction','status'],['aboutMemberId','assigneeId']);
    payload={...id(),body:text(p.body,1200,true),support:text(p.support,600,false),nextAction:text(p.nextAction,300,false),
     status:choice(p.status,['open','done'] as const),aboutMemberId:optionalUuid(p.aboutMemberId),assigneeId:optionalUuid(p.assigneeId)};break;
-  case 'request.create':keys(p,['week','reviewerId','body']);payload={week:weekKey(p.week),reviewerId:uuid(p.reviewerId),body:text(p.body,1200,true)};break;
+  case 'request.create':keys(p,['week','reviewerId','body'],['groupId']);payload=group(p,{week:weekKey(p.week),reviewerId:uuid(p.reviewerId),body:text(p.body,1200,true)});break;
   case 'request.respond':keys(p,['id','expected','decision','body']);
    payload={...id(),decision:choice(p.decision,['answer','clarification'] as const),body:text(p.body,1200,true)};break;
   case 'request.reply':keys(p,['id','expected','body']);payload={...id(),body:text(p.body,1200,true)};break;
@@ -138,7 +143,8 @@ export function parseCommand(input:unknown):Command{
    keys(p,['memberId','capability'],['groupId','unitId']);
    const capability=choice(p.capability,['publish','schedule','oversee'] as const);
    payload={memberId:uuid(p.memberId),capability};
-   if(capability==='oversee')payload.groupId=uuid(p.groupId);else if(p.groupId!==undefined)fail();
+   // Oversee names its group. Publish and schedule default to the member's group, or name a group they lead.
+   if(capability==='oversee')payload.groupId=uuid(p.groupId);else if(p.groupId!==undefined&&p.groupId!==null)payload.groupId=uuid(p.groupId);
    if(capability==='schedule'&&p.unitId!==undefined&&p.unitId!==null)payload.unitId=uuid(p.unitId);else if(p.unitId!==undefined&&p.unitId!==null)fail();
    break;}
  }

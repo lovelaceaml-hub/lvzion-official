@@ -46,6 +46,19 @@ test('member creation clears stale choices and sends the intended unit',async({p
 test('member moves retain a visible full path and the previous placement history',async({page})=>{
  const {commands,getState}=await organizationPage(page);await page.getByRole('button',{name:/Ben Example/}).click();const dialog=page.getByRole('dialog',{name:'Manage member'});await dialog.getByText('Change primary placement',{exact:true}).click();await dialog.getByLabel('Age category').selectOption(categoryB);await dialog.getByLabel('Group',{exact:true}).selectOption(groupB);await dialog.getByLabel('Destination unit').selectOption(unitB);await expect(dialog.locator('.placement-path')).toHaveText('Category B / Group 1 / Unit 1');await dialog.getByLabel('Reason for this change').nth(1).fill('Verified fictional transfer destination');await dialog.getByRole('button',{name:'Submit placement change'}).click();await expect(dialog).toHaveCount(0);expect(commands[0].payload.unitId).toBe(unitB);expect(getState().history).toHaveLength(1);
 });
+test('a move can choose a group without a unit and sends only the group',async({page})=>{
+ const {commands}=await organizationPage(page);await page.getByRole('button',{name:/Ben Example/}).click();const dialog=page.getByRole('dialog',{name:'Manage member'});await dialog.getByText('Change primary placement',{exact:true}).click();
+ await dialog.getByLabel('Age category').selectOption(categoryB);await dialog.getByLabel('Group',{exact:true}).selectOption(groupB);
+ await expect(dialog.getByLabel('Destination unit (optional)')).toHaveValue('');await expect(dialog.locator('.placement-path')).toHaveText('Category B / Group 1 / No unit');
+ await dialog.getByLabel('Reason for this change').nth(1).fill('Verified fictional group-only destination');await dialog.getByRole('button',{name:'Submit placement change'}).click();
+ await expect.poll(()=>commands.length).toBe(1);expect(commands[0].payload.groupId).toBe(groupB);expect(commands[0].payload.unitId).toBeUndefined();
+});
+test('a leader can be appointed to a group outside their own placement',async({page})=>{
+ const {commands}=await organizationPage(page);await page.getByText('Appoint organizational leadership',{exact:true}).click();const form=page.locator('form').filter({has:page.getByRole('button',{name:'Record appointment',exact:true})});
+ await form.getByLabel('Member',{exact:true}).selectOption(id(4,102));await form.getByLabel('Role',{exact:true}).selectOption('group_leader');await expect(form.getByLabel('Group scope')).toHaveValue(groupA);
+ await form.getByLabel('Group scope').selectOption(groupB);await form.getByLabel('Reason for this change').fill('Verified fictional outside-group leadership');await form.getByRole('button',{name:'Record appointment'}).click();
+ await expect.poll(()=>commands.length).toBe(1);expect(commands[0].payload.groupId).toBe(groupB);
+});
 test('leadership scope follows the selected member and omits unrelated scope fields',async({page})=>{
  const {commands}=await organizationPage(page);await page.getByText('Appoint organizational leadership',{exact:true}).click();const form=page.locator('form').filter({has:page.getByRole('button',{name:'Record appointment',exact:true})});await form.getByLabel('Member',{exact:true}).selectOption(id(4,102));await expect(form.getByLabel('Unit scope')).toHaveValue(unitA2);await form.getByLabel('Role',{exact:true}).selectOption('group_leader');await expect(form.getByLabel('Unit scope')).toHaveCount(0);await expect(form.getByLabel('Group scope')).toHaveValue(groupA);await form.getByLabel('Reason for this change').fill('Verified fictional leadership appointment');await form.getByRole('button',{name:'Record appointment'}).click();await expect(page.getByRole('status')).toContainText('Change saved');expect(commands[0].payload.groupId).toBe(groupA);expect(commands[0].payload.unitId).toBeUndefined();
 });

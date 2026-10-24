@@ -282,7 +282,19 @@
   "hosted": "Remove whitespace from each stored statement; these stored statements already omit comments and outer transaction wrappers.",
   "purpose": "Comparison of known migration definitions, not cryptographic attestation or a full semantic/security review."
  },
- "unapplied_repository_migrations": [],
+ "unapplied_repository_migrations": [
+  {
+   "name": "open_access_group_placement",
+   "repository_version": "20261024170000",
+   "source": "supabase/migrations/20261024170000_open_access_group_placement.sql",
+   "status": "unapplied (draft PR)",
+   "decision": "Anthony, 2026-10-24: approved apps open to signed-in members; owner manages every app; group-only placement; leadership independent of placement; approve gospel-planning",
+   "replaces_functions": "app_private: current_member_id, actor_has, module_allowed, member_module_home, manages_member, can_read_placement(uuid,uuid), member_command, apply_member_command, member_workspace, enrollment_command, study_is_manager, study_group_access, worship_can_manage, worship_can_plan, worship_setup_authorized, worship_setup_workspace; public: member_workspace, display_create_screen; display_private.require_manager; mpg_private.allowed; contacts_private.actor, can_create; gp_private: has_access, placement, manager, group_leader, unit_leader, leads_in_group, reads_update, scopes_members, session_members, authorize, command, workspace",
+   "adds": "app_private: organization_member_id, has_member_account, is_owner, module_manager, manages_group, manages_placement, can_read_placement(uuid,uuid,uuid); gp_private: context_group, session_members(uuid,jsonb,uuid), workspace(date,uuid); public.gospel_planning_workspace(date,uuid)",
+   "schema": "member_placements.unit_id and transfer_requests.destination_unit_id become nullable; placements_scoped policy recreated; no rows deleted",
+   "pre_apply_checks": "Compare the live definitions of every replaced function with the repository's latest prior definitions; confirm exactly one bootstrap owner and gospel-planning still draft; then apply with the Supabase CLI from an isolated workdir as for gospel_planning_core."
+  }
+ ],
  "warning": "Hosted versions differ from repository filenames. Never replay applied migrations or use blind db push. Re-read current hosted metadata before release, including concurrent module work. The fresh calendar correction is applied: Study Room booking is enabled for existing grants and weekly restrictions are empty. Do not reinstate superseded defaults.",
  "metadata_reconciled_at": "2026-10-24T19:00:00Z",
  "metadata_reconciliation": "2026-10-24 full listing of hosted schema_migrations: 28 versions. The five Worship migrations were found already applied on 2026-10-15 and are now mapped; gospel_planning_core applied 2026-10-24. Every repository migration is applied.",
