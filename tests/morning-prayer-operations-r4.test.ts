@@ -28,6 +28,23 @@ test('Morning Prayer R4: verified owner, member grants, atomic dates and Vault j
  }
  const denied=async(fn:()=>Promise<unknown>,code='42501')=>assert.rejects(fn,
   (e:unknown)=>typeof e==='object'&&e!==null&&'code'in e&&(e as {code:string}).code===code);
+ async function placeInJoinWindow(occurrenceId:string,asOf:string|null=null){
+  // One start timestamp must supply the occurrence date, including across midnight.
+  const moved=await db.query<{local_date:string;local_start:string;local_end:string}>(`
+   with fixture_time as (
+    select coalesce($2::timestamptz,statement_timestamp())+interval '5 minutes' as starts_at
+   )
+   update mpg_private.occurrences o
+   set starts_at=f.starts_at,ends_at=f.starts_at+interval '30 minutes',
+       local_date=(f.starts_at at time zone o.timezone)::date
+   from fixture_time f where o.id=$1
+   returning o.local_date::text,
+    to_char(o.starts_at at time zone o.timezone,'YYYY-MM-DD HH24:MI') as local_start,
+    to_char(o.ends_at at time zone o.timezone,'YYYY-MM-DD HH24:MI') as local_end`,[occurrenceId,asOf]);
+  await db.query(`update mpg_private.access_references a set expires_at=o.ends_at
+   from mpg_private.occurrences o where a.occurrence_id=o.id and o.id=$1`,[occurrenceId]);
+  return moved.rows[0];
+ }
  const make=(days:number)=>{
   const d=new Date(Date.now()+days*86400000).toISOString().slice(0,10);
   return{date:d,startsAt:d+'T16:00:00Z',endsAt:d+'T16:30:00Z',timezone:'America/Los_Angeles',kind:'gathering'};
@@ -159,10 +176,25 @@ test('Morning Prayer R4: verified owner, member grants, atomic dates and Vault j
    const receipts=await db.query('select result from mpg_private.command_receipts');
    assert.doesNotMatch(JSON.stringify(receipts.rows),/Fictional1|us06web.zoom.us/);
   });
+  await t.test('join-window fixture preserves Las Vegas date across midnight in both offsets',async()=>{
+   await owner();
+   // Historical dates stay separate from the forward-dated scheduling fixtures.
+   for(const [asOf,nextDate] of [
+    ['2020-06-30T23:58:00-07:00','2020-07-01'],
+    ['2020-12-31T23:58:00-08:00','2021-01-01']]){
+    const row=await placeInJoinWindow(occ,asOf);
+    assert.equal(row.local_date,nextDate);
+    assert.equal(row.local_start,nextDate+' 00:03');
+    assert.equal(row.local_end,nextDate+' 00:33');
+    assert.equal(await scalar(`select a.expires_at=o.ends_at from mpg_private.access_references a
+     join mpg_private.occurrences o on o.id=a.occurrence_id where o.id=$1`,[occ]),true);
+    // Keep the production guard active: the previous day's date must still fail.
+    await denied(()=>db.query('update mpg_private.occurrences set local_date=$2::date where id=$1',[occ,asOf.slice(0,10)]),'22023');
+   }
+  });
   await t.test('inside window, only authorized member obtains Vault link',async()=>{
    await owner();
-   await db.query("update mpg_private.occurrences set starts_at=clock_timestamp()+interval '5 minutes',ends_at=clock_timestamp()+interval '35 minutes',local_date=(clock_timestamp() at time zone 'America/Los_Angeles')::date where id=$1",[occ]);
-   await db.query("update mpg_private.access_references set expires_at=clock_timestamp()+interval '35 minutes' where occurrence_id=$1",[occ]);
+   await placeInJoinWindow(occ);
    await as(2);
    const result=await scalar<{joinUrl:string}>('select public.mpg_live_join($1)',[occ]);
    assert.match(result.joinUrl,/^https:\/\/us06web[.]zoom[.]us\/j\//);

@@ -1,9 +1,8 @@
 'use client';
 import {useRef,useState,useEffect} from 'react';
 import type {ReactNode} from 'react';
-import AppHeader from '../app-header';
-import AppSwitcher from '../app-switcher';
-import {CalendarDays,ChevronLeft,Clock3,Grid2X2,House,UsersRound,X} from '../home-icons';
+import {FrameControls} from '../app-frame';
+import {ChevronLeft,X} from '../home-icons';
 import {useSwipeTabs} from '../../lib/use-swipe-tabs';
 import {addDay,clock,startOptions,endOptions,purposes,validRange,bookingResources,kindLabels,purposeLabel,resourceNames} from '../../lib/study-rooms/domain';
 import type {Booking,Schedule,Kind,Purpose,BookingCommand} from '../../lib/study-rooms/domain';
@@ -14,11 +13,10 @@ import {ReservationHistory} from './history';
 import type {HistoryPage,HistoryQuery} from '../../lib/study-rooms/history';
 import type {AdminCommand,AdminData} from '../../lib/study-rooms/admin';
 
-type View='schedule'|'mine'|'managed'|'history';
+type View='schedule'|'mine'|'managed'|'history'|'more';
 type Props={schedule:Schedule;changeDay:(day:string)=>void;submit:(command:BookingCommand)=>Promise<void>;refresh:()=>void;loadDay:(day:string)=>Promise<Schedule>;admin?:AdminData;saveAdmin:(c:AdminCommand)=>Promise<void>;loadHistory:(query:HistoryQuery)=>Promise<HistoryPage>;operations?:ReactNode;status?:ReactNode};
 
 const stateLabel=(b:Booking)=>b.state==='cancelled'?'Cancelled':b.state==='ended'?'Ended early':b.hold?'Hold':'Confirmed';
-const weekday=(date:string)=>new Date(date+'T12:00:00Z').toLocaleDateString('en-US',{weekday:'short',timeZone:'UTC'});
 const longDay=(date:string)=>new Date(date+'T12:00:00Z').toLocaleDateString('en-US',{weekday:'long',month:'long',day:'numeric',timeZone:'UTC'});
 
 /** Time first: start over end on the left, in tabular figures, like the Home day line. */
@@ -33,7 +31,9 @@ export default function Reservations({schedule:s,changeDay,submit,refresh,loadDa
  const [start,setStart]=useState<number|null>(null),[end,setEnd]=useState<number|null>(null),[step,setStep]=useState(0),[hold,setHold]=useState(false);
  const [busy,setBusy]=useState(false),[message,setMessage]=useState(''),[error,setError]=useState('');
  const [selectedSlot,setSelectedSlot]=useState<{id:string;time:number;day:string}|null>(null);
- const [appsOpen,setAppsOpen]=useState(false);
+ const scheduleScroll=useRef<HTMLDivElement>(null),scheduleCanvas=useRef<HTMLDivElement>(null);
+ const positionedSchedule=useRef('');
+ const [nowTop,setNowTop]=useState<number|null>(null);
  const dialog=useRef<HTMLDialogElement>(null),requestId=useRef('');
  const cancelDialog=useRef<HTMLDialogElement>(null),[cancelId,setCancelId]=useState(''),[cancelVersion,setCancelVersion]=useState(1),[reason,setReason]=useState('');
  useEffect(()=>{if(cancelId)cancelDialog.current?.showModal();},[cancelId]);
@@ -41,13 +41,50 @@ export default function Reservations({schedule:s,changeDay,submit,refresh,loadDa
  useEffect(()=>{setSelectedSlot(null);},[s.day,kind]);
 
  const closed=s.bookingsOpen===false;
- const tabs:View[]=s.canManage?['schedule','mine','managed','history']:['schedule','mine','history'];
+ const tabs:View[]=s.canManage?['schedule','mine','more','managed','history']:['schedule','mine','more','history'];
  const swipe=useSwipeTabs(tabs,view,setView);
  const resources=s.resources.filter(r=>r.kind===kind&&r.active!==false),times=Array.from({length:(s.close-s.open)/s.step},(_,i)=>s.open+i*s.step);
  const visible=s.bookings.filter(b=>b.day===s.day&&(b.state==='confirmed'||b.state==='ended'));
  const listed=s.bookings.filter(b=>b.day===s.day&&(b.mine||(view==='managed'&&s.canManage)));
  const selection=[resource,...extras];
+ const selectedAvailable=selectedSlot?.day===s.day&&resources.some(r=>r.id===selectedSlot.id)&&validRange(s,selectedSlot.id,selectedSlot.time,selectedSlot.time+s.step);
+ const lastDay=addDay(s.today,Math.max(0,s.horizon-1));
+ const selectedDayIndex=Math.max(0,Math.round((Date.parse(s.day+'T12:00:00Z')-Date.parse(s.today+'T12:00:00Z'))/86400000));
+ const dateWindow=Math.floor(selectedDayIndex/4)*4;
+ const shownDays=Array.from({length:Math.min(4,Math.max(0,s.horizon-dateWindow))},(_,i)=>addDay(s.today,dateWindow+i));
  const ends=start===null?[]:endOptions(s,selection,start);
+
+ // Use the server's Las Vegas clock. Refresh moves the indicator, never the reader's scroll.
+ useEffect(()=>{
+  if(view!=='schedule'){positionedSchedule.current='';setNowTop(null);return;}
+  const scroller=scheduleScroll.current,canvas=scheduleCanvas.current;
+  if(!scroller||!canvas)return;
+  const key=s.day+':'+kind;
+  function position(){
+   if(!scroller||!canvas)return;
+   const rows=Array.from(canvas.querySelectorAll<HTMLTableRowElement>('tbody tr[data-minute]'));
+   const today=s.day===s.today;
+   const inHours=today&&s.nowMinute>=s.open&&s.nowMinute<s.close;
+   const index=Math.max(0,Math.min(rows.length-1,Math.floor((s.nowMinute-s.open)/s.step)));
+   const row=rows[index];
+   let top:number|null=null;
+   if(inHours&&row){
+    const rect=row.getBoundingClientRect(),origin=canvas.getBoundingClientRect();
+    const next=rows[index+1]?.getBoundingClientRect();
+    const height=next?next.top-rect.top:rect.height;
+    top=rect.top-origin.top+((s.nowMinute-Number(row.dataset.minute))/s.step)*height;
+   }
+   setNowTop(top);
+   if(positionedSchedule.current!==key){
+    positionedSchedule.current=key;
+    const header=canvas.querySelector('thead')?.getBoundingClientRect().height??44;
+    scroller.scrollTop=today?(top===null?(s.nowMinute>=s.close?scroller.scrollHeight:0):Math.max(0,top-header-scroller.clientHeight*.2)):0;
+   }
+  }
+  position();
+  const observer=new ResizeObserver(position);observer.observe(canvas);observer.observe(scroller);
+  return ()=>observer.disconnect();
+ },[view,kind,s.day,s.today,s.nowMinute,s.open,s.close,s.step,resources.length]);
 
  function open(id?:string,time?:number,makeHold=false){if(closed)return;setExtras([]);setResource(id??resources[0]?.id??'');setStart(time??null);setEnd(time===undefined?null:time+s.step);setDetail('');setPurpose('contact');setStep(0);setHold(makeHold);setError('');requestId.current=crypto.randomUUID();dialog.current?.showModal();}
  function revise(){setStep(0);requestId.current=crypto.randomUUID();setError('');}
@@ -56,7 +93,7 @@ export default function Reservations({schedule:s,changeDay,submit,refresh,loadDa
   setBusy(true);setError('');
   try{
    await submit({requestId:requestId.current,action:hold?'hold':'reserve',resourceIds:selection,day:s.day,start,end,...(hold?{reason:detail}:{purpose,detail})});
-   dialog.current?.close();setMessage(hold?'Resource hold confirmed.':'Reservation confirmed. Your My Week activity is updated.');setView('mine');
+   dialog.current?.close();setSelectedSlot(null);setMessage(hold?'Resource hold confirmed.':'Reservation confirmed. Your My Week activity is updated.');setView('mine');
   }catch(e){setError(e instanceof Error?e.message:'Reservation failed. Please refresh and try again.');}
   finally{setBusy(false);}
  }
@@ -69,21 +106,24 @@ export default function Reservations({schedule:s,changeDay,submit,refresh,loadDa
 
  const tab=(id:View,label:string)=><button type="button" className="ui-tab" onClick={()=>setView(id)} aria-current={view===id?'page':undefined}>{label}</button>;
  const heading=view==='mine'?'My reservations':view==='managed'?'Authorized reservations':s.day===s.today?'Today’s availability':'Availability';
+ const resourceTabs=<div className="sr-segment sr-header-tabs" role="group" aria-label="Resource type">{(Object.keys(kindLabels) as Kind[]).map(id=><button type="button" key={id} aria-label={id==='room'?'Study rooms':undefined} aria-pressed={kind===id} onClick={()=>setKind(id)}>{id==='room'?'Rooms':id==='whiteboard'?'Whiteboards':'TVs'}</button>)}</div>;
 
  const schedule=<>
-  <div className="sr-scroll" tabIndex={0} data-no-swipe aria-label="Full-day resource schedule; scroll horizontally for more resources"><table style={{minWidth:Math.max(302,64+resources.length*64)}}>
+  <div ref={scheduleScroll} className="sr-scroll" tabIndex={0} data-no-swipe aria-label="Full-day resource schedule; scroll horizontally for more resources"><div ref={scheduleCanvas} className="sr-grid-canvas" style={{minWidth:Math.max(280,56+resources.length*56)}}><table>
    <thead><tr><th scope="col">Time</th>{resources.map(r=><th key={r.id} scope="col">{r.name}</th>)}</tr></thead>
-   <tbody>{times.map(time=><tr key={time}><th scope="row">{clock(time)}</th>{resources.map(r=>{
+   <tbody>{times.map(time=><tr key={time} data-minute={time}><th scope="row" aria-label={clock(time)} className={time%60===0||time===s.open?'sr-hour':'sr-half-hour'}><span aria-hidden="true">{clock(time).replace(/ [AP]M$/,'')}</span></th>{resources.map(r=>{
     const block=s.blocks.find(b=>(!b.resourceId||b.resourceId===r.id)&&time>=b.start&&time<b.end);
     const booking=visible.find(b=>bookingResources(b).includes(r.id)&&time>=b.start&&time<b.end);
     const openSlot=validRange(s,r.id,time,time+s.step);
     const chosen=selectedSlot?.day===s.day&&selectedSlot.id===r.id&&selectedSlot.time===time;
     if(block)return <td key={r.id} className="sr-block"><span>{block.label}</span></td>;
-    if(booking)return <td key={r.id} className="sr-reserved"><span><b>{booking.hold?'Unavailable':booking.label}</b>{booking.mine&&booking.purpose&&<small>{purposeLabel(booking.purpose)}</small>}</span></td>;
-    return <td key={r.id} className={chosen?'sr-slot-selected':undefined}><button type="button" aria-pressed={chosen} disabled={!openSlot||closed} aria-label={`${r.name}, ${clock(time)}, ${closed?'booking closed':openSlot?'available':'past'}`} onClick={()=>setSelectedSlot({id:r.id,time,day:s.day})}>{closed?'Not open':!openSlot?'Past':chosen?'Selected':'+ Open'}</button></td>;
+    if(booking)return <td key={r.id} className="sr-reserved"><span><b>{booking.hold?'Unavailable':booking.mine?'Yours':'Booked'}</b></span></td>;
+    return <td key={r.id} className={chosen?'sr-slot-selected':undefined}><button type="button" aria-pressed={chosen} data-available={openSlot&&!closed} disabled={!openSlot||closed} aria-label={`${r.name}, ${clock(time)}, ${closed?'booking closed':openSlot?'available':'past'}`} onClick={()=>setSelectedSlot({id:r.id,time,day:s.day})}><span aria-hidden="true">{closed||!openSlot?'—':chosen?'✓':'+'}</span></button></td>;
    })}</tr>)}</tbody>
-  </table></div>
-  <p className="ui-hint sr-note">Other members’ bookings show as occupied, without names. Private purpose details never appear on this shared schedule.</p>
+  </table>
+  {s.day===s.today&&nowTop!==null&&<div className="sr-now-marker" role="img" style={{top:nowTop}} aria-label={`Current time ${clock(s.nowMinute)}, Las Vegas`}><span>{clock(s.nowMinute).replace(/ [AP]M$/,'')}</span></div>}
+  </div></div>
+
  </>;
 
  const list=<ul className="ui-list sr-my-list">
@@ -104,39 +144,39 @@ export default function Reservations({schedule:s,changeDay,submit,refresh,loadDa
   {!listed.length&&<li className="ui-empty">No reservations for this date.</li>}
  </ul>;
 
- return <div className="ui-page sr-app">
-  <header className="sr-topbar">
-   <a href="/members" className="sr-topbar-home" aria-label="LV Zion home"><ChevronLeft size={21}/></a>
-   <h1>Study Rooms</h1>
-   <button type="button" className="sr-topbar-bookings" aria-label="View bookings" onClick={()=>setView('mine')}><CalendarDays size={21}/></button>
-  </header>
+ return <div className="ui-page sr-app" data-view={view} data-selection={Boolean(selectedSlot&&selectedAvailable&&view==='schedule'&&!closed)}>
+  <FrameControls left={{label:'Schedule',icon:'calendar',onClick:()=>setView('schedule'),active:view==='schedule'}} right={{label:'Bookings',icon:'clock',onClick:()=>setView('mine'),active:view==='mine'}} onMore={()=>setView('more')} moreActive={['more','managed','history'].includes(view)} headerContent={view==='schedule'?resourceTabs:undefined} viewport={view==='schedule'}/>
   <main className="ui-main sr-main">
+   <h1 className="ui-visually-hidden">Study Rooms</h1>
    {closed&&<p role="status" className="ui-notice sr-gate" data-tone="warning"><strong>Bookings are paused.</strong> Availability and reservations are managed within LV Zion Official.</p>}
    {message&&<p role="status" className="ui-notice sr-success" data-tone="success">{message}</p>}
+   {view==='schedule'&&status}
 
    <div className="sr-layout">
     <section className="sr-primary-column" aria-label="Reservations">
-     {view==='schedule'&&<div className="sr-segment" role="group" aria-label="Resource type">{(Object.keys(kindLabels) as Kind[]).map(id=><button type="button" key={id} aria-pressed={kind===id} onClick={()=>setKind(id)}>{kindLabels[id]}</button>)}</div>}
-     <div className="sr-days" aria-label="Booking days">{Array.from({length:s.horizon},(_,i)=>addDay(s.today,i)).map((date,i)=><button type="button" key={date} aria-pressed={s.day===date} onClick={()=>changeDay(date)}><span>{i===0?'Today':weekday(date)}</span><strong>{new Date(date+'T12:00:00Z').toLocaleDateString('en-US',{month:'short',day:'numeric',timeZone:'UTC'})}</strong></button>)}</div>
-     <div className="sr-quick-actions">
-      <span>Las Vegas time · 30-minute slots</span>
-      <div className="sr-sticky"><button type="button" className="ui-button" onClick={()=>open()} disabled={busy||!resources.length||closed}>{closed?'Bookings Not Open':'Reserve Now'}</button></div>
-     </div>
-     <nav className="ui-tabs" aria-label="Reservation screens">
-      {tab('schedule','Availability')}{tab('mine','My Reservations')}{s.canManage&&tab('managed','Manage bookings')}{tab('history','History')}
-     </nav>
+     {view!=='more'&&<div className="sr-date-window" role="group" aria-label="Booking days">
+      <button type="button" className="sr-date-arrow" aria-label="Previous day" disabled={s.day<=s.today} onClick={()=>changeDay(addDay(s.day,-1))}><ChevronLeft size={20}/></button>
+      <div className="sr-date-days">{shownDays.map(date=>{
+       const value=new Date(date+'T12:00:00Z'),special=[2,6].includes(value.getUTCDay());
+       return <button type="button" key={date} className="sr-day" data-date={date} data-today={date===s.today} data-special={special} aria-label={longDay(date)+(date===s.today?', today':'')} aria-pressed={date===s.day} onClick={()=>changeDay(date)}>
+        <span>{value.toLocaleDateString('en-US',{weekday:'short',timeZone:'UTC'})}</span><strong>{value.getUTCDate()}</strong>{date===s.today&&<small>Today</small>}{special&&<i aria-hidden="true">✦</i>}
+       </button>;
+      })}</div>
+      <button type="button" className="sr-date-arrow" aria-label="Next day" disabled={s.day>=lastDay} onClick={()=>changeDay(addDay(s.day,1))}><ChevronLeft className="sr-next" size={20}/></button>
+     </div>}
+     {(view==='managed'||view==='history')&&<nav className="ui-tabs" aria-label="Reservation screens">{s.canManage&&tab('managed','Manage bookings')}{tab('history','History')}</nav>}
      <div className="sr-panel" {...swipe}>
-      {view==='history'?<ReservationHistory today={s.today} canManage={s.canManage} resources={s.resources} read={loadHistory}/>:<>
-       <div className="sr-panel-head">
-        <div><h2>{view==='schedule'?longDay(s.day):heading}</h2><p className="ui-hint">{view==='schedule'?'Choose an open time to reserve.':longDay(s.day)}</p></div>
+      {view==='more'?<section className="sr-more"><h2>More</h2><button type="button" className="ui-row" onClick={()=>setView('history')}>Reservation history</button>{s.canManage&&<button type="button" className="ui-row" onClick={()=>setView('managed')}>Manage bookings & resources</button>}<a className="ui-row" href="/appearance">Appearance</a><button type="button" className="ui-row" onClick={refresh}>Refresh availability</button></section>:view==='history'?<ReservationHistory today={s.today} canManage={s.canManage} resources={s.resources} read={loadHistory}/>:<>
+       {view!=='schedule'&&<div className="sr-panel-head">
+        <div><h2>{heading}</h2><p className="ui-hint">{longDay(s.day)}</p></div>
         <button type="button" onClick={refresh} className="ui-button ui-button-quiet">Refresh</button>
-       </div>
-       {view==='schedule'?schedule:list}
+       </div>}
+       {view==='schedule'?(resources.length?schedule:<p className="ui-empty">No {kindLabels[kind].toLowerCase()} available. Choose another resource type.</p>):list}
       </>}
      </div>
     </section>
 
-    {s.canManage&&<aside className="sr-side" aria-label="Manager tools">
+    {s.canManage&&view==='managed'&&<aside className="sr-side" aria-label="Manager tools">
      <section className="sr-section">
       <h2>Manage resources</h2>
       <p className="ui-hint">Place a resource hold or cancel an authorized booking. Neither action deletes its history.</p>
@@ -146,22 +186,18 @@ export default function Reservations({schedule:s,changeDay,submit,refresh,loadDa
      {operations}
     </aside>}
    </div>
-   {status}
+   {view!=='schedule'&&status}
   </main>
 
-  <nav className="sr-bottom-nav" aria-label="Study Room bottom navigation">
-   <a href="/members" aria-label="Home"><House size={21}/><span>Home</span></a>
-   <button type="button" onClick={()=>setView('schedule')} aria-current={view==='schedule'?'page':undefined}><CalendarDays size={21}/><span>Schedule</span></button>
-   <button type="button" className="sr-bottom-apps" aria-label="Open apps" onClick={()=>setAppsOpen(true)}><span className="sr-bottom-apps-icon"><Grid2X2 size={24}/></span><span>Apps</span></button>
-   <button type="button" onClick={()=>setView('mine')} aria-current={view==='mine'?'page':undefined}><Clock3 size={21}/><span>Bookings</span></button>
-   <button type="button" onClick={()=>setView(s.canManage?'managed':'history')} aria-current={view===(s.canManage?'managed':'history')?'page':undefined}><UsersRound size={21}/><span>{s.canManage?'Manage':'History'}</span></button>
-  </nav>
-  {selectedSlot&&view==='schedule'&&!closed&&<aside className="sr-selection-bar" aria-label="Selected reservation">
-   <div><strong>{s.resources.find(r=>r.id===selectedSlot.id)?.name??'Resource'}</strong><small>{weekday(s.day)}, {new Date(s.day+'T12:00:00Z').toLocaleDateString('en-US',{month:'short',day:'numeric',timeZone:'UTC'})} · {clock(selectedSlot.time)} to {clock(selectedSlot.time+s.step)}</small></div>
-   <button type="button" className="ui-button" onClick={()=>{open(selectedSlot.id,selectedSlot.time);setSelectedSlot(null);}}>Reserve</button>
+  {view==='schedule'&&resources.length>0&&<aside className="sr-reserve-dock" aria-label="Reservation action">
+   {selectedSlot&&selectedAvailable&&!closed&&<div className="sr-selection-summary" role="status"><strong>{s.resources.find(r=>r.id===selectedSlot.id)?.name??'Resource'}</strong><span>{clock(selectedSlot.time)} – {clock(selectedSlot.time+s.step)}</span></div>}
+   {!selectedSlot&&!closed&&<p className="sr-reserve-prompt">Choose an open time</p>}
+   {closed&&<p className="sr-reserve-prompt">Reservations are paused</p>}
+   {selectedSlot&&!selectedAvailable&&!closed&&<p role="status" className="ui-hint">That time is no longer available. Choose another open time.</p>}
+   <button type="button" className="ui-button" aria-label={closed?'Bookings paused':undefined} disabled={busy||closed||Boolean(selectedSlot&&!selectedAvailable)} onClick={()=>open(selectedSlot?.id,selectedSlot?.time)}>{closed?'Paused':'Reserve'}</button>
   </aside>}
 
-  <AppSwitcher open={appsOpen} onClose={()=>setAppsOpen(false)}/>
+
 
   <dialog ref={dialog} className="ui-sheet sr-dialog" aria-label="Reserve a resource" onCancel={e=>{if(busy)e.preventDefault();}}><div className="ui-sheet-body">
    <div className="sr-sheet-head">
@@ -204,3 +240,4 @@ export default function Reservations({schedule:s,changeDay,submit,refresh,loadDa
   </div></dialog>
  </div>;
 }
+

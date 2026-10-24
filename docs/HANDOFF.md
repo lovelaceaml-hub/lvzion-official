@@ -1,6 +1,6 @@
 # LV Zion Official — current handoff
 
-Updated October 16, 2026. This handoff and `AGENTS.md` describe the application to build and operate now. Milestone-specific release records are evidence, not additional product requirements.
+Updated October 19, 2026. This handoff and `AGENTS.md` describe the application to build and operate now. Milestone-specific release records are evidence, not additional product requirements.
 
 ## Authoritative requirements
 
@@ -8,13 +8,27 @@ LV Zion Official is a self-contained, phone-first application at https://lvz.app
 
 Keep compact module headers and the prominent center Apps launcher. The launcher shows only server-authorized modules. Continue the approved [Day Sheet design contract](design/LVZ-DESIGN-CONTRACT.md), shared tokens, accessible controls and phone-first layouts.
 
+## Device appearance — released October 19, 2026
+
+**More → Appearance** now offers 24 optional device themes on the [real app](https://lvz.app/appearance). **Current app design** restores the existing module defaults, including Study Rooms’ Lavender Softform. Source `0197e83f1ee5fd28ceaaea3cc339b1a9ab800580`, deployment `dpl_HVSBqrSGcvVaTQupPhwaAkU7FDVk`, READY with both production aliases verified. Type checking, 9 selected unit checks, 13 selected browser checks, optimized compilation and 7 compiled-app browser checks passed. Live theme persistence/reset and anonymous denials were verified; no full suite or real hosted booking was run. See [scope and verification](design/APPEARANCE.md) and the [release receipt](design/APPEARANCE-RELEASE.json).
+
+## Current Study Rooms design — Lavender Softform
+
+The owner selected prototype 06, refined its layout, and requested implementation in the real app. Resource tabs attach to the shared header, dates sit below them, and the continuous half-hour grid fills the viewport beneath a transparent floating selection/Reserve tray and the shared dock. Lavender/plum styling is scoped to Study Rooms, including its raised Apps rounded square. This supersedes earlier Study Rooms color, time-tile and date/resource ordering descriptions. [Current scope, verification and release record](study-rooms/LAVENDER-SOFTFORM-2026-10-19.md).
+
+Local release gates passed: 387 application tests, 198 additional PostgreSQL permission assertions, TypeScript/production build, and the complete 131-case browser suite with no exclusions. The older sign-in/resend, time-dependent Display and midnight-sensitive Work Mission fixture failures were repaired in tests only. Responsive screenshots and real-route synthetic bookings were checked at 320, 390 and 1280 px; this is not physical-phone or real hosted booking acceptance.
+
+Released October 19 at 07:09 UTC from `2f80bbd773e61cda59eaf9d01b12337fba766496`. Deployment `dpl_J9vTBQ2woZQ8a6abcCKicnUBxzVj` is READY with `lvz.app` and `www.lvz.app` aliases. The live Study Rooms page returns HTTP 200 and identifies this exact deployment; its three loaded CSS chunks include the lavender/plum tokens, attached tabs, viewport layout and standard 6 px / 12 px glass blur. The canonical `www` redirect returns 308 to `lvz.app`.
+
+Read-only live GET checks of Study Rooms availability and administration returned HTTP 401 without an application member session. No production booking transaction was used for this verification.
+
 ## Infrastructure and verified release
 
 - Repository: `lovelaceaml-hub/lvzion-official`.
 - Vercel: `lvzion-official`, project `prj_4icc6S1jw8OVKWD9AOI1oiB5fwYe`, team `lvzion`.
 - Supabase: `otecqlkqirncotytbfns`, Las Vegas Zion organization.
-- Production source: `dfad3817911f2ba195a21762986f54cceed46d78`.
-- Production deployment: `dpl_HxTFTX6mRCn4JAUH3Mv4mSsuj7ZC`, READY, `lvz.app` and `www.lvz.app` aliases verified.
+- Production source: `0197e83f1ee5fd28ceaaea3cc339b1a9ab800580`.
+- Production deployment: `dpl_HVSBqrSGcvVaTQupPhwaAkU7FDVk`, READY, `lvz.app` and `www.lvz.app` aliases verified.
 - Fresh calendar correction: repository migration `20261016180000_study_rooms_fresh_calendar.sql`, applied hosted version `20261016173939`.
 
 Documentation-only commits after the runtime source do not require another deployment. Read current provider state rather than assuming a recorded snapshot cannot change. Automatic Git deployments remain disabled; no unrequested previews are authorized.
@@ -32,7 +46,7 @@ Production deployment `dpl_99bVq58phv1XR6dKcpvkruaXsQ21` is READY on `lvz.app`; 
 
 At release the live database had zero active leader appointments and zero placed members, so nobody gained access yet. Access starts as leaders are appointed and members are placed.
 
-Not verified: a real signed-in group leader turning a member on, and physical phones. Six existing Study Rooms browser tests fail on main independently of this release (they also fail on `d44e6cc`).
+Not verified: a real signed-in group leader turning a member on, and physical phones. At that release, six existing Study Rooms browser tests failed independently of the change (they also failed on `d44e6cc`). The current Lavender Softform release supersedes that browser-test status with a complete 131-case pass.
 
 ## Study Rooms — correction completed
 
@@ -56,10 +70,26 @@ Contacts remains an explicitly granted private owner workspace. Preserve forced 
 
 Continuous Display uses approved publications and explicitly paired devices. Do not confuse a browser test with physical TV acceptance. [Operations](continuous-display/OPERATIONS-R2.md).
 
-Work Mission uses owner-supplied dates, hosts, materials and meeting links. Schedule/material/people management and the protected meeting broker remain intact. Do not infer dates or enable outbound distribution. Real owner save/member join and physical-device acceptance remain distinct checks. [Completion](morning-prayer/COMPLETION-R5.md), [interface](morning-prayer/SIMPLER-R6.md).
+Work Mission uses owner-supplied dates, hosts, materials and meeting links. Schedule/material/people management and the protected meeting broker remain intact. Do not infer dates or enable outbound distribution. Real owner save/member join and physical-device acceptance remain distinct checks. [Completion](morning-prayer/COMPLETION-R5.md), [historical R6 interface and October 18 focused verification](morning-prayer/SIMPLER-R6.md), [release receipt](morning-prayer/RELEASE-R6.json). The October 18 read-only check still found one module grant, seven capabilities and zero gatherings/publications/meeting references. Eight live signed-out/origin checks passed on the newer READY shared-frame release; no full suite was rerun.
 
 ## Development and recovery
 
 Follow [release controls](RELEASE-GATES.md). Reconcile the [hosted ledger](HOSTED-MIGRATION-LEDGER.json), including the October 16 correction, before applying SQL. Do not replay applied migrations or use a blind database push. Never use fictional fixtures against production; the fixture seed now explicitly refuses hosted Auth schemas.
 
 Keep secrets in provider stores or personal Keychain. Preserve all existing authorization boundaries. Test the changed workflow and its denial paths, then verify exact deployed source and aliases. Choose a schema-compatible verified deployment for recovery; do not delete history, restore unapproved defaults or widen permissions as a rollback shortcut.
+
+## Study Rooms Soft Panels — October 18, 2026
+
+Anthony selected Soft Panels as the main Study Rooms interface with glass accents only, superseding the earlier Day Sheet visual rules for this module. The implementation preserves the compact header and authorized center Apps launcher; date navigation, the availability grid and Continue form the main flow. Manager tools and history are under More. See [design and verification](study-rooms/SOFT-PANELS-2026-10-18.md) for scope and test evidence.
+
+### Later Study Rooms layout correction
+
+Anthony supplied a second October 18 layout reference. Study Rooms now uses separate rounded time tiles, an hourly rail, resource tabs at the top and a full-width Reserve action above the bottom Apps navigation. See [implementation and verification](study-rooms/TILE-LAYOUT-2026-10-18.md). This supersedes the continuous raised columns described in the earlier Soft Panels release.
+
+## Shared application frame — October 18 request
+
+The root frame now provides a persistent compact module header, circular profile avatar and matching bottom navigation, with a raised center Apps button. `FrameControls` registers each module’s neighboring actions. This supersedes separate module bars and the older wordmark-only header. See [shared frame details and release evidence](SHARED-APP-FRAME-2026-10-19.md). Profile photos are not yet a stored feature; the circle uses authenticated initials. No grants, operational records or schema changes are included.
+
+### Glass/date refinement
+
+The subsequent October 18 request puts four glass date buttons above slimmer resource tabs, strengthens Reserve/Apps depth, adds today shimmer and Tuesday/Saturday decoration, and makes the shared header edge-to-edge. See [current refinement and verification](GLASS-REFINEMENT-2026-10-19.md). Booking policy and data remain server-sourced.

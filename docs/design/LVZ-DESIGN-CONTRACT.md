@@ -1,8 +1,12 @@
 # LV Zion design contract: Day Sheet
 
-Status: locked. Anthony chose direction **A. Day Sheet** on 2026-10-14 from three options (A Day Sheet, B Module Board, C First Light). His selection, as given: "A. Day Sheet (Recommended)". No extra note.
+Status: default design contract. Anthony chose direction **A. Day Sheet** on 2026-10-14 from three options (A Day Sheet, B Module Board, C First Light). His selection, as given: "A. Day Sheet (Recommended)". No extra note.
+
+October 19 appearance exception: Anthony requested applying the theme collection to the current app. The [device appearance options](APPEARANCE.md) add 24 explicit light/dark presentation choices. With **Current app design**, existing defaults remain unchanged, including Study Rooms' later approved Lavender Softform design. These optional overrides supersede this document's palette/material restrictions only while a device theme is selected; layout, authorization and accessibility requirements remain applicable.
 
 Evidence: [direction board](directions/direction-board.html) with phone and desktop exports in [directions/](directions/), and the earlier look in [before/](before/).
+
+The latest approved Study Rooms exception is [Lavender Softform](../study-rooms/LAVENDER-SOFTFORM-2026-10-19.md). Its resource tabs, dates, continuous grid and floating controls supersede earlier Study Rooms appearance rules below; the base contract still governs other module content.
 
 Every screen in lvz.app follows this contract: Home, sign in and sign up, member management, and every module (Work Mission prayer, Study Rooms, Church Display, Contacts, Worship Duty). Material changes to it go back to Anthony.
 
@@ -110,3 +114,25 @@ WCAG 2.2 AA: text contrast at least 4.5:1, interface borders at least 3:1, visib
 ## Ownership
 
 The shared-core owner changes `styles/lvz-tokens.css`, `styles/lvz-ui.css`, `components/app-header.tsx`, `lib/use-swipe-tabs.ts`, `lib/design-tokens.ts` and this file. Module owners may request additions. `tests/design-tokens.test.ts` keeps script and CSS tokens in step and checks the swipe rule.
+
+## Study Rooms exception — approved October 18, 2026
+
+Anthony selected the Soft Panels reference as the Study Rooms design, with Floating Glass used only for accents. This supersedes the no-shadow/no-gradient and underline-navigation rules for this module only. Keep the shared palette, compact header, accessible controls and center Apps launcher. The booking grid stays opaque and readable: raised white resource columns, muted booked cells, green selection and a contextual Continue bar. Glass is limited to navigation and action accents. Resource inventory, dates and bookings come from this application's actual records; reference-image sample data is never seeded.
+
+### Study Rooms layout refinement — later October 18 reference
+
+The owner's later reference uses separate rounded `+ Open` tiles and hour labels spanning half-hour rows, superseding continuous raised resource columns. The schedule begins with icon-labelled resource tabs and uses a full-width Reserve button above the required bottom navigation. Glass remains accent-only. Details: [layout correction](../study-rooms/TILE-LAYOUT-2026-10-18.md).
+
+## Shared persistent frame — approved October 18, 2026
+
+Anthony requested a persistent matching header and bottom control across pages, based on the supplied raised/glass Apps button references. This supersedes the wordmark header, desktop top navigation and no-glass restrictions for shared navigation. Use `AppFrame` in the root layout and register real module actions with `FrameControls`; do not add separate module bottom bars. The header shows the module symbol/title and circular member avatar. Home, centered Apps and More remain stable; the two neighboring actions follow the module. Glass stays an accent and content stays opaque. Full-screen TV playback remains immersive. See [implementation, mapping and verification](../SHARED-APP-FRAME-2026-10-19.md).
+
+### Later October 18 glass/date refinement
+
+Owner explicitly approved stronger reflective glass on dates and Reserve, a detailed shimmering Apps circle and today button, decorative Tuesday/Saturday glow, edge-to-edge square-corner header, and a deeper bottom dock. Dates precede a slim resource selector and show today plus three days within the configured booking horizon. Keep 44px targets, readable content, reduced-motion/transparency fallbacks and unchanged availability rules. See [refinement details](../GLASS-REFINEMENT-2026-10-19.md).
+
+### Latest Study Rooms direction — Lavender Softform, October 19, 2026 UTC
+
+The owner selected prototype 06 and explicitly requested implementation in the real app. Study Rooms now uses scoped lavender/plum tokens and soft raised surfaces. Rooms, Whiteboards and TVs are tabs connected to the shared header; dates follow below. The continuous ruled grid reaches the viewport bottom, with half-hour labels and plus-only open cells. The selected cell remains visible behind a more transparent floating selection/Reserve tray, above the shared dock and its raised plum Apps rounded square. The scroll area must not shrink on selection, and its final interval must scroll clear of the floating controls.
+
+This approval supersedes the earlier green palette, separate time tiles, hour-spanning rail, dates-before-resources and Apps-circle rules for Study Rooms only. Keep shared token ownership, 44px targets, readable states, keyboard access, reduced-motion/transparency fallbacks and server-sourced data. See [implementation and verification](../study-rooms/LAVENDER-SOFTFORM-2026-10-19.md).

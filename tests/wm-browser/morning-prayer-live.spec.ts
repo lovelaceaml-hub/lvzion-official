@@ -36,7 +36,7 @@ test('real client supports Home Schedule Me Manage across phone and tablet width
  await expect(page.getByRole('region',{name:'Monthly Morning Prayer gathering calendar'})).toBeVisible();
  await page.getByRole('button',{name:'Me',exact:true}).click();
  await expect(page.getByRole('button',{name:'Confirm hosting'})).toBeVisible();
- await page.getByRole('button',{name:'Manage',exact:true}).click();
+ await page.getByRole('navigation',{name:'Main navigation'}).getByRole('button',{name:'More',exact:true}).click();await page.getByRole('dialog',{name:'More options'}).getByRole('button',{name:'Manage',exact:true}).click();
  await expect(page.getByText('Meeting link',{exact:true})).toBeVisible();
  await expect(page.getByLabel('Official Zoom join link')).toBeHidden();
  for(const width of [320,390,768,1024]){
@@ -45,7 +45,7 @@ test('real client supports Home Schedule Me Manage across phone and tablet width
  }
 });
 test('recurrence previews exact weekdays and requires confirmation before writing',async({page})=>{
- const f=await setup(page);await page.getByRole('button',{name:'Manage',exact:true}).click();
+ const f=await setup(page);await page.getByRole('navigation',{name:'Main navigation'}).getByRole('button',{name:'More',exact:true}).click();await page.getByRole('dialog',{name:'More options'}).getByRole('button',{name:'Manage',exact:true}).click();
  const panel=page.getByTestId('wm-bulk-schedule');
  await panel.locator('summary').click();
  await panel.getByLabel('First date').fill(nextDate());
@@ -61,7 +61,7 @@ test('recurrence previews exact weekdays and requires confirmation before writin
  expect(f.commands[0].occurrences[0].date).toBe(nextDate());
 });
 test('unpublished draft can be corrected and edits reset source attestation',async({page})=>{
- const f=await setup(page);await page.getByRole('button',{name:'Manage',exact:true}).click();
+ const f=await setup(page);await page.getByRole('navigation',{name:'Main navigation'}).getByRole('button',{name:'More',exact:true}).click();await page.getByRole('dialog',{name:'More options'}).getByRole('button',{name:'Manage',exact:true}).click();
  await page.getByRole('button',{name:'Materials',exact:true}).click();
  const panel=page.getByTestId('wm-revision-editor');
  await panel.locator('summary').click();
@@ -74,7 +74,7 @@ test('unpublished draft can be corrected and edits reset source attestation',asy
  expect(f.commands[0].action).toMatchObject({type:'material_draft',key:'reading-draft',sourceChecked:false,body:{title:'Fictional corrected title'}});
 });
 test('owner permissions use explicit capability choices',async({page})=>{
- const f=await setup(page);await page.getByRole('button',{name:'Manage',exact:true}).click();
+ const f=await setup(page);await page.getByRole('navigation',{name:'Main navigation'}).getByRole('button',{name:'More',exact:true}).click();await page.getByRole('dialog',{name:'More options'}).getByRole('button',{name:'Manage',exact:true}).click();
  await page.getByRole('button',{name:'People',exact:true}).click();
  const panel=page.getByTestId('wm-member-access');
  await panel.getByRole('combobox',{name:/^Member/}).selectOption(id(11));
@@ -109,7 +109,7 @@ test('older refresh cannot restore a private schedule after a newer denial',asyn
 });
 
 test('Manage starts with focused sections and closed setup forms',async({page})=>{
- await setup(page);await page.getByRole('button',{name:'Manage',exact:true}).click();
+ await setup(page);await page.getByRole('navigation',{name:'Main navigation'}).getByRole('button',{name:'More',exact:true}).click();await page.getByRole('dialog',{name:'More options'}).getByRole('button',{name:'Manage',exact:true}).click();
  await expect(page.getByLabel('Start (Las Vegas)',{exact:true})).toBeHidden();
  await expect(page.getByLabel('Official Zoom join link')).toBeHidden();
  await expect(page.getByTestId('wm-revision-editor')).toHaveCount(0);
@@ -120,7 +120,7 @@ test('Manage starts with focused sections and closed setup forms',async({page})=
  await expect(page.getByText('New reading or PWP',{exact:true})).toBeVisible();
 });
 test('PWP draft uses month and week choices without exposing database keys',async({page})=>{
- const f=await setup(page);await page.getByRole('button',{name:'Manage',exact:true}).click();
+ const f=await setup(page);await page.getByRole('navigation',{name:'Main navigation'}).getByRole('button',{name:'More',exact:true}).click();await page.getByRole('dialog',{name:'More options'}).getByRole('button',{name:'Manage',exact:true}).click();
  await page.getByRole('button',{name:'Materials',exact:true}).click();
  await page.getByText('New reading or PWP',{exact:true}).click();
  await expect(page.getByLabel('Unique material key')).toHaveCount(0);
@@ -136,7 +136,7 @@ test('PWP draft uses month and week choices without exposing database keys',asyn
  await expect(page.getByLabel('Title',{exact:true})).toHaveValue('');
 });
 test('reading drafts receive separate private identifiers for each successful create',async({page})=>{
- const f=await setup(page);await page.getByRole('button',{name:'Manage',exact:true}).click();
+ const f=await setup(page);await page.getByRole('navigation',{name:'Main navigation'}).getByRole('button',{name:'More',exact:true}).click();await page.getByRole('dialog',{name:'More options'}).getByRole('button',{name:'Manage',exact:true}).click();
  await page.getByRole('button',{name:'Materials',exact:true}).click();
  await page.getByText('New reading or PWP',{exact:true}).click();
  await page.getByRole('combobox',{name:'Type',exact:true}).selectOption('reading');
@@ -153,7 +153,7 @@ test('reading drafts receive separate private identifiers for each successful cr
  expect(f.commands[0].action.key).toMatch(/^reading-[0-9a-f-]+$/);
 });
 test('accepted save with unavailable readback never reports a confirmed saved result',async({page})=>{
- const f=await setup(page);await page.getByRole('button',{name:'Manage',exact:true}).click();
+ const f=await setup(page);await page.getByRole('navigation',{name:'Main navigation'}).getByRole('button',{name:'More',exact:true}).click();await page.getByRole('dialog',{name:'More options'}).getByRole('button',{name:'Manage',exact:true}).click();
  const panel=page.getByTestId('wm-bulk-schedule');await panel.locator('summary').click();
  await panel.getByLabel('First date').fill(nextDate());await panel.getByLabel('Last date').fill(nextDate());
  await panel.getByLabel(['Sun','Mon','Tue','Wed','Thu','Fri','Sat'][new Date(nextDate()+'T12:00:00Z').getUTCDay()],{exact:true}).check();
@@ -169,7 +169,7 @@ test('clean interface supports keyboard disclosure and phone/desktop evidence',a
  await setup(page);
  await page.setViewportSize({width:390,height:844});
  await page.screenshot({path:'/tmp/lvz-wm-simple-home-phone.png'});
- await page.getByRole('button',{name:'Manage',exact:true}).click();
+ await page.getByRole('navigation',{name:'Main navigation'}).getByRole('button',{name:'More',exact:true}).click();await page.getByRole('dialog',{name:'More options'}).getByRole('button',{name:'Manage',exact:true}).click();
  const summary=page.getByTestId('wm-bulk-schedule').locator('summary');
  await summary.focus();await page.keyboard.press('Enter');
  await expect(page.getByLabel('First date')).toBeVisible();
@@ -183,7 +183,7 @@ test('publication keeps full source review available before the publish action',
  const f=await setup(page);
  f.setData({...f.data,drafts:[{...f.data.materialCatalog[0],id:id(21),sourceState:'checked'}]} as any);
  await page.evaluate(()=>window.dispatchEvent(new Event('focus')));
- await page.getByRole('button',{name:'Manage',exact:true}).click();
+ await page.getByRole('navigation',{name:'Main navigation'}).getByRole('button',{name:'More',exact:true}).click();await page.getByRole('dialog',{name:'More options'}).getByRole('button',{name:'Manage',exact:true}).click();
  await page.getByRole('button',{name:'Materials',exact:true}).click();
  await expect(page.getByRole('button',{name:'Publish',exact:true})).toBeHidden();
  await page.getByText('Review draft',{exact:true}).click();
@@ -194,7 +194,7 @@ test('publication keeps full source review available before the publish action',
  expect(f.commands[0].action).toMatchObject({type:'material_publish',materialId:id(21)});
 });
 test('new material form blocks empty required details before sending a command',async({page})=>{
- const f=await setup(page);await page.getByRole('button',{name:'Manage',exact:true}).click();
+ const f=await setup(page);await page.getByRole('navigation',{name:'Main navigation'}).getByRole('button',{name:'More',exact:true}).click();await page.getByRole('dialog',{name:'More options'}).getByRole('button',{name:'Manage',exact:true}).click();
  await page.getByRole('button',{name:'Materials',exact:true}).click();
  await page.getByText('New reading or PWP',{exact:true}).click();
  await page.getByRole('button',{name:'Save draft',exact:true}).click();
@@ -203,7 +203,7 @@ test('new material form blocks empty required details before sending a command',
 });
 test('month text fallback keeps partial entries editable and loads only complete months',async({page})=>{
  await useMonthTextFallback(page);
- await setup(page);await page.getByRole('button',{name:'Manage',exact:true}).click();
+ await setup(page);await page.getByRole('navigation',{name:'Main navigation'}).getByRole('button',{name:'More',exact:true}).click();await page.getByRole('dialog',{name:'More options'}).getByRole('button',{name:'Manage',exact:true}).click();
  const month=page.getByLabel('Month',{exact:true});
  const reads:string[]=[];
  page.on('request',request=>{if(request.url().includes('/api/morning-prayer?'))reads.push(request.url());});
@@ -222,7 +222,7 @@ test('month text fallback keeps partial entries editable and loads only complete
 });
 test('PWP text fallback rejects an invalid month before creating a draft',async({page})=>{
  await useMonthTextFallback(page);
- const f=await setup(page);await page.getByRole('button',{name:'Manage',exact:true}).click();
+ const f=await setup(page);await page.getByRole('navigation',{name:'Main navigation'}).getByRole('button',{name:'More',exact:true}).click();await page.getByRole('dialog',{name:'More options'}).getByRole('button',{name:'Manage',exact:true}).click();
  await page.getByRole('button',{name:'Materials',exact:true}).click();
  await page.getByText('New reading or PWP',{exact:true}).click();
  const month=page.getByLabel('PWP month');
@@ -237,9 +237,9 @@ test('PWP text fallback rejects an invalid month before creating a draft',async(
  expect(await month.evaluate(element=>(element as HTMLInputElement).validity.patternMismatch)).toBe(true);
  expect(f.commands).toHaveLength(0);
 });
-test('Day Sheet header goes home and a deliberate swipe changes tabs without wrapping',async({page})=>{
+test('persistent Home links home and a deliberate swipe changes tabs without wrapping',async({page})=>{
  await setup(page);
- await expect(page.getByRole('link',{name:'LV Zion home'})).toHaveAttribute('href','/members');
+ await expect(page.getByRole('link',{name:'Home',exact:true})).toHaveAttribute('href','/members');
  const content=page.locator('main [data-testid=wm-content]');
  const swipe=async(dx:number,dy=0,ms=150)=>content.evaluate(async(el,[dx,dy,ms])=>{
   const touch=(x:number,y:number)=>new Touch({identifier:1,target:el,clientX:x,clientY:y});
@@ -247,10 +247,11 @@ test('Day Sheet header goes home and a deliberate swipe changes tabs without wra
   await new Promise(r=>setTimeout(r,ms));
   el.dispatchEvent(new TouchEvent('touchend',{bubbles:true,touches:[],changedTouches:[touch(200+dx,300+dy)]}));
  },[dx,dy,ms]);
- const current=()=>page.locator('nav[aria-label="Morning Prayer sections"]:visible [aria-current=page]');
- await swipe(80);await expect(current()).toHaveText('Home');
+ const current=()=>page.locator('nav[aria-label="Main navigation"] [aria-current=page]');
+ await swipe(80);await expect(page.getByRole('heading',{name:'Your next gathering'})).toBeVisible();
  await swipe(-80);await expect(current()).toHaveText('Schedule');
  await swipe(-40);await expect(current()).toHaveText('Schedule');
  await swipe(-80,70);await expect(current()).toHaveText('Schedule');
  await swipe(-80,0,700);await expect(current()).toHaveText('Schedule');
 });
+

@@ -1,3 +1,5 @@
+import {openManagement} from './study-navigation';
+import {startReservation} from './study-navigation';
 import {test,expect} from '@playwright/test';
 import {demoSchedule,vegasDay} from '../../lib/study-rooms/domain';
 import type {WeeklyServiceInterval} from '../../lib/study-rooms/operations';
@@ -24,13 +26,14 @@ async function setup(page:import('@playwright/test').Page,manager=true,bookingsO
   return route.fulfill({status:200,json:{...f.operations,bookingsOpen}});
  });
  await page.goto('/modules/study-rooms');
+ if(manager)await openManagement(page);
  return f;
 }
 test('manager can configure inventory during an application-local booking pause',async({page})=>{
  const f=await setup(page);
  await expect(page.getByRole('heading',{name:'Inventory & service calendar'})).toBeVisible();
  await expect(page.getByText(/Booking status: Paused/)).toBeVisible();
- await expect(page.getByRole('button',{name:/Bookings Not Open/})).toBeDisabled();
+ await expect(page.locator('.sr-gate')).toContainText('Bookings are paused.');
  await page.getByText('Add a room, whiteboard or TV').click();
  await page.getByLabel('New resource kind').selectOption('whiteboard');
  await page.getByLabel('New resource name').fill('New Large Whiteboard');
@@ -38,7 +41,7 @@ test('manager can configure inventory during an application-local booking pause'
  await page.getByRole('button',{name:'Add resource'}).click();
  await expect.poll(()=>f.commands.length).toBe(1);
  expect(f.commands[0]).toMatchObject({action:'resource.add',kind:'whiteboard',name:'New Large Whiteboard',expectedVersion:1});
- await expect(page.getByRole('button',{name:/Bookings Not Open/})).toBeDisabled();
+ await expect(page.locator('.sr-gate')).toContainText('Bookings are paused.');
  await expect(page.getByText(/Reservations: 0/)).toBeVisible();
 });
 test('weekly calendars start empty and save only explicitly added intervals',async({page})=>{
@@ -73,10 +76,10 @@ test('manager can save an empty weekly calendar and remove the final interval',a
 });
 test('bookings can operate with an empty calendar without another service',async({page})=>{
  await setup(page,true,true);
- await expect(page.getByRole('button',{name:'Reserve Now'})).toBeEnabled();
+ await expect(page.getByRole('button',{name:'Schedule',exact:true})).toBeEnabled();
  await expect(page.getByText(/Booking status: Open/)).toBeVisible();
  await expect(page.getByText(/original scheduler|scheduler transition|cutover|lvrooms\.web\.app/i)).toHaveCount(0);
- await page.getByRole('button',{name:'Reserve Now'}).click();
+ await startReservation(page);
  await expect(page.getByRole('dialog',{name:'Reserve a resource'})).toBeVisible();
 });
 test('special-day override can intentionally contain no service restrictions',async({page})=>{
@@ -90,9 +93,9 @@ test('special-day override can intentionally contain no service restrictions',as
 });
 test('a regular member cannot see private manager policy controls',async({page})=>{
  await setup(page,false);
- await expect(page.getByRole('button',{name:'My Reservations'})).toBeVisible();
+ await expect(page.getByRole('button',{name:'Bookings',exact:true})).toBeVisible();
  await expect(page.getByRole('heading',{name:'Inventory & service calendar'})).toHaveCount(0);
- await expect(page.getByRole('button',{name:/Bookings Not Open/})).toBeDisabled();
+ await expect(page.locator('.sr-gate')).toContainText('Bookings are paused.');
 });
 test('anonymous operations API cannot read or edit the policy',async({request})=>{
  const r=await request.get('/api/study-rooms/operations');
@@ -109,3 +112,4 @@ test('manager editor does not overflow narrow phone or tablet',async({page})=>{
   expect(overflow,'viewport '+width).toBeLessThanOrEqual(1);
  }
 });
+

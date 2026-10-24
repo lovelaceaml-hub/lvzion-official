@@ -4,11 +4,9 @@ import type {FormEvent,KeyboardEvent} from 'react';
 import type {ContactsWorkspace,ContactDetail,ContactSummary,PreferredMethod} from '../../lib/contacts/server-contract';
 import {contactCounts,contactFilters,findLoadedContacts} from '../../lib/contacts/presentation';
 import type {ContactFilter} from '../../lib/contacts/presentation';
-import {parseModuleFeed} from '../../lib/app-runtime';
-import type {AuthorizedModule} from '../../lib/app-runtime';
-import AppHeader from '../app-header';
+import {FrameControls} from '../app-frame';
 import {useSwipeTabs} from '../../lib/use-swipe-tabs';
-import {ChevronLeft,ChevronRight,Grid2X2,X} from '../home-icons';
+import {ChevronLeft,ChevronRight,X} from '../home-icons';
 import './contacts.css';
 
 type View='mine'|'followup'|'overview';
@@ -43,19 +41,18 @@ function Status({contact}:{contact:ContactSummary}){
 export default function ContactsLiveWorkspace(){
  const [workspace,setWorkspace]=useState<ContactsWorkspace|null>(null),[detail,setDetail]=useState<ContactDetail|null>(null),[view,setView]=useState<View>('mine'),[form,setForm]=useState<Form>(null);
  const [busy,setBusy]=useState(false),[error,setError]=useState(''),[notice,setNotice]=useState(''),[filter,setFilter]=useState<ContactFilter>('open'),[search,setSearch]=useState('');
- const [apps,setApps]=useState(false),[authorizedApps,setAuthorizedApps]=useState<AuthorizedModule[]>([]),[appsError,setAppsError]=useState(''),[appsLoading,setAppsLoading]=useState(false);
  const [duplicates,setDuplicates]=useState<DuplicateMatch[]|null>(null),[duplicatesLoading,setDuplicatesLoading]=useState(false);
  const [name,setName]=useState(''),[phone,setPhone]=useState(''),[preferred,setPreferred]=useState<PreferredMethod>('unknown'),[note,setNote]=useState(''),[due,setDue]=useState(''),[taskId,setTaskId]=useState('');
  const [agenda,setAgenda]=useState<AgendaItem[]>([]);
  // epoch invalidates every in-flight response once the view changes or private data is cleared.
  const requests=useRef(new Set<AbortController>()),epoch=useRef(0),pending=useRef<Packet|null>(null),submitting=useRef(false);
- const appsSheet=useRef<HTMLDialogElement>(null),paneHeading=useRef<HTMLHeadingElement>(null);
+ const paneHeading=useRef<HTMLHeadingElement>(null);
 
  const abortAll=useCallback(()=>{epoch.current++;for(const request of requests.current)request.abort();requests.current.clear();},[]);
  const resetFields=useCallback(()=>{setName('');setPhone('');setNote('');setDue('');setPreferred('unknown');setTaskId('');},[]);
  const clearPrivate=useCallback(()=>{
   abortAll();setWorkspace(null);setDetail(null);setAgenda([]);setForm(null);resetFields();pending.current=null;
-  setBusy(false);setApps(false);setAuthorizedApps([]);setDuplicates(null);
+  setBusy(false);setDuplicates(null);
  },[abortAll,resetFields]);
  const send=useCallback(async<T,>(endpoint:string,body:unknown):Promise<T>=>{
   const abort=new AbortController();requests.current.add(abort);
@@ -88,8 +85,6 @@ export default function ContactsLiveWorkspace(){
   document.addEventListener('visibilitychange',visibility);window.addEventListener('online',online);
   return()=>{document.removeEventListener('visibilitychange',visibility);window.removeEventListener('online',online);abortAll();};
  },[load,clearPrivate,abortAll]);
- // The apps sheet is a native dialog; closing private data also closes it.
- useEffect(()=>{const sheet=appsSheet.current;if(!sheet)return;if(apps&&!sheet.open)sheet.showModal();else if(!apps&&sheet.open)sheet.close();},[apps]);
  // Opening a record or form moves focus to its heading, so keyboard and screen reader users land on it.
  useEffect(()=>{if(detail||form){paneHeading.current?.focus({preventScroll:true});if(window.matchMedia('(max-width: 899px)').matches)window.scrollTo({top:0});}},[detail?.id,form]);
 
@@ -113,17 +108,6 @@ export default function ContactsLiveWorkspace(){
   if(!detail)return;
   setError('');
   await track(epoch.current,()=>send<DuplicateMatch[]>('duplicates',{id:detail.id}),setDuplicates,setDuplicatesLoading);
- }
- async function openApps(){
-  if(apps)return;
-  setApps(true);setAppsLoading(true);setAppsError('');
-  const controller=new AbortController();requests.current.add(controller);
-  try{
-   const r=await fetch('/api/members/experience',{credentials:'same-origin',cache:'no-store',signal:controller.signal,referrerPolicy:'no-referrer'});
-   if(!r.ok)throw new Error('Unavailable');
-   setAuthorizedApps(parseModuleFeed(await r.json()).modules);
-  }catch(e){if(!isAbort(e))setAppsError('Your app list is unavailable. Go to Home to see your apps.');}
-  finally{requests.current.delete(controller);setAppsLoading(false);}
  }
  function edit(kind:Form,id=''){
   setError('');setNotice('');setForm(kind);resetFields();
@@ -177,12 +161,7 @@ export default function ContactsLiveWorkspace(){
  const paneOpen=Boolean(workspace&&(detail||form));
 
  return <div className="ui-page ct-page">
-  <AppHeader homeHref="/members">
-   <div className="ct-header-actions">
-    <button type="button" className="ui-button ui-button-quiet ct-header-button" onClick={()=>void load()} disabled={busy}>Reload</button>
-    <button type="button" className="ui-button ui-button-quiet ct-header-button" onClick={()=>void openApps()} aria-haspopup="dialog"><Grid2X2/>Apps</button>
-   </div>
-  </AppHeader>
+  <FrameControls left={{label:'Contacts',icon:'people',onClick:()=>selectTab('mine'),active:view==='mine',disabled:!workspace}} right={{label:'Follow-ups',icon:'clock',onClick:()=>selectTab('followup'),active:view==='followup',disabled:!workspace}} more={[{label:'Overview',icon:'info',onClick:()=>selectTab('overview'),disabled:!workspace},{label:'Reload',icon:'clock',onClick:()=>void load(),disabled:busy}]}/>
   <main className="ui-main ct-main">
    <div className="ct-intro" data-pane={paneOpen?'open':'closed'}>
     <p className="ui-kicker">Private to you</p>
@@ -317,17 +296,7 @@ export default function ContactsLiveWorkspace(){
    </div>}
   </main>
 
-  <dialog ref={appsSheet} className="ui-sheet" aria-labelledby="ct-apps-title" onClose={()=>setApps(false)}>
-   <div className="ui-sheet-body">
-    <div className="ct-sheet-head"><h2 id="ct-apps-title">Your apps</h2><button type="button" className="ui-button ui-button-quiet ct-close" onClick={()=>setApps(false)} aria-label="Close your apps"><X/></button></div>
-    {appsLoading&&<p className="ct-loading" role="status">Loading your apps…</p>}
-    {appsError&&<p className="ui-notice" data-tone="danger" role="alert">{appsError}</p>}
-    <ul className="ui-list">
-     {authorizedApps.map(module=><li key={module.id}><a className="ui-row" href={module.route}><span className="ui-row-body"><strong>{module.name}</strong></span><ChevronRight className="ct-chevron"/></a></li>)}
-     <li><a className="ui-row" href="/members"><span className="ui-row-body"><strong>LV Zion Home</strong></span><ChevronRight className="ct-chevron"/></a></li>
-    </ul>
-    {!appsLoading&&!appsError&&!authorizedApps.length&&<p className="ct-quiet">No other apps are assigned to you.</p>}
-   </div>
-  </dialog>
+
  </div>;
 }
+

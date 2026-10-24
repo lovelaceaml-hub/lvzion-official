@@ -1,8 +1,8 @@
 /*
  * LV Zion design tokens: Day Sheet direction, selected by Anthony on 2026-10-14.
  * Contract: docs/design/LVZ-DESIGN-CONTRACT.md. Every screen and module reads its
- * colors, type, spacing, radius and motion from these variables. Do not add
- * module-specific palettes; add a token here (shared-core owner) if one is missing.
+ * colors, type, spacing, radius and motion from these variables. Owner-approved
+ * route themes are scoped below; unthemed routes retain the shared defaults.
  * Light only for now; color-scheme stays light until a dark set is approved.
  */
 :root{
@@ -24,6 +24,7 @@
  --lvz-focus:#1f5c4d;
  --lvz-alert:#b4532a;
  --lvz-danger:#a3361f;
+ --lvz-time-marker:#c62828;
  --lvz-danger-soft:#f8e7e2;
  --lvz-warning:#7a5200;
  --lvz-warning-soft:#f8efd9;
@@ -85,3 +86,27 @@
 @media (min-width:900px){
  :root{--lvz-gutter:var(--lvz-gutter-wide)}
 }
+
+/* Lavender Softform: Anthony's approved Study Rooms design, October 19, 2026.
+ * The exact route keeps this palette out of other modules and member tools. */
+.app-frame[data-route="/modules/study-rooms"]{
+ --lvz-ground:#eee8fa;
+ --lvz-surface:#f8f4ff;
+ --lvz-sunken:#dcd0e9;
+ --lvz-ink:#291347;
+ --lvz-ink-quiet:#665480;
+ --lvz-ink-faint:#9787ad;
+ --lvz-line:#d0c1e4;
+ --lvz-line-input:#9072b5;
+ --lvz-accent:#7041a8;
+ --lvz-accent-strong:#472369;
+ --lvz-accent-soft:#e2d3fb;
+ --lvz-on-accent:#ffffff;
+ --lvz-focus:#6021a2;
+ --lvz-time-marker:#d91736;
+ --lvz-radius-md:16px;
+ --lvz-radius-lg:24px;
+ --lvz-shadow-sheet:0 12px 28px rgb(66 36 98 / 20%);
+ --lvz-shadow-pop:0 6px 16px rgb(66 36 98 / 20%);
+}
+

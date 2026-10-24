@@ -2,6 +2,10 @@
 
 Verified October 16, 2026. Study Rooms is an integrated application at [lvz.app/modules/study-rooms](https://lvz.app/modules/study-rooms), using LV Zion Official authentication, its own calendar, reservations and permissions.
 
+## Current interface — Lavender Softform, October 19, 2026
+
+The owner's latest approved design places Rooms, Whiteboards and TVs as tabs attached to the compact header, followed by the date window and a continuous half-hour grid reaching the screen bottom. A transparent selection/Reserve tray floats above the grid and the persistent five-item dock. Lavender/plum surfaces and the raised Apps rounded square follow the selected prototype. This supersedes the older visual descriptions below. See [current implementation and verification](LAVENDER-SOFTFORM-2026-10-19.md).
+
 ## Current state
 
 - Booking is enabled for the existing explicitly authorized audience. This release does not add member or manager grants.
@@ -49,3 +53,11 @@ A synthetic deployed-browser check is not evidence of a real signed-in owner tra
 Read `AGENTS.md` and [release controls](../RELEASE-GATES.md). Only explicitly approved LV Zion Official requirements govern this module. Do not populate production calendars from fixtures. The fixture seed is restricted to disposable test databases.
 
 Use incremental, tested schema changes and reconcile the [hosted ledger](../HOSTED-MIGRATION-LEDGER.json). Never replay applied installation SQL. Preserve grants, audit history and intentionally entered records. To pause booking for maintenance, use this application's booking activation state; do not delete reservations or invent scheduling policy. Validate a compatible deployment before rollback, and do not restore superseded defaults.
+
+## Soft Panels interface — October 18, 2026
+
+The owner-selected Soft Panels redesign replaces the crowded date/tab rows with a date strip, raised room columns and contextual Continue action. Glass is limited to accents. Home, Schedule, center Apps, Bookings and More remain at the bottom. History, refresh and authorized management are under More. See [design and verification](SOFT-PANELS-2026-10-18.md). Existing records and permissions are unchanged.
+
+### Updated layout reference
+
+The later October 18 reference supersedes the continuous column layout: individual rounded `+ Open` tiles, an hourly time rail, icon-labelled resource tabs and an always-visible full-width Reserve action above the Apps navigation. See [layout correction](TILE-LAYOUT-2026-10-18.md).

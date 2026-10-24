@@ -12,6 +12,7 @@ Start with [lvz.app](https://lvz.app), `AGENTS.md` and the [current handoff](HAN
 - [Organization workflow](ORGANIZATION-WORKFLOW.md)
 - [Product decisions](PRODUCT-DECISIONS.md)
 - [Day Sheet design contract](design/LVZ-DESIGN-CONTRACT.md)
+- [Device appearance choices and focused verification](design/APPEARANCE.md)
 - [Authentication and domain setup](DOMAIN-SETUP.md)
 
 ## Module guides
