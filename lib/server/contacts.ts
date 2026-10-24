@@ -3,9 +3,9 @@ import {handleContactsRequest} from '../contacts/http-service';
 import {requireMember} from './supabase';
 import {settings} from './config';
 
-/** Not an environment toggle. Change only with approved access rules and verified release evidence.
- * The independent SQL gate, app approval and member grant checks must ALSO pass.
- * Public R3 RPC wrappers are not installed in the hosted project.
+/** Release switch for Contacts in production. Despite its historical name, once the 2026-10-24 open-access
+ * migration is applied every signed-in member gets their own private Contacts workspace when this is true.
+ * The independent SQL gate (approved app, signed-in member, owner-only records) must ALSO pass.
  */
 export function contactsReleaseEnabled():boolean{
  try{

@@ -34,7 +34,7 @@ export default function OrganizationPanel({data:w,execute}:{data:Workspace;execu
  <div className="section-heading"><h3>{group.name}</h3><span className="badge">{units.length} units</span></div>
  <EntryEditor entry={group} kind="group" path={path} busy={busy} run={run}/>
  <ul className="organization-units">{units.map(unit=><li key={unit.id}><strong>{unit.name}</strong><EntryEditor entry={unit} kind="unit" path={unitPath(w,unit.id)} busy={busy} run={run}/></li>)}</ul>
- {!units.length&&<p>No units yet. Add one before assigning members here.</p>}
+ {!units.length&&<p>No units yet. Members can be placed in this group without a unit.</p>}
  <details><summary>Add a unit to {group.name}</summary><CreateEntry kind="unit" parentId={group.id} title={'New unit in '+path} busy={busy} run={run}/></details>
  </article>;})}</details>;})}
  </section>;

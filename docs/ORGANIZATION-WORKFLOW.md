@@ -2,6 +2,14 @@
 
 Status: all three steps complete. No active organization implementation remains. Current module boundaries and later documentation checks are in the [handoff](HANDOFF.md) and [documentation audit](DOCUMENTATION-AUDIT.md).
 
+## October 24, 2026: group-only placement and placement-independent leadership
+
+Anthony's decisions (migration `20261024170000_open_access_group_placement.sql`, draft, not applied):
+
+- Placement is **Age category → Group → (optional) Unit**. The shared placement picker posts `groupId` and adds `unitId` only when a unit is chosen; "No unit (group only)" is offered where the viewer may place members in the group itself (organization authority or that group's leader). Unit leaders cannot create, place or see group-only members.
+- **Leadership is independent of placement.** A member keeps one primary placement and may lead other groups or units. Appointments name any active group or unit; the leadership form lists every active member and every group and unit, starting from the member's own. Example (fictional): a member placed in Adult group A, unit A2, can be unit leader of A2 and group leader of a Student group at the same time. Their own directory follows their placement.
+- Transfers can target a group without a unit; receiving-group acceptance is unchanged.
+
 ## Scope and authority
 
 Anthony requested four named age categories, two empty placeholder groups in each, then two empty placeholder units in each group, and authorized autonomous completion of the organization and member-assignment workflow in the actual app. No preview is authorized. Full replacement is the established release mode.

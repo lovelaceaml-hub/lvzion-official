@@ -11,7 +11,8 @@ test('group access accepts only on/off for one member id',()=>{
 });
 test('leaders and managers show as fixed; members follow their switch',()=>{
  const base={id,name:'Hugo Example',unit:'Demo Unit B1',automatic:false,enabled:false,locked:false,self:false};
- assert.deepEqual(accessState({...base,automatic:true}),{on:true,fixed:true,note:'On automatically as a leader'});
+ assert.deepEqual(accessState({...base,automatic:true}),{on:true,fixed:true,note:'On automatically'});
+ assert.deepEqual(accessState({...base,automatic:true,enabled:true,locked:true}),{on:true,fixed:true,note:'Reservation manager'});
  assert.deepEqual(accessState({...base,enabled:true,locked:true}),{on:true,fixed:true,note:'Reservation manager'});
  assert.deepEqual(accessState({...base,enabled:true}),{on:true,fixed:false,note:'Can book study rooms'});
  assert.deepEqual(accessState(base),{on:false,fixed:false,note:'Cannot book yet'});

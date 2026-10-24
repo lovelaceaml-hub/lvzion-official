@@ -26,7 +26,7 @@ The owner-requested initial structure has four age categories, two placeholder g
 
 1. Find the person under **Unassigned members**.
 2. Check their identity and church membership independently, including whether an existing member record already represents them.
-3. Choose age category, then group, then unit. Check the complete placement shown below the choices.
+3. Choose age category, then group, then (optionally) unit. Choose **No unit (group only)** to place the member in the group without a unit. Check the complete placement shown below the choices.
 4. Choose **I independently verified membership and identity** and enter the verification and placement reason.
 5. Select **Verify and assign member**. The member becomes active in that placement; the decision and placement history are retained.
 
@@ -42,7 +42,7 @@ Use **Member invitations** to invite an existing unlinked member at their verifi
 
 Open a member under **Members you manage**, then **Change primary placement**. Choose the destination age category, group and unit and document the reason. Previous placements remain in history. Cross-group transfers by scoped leaders require receiving-group acceptance. A separately authorized member administrator can transfer directly.
 
-Under **Organizational leadership**, select an active member and the role. Unit and group leadership use that member's current placement. Place an Unassigned member before appointing them to a unit or group. Appointments remain until an authorized administrator ends them. A move can make a previous appointment ineffective without erasing its history.
+Under **Organizational leadership**, select an active member, the role and the unit or group they lead. Leadership does not have to match the member's own placement: a member placed in one group can lead a unit there and also lead a different group. Appointments remain until an authorized administrator ends them; moving the member does not end them.
 
 Organization, department and account administration are independent permissions. Member placement does not grant administrative access.
 
@@ -73,7 +73,7 @@ See [Study Rooms operations](study-rooms/README.md) for the current verification
 
 ## Open an authorized app
 
-Use **Apps** to see modules explicitly assigned to your account. Signing up or receiving a placement does not automatically grant every app.
+Use **Apps** to open every approved app. Every signed-in member, including an Unassigned member, can use them; managing an app needs a manager grant from the owner. Each app still shows you only your own private records and what your group or role allows.
 
 - **Contacts:** private authorized workspace; sharing, export and messages are unavailable.
 - **Study Rooms:** availability, reservations and explicit calendar management for the authorized audience.
@@ -84,7 +84,7 @@ See [all documentation](README.md) for detailed module guides.
 
 ## Contacts: authorized owner workspace
 
-Open [Contacts](https://lvz.app/modules/contacts) using your normal verified account and **Apps**. Only the individually granted owner sees Contacts; being a member, group leader or technical administrator is not sufficient.
+Open [Contacts](https://lvz.app/modules/contacts) using your normal verified account and **Apps**. Every member has their own private Contacts workspace; nobody else, including leaders and the owner, can see your contacts or notes.
 
 Under **My Contacts**, add a name, optional phone and preferred method. You can edit a name or preference later, but not an existing saved phone number. Search and filters inspect loaded authorized names only; use the next-page control for more records. Overview counts are partial until all pages have been loaded.
 

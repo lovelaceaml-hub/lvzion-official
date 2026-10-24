@@ -19,7 +19,7 @@ insert into app_private.module_access_grants(member_id,module_id,permission,gran
 select pg_temp.login(105);set local role authenticated;
 select pg_temp.pass(public.study_room_schedule(pg_temp.tomorrow()) ? 'resources','pastoral staff use Study Rooms by owner decision (2026-10-16)');
 reset role;select pg_temp.login(104);set local role authenticated;
-select pg_temp.denied('select public.study_room_schedule(pg_temp.tomorrow())','42501','technical title does not confer app access');
+select pg_temp.pass(public.study_room_schedule(pg_temp.tomorrow())->>'canManage'='false','signed-in technical admin books as an ordinary member (open access, 2026-10-24) with no administration');
 reset role;
 select pg_temp.login(107);set local role authenticated;
 select pg_temp.pass(jsonb_array_length(public.study_room_schedule(pg_temp.tomorrow())->'resources')=12,'authorized member sees 12 resources');

@@ -21,7 +21,7 @@ select pg_temp.enrollment_denied($q$select public.complete_self_service_enrollme
 select public.complete_self_service_enrollment('Jamie Example');
 select public.complete_self_service_enrollment('Different Name Retry');
 select pg_temp.enrollment_ok(public.my_membership_id() is not null,'confirmed signup can sign in while Unassigned');
-select pg_temp.enrollment_ok(app_private.current_member_id() is null,'Unassigned account has no active-member authority');
+select pg_temp.enrollment_ok(app_private.organization_member_id() is null and app_private.current_member_id() is not null,'Unassigned account is signed in for apps but has no active-member authority');
 select pg_temp.enrollment_ok((select count(id)=1 from public.members),'Unassigned direct RLS sees only own member name');
 select pg_temp.enrollment_ok((select count(*)=0 from public.church_groups),'Unassigned cannot enumerate groups');
 select pg_temp.enrollment_ok((select count(*)=0 from public.church_units),'Unassigned cannot enumerate units');
@@ -35,7 +35,7 @@ select pg_temp.enrollment_ok(jsonb_array_length(public.member_workspace()->'dire
 select pg_temp.enrollment_ok(public.member_workspace()->'contacts'->>'email'='signup-1@example.invalid','Unassigned sees own verified contact only');
 select pg_temp.enrollment_denied($q$select * from app_private.self_service_enrollments$q$,'42501','private enrollment table not exposed');
 select pg_temp.enrollment_denied($q$select public.member_command('organization.create','{"kind":"category","name":"Forged","reason":"Forged metadata attack"}',gen_random_uuid())$q$,'42501','forged metadata cannot authorize any member command');
-select pg_temp.enrollment_denied($q$select public.member_module_home()$q$,'42501','Unassigned cannot read module feeds');
+select pg_temp.enrollment_ok(jsonb_typeof(public.member_module_home()->'modules')='array' and not exists(select 1 from jsonb_array_elements(public.member_module_home()->'modules') e where (e->>'canManage')::boolean),'Unassigned member opens the Apps list (open access) without managing any app');
 select pg_temp.enrollment_denied($q$select public.enrollment_command('enrollment.assign','{"memberId":"44444444-4444-4444-8444-000000000107","unitId":"33333333-3333-4333-8333-000000000001","verified":"yes","reason":"Self placement attack"}',gen_random_uuid())$q$,'42501','Unassigned cannot assign anyone');
 reset role;
 select pg_temp.enrollment_ok((select count(*)=1 from app_private.self_service_enrollments),'confirmation retries create exactly one enrollment');
@@ -71,7 +71,7 @@ select pg_temp.enrollment_ok((select count(*)=1 from public.member_placements wh
 select pg_temp.enrollment_ok((select count(*)=1 from app_private.audit_events where operation='enrollment.assign'),'initial placement retries audit exactly once');
 select pg_temp.enrollment_ok((select count(*)=0 from app_private.role_assignments where member_id=(select target from enrollment_test_context)),'assignment never grants a leadership role');
 select pg_temp.enrollment_login(1);set local role authenticated;
-select pg_temp.enrollment_ok(app_private.current_member_id() is not null,'assignment enables ordinary member authority');
+select pg_temp.enrollment_ok(app_private.organization_member_id() is not null,'assignment enables ordinary member authority');
 select pg_temp.enrollment_ok(jsonb_array_length(public.member_workspace()->'enrollment'->'placementHistory')=1,'member sees own placement history');
 select pg_temp.enrollment_ok(jsonb_array_length(public.member_workspace()->'unassignedMembers')=0,'assigned ordinary member still cannot see intake queue');
 reset role;select pg_temp.enrollment_login(6);set local role authenticated;select public.complete_self_service_enrollment('Declined Example');reset role;

@@ -10,7 +10,7 @@ set local role authenticated;
 select pg_temp.owner_denied('select owner_email from app_private.enrollment_settings','42501','designated owner address is private');
 select pg_temp.owner_denied('select app_private.initialize_application_owner()','42501','browser cannot directly invoke private owner initializer');
 select public.complete_self_service_enrollment('Ordinary Example');
-select pg_temp.owner_ok(app_private.current_member_id() is null,'ordinary intake stays without authority despite forged owner metadata');
+select pg_temp.owner_ok(app_private.organization_member_id() is null and app_private.current_member_id() is not null,'ordinary intake is signed in but stays without organizational authority despite forged owner metadata');
 select pg_temp.owner_ok(jsonb_array_length(public.member_workspace()->'unassignedMembers')=0,'ordinary signup cannot see the owner queue');
 reset role;
 select pg_temp.owner_ok((select count(*)=0 from app_private.role_assignments),'ordinary signup receives zero roles');

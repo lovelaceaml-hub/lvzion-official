@@ -55,14 +55,20 @@ insert into app_private.module_notices(id,module_id,recipient_member_id,requires
  ('99999999-9999-4999-8999-000000000002','77777777-7777-4777-8777-000000000002','44444444-4444-4444-8444-000000000107',true),
  ('99999999-9999-4999-8999-000000000003','77777777-7777-4777-8777-000000000002','44444444-4444-4444-8444-000000000103',false);
 
+-- Open access (owner decision 2026-10-24): every approved app appears for every signed-in member.
+create function pg_temp.has_module(home jsonb,module_name text) returns boolean language sql as $$
+ select exists(select 1 from jsonb_array_elements(home->'modules') e where e->>'name'=module_name)$$;
+create function pg_temp.manages(home jsonb,module_name text) returns boolean language sql as $$
+ select coalesce((select (e->>'canManage')::boolean from jsonb_array_elements(home->'modules') e where e->>'name'=module_name),false)$$;
 select pg_temp.login(107);
 set local role authenticated;
-select pg_temp.pass_if(jsonb_array_length(public.member_module_home()->'modules')=1,'only explicitly granted approved module appears');
-select pg_temp.pass_if(public.member_module_home()->'modules'->0->>'name'='Example Approved A','member sees assigned module name');
-select pg_temp.pass_if(jsonb_array_length(public.member_module_home()->'activities')=1,'only self and granted scheduled activities appear');
-select pg_temp.pass_if(public.member_module_home()->'activities'->0->>'title'='Example activity A','activity is from assigned module');
-select pg_temp.pass_if(jsonb_array_length(public.member_module_home()->'notifications')=1,'cross-module notices are hidden');
-select pg_temp.pass_if(public.member_module_home()->'notifications'->0->>'title'='Update available in Example Approved A','notice text is generic');
+select pg_temp.pass_if(pg_temp.has_module(public.member_module_home(),'Example Approved A') and pg_temp.has_module(public.member_module_home(),'Example Approved B'),'every approved module appears for a signed-in member');
+select pg_temp.pass_if(not pg_temp.has_module(public.member_module_home(),'Example Draft'),'a draft module stays hidden even with a grant');
+select pg_temp.pass_if(not pg_temp.manages(public.member_module_home(),'Example Approved A'),'a viewer grant does not manage');
+select pg_temp.pass_if(jsonb_array_length(public.member_module_home()->'activities')=2,'only own scheduled activities from approved modules appear');
+select pg_temp.pass_if(not(public.member_module_home()::text like '%Example other member%'),'another member''s activity never appears');
+select pg_temp.pass_if(jsonb_array_length(public.member_module_home()->'notifications')=2,'own notices from approved modules appear');
+select pg_temp.pass_if(public.member_module_home()->'notifications'->0->>'title' like 'Update available in Example Approved %','notice text is generic');
 select pg_temp.pass_if(public.member_module_home()->>'favoriteVersion'='0','initial favorite version is zero');
 select pg_temp.must_fail('select * from app_private.app_modules','42501','no direct module catalog access');
 select pg_temp.must_fail('select * from app_private.module_activities','42501','no direct activity access');
@@ -70,7 +76,7 @@ select pg_temp.must_fail('select * from app_private.module_access_grants','42501
 select pg_temp.must_fail('select * from app_private.module_notices','42501','no direct notification access');
 select pg_temp.must_fail('select * from app_private.member_module_favorites','42501','no direct favorites table access');
 select pg_temp.must_fail('select app_private.module_allowed(''44444444-4444-4444-8444-000000000103'',''77777777-7777-4777-8777-000000000002'')','42501','no arbitrary-member authority oracle');
-select pg_temp.must_fail($q$select public.save_module_favorites(array['77777777-7777-4777-8777-000000000002'::uuid],0)$q$,'42501','cannot save ungranted module as favorite');
+select pg_temp.must_fail('select app_private.module_manager(''44444444-4444-4444-8444-000000000103'',''77777777-7777-4777-8777-000000000002'')','42501','no arbitrary-member manager oracle');
 select pg_temp.must_fail($q$select public.save_module_favorites(array['77777777-7777-4777-8777-000000000003'::uuid],0)$q$,'42501','cannot save draft module as favorite');
 select pg_temp.must_fail($q$select public.save_module_favorites(array['77777777-7777-4777-8777-000000000001'::uuid,'77777777-7777-4777-8777-000000000001'::uuid],0)$q$,'22023','duplicate favorites rejected');
 select pg_temp.pass_if(public.save_module_favorites(array['77777777-7777-4777-8777-000000000001'::uuid],0)->>'favoriteVersion'='1','first save increments favorite version');
@@ -79,33 +85,38 @@ select pg_temp.must_fail($q$select public.save_module_favorites('{}'::uuid[],0)$
 select pg_temp.pass_if(public.save_module_favorites('{}'::uuid[],1)->>'favoriteVersion'='2','authorized unpin increments version');
 select pg_temp.pass_if(jsonb_array_length(public.member_module_home()->'favorites')=0,'removed favorite no longer visible');
 select pg_temp.pass_if(public.mark_module_notice_read('99999999-9999-4999-8999-000000000001')=true,'member may mark own approved module notice read');
-select pg_temp.pass_if(public.member_module_home()->'notifications'->0->>'readAt' is not null,'notice read receipt is visible to owner');
+select pg_temp.pass_if(exists(select 1 from jsonb_array_elements(public.member_module_home()->'notifications') n where n->>'id'='99999999-9999-4999-8999-000000000001' and n->>'readAt' is not null),'notice read receipt is visible to owner');
 select pg_temp.pass_if(public.mark_module_notice_read('99999999-9999-4999-8999-000000000003')=false,'cannot mark other member notice');
 
 reset role;
+insert into app_private.module_access_grants(member_id,module_id,permission,granted_at,reason) values
+ ('44444444-4444-4444-8444-000000000105','77777777-7777-4777-8777-000000000002','manager',now()-interval '1 day','Synthetic explicit manager grant');
 select pg_temp.login(103);
 set local role authenticated;
-select pg_temp.pass_if(public.member_module_home()->'modules'->0->>'name'='Example Approved B','other group user sees only explicit module');
+select pg_temp.pass_if(pg_temp.has_module(public.member_module_home(),'Example Approved A'),'other group user also sees every approved module');
 select pg_temp.pass_if(jsonb_array_length(public.member_module_home()->'activities')=1,'other group user sees only own activity');
 select pg_temp.pass_if(public.mark_module_notice_read('99999999-9999-4999-8999-000000000001')=false,'other member cannot modify first user notice');
 reset role;
 select pg_temp.login(101);
 set local role authenticated;
-select pg_temp.pass_if(jsonb_array_length(public.member_module_home()->'modules')=0,'unit leader does not automatically gain module permission');
+select pg_temp.pass_if(pg_temp.has_module(public.member_module_home(),'Example Approved B') and not pg_temp.manages(public.member_module_home(),'Example Approved B'),'unit leader uses apps but gains no manager permission');
 reset role;
 select pg_temp.login(105);
 set local role authenticated;
-select pg_temp.pass_if(jsonb_array_length(public.member_module_home()->'modules')=0,'pastoral authority does not automatically grant app access');
+select pg_temp.pass_if(pg_temp.manages(public.member_module_home(),'Example Approved B') and not pg_temp.manages(public.member_module_home(),'Example Approved A'),'an explicit manager grant manages only its own app');
 reset role;
--- Revoked module grants immediately suppress module/activity/notice/favorite visibility.
+-- Ending an explicit viewer grant leaves open use access; suspending the account removes every app.
 update app_private.module_access_grants set ended_at=clock_timestamp()
 where member_id='44444444-4444-4444-8444-000000000107' and module_id='77777777-7777-4777-8777-000000000001';
 select pg_temp.login(107);
 set local role authenticated;
-select pg_temp.pass_if(jsonb_array_length(public.member_module_home()->'modules')=0,'revoked app grant removes catalog');
-select pg_temp.pass_if(jsonb_array_length(public.member_module_home()->'activities')=0,'revoked app grant removes activities');
-select pg_temp.pass_if(jsonb_array_length(public.member_module_home()->'notifications')=0,'revoked app grant removes notifications');
-select pg_temp.must_fail($q$select public.save_module_favorites(array['77777777-7777-4777-8777-000000000001'::uuid],2)$q$,'42501','revoked favorite cannot be resaved');
+select pg_temp.pass_if(pg_temp.has_module(public.member_module_home(),'Example Approved A'),'ending a viewer grant keeps open use access');
+reset role;
+update app_private.account_links set technical_enabled=false where member_id='44444444-4444-4444-8444-000000000107';
+select pg_temp.login(107);
+set local role authenticated;
+select pg_temp.must_fail('select public.member_module_home()','42501','a suspended account loses every app, activity and notice');
+select pg_temp.must_fail($q$select public.save_module_favorites(array['77777777-7777-4777-8777-000000000001'::uuid],2)$q$,'42501','a suspended account cannot save favorites');
 reset role;
 set local role anon;
 select pg_temp.must_fail('select public.member_module_home()','42501','anonymous cannot call module workspace');

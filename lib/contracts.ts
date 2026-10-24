@@ -11,7 +11,7 @@ export type Workspace = {
  directory: Person[]; managedMembers: Person[]; categories: Entry[]; groups: Entry[]; units: Entry[];
  departments: (Entry & { members: Person[] })[];
  appointments: { id: string; memberId: string; role: string; unitId?: string; groupId?: string; departmentId?: string; endedAt?: string; effective: boolean }[];
- transfers: { id: string; memberId: string; name: string; status: string; unitId: string; requestedBy: string; canDecide: boolean }[];
+ transfers: { id: string; memberId: string; name: string; status: string; groupId?: string; unitId: string | null; requestedBy: string; canDecide: boolean }[];
  audit: { id: number; at: string; action: string; memberId: string; reason: string }[];
 };
 export const actions = ['member.create','member.rename','member.status','member.move','transfer.request','transfer.decide','department.membership','role.appoint','role.end','organization.create','profile.contacts','invitation.create','access.review','invitation.revoke','account.access','organization.rename','organization.archive','enrollment.assign','enrollment.reject'] as const;

@@ -93,8 +93,11 @@ select pg_temp.pass((select count(*)=2 from app_private.study_booking_resources 
 select pg_temp.login(103);set local role authenticated;
 select pg_temp.pass((public.study_room_history(pg_temp.tomorrow(),pg_temp.tomorrow())->'bookings'->0->>'cancelReason')='Fictional cancellation of bundle','owner can read cancellation detail');
 reset role;select pg_temp.login(104);set local role authenticated;
-select pg_temp.denied('select public.study_room_history(pg_temp.tomorrow(),pg_temp.tomorrow())','42501','member without module grant cannot read history');
-select pg_temp.denied('select public.study_room_command(pg_temp.bundle(10,array[4,14,21],810,840))','42501','ungranted identity cannot create a bundle');
+-- Open access (2026-10-24): any signed-in member reads history, but only their own bookings.
+select pg_temp.pass(not(public.study_room_history(pg_temp.tomorrow(),pg_temp.tomorrow())::text like '%Fictional cancellation of bundle%'),'another member cannot read the owner''s cancellation detail');
+reset role;update app_private.account_links set technical_enabled=false where member_id='44444444-4444-4444-8444-000000000104';select pg_temp.login(104);set local role authenticated;
+select pg_temp.denied('select public.study_room_command(pg_temp.bundle(10,array[4,14,21],810,840))','42501','a suspended account cannot create a bundle');
+reset role;update app_private.account_links set technical_enabled=true where member_id='44444444-4444-4444-8444-000000000104';
 reset role;
 -- Retrospective reads remain available after the booking day but stay private.
 create or replace function app_private.study_clock() returns timestamptz language sql volatile set search_path='' as $$select now()+interval '45 days'$$;

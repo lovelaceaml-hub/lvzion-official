@@ -17,7 +17,7 @@ export default function EnrollmentPanel({data:w,execute,demo=false}:{data:Worksp
  <form onSubmit={e=>void submit(e,'enrollment.assign',m.id)}>
  <PlacementPicker data={w} manageableOnly/>
  <label>Membership and identity verified<select name="verified" required defaultValue="no"><option value="no">Not yet verified</option><option value="yes">I independently verified membership and identity</option></select></label>
- <label>Verification and placement reason<input name="reason" required minLength={5} maxLength={500}/></label><button disabled={busy||!w.units.some(u=>u.canManage)}>Verify and assign member</button></form>
+ <label>Verification and placement reason<input name="reason" required minLength={5} maxLength={500}/></label><button disabled={busy||!(w.units.some(u=>u.canManage)||w.groups.some(g=>g.canManage))}>Verify and assign member</button></form>
  <details><summary>Decline this signup</summary><p>Use this for an unverified person or a duplicate profile. Existing member records stay separate, and the decision is retained.</p><form onSubmit={e=>void submit(e,'enrollment.reject',m.id)}><label>Reason for declining<input name="reason" required minLength={5} maxLength={500}/></label><button className="secondary" disabled={busy}>Decline signup</button></form></details></article>;})}
  {!w.unassignedMembers?.length&&<p>No members are waiting for initial placement.</p>}
  </section>;

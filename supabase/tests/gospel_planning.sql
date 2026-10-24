@@ -86,11 +86,11 @@ select pg_temp.pass((select array_agg(e->>'name' order by e->>'name') from jsonb
  =array['Ava Example','Ben Example','Eira Example','Gina Example','Isla Example'],'partner list is own group names with access only');
 select pg_temp.pass(pg_temp.ws(107)->'updates'='null'::jsonb and pg_temp.ws(107)->'reviewers'='null'::jsonb and pg_temp.ws(107)->'weekSummary'='null'::jsonb,'ordinary member gets no restricted leader sections');
 select pg_temp.pass((pg_temp.ws(107)->'plan'->'draft')='null'::jsonb,'ordinary member gets no plan draft');
-select pg_temp.ws_fails(104,'technical administrator without a grant is denied');
+select pg_temp.pass(pg_temp.ws(104)->'manage'='null'::jsonb and not (pg_temp.ws(104)->'me'->>'manager')::boolean,'signed-in technical administrator opens the app (open access) without setup tools');
 select pg_temp.ws_fails(106,'inactive member is denied');
 select pg_temp.pass((pg_temp.ws(108)->'me'->>'manager')::boolean and pg_temp.ws(108)->'manage' is not null,'module manager sees setup tools');
 select pg_temp.pass(pg_temp.ws(109)->'manage'='null'::jsonb,'group leader without manager grant gets no setup tools');
-select pg_temp.pass((select bool_and(e->>'id'<>pg_temp.m(104)::text) from jsonb_array_elements(pg_temp.ws(108)->'manage'->'members') e),'manager list covers only members with access');
+select pg_temp.pass((select bool_and(e->>'id'<>pg_temp.m(106)::text) from jsonb_array_elements(pg_temp.ws(108)->'manage'->'members') e),'manager list covers only active members with access');
 
 -- 3. Manager setup: places and Gospel roles.
 select pg_temp.fails(107,'location.add','{"label":"Fictional Library Lobby"}','GP_DENIED','member cannot add places');
@@ -101,7 +101,7 @@ select pg_temp.fails(108,'capability.grant',jsonb_build_object('memberId',pg_tem
 select pg_temp.cmd(108,'capability.grant',jsonb_build_object('memberId',pg_temp.m(109),'capability','publish'));
 select pg_temp.fails(108,'capability.grant',jsonb_build_object('memberId',pg_temp.m(109),'capability','publish'),'GP_STALE','duplicate role grant is rejected');
 select pg_temp.cmd(108,'capability.grant',jsonb_build_object('memberId',pg_temp.m(105),'capability','oversee','groupId','22222222-2222-4222-8222-000000000001'));
-select pg_temp.fails(108,'capability.grant',jsonb_build_object('memberId',pg_temp.m(104),'capability','oversee','groupId','22222222-2222-4222-8222-000000000001'),'GP_DENIED','role needs current module access');
+select pg_temp.fails(108,'capability.grant',jsonb_build_object('memberId',pg_temp.m(106),'capability','oversee','groupId','22222222-2222-4222-8222-000000000001'),'GP_DENIED','role needs an active member with access');
 select pg_temp.pass((pg_temp.ws(109)->'me'->>'publisher')::boolean and (pg_temp.ws(105)->'me'->>'overseer')::boolean,'granted roles are effective');
 select pg_temp.pass(not exists(select 1 from information_schema.columns where table_schema='gp_private' and table_name in ('audit','receipts') and column_name in ('body','note','support','review','plan')),'audit and receipts store no note text');
 
@@ -217,7 +217,7 @@ select pg_temp.pass(pg_temp.ws(107)->'plan'->'published'='null'::jsonb and pg_te
 select pg_temp.pass((pg_temp.ws(101)->'plan'->'draft'->>'plan')='Fictional plan v1' and not (pg_temp.ws(101)->'plan'->>'canEdit')::boolean,'unit leader reads the draft without editing');
 select pg_temp.fails(101,'plan.save',jsonb_build_object('week',pg_temp.week(),'expected',1,'review','x','plan','x','nextAction',''),'GP_DENIED','unit leader cannot edit the group draft');
 select pg_temp.fails(107,'plan.save',jsonb_build_object('week',pg_temp.week(),'expected',1,'review','x','plan','x','nextAction',''),'GP_DENIED','member cannot edit the group draft');
-select pg_temp.fails(109,'plan.save',jsonb_build_object('week',pg_temp.week(),'expected',1,'review','x','plan','x','nextAction','','groupId','22222222-2222-4222-8222-000000000002'),'GP_INVALID','client group scope is rejected');
+select pg_temp.fails(109,'plan.save',jsonb_build_object('week',pg_temp.week(),'expected',1,'review','x','plan','x','nextAction','','groupId','22222222-2222-4222-8222-000000000002'),'GP_DENIED','a group the actor does not lead cannot be named');
 select pg_temp.fails(101,'plan.publish',jsonb_build_object('week',pg_temp.week(),'expected',1),'GP_DENIED','unit leader cannot publish the group plan');
 select pg_temp.cmd(109,'plan.publish',jsonb_build_object('week',pg_temp.week(),'expected',1));
 select pg_temp.pass((pg_temp.ws(107)->'plan'->'published'->>'plan')='Fictional plan v1','members see the published plan');
@@ -262,9 +262,12 @@ select pg_temp.fails(101,'session.publish',jsonb_build_object('id',(select v fro
 update app_private.role_assignments set ended_at=clock_timestamp() where member_id=pg_temp.m(109) and role_key='group_leader';
 select pg_temp.fails(109,'plan.publish',jsonb_build_object('week',pg_temp.week(),'expected',2),'GP_DENIED','publish role lapses with the leadership appointment');
 select pg_temp.pass(pg_temp.ws(109)->'plan'->'draft'='null'::jsonb,'ended group leader loses the draft');
+-- Open access: ending an explicit viewer grant keeps use; suspending the account closes everything at once.
 update app_private.module_access_grants set ended_at=clock_timestamp() where member_id=pg_temp.m(102) and module_id='a7000000-0000-4000-8000-000000000001';
-select pg_temp.ws_fails(102,'revoked module access closes the workspace');
-select pg_temp.fails(102,'session.respond',jsonb_build_object('id',(select v from t where k='s1'),'expected',2,'expectedResponse',0,'response','accepted'),'GP_DENIED','revoked module access blocks a queued action');
+select pg_temp.pass((pg_temp.ws(102)->'me'->>'name')='Ben Example','ending a viewer grant keeps open use access');
+update app_private.account_links set technical_enabled=false where member_id=pg_temp.m(102);
+select pg_temp.ws_fails(102,'a suspended account closes the workspace');
+select pg_temp.fails(102,'session.respond',jsonb_build_object('id',(select v from t where k='s1'),'expected',2,'expectedResponse',0,'response','accepted'),'GP_DENIED','a suspended account blocks a queued action');
 update public.member_placements set ended_at=now()-interval '2 seconds' where member_id=pg_temp.m(107) and ended_at is null;
 insert into public.member_placements(member_id,group_id,unit_id,started_at) values(pg_temp.m(107),'22222222-2222-4222-8222-000000000002','33333333-3333-4333-8333-000000000003',now()-interval '1 second');
 select pg_temp.pass(not pg_temp.has_session(pg_temp.ws(107),(select v from t where k='s5')),'a moved member does not carry old group sessions');

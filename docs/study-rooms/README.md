@@ -14,6 +14,10 @@ The owner's latest approved design places Rooms, Whiteboards and TVs as tabs att
 - At verification there were zero reservations. Inventory and existing account, member and permission records were retained.
 - Availability is computed from this application's stored reservations, explicit restrictions and closures. PostgreSQL remains authoritative. A booking pause is a local maintenance control, not an integration prerequisite.
 
+## Open booking (owner decision, October 24, 2026)
+
+Every signed-in member, including Unassigned members, can book under the rules below (migration `20261024170000_open_access_group_placement.sql`). Holds, administration and other members' purpose details stay with reservation managers (explicit manager grant, or the owner). **Who can book** lists group-only members ("No unit") and shows everyone with an account as on automatically; leaders see it for any group they lead, wherever they are placed. The October 16 notes below describe the earlier, narrower audience.
+
 ## Who can book and service times (owner decisions, October 16, 2026)
 
 Anthony decided on 2026-10-16:

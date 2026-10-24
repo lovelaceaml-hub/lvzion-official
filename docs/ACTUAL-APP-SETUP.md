@@ -36,7 +36,7 @@ Confirmed-session onboarding creates one Unassigned member without invented role
 
 Study Rooms is available within the authorized Apps registry. Booking is enabled for the existing audience, with empty weekly and special-date restrictions. Empty weekly saves are supported. Resource inventory, private reservation history, receipt/version controls, overlap checks and management permissions remain intact. The October 16 database correction removed four exact never-edited defaults, updated calendar version to 2 and wrote one audit event. See [current operations](study-rooms/README.md).
 
-Contacts remains a private explicitly granted owner workspace with RLS, ownership, author-only notes, do-not-contact and audit controls. Sharing, export and communications remain separately controlled. Read [Contacts operations](contacts/OPERATIONS.md) and [verification](contacts/VERIFICATION.md).
+Contacts is a private owner workspace until the October 24 open-access migration is applied, then a private workspace for each signed-in member, with RLS, ownership, author-only notes, do-not-contact and audit controls. Sharing, export and communications remain separately controlled. Read [Contacts operations](contacts/OPERATIONS.md) and [verification](contacts/VERIFICATION.md).
 
 Display publishes only reviewed content to explicitly paired devices. Work Mission uses deliberately entered dates, materials, host assignments and protected meeting links. Neither a module tile nor a passing build establishes a broader audience or physical-device acceptance.
 
