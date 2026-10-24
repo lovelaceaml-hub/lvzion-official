@@ -1,0 +1,18 @@
+{
+ "url": "/modules/contacts",
+ "title": "LV Zion Official",
+ "theme": null,
+ "h1": [
+  "Contacts"
+ ],
+ "header": "ContactsGE",
+ "dockVisible": true,
+ "brandMentions": 0,
+ "overflowX": false,
+ "coveredByDock": [],
+ "waiting": null,
+ "ground": "rgb(15, 22, 19)",
+ "frameGround": "#0b1819",
+ "accent": "#62cbc7",
+ "errors": []
+}

@@ -37,10 +37,10 @@ test('member workspace tabs also switch by swipe',async({page})=>{
  await expect(page.locator('.member-tabs').getByRole('button',{name:'My Group',exact:true})).toHaveAttribute('aria-current','page');
 });
 for(const path of ['/sign-in','/sign-up','/experience-preview','/member-preview','/install']){
- test(`${path} fits a 320px phone and uses the Day Sheet ground`,async({page})=>{
+ test(`${path} fits a 320px phone and uses the shared base ground`,async({page})=>{
   await page.setViewportSize({width:320,height:700});await page.goto(path);
   expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);
-  expect(await page.evaluate(()=>getComputedStyle(document.body).backgroundColor)).toBe('rgb(242, 244, 241)');
+  expect(await page.evaluate(()=>getComputedStyle(document.body).backgroundColor)).toBe('rgb(245, 246, 242)');
  });
 }
 

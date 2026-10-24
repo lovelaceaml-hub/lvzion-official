@@ -40,7 +40,7 @@ function Status({contact}:{contact:ContactSummary}){
 /** Authenticated data only. Not mounted by the fictional preview and has no simulated role controls. */
 export default function ContactsLiveWorkspace(){
  const [workspace,setWorkspace]=useState<ContactsWorkspace|null>(null),[detail,setDetail]=useState<ContactDetail|null>(null),[view,setView]=useState<View>('mine'),[form,setForm]=useState<Form>(null);
- const [busy,setBusy]=useState(false),[error,setError]=useState(''),[notice,setNotice]=useState(''),[filter,setFilter]=useState<ContactFilter>('open'),[search,setSearch]=useState('');
+ const [busy,setBusy]=useState(false),[error,setError]=useState(''),[failureStatus,setFailureStatus]=useState(0),[notice,setNotice]=useState(''),[filter,setFilter]=useState<ContactFilter>('open'),[search,setSearch]=useState('');
  const [duplicates,setDuplicates]=useState<DuplicateMatch[]|null>(null),[duplicatesLoading,setDuplicatesLoading]=useState(false);
  const [name,setName]=useState(''),[phone,setPhone]=useState(''),[preferred,setPreferred]=useState<PreferredMethod>('unknown'),[note,setNote]=useState(''),[due,setDue]=useState(''),[taskId,setTaskId]=useState('');
  const [agenda,setAgenda]=useState<AgendaItem[]>([]);
@@ -65,6 +65,7 @@ export default function ContactsLiveWorkspace(){
  const failure=useCallback((e:unknown)=>{
   if(isAbort(e))return;
   if(e instanceof RequestFailure&&(e.status===401||e.status===403))clearPrivate();
+  setFailureStatus(e instanceof RequestFailure?e.status:0);
   setError(e instanceof RequestFailure?e.message:'Contacts is unavailable. Reload before retrying a submitted change.');
  },[clearPrivate]);
  /** Runs one read; its result and errors are ignored if the epoch moved on meanwhile. */
@@ -168,7 +169,7 @@ export default function ContactsLiveWorkspace(){
     <h1 className="ui-title">Contacts</h1>
     <p className="ui-lede">One responsible person. A clear next step.</p>
    </div>
-   {error&&<div className="ui-notice ct-notice" data-tone="danger" role="alert"><p>{error}</p><div className="ct-notice-actions"><button type="button" className="ui-button ui-button-secondary" onClick={()=>{pending.current=null;void load();}} disabled={busy}>Reload and review</button>{!workspace&&<a className="ui-link" href="/sign-in">Sign in</a>}</div></div>}
+   {error&&<div className="ui-notice ct-notice" data-tone="danger" role="alert"><p>{!workspace&&failureStatus===403?'Contacts has not been assigned to your account.':error}</p><div className="ct-notice-actions"><button type="button" className="ui-button ui-button-secondary" onClick={()=>{pending.current=null;void load();}} disabled={busy}>Reload and review</button>{!workspace&&failureStatus===401&&<a className="ui-link" href="/sign-in">Sign in</a>}</div></div>}
    {notice&&<p className="ui-notice" data-tone="success" role="status">{notice}</p>}
    {busy&&<p className="ct-loading" role="status">Loading your contacts…</p>}
    {!workspace&&!busy&&!error&&<p className="ui-empty">Sign in to use Contacts.</p>}
@@ -209,7 +210,7 @@ export default function ContactsLiveWorkspace(){
          <span className="ui-row-body"><strong>{c.name}</strong><small><Status contact={c}/> · {nextStepLabel(c)}</small></span><ChevronRight className="ct-chevron"/>
         </button>
        </li>)}</ul>}
-       {!cards.length&&<div className="ui-empty"><strong>No contacts match</strong>Change the search or status, or load more contacts.</div>}
+       {!cards.length&&(workspace.contacts.length||workspace.nextCursor?<div className="ui-empty"><strong>No contacts match</strong>Change the search or status, or load more contacts.</div>:<div className="ui-empty"><strong>No contacts yet</strong>People you add appear here with their next step.</div>)}
        {workspace.nextCursor&&<button type="button" className="ui-button ui-button-secondary ct-more" disabled={busy} onClick={()=>void more()}>Load next 100 contacts</button>}
       </>}
      </div>

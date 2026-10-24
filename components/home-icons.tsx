@@ -31,3 +31,9 @@ export const UserRound=make(<><circle cx="12" cy="8" r="4"/><path d="M4 21v-2a8 
 export const DoorOpen=make(<><path d="M5 21V4l13-2v19M3 21h18M14 11v2"/></>);
 export const Monitor=make(<><rect x="2" y="3" width="20" height="14" rx="3"/><path d="M12 17v4M8 21h8"/></>);
 export const MoreHorizontal=make(<><circle cx="5" cy="12" r="1"/><circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/></>);
+export const Sun=make(<><circle cx="12" cy="12" r="4"/><path d="M12 2v2m0 16v2M4.9 4.9l1.4 1.4m11.4 11.4 1.4 1.4M2 12h2m16 0h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></>);
+export const Contrast=make(<><circle cx="12" cy="12" r="9"/><path d="M12 3a9 9 0 0 1 0 18z" fill="currentColor"/></>);
+export const Music=make(<><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></>);
+export const Heart=make(<path d="M19 14c1.5-1.5 3-3.2 3-5.5A5.5 5.5 0 0 0 12 5.6 5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4 3 5.5l7 7z"/>);
+export const ClipboardList=make(<><rect x="5" y="4" width="14" height="17" rx="2"/><path d="M9 2h6v4H9zM9 11h6m-6 4h4"/></>);
+export const LogIn=make(<><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4M10 17l5-5-5-5M15 12H3"/></>);

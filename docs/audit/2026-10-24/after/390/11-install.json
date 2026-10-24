@@ -1,0 +1,18 @@
+{
+ "url": "/install",
+ "title": "Install LV Zion",
+ "theme": null,
+ "h1": [
+  "LV Zion,on your phone."
+ ],
+ "header": "Install LV ZionSign in",
+ "dockVisible": false,
+ "brandMentions": 2,
+ "overflowX": false,
+ "coveredByDock": [],
+ "waiting": null,
+ "ground": "rgb(245, 246, 242)",
+ "frameGround": "#f5f6f2",
+ "accent": "#18513e",
+ "errors": []
+}

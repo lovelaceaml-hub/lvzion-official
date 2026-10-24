@@ -1,35 +1,47 @@
-import {appearanceThemes,DEFAULT_THEME,parseTheme,THEME_STORAGE_KEY,type ThemeId} from './appearance-themes.ts';
+import {APPEARANCE_STORAGE_KEY,DEFAULT_APPEARANCE,legacyDarkThemes,legacyLightThemes,parseAppearance,resolveScheme,type Appearance} from './appearance-preference.ts';
 import {designTokens} from './design-tokens.ts';
 
 const changed='lvz:appearance';
-export function readThemePreference():ThemeId{
- try{return parseTheme(window.localStorage.getItem(THEME_STORAGE_KEY));}catch{return DEFAULT_THEME;}
+const darkQuery='(prefers-color-scheme: dark)';
+const systemDark=()=>typeof window!=='undefined'&&typeof window.matchMedia==='function'&&window.matchMedia(darkQuery).matches;
+
+export function readAppearance():Appearance{
+ try{return parseAppearance(window.localStorage.getItem(APPEARANCE_STORAGE_KEY));}catch{return DEFAULT_APPEARANCE;}
 }
-export function currentTheme():ThemeId{
- return typeof document==='undefined'?DEFAULT_THEME:parseTheme(document.documentElement.dataset.lvzTheme);
+export function currentAppearance():Appearance{
+ return typeof document==='undefined'?DEFAULT_APPEARANCE:parseAppearance(document.documentElement.dataset.lvzAppearance);
 }
-export function applyTheme(theme:ThemeId,immersive=false){
- const root=document.documentElement,selected=immersive?DEFAULT_THEME:parseTheme(theme);
- if(selected===DEFAULT_THEME)delete root.dataset.lvzTheme;
- else root.dataset.lvzTheme=selected;
+/** Sets :root[data-lvz-scheme]; the paired TV player always keeps its published light composition. */
+export function applyAppearance(appearance:Appearance,immersive=false){
+ const root=document.documentElement,selected=parseAppearance(appearance);
+ root.dataset.lvzAppearance=selected;
+ const scheme=immersive?'light':resolveScheme(selected,systemDark());
+ if(scheme==='dark')root.dataset.lvzScheme='dark';else delete root.dataset.lvzScheme;
  const meta=document.querySelector<HTMLMetaElement>('meta[name="theme-color"]');
- if(meta)meta.content=appearanceThemes.find(t=>t.id===selected)?.background??designTokens.accent;
+ if(meta)meta.content=scheme==='dark'?designTokens.darkGround:designTokens.accent;
  window.dispatchEvent(new Event(changed));
 }
-export function saveThemePreference(theme:ThemeId):boolean{
- const selected=parseTheme(theme);
- applyTheme(selected);
+export function saveAppearance(appearance:Appearance):boolean{
+ const selected=parseAppearance(appearance);
+ applyAppearance(selected);
  try{
-  if(selected===DEFAULT_THEME)window.localStorage.removeItem(THEME_STORAGE_KEY);
-  else window.localStorage.setItem(THEME_STORAGE_KEY,selected);
+  if(selected===DEFAULT_APPEARANCE)window.localStorage.removeItem(APPEARANCE_STORAGE_KEY);
+  else window.localStorage.setItem(APPEARANCE_STORAGE_KEY,selected);
   return true;
  }catch{return false;}
 }
-export function subscribeToTheme(listener:()=>void){
+export function subscribeToAppearance(listener:()=>void){
  window.addEventListener(changed,listener);
  return()=>window.removeEventListener(changed,listener);
 }
+/** Re-resolves System when the device switches between light and dark. */
+export function subscribeToSystemScheme(listener:()=>void){
+ if(typeof window.matchMedia!=='function')return()=>{};
+ const query=window.matchMedia(darkQuery);
+ query.addEventListener('change',listener);
+ return()=>query.removeEventListener('change',listener);
+}
 
-// Only an allow-listed, non-sensitive theme ID is read before first paint.
-// A blocked preference store falls back to the application's approved defaults.
-export const themeBootstrap=`(()=>{try{if(location.pathname!=="/display"){const t=localStorage.getItem(${JSON.stringify(THEME_STORAGE_KEY)});if(${JSON.stringify(appearanceThemes.map(t=>t.id))}.includes(t))document.documentElement.dataset.lvzTheme=t;}}catch{}})()`;
+// Only the allow-listed appearance value is read before first paint. Legacy theme
+// IDs map to Light or Dark. A blocked store falls back to System.
+export const themeBootstrap=`(()=>{try{if(location.pathname==="/display")return;let a="system";try{const v=localStorage.getItem(${JSON.stringify(APPEARANCE_STORAGE_KEY)});if(v==="light"||v==="dark"||v==="system")a=v;else if(${JSON.stringify(legacyDarkThemes)}.includes(v))a="dark";else if(${JSON.stringify(legacyLightThemes)}.includes(v))a="light";}catch{}const r=document.documentElement;r.dataset.lvzAppearance=a;if(a==="dark"||(a==="system"&&matchMedia(${JSON.stringify(darkQuery)}).matches))r.dataset.lvzScheme="dark";}catch{}})()`;

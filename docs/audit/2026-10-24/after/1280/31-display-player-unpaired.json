@@ -1,0 +1,20 @@
+{
+ "url": "/display",
+ "title": "Church Display · LV Zion Official",
+ "theme": null,
+ "h1": [
+  "Welcome."
+ ],
+ "header": null,
+ "dockVisible": false,
+ "brandMentions": 1,
+ "overflowX": false,
+ "coveredByDock": [],
+ "waiting": null,
+ "ground": "rgb(245, 246, 242)",
+ "frameGround": null,
+ "accent": "#18513e",
+ "errors": [
+  "Failed to load resource: the server responded with a status of 401 (Unauthorized)"
+ ]
+}

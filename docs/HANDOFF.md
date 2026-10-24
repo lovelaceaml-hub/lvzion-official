@@ -8,6 +8,10 @@ LV Zion Official is a self-contained, phone-first application at https://lvz.app
 
 Keep compact module headers and the prominent center Apps launcher. The launcher shows only server-authorized modules. Continue the approved [Day Sheet design contract](design/LVZ-DESIGN-CONTRACT.md), shared tokens, accessible controls and phone-first layouts.
 
+## Design repair: one base, a style per app (October 24, 2026, draft, not released)
+
+Anthony's October 24 decision replaces the competing Day Sheet, glass and 24-theme layers with one shared base (Atlas Layered Tabs) and an Atlas style per app, plus a System, Light or Dark appearance choice. Branch `claude/lvz-repair-design-31a05d` also fixes the signed-out frame, header Home link, duplicate wordmarks and several module states. Read the [design contract](design/LVZ-DESIGN-CONTRACT.md) and the [audit](audit/2026-10-24/README.md). Not merged or deployed; release needs Anthony's approval.
+
 ## Groups & Gospel Planning — draft, October 24, 2026
 
 My Preaching (availability, proposed sessions, partner confirmation, one shared result) and My Group (Member Updates, Gospel Review, Gospel Plan, Request for Overseer) are built on the member foundation with migration `20261024150000_gospel_planning_core.sql`, unapplied. Draft module, no grants. Atlas style Skyline Grid. Tested locally with fictional data only. [Status and the approval list](gospel-planning/README.md).
