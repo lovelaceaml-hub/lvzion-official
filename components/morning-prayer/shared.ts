@@ -33,3 +33,27 @@ export async function requestJSON<T>(url:string,options:RequestInit={},fallback=
 }
 export const postJSON=<T>(url:string,payload:unknown,fallback?:string)=>
  requestJSON<T>(url,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)},fallback);
+/** Calendar date arithmetic on YYYY-MM-DD strings (UTC noon, so the device timezone never shifts the day). */
+export const addDays=(date:string,days:number)=>{const d=new Date(date+'T12:00:00Z');d.setUTCDate(d.getUTCDate()+days);return d.toISOString().slice(0,10);};
+/** Monday of the week that holds the date. */
+export const mondayOf=(date:string)=>addDays(date,-((new Date(date+'T12:00:00Z').getUTCDay()+6)%7));
+/** Formats a calendar date with the given parts, e.g. {weekday:'long',month:'long',day:'numeric'}. */
+export const formatDate=(date:string,parts:Intl.DateTimeFormatOptions)=>new Intl.DateTimeFormat('en-US',{...parts,timeZone:'UTC'}).format(new Date(date+'T12:00:00Z'));
+/** "Tuesday, October 20". */
+export const longDay=(date:string)=>formatDate(date,{weekday:'long',month:'long',day:'numeric'});
+/** Who leads the occurrence, in the words a member reads. */
+export const hostLine=(o:Occurrence)=>o.kind==='app_day'?'Pray Daily app day':o.kind==='cancelled'?'No gathering':o.isMine||o.host==='You'?'You are hosting':o.host==='Host needed'?'Host needed':'Hosted by '+o.host;
+/** Short status label for a schedule row. */
+export function statusTag(o:Occurrence):{label:string;tone?:'warning'|'success'|'danger'}{
+ if(o.kind==='cancelled')return {label:'Cancelled',tone:'danger'};
+ if(o.kind==='app_day')return {label:'App day'};
+ if(!o.verified)return {label:'To confirm',tone:'warning'};
+ if(o.isMine||o.host==='You')return {label:'You host',tone:'success'};
+ if(o.host==='Host needed')return {label:'Open',tone:'warning'};
+ return {label:'Assigned'};
+}
+/** Month and week named by a PWP key such as "pwp-2026-10-week-2". */
+export function pwpPeriod(key:string){
+ const match=/^pwp-([0-9]{4}-[0-9]{2})-week-([1-5])$/.exec(key);
+ return match?{month:match[1],week:Number(match[2])}:null;
+}

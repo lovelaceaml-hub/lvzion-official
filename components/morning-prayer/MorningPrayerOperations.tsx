@@ -1,7 +1,10 @@
 'use client';
 import {useEffect,useState} from 'react';
 import {scheduleCandidates,vegasToday,vegasInstant} from '../../lib/morning-prayer/time';
+import {CalendarDays,Clock3,Pencil,ShieldCheck} from '../home-icons';
+import {IconBox,SearchField,initialsOf} from '../ui-kit';
 import css from './morning-prayer.module.css';
+import {CardSummary} from './parts';
 import {dayLabel,lines,postJSON} from './shared';
 import type {Capability,Kind,ManageArea,Material,Occurrence,Workspace} from './shared';
 
@@ -101,7 +104,7 @@ function BulkSchedule({visible,data,busy,save,onNotice}:Panel){
   catch(e){onNotice(e instanceof Error?e.message:'Choose a valid schedule.');}
  }
  return <details className={css.disclosure} data-testid="wm-bulk-schedule">
-  <summary>Add several dates</summary><div className={css.disclosureBody}>
+  <CardSummary icon={<CalendarDays size={22}/>} title="Add several dates"/><div className={css.disclosureBody}>
    <p className={css.quiet}>Choose a date range and weekdays, then review the dates.</p>
    <div className={css.two}>
     <label className="ui-field">First date<input className="ui-input" type="date" value={from} min={vegasToday()} onChange={e=>change(setFrom)(e.target.value)}/></label>
@@ -146,7 +149,7 @@ function Reschedule({visible,busy,save,future,versioned,onNotice}:Panel){
   }catch(e){onNotice(e instanceof Error?e.message:'Choose a valid time.');}
  }
  return <details className={css.disclosure} data-testid="wm-reschedule">
-  <summary>Change a gathering time</summary><div className={css.disclosureBody}>
+  <CardSummary icon={<Clock3 size={22}/>} title="Change a gathering time"/><div className={css.disclosureBody}>
    <p className={css.quiet}>Confirm the new time afterward. The host and meeting link will need to be checked again.</p>
    <label className="ui-field">Scheduled occurrence<select className="ui-input" value={moveId} onChange={e=>change(setMoveId)(e.target.value)}>
     <option value="">Select a future occurrence</option>{future.map(o=><option key={o.id} value={o.id}>{dayLabel(o.date)} · {o.host}</option>)}
@@ -172,7 +175,7 @@ function MeetingAccess({visible,data,busy,save,future,versioned}:Panel){
  const configured=data.meetingStates?.some(x=>x.occurrenceId===occurrence&&x.configured);
  const canSave=!busy&&!!occurrence&&sourceVerified&&!!url&&windowSet&&!!future.find(o=>o.id===occurrence)?.verified;
  return <details className={css.disclosure} data-testid="wm-meeting-access">
-  <summary>Meeting link</summary><div className={css.disclosureBody}>
+  <CardSummary icon={<ShieldCheck size={22}/>} title="Meeting link"/><div className={css.disclosureBody}>
    <p className={css.quiet}>Choose a confirmed gathering and add its Zoom link. Only people with joining access can open it.</p>
    <label className="ui-field">Join window (0 to 30 minutes before start)<input className="ui-input" type="number" min="0" max="30" step="1" value={windowMinutes} onChange={e=>setWindowMinutes(e.target.value)}/></label>
    <button className="ui-button ui-button-secondary" disabled={busy||!validWindow} onClick={()=>void save('/api/morning-prayer/meeting',versioned({type:'set_window',windowMinutes:minutes}),'Joining window saved.')}>Save joining window</button>
@@ -206,7 +209,7 @@ function RevisionEditor({visible,data,busy,save,versioned}:Panel){
   setItems(m.body.items.join('\n'));setSource(m.body.sourceLabel);setChecked(false);
  }
  return <details className={css.disclosure} data-testid="wm-revision-editor">
-  <summary>Edit a reading or PWP</summary><div className={css.disclosureBody}>
+  <CardSummary icon={<Pencil size={22}/>} title="Edit a reading or PWP"/><div className={css.disclosureBody}>
    <p className={css.quiet}>Save a new draft. The current published version stays in place until the replacement is reviewed.</p>
    <label className="ui-field">Material to revise<select className="ui-input" value={key} onChange={e=>{const m=catalog.find(x=>x.key===e.target.value);if(m)load(m);else setKey('');}}>
     <option value="">Choose a draft, reading or PWP</option>{catalog.map(m=><option key={m.key} value={m.key}>{m.body.title}</option>)}
@@ -236,20 +239,20 @@ function MemberAccess({visible,busy,save,versioned,roster,rosterError}:Panel&{ro
  const listed=others.filter(m=>m.name.toLocaleLowerCase().includes(query)||m.placement.toLocaleLowerCase().includes(query));
  const roleLabel=(m:Member)=>m.status==='active'?(m.moduleAccess?'Has module access':'Not assigned'):'Not eligible for new access';
  const access=(action:Record<string,unknown>,success:string)=>void save('/api/morning-prayer/access',versioned(action),success);
- return <section data-testid="wm-member-access">
-  <h2 className={css.heading}>People</h2>
+ return <section data-testid="wm-member-access" aria-labelledby="wm-people-title">
+  <div className="ui-section-head"><h2 id="wm-people-title">People</h2></div>
+  <div className={'ui-glass '+css.card}>
   <p className={css.quiet}>Choose who can use Morning Prayer and who can host.</p>
   {rosterError&&<p role="status">{rosterError}</p>}
   {!roster&&!rosterError&&<p>Checking whether your account can manage member access…</p>}
   {roster&&<>
-   <p className={css.quiet}>Only the app owner can change access.</p>
-   <label className="ui-field">Find a member<input className="ui-input" value={search} placeholder="Name or assigned group" onChange={e=>setSearch(e.target.value)}/></label>
+   <SearchField className={css.search} label="Find a member" value={search} placeholder="Find a member by name or group" onChange={e=>setSearch(e.target.value)}/>
    <label className="ui-field">Member<select className="ui-input" value={chosen} onChange={e=>{setChosen(e.target.value);setGrantCaps(roster.members.find(x=>x.id===e.target.value)?.capabilities||[]);}}>
     <option value="">Choose an eligible member</option>{listed.map(m=><option key={m.id} value={m.id}>{m.name} · {m.status==='active'?m.placement:'Not active'}</option>)}
    </select></label>
    {others.length===0&&<p className={css.quiet}>No members to manage yet. Members appear after their enrollment is confirmed.</p>}
    {selected&&<div className={css.person}>
-    <strong>{selected.name}</strong><p className={css.quiet}>{selected.placement} · {roleLabel(selected)}</p>
+    <div className={css.personHead}><IconBox round>{initialsOf(selected.name)}</IconBox><span className="ui-row-body"><strong>{selected.name}</strong><small>{selected.placement} · {roleLabel(selected)}</small></span></div>
     <label className="ui-field">Access level<select className="ui-input" value={accessLevel} onChange={e=>setGrantCaps(PRESETS[e.target.value]||[])}>
      <option value="">Choose an access level</option><option value="Custom" disabled>Custom access</option>{Object.keys(PRESETS).map(p=><option key={p} value={p}>{p}</option>)}
     </select></label>
@@ -257,7 +260,7 @@ function MemberAccess({visible,busy,save,versioned,roster,rosterError}:Panel&{ro
      <label key={c} className={css.check+' '+css.permission}><input type="checkbox" checked={grantCaps.includes(c)} onChange={e=>setGrantCaps(v=>e.target.checked?[...v,c]:v.filter(x=>x!==c))}/>
       <span><strong>{CAP_LABELS[c]}</strong><small>{CAP_DESCRIPTIONS[c]}</small></span></label>)}
     </fieldset></details>
-    <button className="ui-button" disabled={busy||selected.status!=='active'||!selected.enabled||!grantCaps.includes('view_schedule')}
+    <button className="ui-button ui-button-block" disabled={busy||selected.status!=='active'||!selected.enabled||!grantCaps.includes('view_schedule')}
      onClick={()=>access({type:'grant',memberId:selected.id,capabilities:grantCaps},'Saved explicit member permissions.')}>Save access</button>
     <div className={css.actions}>
      <button className="ui-button ui-button-secondary" disabled={busy||!selected.capabilities.includes('volunteer_host')||selected.hostEligible}
@@ -271,5 +274,6 @@ function MemberAccess({visible,busy,save,versioned,roster,rosterError}:Panel&{ro
     <p className={css.quiet}>Removing access keeps past records. Review any future hosting assignments separately.</p>
    </div>}
   </>}
+  </div>
  </section>;
 }

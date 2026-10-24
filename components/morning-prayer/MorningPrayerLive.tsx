@@ -1,33 +1,39 @@
 'use client';
 import {useCallback,useEffect,useRef,useState} from 'react';
 import {FrameControls} from '../app-frame';
-import {CalendarDays,Clock3,House,Pencil} from '../home-icons';
+import {Sun} from '../home-icons';
+import {EmptyState} from '../ui-kit';
 import {useSwipeTabs} from '../../lib/use-swipe-tabs';
 import {vegasToday} from '../../lib/morning-prayer/time';
 import styles from './morning-prayer.module.css';
 import {postJSON,requestJSON} from './shared';
 import type {Capability,ManageArea,Occurrence,Workspace} from './shared';
 import HomeTab from './HomeTab';
-import ScheduleTab from './ScheduleTab';
+import ScheduleTab,{type ScheduleView} from './ScheduleTab';
+import GatheringDetail from './GatheringDetail';
+import MaterialsTab from './MaterialsTab';
 import MeTab from './MeTab';
 import ManageTab,{useGatheringForm,useMaterialForm} from './ManageTab';
-type Tab='home'|'schedule'|'me'|'manage';
-const TAB_LABELS:Record<Tab,string>={home:'Home',schedule:'Schedule',me:'Me',manage:'Manage'};
-const TAB_ICONS:Record<Tab,typeof House>={home:House,schedule:CalendarDays,me:Clock3,manage:Pencil};
+type Tab='home'|'schedule'|'materials'|'me'|'manage';
+const TAB_LABELS:Record<Tab,string>={home:'Home',schedule:'Schedule',materials:'Materials',me:'Me',manage:'Manage'};
 const MANAGER_CAPS:Capability[]=['review_requests','manage_schedule','edit_materials','publish_materials'];
 /** Posts one action. Single new dates go to the batch endpoint; setup actions to setup; everything else to command. */
 export type Post=(action:Record<string,unknown>,setup?:boolean)=>Promise<boolean>;
 export default function MorningPrayerLive(){
  const readSequence=useRef(0),readController=useRef<AbortController|null>(null);
- const [tab,setTab]=useState<Tab>('home');
+ const [tab,setTabState]=useState<Tab>('home');
  const [month,setMonth]=useState(()=>vegasToday().slice(0,7)),[monthDraft,setMonthDraft]=useState(()=>vegasToday().slice(0,7));
  const [data,setData]=useState<Workspace|null>(null),[error,setError]=useState(''),[message,setMessage]=useState('');
- const [busy,setBusy]=useState(false),[focus,setFocus]=useState<string|null>(null);
+ const [busy,setBusy]=useState(false);
+ // The gathering detail screen sits over the tab that opened it; switching tabs closes it.
+ const [detail,setDetail]=useState<string|null>(null);
+ const [scheduleView,setScheduleView]=useState<ScheduleView>('week'),[day,setDay]=useState(()=>vegasToday());
  const [manageArea,setManageArea]=useState<ManageArea>('schedule'),[ownerAccess,setOwnerAccess]=useState(false);
  const [hostSelection,setHostSelection]=useState(''),[readingSelection,setReadingSelection]=useState(''),[myWeek,setMyWeek]=useState(1);
  const gatheringForm=useGatheringForm(),materialForm=useMaterialForm();
  const cap=(key:Capability)=>!!data?.capabilities?.includes(key);
  useEffect(()=>{setMonthDraft(month);},[month]);
+ const setTab=useCallback((next:Tab)=>{setDetail(null);setTabState(next);window.scrollTo?.({top:0});},[]);
 
  const loader=useCallback(async()=>{
   const sequence=++readSequence.current;
@@ -80,47 +86,51 @@ export default function MorningPrayerLive(){
    window.location.assign(url.toString());
   }catch(e){setMessage(e instanceof Error?e.message:'Joining is currently unavailable.');setBusy(false);}
  }
- function openDate(o:Occurrence){setFocus(o.id);setMonth(o.date.slice(0,7));setTab('schedule');}
+ /** Opens the gathering detail screen; loads the occurrence's month so its reading and state are current. */
+ function openGathering(o:Occurrence){setMonth(o.date.slice(0,7));setDay(o.date);setDetail(o.id);window.scrollTo?.({top:0});}
+ /** Opens the schedule week that holds the date. */
+ function openDay(date:string){setMonth(date.slice(0,7));setDay(date);setScheduleView('week');setTab('schedule');}
 
  const today=vegasToday();
  const rows=[...(data?.occurrences||[])].sort((a,b)=>a.date.localeCompare(b.date));
  const published=data?.materials||[];
  const joinable=(id:string)=>cap('join_gathering')&&!!data?.meetingStates?.some(s=>s.occurrenceId===id&&s.ready);
  const canManage=MANAGER_CAPS.some(cap);
- const tabs:Tab[]=['home','schedule','me',...(canManage?['manage' as const]:[])];
+ const tabs:Tab[]=['home','schedule',...(cap('view_materials')?['materials' as const]:[]),'me',...(canManage?['manage' as const]:[])];
  const swipe=useSwipeTabs(tabs,tab,setTab);
  const screen={data:data!,rows,today,published,busy,cap,post,joinable,joinGathering};
+ const known=data?[...rows,...(data.upcoming||[]),...(data.ownHosting||[])]:[];
+ const detailOccurrence=detail?known.find(o=>o.id===detail):undefined;
  return <div className="ui-page">
-  <FrameControls left={{label:'Schedule',icon:'calendar',onClick:()=>setTab('schedule'),active:tab==='schedule',disabled:!data}} right={{label:'Me',icon:'user',onClick:()=>setTab('me'),active:tab==='me',disabled:!data}} more={[{label:'Overview',icon:'home',onClick:()=>setTab('home')},...(canManage?[{label:'Manage',icon:'people' as const,onClick:()=>setTab('manage')}]:[])]}/>
+  <FrameControls left={{label:'Schedule',icon:'calendar',onClick:()=>setTab('schedule'),active:tab==='schedule',disabled:!data}} right={{label:'Me',icon:'user',onClick:()=>setTab('me'),active:tab==='me',disabled:!data}}
+   more={[{label:'Overview',icon:'home',onClick:()=>setTab('home')},...(cap('view_materials')?[{label:'Materials',icon:'clipboard' as const,onClick:()=>setTab('materials')}]:[]),...(canManage?[{label:'Manage',icon:'people' as const,onClick:()=>setTab('manage')}]:[])]}/>
   <main className={'ui-main '+styles.main}>
-   <p className="ui-kicker">Work Mission</p>
-   <h1 className="ui-title">Morning Prayer</h1>
    {data&&<nav className={'ui-tabs '+styles.topTabs} aria-label="Morning Prayer sections">
     {tabs.map(x=><button key={x} type="button" className="ui-tab" aria-current={tab===x?'page':undefined} onClick={()=>setTab(x)}>{TAB_LABELS[x]}</button>)}
    </nav>}
    {message&&<p className="ui-notice" role="status">{message}</p>}
-   {error&&<section className="ui-empty">
-    <strong>Morning Prayer is unavailable</strong>
-    <p role="alert">{error}</p>
-    <div className={styles.actions}>
+   {error&&<section className={'ui-glass '+styles.state}>
+    <EmptyState icon={<Sun/>} title="Morning Prayer is unavailable" action={<div className={styles.actions}>
      <button type="button" className="ui-button" onClick={()=>void loader()}>Try again</button>
      <a className="ui-button ui-button-secondary" href="/members">Back to your apps</a>
-    </div>
+    </div>}><span role="alert">{error}</span></EmptyState>
    </section>}
-   {!error&&!data&&<p className="ui-empty" role="status">Loading your gathering schedule…</p>}
+   {!error&&!data&&<div className={'ui-glass '+styles.state}><EmptyState icon={<Sun/>} title="Loading" role="status">Loading your gathering schedule…</EmptyState></div>}
    {data&&<div className={styles.content} data-testid="wm-content" {...swipe}>
-    {tab==='home'&&<HomeTab {...screen} month={month} myWeek={myWeek} onWeek={setMyWeek} onOpen={openDate}
-     onFullSchedule={()=>setTab('schedule')} onAddGathering={()=>{setManageArea('schedule');setTab('manage');}}/>}
-    {tab==='schedule'&&<ScheduleTab {...screen} month={month} focus={focus} onFocus={setFocus}
-     onMonth={value=>{setMonth(value);setFocus(null);}}/>}
-    {tab==='me'&&<MeTab {...screen}/>}
-    {tab==='manage'&&<ManageTab {...screen} canManage={canManage} area={manageArea} onArea={setManageArea}
-     ownerAccess={ownerAccess} onOwnerAccess={setOwnerAccess} monthDraft={monthDraft} onMonthDraft={setMonthDraft} onMonth={setMonth} gathering={gatheringForm} material={materialForm}
-     hostSelection={hostSelection} onHostSelection={setHostSelection} readingSelection={readingSelection} onReadingSelection={setReadingSelection}
-     onReload={loader} onNotice={setMessage}/>}
+    {detail?<GatheringDetail {...screen} occurrence={detailOccurrence} backLabel={tab==='home'?'Overview':TAB_LABELS[tab]} onBack={()=>setDetail(null)}/>:<>
+     {tab==='home'&&<HomeTab {...screen} month={month} myWeek={myWeek} onWeek={setMyWeek} onOpen={openGathering} onDay={openDay}
+      onFullSchedule={()=>setTab('schedule')} onAddGathering={()=>{setManageArea('schedule');setTab('manage');}} onMaterials={()=>setTab('materials')}/>}
+     {tab==='schedule'&&<ScheduleTab {...screen} month={month} day={day} view={scheduleView} onView={setScheduleView} onDay={setDay} onOpen={openGathering}
+      onMonth={value=>setMonth(value)} onMine={()=>setTab('me')}/>}
+     {tab==='materials'&&<MaterialsTab {...screen} onOpen={openGathering}/>}
+     {tab==='me'&&<MeTab {...screen} onOpen={openGathering}/>}
+     {tab==='manage'&&<ManageTab {...screen} canManage={canManage} area={manageArea} onArea={setManageArea}
+      ownerAccess={ownerAccess} onOwnerAccess={setOwnerAccess} monthDraft={monthDraft} onMonthDraft={setMonthDraft} onMonth={setMonth} gathering={gatheringForm} material={materialForm}
+      hostSelection={hostSelection} onHostSelection={setHostSelection} readingSelection={readingSelection} onReadingSelection={setReadingSelection}
+      onReload={loader} onNotice={setMessage}/>}
+    </>}
    </div>}
   </main>
-
  </div>;
 }
 /** Props every tab receives from the shell. `data` is always loaded when a tab renders. */
@@ -128,4 +138,3 @@ export type Screen={
  data:Workspace;rows:Occurrence[];today:string;published:NonNullable<Workspace['materials']>;busy:boolean;
  cap:(key:Capability)=>boolean;post:Post;joinable:(id:string)=>boolean;joinGathering:(id:string)=>Promise<void>;
 };
-

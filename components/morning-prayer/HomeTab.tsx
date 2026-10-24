@@ -1,66 +1,99 @@
 'use client';
+import {ArrowRight,Sun} from '../home-icons';
+import {DateStrip,EmptyState,PageHeading,SectionHeader,Tag,TextAction} from '../ui-kit';
 import styles from './morning-prayer.module.css';
-import {clockParts,dayLabel,monthLabel} from './shared';
+import {addDays,clockTime,formatDate,hostLine,longDay,monthLabel,pwpPeriod} from './shared';
 import type {Occurrence} from './shared';
 import type {Screen} from './MorningPrayerLive';
-export default function HomeTab({data,rows,today,published,cap,joinable,joinGathering,busy,month,myWeek,onWeek,onOpen,onFullSchedule,onAddGathering}:Screen&{
- month:string;myWeek:number;onWeek:(week:number)=>void;onOpen:(o:Occurrence)=>void;onFullSchedule:()=>void;onAddGathering:()=>void;
+
+/**
+ * Atlas mission-home in Liquid Opal: heading, the weekly focus as the filled hero
+ * (only when a published PWP exists for the month), the next gathering, and the
+ * coming week as round date chips. Without a focus, the next gathering is the hero.
+ */
+export default function HomeTab({data,rows,today,published,cap,joinable,joinGathering,busy,month,myWeek,onWeek,onOpen,onDay,onFullSchedule,onAddGathering,onMaterials}:Screen&{
+ month:string;myWeek:number;onWeek:(week:number)=>void;onOpen:(o:Occurrence)=>void;onDay:(date:string)=>void;onFullSchedule:()=>void;onAddGathering:()=>void;onMaterials:()=>void;
 }){
  const isNextGathering=(o:Occurrence)=>o.date>=today&&o.kind==='gathering';
  const future=rows.filter(isNextGathering),upcoming=(data.upcoming||[]).filter(isNextGathering);
  const next=upcoming[0]||future[0];
- const later=(upcoming.length?upcoming:future).filter(o=>o.id!==next?.id).slice(0,5);
- const pwp=published.find(m=>m.key==='pwp-'+month+'-week-'+myWeek);
- const [time,meridiem]=next?clockParts(next.startsAt):['',''];
- return <div className={styles.split}>
-  <div>
-   <h2 className={styles.heading}>Your next gathering</h2>
-   {next?<section aria-label="Next gathering">
-    <div className={styles.next}>
-     <p className={styles.bigTime}>{time}<small>{meridiem} Las Vegas</small></p>
-     <div className={styles.nextBody}>
-      <span className={styles.quiet}>{dayLabel(next.date)}</span>
-      <strong>{next.host}</strong>
-      <span className={styles.status} data-tone={next.verified?undefined:'warning'}>{next.verified?'Date confirmed':'Date to be confirmed'}</span>
-      {!next.hostConfirmed&&next.host!=='Host needed'&&<span className={styles.status}>Host confirmation pending</span>}
-     </div>
-    </div>
-    <div className={styles.actions}>
-     {joinable(next.id)&&<button type="button" className="ui-button" disabled={busy} onClick={()=>void joinGathering(next.id)}>Join the gathering</button>}
-     <button type="button" className="ui-button ui-button-secondary" onClick={()=>onOpen(next)}>Gathering details</button>
-    </div>
-   </section>:<div className="ui-empty">
-    <strong>No gatherings scheduled yet</strong>
-    <p>{cap('manage_schedule')?'Add your first gathering in Manage.':'Your next gathering will appear here.'}</p>
-    {cap('manage_schedule')&&<button type="button" className="ui-button" onClick={onAddGathering}>Add a gathering</button>}
-   </div>}
+ const monthPwp=cap('view_materials')?published.filter(m=>m.kind==='pwp'&&pwpPeriod(m.key)?.month===month):[];
+ const pwp=monthPwp.find(m=>m.key==='pwp-'+month+'-week-'+myWeek);
+ // The coming seven days. Days come from the upcoming projection and, for the loaded month, the full schedule.
+ const byDate=new Map<string,Occurrence>();
+ for(const o of [...(data.upcoming||[]),...rows])if(!byDate.has(o.date)||o.kind==='gathering')byDate.set(o.date,o);
+ const week=Array.from({length:7},(_,i)=>addDays(today,i));
+ const when=(o:Occurrence)=>longDay(o.date)+' · '+clockTime(o.startsAt);
 
-   {later.length>0&&<>
-    <div className={styles.headingRow}>
-     <h2 className={styles.heading}>Upcoming dates</h2>
-     <button type="button" className="ui-button ui-button-quiet" onClick={onFullSchedule}>Full schedule</button>
-    </div>
-    <ul className="ui-list">{later.map(o=>{const [t,m]=clockParts(o.startsAt);return <li key={o.id}>
-     <button type="button" className="ui-row" onClick={()=>onOpen(o)}>
-      <span className={styles.time}>{t}<small>{m}</small></span>
-      <span className={styles.dot} data-state={o.verified?undefined:'quiet'} aria-hidden="true"/>
-      <span className="ui-row-body"><strong>{o.host}</strong><small>{dayLabel(o.date)}{o.verified?'':' · to be confirmed'}</small></span>
-     </button>
-    </li>;})}</ul>
-   </>}
-  </div>
+ const nextActions=(o:Occurrence,onHero:boolean)=>{
+  const join=joinable(o.id);
+  if(onHero)return <div className={styles.heroActions}>
+   {join&&<button type="button" className="ui-hero-action" disabled={busy} onClick={()=>void joinGathering(o.id)}>Join the gathering</button>}
+   <button type="button" className="ui-hero-action" onClick={()=>onOpen(o)}>View gathering <ArrowRight size={18}/></button>
+  </div>;
+  return <div className={styles.actions}>
+   {join&&<button type="button" className="ui-button" disabled={busy} onClick={()=>void joinGathering(o.id)}>Join the gathering</button>}
+   <button type="button" className={'ui-button'+(join?' ui-button-secondary':'')} onClick={()=>onOpen(o)}>View gathering <ArrowRight size={18}/></button>
+  </div>;
+ };
+ // Only what still needs attention; a confirmed date and host need no label here.
+ const nextTags=(o:Occurrence)=>!o.verified||(!o.hostConfirmed&&o.host!=='Host needed')?<div className={styles.tags}>
+  {!o.verified&&<Tag tone="warning">Date to be confirmed</Tag>}
+  {!o.hostConfirmed&&o.host!=='Host needed'&&<Tag tone="warning">Host confirmation pending</Tag>}
+ </div>:null;
 
-  {cap('view_materials')&&<aside className={styles.side} aria-labelledby="wm-pwp-title">
-   <h2 className={styles.heading} id="wm-pwp-title">PWP for {monthLabel(month)}</h2>
-   <div className={styles.choices} role="group" aria-label="PWP week">{[1,2,3,4,5].map(n=>
-    <button key={n} type="button" aria-pressed={myWeek===n} aria-label={'Week '+n} onClick={()=>onWeek(n)}>Wk {n}</button>)}
+ return <div className={styles.screen}>
+  <PageHeading eyebrow="Las Vegas Work Mission" title="Begin the day together." lede="A place for preparation, encouragement and prayer."/>
+
+  {monthPwp.length>0&&<section className={'ui-hero '+styles.hero} aria-labelledby="wm-pwp-title">
+   <div className="ui-hero-copy">
+    <h2 className={'ui-tag '+styles.heroTag} id="wm-pwp-title">Weekly focus · {monthLabel(month)}</h2>
+    <p className={styles.heroTitle}>{pwp?pwp.body.title:'Week '+myWeek}</p>
+    {pwp?<p className={styles.heroSummary}>{pwp.body.summary}</p>:<p>Week {myWeek} activities will appear here when they are ready.</p>}
+    {pwp&&<button type="button" className="ui-hero-action" onClick={onMaterials}>Activities and source <ArrowRight size={18}/></button>}
+    <div className={styles.heroWeeks} role="group" aria-label="PWP week">{[1,2,3,4,5].map(n=>
+     <button key={n} type="button" aria-pressed={myWeek===n} aria-label={'Week '+n} onClick={()=>onWeek(n)}>Wk {n}</button>)}
+    </div>
    </div>
-   {pwp?<div className={styles.material}>
-    <h3>{pwp.body.title}</h3><p>{pwp.body.summary}</p>
-    <ul>{pwp.body.items.map((x,i)=><li key={i}>{x}</li>)}</ul>
-    <p className={styles.quiet}>Source: {pwp.body.sourceLabel}</p>
-   </div>:<p className={styles.quiet}>Week {myWeek} activities will appear here when they are ready.</p>}
-   <p><a className="ui-link" href="https://wm.watv.org/login.wmc" target="_blank" rel="noopener noreferrer">Open the PWP card on wm.watv.org</a></p>
-  </aside>}
+  </section>}
+
+  {next&&monthPwp.length>0&&<section className={'ui-glass '+styles.nextCard} aria-labelledby="wm-next-title">
+   <h2 className="ui-eyebrow" id="wm-next-title">Your next gathering</h2>
+   <p className={styles.cardTitle}>{hostLine(next)}</p>
+   <p className={styles.quiet}>{when(next)} Las Vegas</p>
+   {nextTags(next)}
+   {nextActions(next,false)}
+  </section>}
+
+  {next&&monthPwp.length===0&&<section className={'ui-hero '+styles.hero} aria-labelledby="wm-next-title">
+   <div className="ui-hero-copy">
+    <h2 className={'ui-tag '+styles.heroTag} id="wm-next-title">Your next gathering</h2>
+    <p className={styles.heroTitle}>{hostLine(next)}</p>
+    <p>{when(next)} Las Vegas</p>
+    {nextTags(next)}
+    {nextActions(next,true)}
+   </div>
+  </section>}
+
+  {!next&&<section className={'ui-glass '+styles.state} aria-label="Next gathering">
+   <EmptyState icon={<Sun/>} title="No gatherings scheduled yet"
+    action={cap('manage_schedule')?<button type="button" className="ui-button" onClick={onAddGathering}>Add a gathering</button>:undefined}>
+    {cap('manage_schedule')?'Add your first gathering in Manage.':'Your next gathering will appear here.'}
+   </EmptyState>
+  </section>}
+
+  <section aria-labelledby="wm-week-title">
+   <SectionHeader title="This week" id="wm-week-title" action={<TextAction label="Open the full schedule" onClick={onFullSchedule}>Schedule</TextAction>}/>
+   <div className={styles.week} data-no-swipe>
+    <DateStrip label="The next seven days" days={week.map(date=>{
+     const o=byDate.get(date);
+     const what=!o?'no gathering scheduled':o.kind==='gathering'?hostLine(o)+' at '+clockTime(o.startsAt):o.kind==='app_day'?'Pray Daily app day':'cancelled';
+     return {key:date,top:formatDate(date,{weekday:'short'}),day:Number(date.slice(-2)),
+      bottom:o&&o.kind==='gathering'?<i className={styles.dot} aria-hidden="true"/>:date===today?'Today':formatDate(date,{month:'short'}),
+      label:longDay(date)+', '+what,selected:date===today,onClick:()=>o&&o.kind==='gathering'?onOpen(o):onDay(date)};
+    })}/>
+   </div>
+   <p className="ui-legend">Dots mark a scheduled gathering. Times are Las Vegas time.</p>
+  </section>
  </div>;
 }

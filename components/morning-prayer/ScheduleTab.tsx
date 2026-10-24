@@ -1,50 +1,79 @@
 'use client';
+import {CalendarDays,ChevronLeft,ChevronRight,Sun} from '../home-icons';
+import {DateStrip,EmptyState,IconBox,PageHeading,Row,Segmented,Tag} from '../ui-kit';
 import styles from './morning-prayer.module.css';
-import MorningPrayerVolunteer from './MorningPrayerVolunteer';
-import {clockParts,clockTime,dayLabel,monthLabel,shiftMonth} from './shared';
+import {MonthCalendar,VolunteerCard} from './MorningPrayerVolunteer';
+import {addDays,clockTime,formatDate,hostLine,longDay,mondayOf,monthLabel,shiftMonth,statusTag} from './shared';
 import type {Occurrence} from './shared';
 import type {Screen} from './MorningPrayerLive';
-const kindTitle=(o:Occurrence)=>o.kind==='gathering'?o.host:o.kind==='app_day'?'Pray Daily app day':'Cancelled';
-export default function ScheduleTab({rows,today,published,busy,cap,post,joinable,joinGathering,month,focus,onFocus,onMonth}:Screen&{
- month:string;focus:string|null;onFocus:(id:string)=>void;onMonth:(month:string)=>void;
+export type ScheduleView='week'|'month';
+
+/**
+ * Atlas mission-schedule in Liquid Opal: Week or Month pill control, the week as
+ * round date chips over a glass list of gatherings, or the month calendar. Weeks
+ * are shown within the loaded month, so every chip reflects data that was read.
+ */
+export default function ScheduleTab({rows,today,busy,cap,post,month,day,view,onView,onDay,onOpen,onMonth,onMine}:Screen&{
+ month:string;day:string;view:ScheduleView;onView:(view:ScheduleView)=>void;onDay:(date:string)=>void;onOpen:(o:Occurrence)=>void;onMonth:(month:string)=>void;onMine:()=>void;
 }){
- const active=focus?rows.find(o=>o.id===focus):rows.find(o=>o.date>=today&&o.kind==='gathering')||rows[0];
- const canVolunteer=(o:Occurrence)=>cap('volunteer_host')&&o.kind==='gathering'&&o.verified&&o.host==='Host needed'&&o.date>=today;
- return <div className={styles.split}>
-  <div>
-   <div className={styles.monthNav}>
-    <button type="button" className="ui-button ui-button-quiet" aria-label="Previous month" onClick={()=>onMonth(shiftMonth(month,-1))}>‹</button>
+ const inMonth=(date:string)=>date.slice(0,7)===month;
+ // The selected day always lies in the loaded month.
+ const selected=inMonth(day)?day:inMonth(today)?today:month+'-01';
+ const segment=Array.from({length:7},(_,i)=>addDays(mondayOf(selected),i)).filter(inMonth);
+ const weekRows=rows.filter(o=>segment.includes(o.date));
+ const byDate=new Map<string,Occurrence>();
+ for(const o of rows)if(!byDate.has(o.date)||o.kind==='gathering')byDate.set(o.date,o);
+ /** Moves to the neighbouring week segment, crossing into the next or previous month when needed. */
+ function moveWeek(direction:-1|1){
+  const target=direction<0?addDays(segment[0],-1):addDays(segment[segment.length-1],1);
+  const start=direction<0?(()=>{const monday=mondayOf(target);return monday.slice(0,7)===target.slice(0,7)?monday:target.slice(0,7)+'-01';})():target;
+  if(!inMonth(start))onMonth(start.slice(0,7));
+  onDay(start);
+ }
+ function moveMonth(delta:number){const next=shiftMonth(month,delta);onMonth(next);onDay(today.slice(0,7)===next?today:next+'-01');}
+ const range=segment.length?formatDate(segment[0],{month:'short',day:'numeric'})+(segment.length>1?' – '+formatDate(segment[segment.length-1],{day:'numeric'}):''):'';
+ return <div className={styles.screen}>
+  <PageHeading eyebrow={monthLabel(month)} title="Host schedule" lede="Gathering dates and hosts, in Las Vegas time."/>
+  <Segmented label="Schedule view" value={view} onChange={onView} options={[['week','Week'],['month','Month']]}/>
+
+  {view==='week'&&<>
+   <div className={styles.periodNav}>
+    <button type="button" className={styles.round} aria-label="Previous week" onClick={()=>moveWeek(-1)}><ChevronLeft size={20}/></button>
+    <strong>{range}</strong>
+    <button type="button" className={styles.round} aria-label="Next week" onClick={()=>moveWeek(1)}><ChevronRight size={20}/></button>
+   </div>
+   <div className={styles.week} data-no-swipe>
+    <DateStrip label="Days this week" days={segment.map(date=>{
+     const o=byDate.get(date);
+     return {key:date,top:formatDate(date,{weekday:'short'}),day:Number(date.slice(-2)),
+      bottom:o&&o.kind==='gathering'?<i className={styles.dot} aria-hidden="true"/>:date===today?'Today':formatDate(date,{month:'short'}),
+      label:'Select '+longDay(date)+(o?', '+(o.kind==='gathering'?hostLine(o):o.kind==='app_day'?'Pray Daily app day':'cancelled'):', no gathering'),
+      selected:date===selected,onClick:()=>onDay(date)};
+    })}/>
+   </div>
+   {weekRows.length?<div className="ui-glass ui-glass-tight"><ul className="ui-list" aria-label="Gatherings this week">{weekRows.map(o=>{
+    const tag=statusTag(o);
+    return <li key={o.id} className={o.date===selected?styles.current:undefined}>
+     <Row onClick={()=>onOpen(o)} lead={<IconBox><Sun size={22}/></IconBox>}
+      title={formatDate(o.date,{weekday:'short'})+' '+Number(o.date.slice(-2))+' · '+(o.kind==='gathering'?(o.host==='Host needed'?'Open host':o.host):o.kind==='app_day'?'Pray Daily app day':'No gathering')}
+      detail={o.kind==='gathering'?clockTime(o.startsAt)+' · '+(o.verified?'Date confirmed':'To be confirmed'):o.kind==='app_day'?'No Zoom gathering':'Cancelled'}
+      end={<Tag tone={tag.tone}>{tag.label}</Tag>} chevron={false}/>
+    </li>;})}</ul></div>
+   :<div className="ui-glass"><EmptyState icon={<CalendarDays/>} title="Nothing scheduled this week">Scheduled gatherings will appear here.</EmptyState></div>}
+  </>}
+
+  {view==='month'&&<>
+   <div className={styles.periodNav}>
+    <button type="button" className={styles.round} aria-label="Previous month" onClick={()=>moveMonth(-1)}><ChevronLeft size={20}/></button>
     <h2>{monthLabel(month)}</h2>
-    <button type="button" className="ui-button ui-button-quiet" aria-label="Next month" onClick={()=>onMonth(shiftMonth(month,1))}>›</button>
+    <button type="button" className={styles.round} aria-label="Next month" onClick={()=>moveMonth(1)}><ChevronRight size={20}/></button>
    </div>
-   <MorningPrayerVolunteer month={month} rows={rows} today={today} selected={focus} onSelect={onFocus} canVolunteer={cap('volunteer_host')} busy={busy}
-    onSubmit={ids=>post({type:'volunteer',occurrenceIds:ids})}/>
-   {rows.length===0?<p className="ui-empty"><strong>No gatherings this month</strong>Scheduled gatherings will appear on this calendar.</p>
-   :<details className={styles.disclosure}><summary>All dates this month<small>{rows.length}</small></summary>
-    <ul className="ui-list">{rows.map(o=>{const [t,m]=clockParts(o.startsAt);return <li key={o.id}>
-     <button type="button" className="ui-row" onClick={()=>onFocus(o.id)} aria-pressed={focus===o.id}>
-      <span className={styles.time}>{o.kind==='gathering'?<>{t}<small>{m}</small></>:<small>No Zoom</small>}</span>
-      <span className="ui-row-body"><strong>{kindTitle(o)}</strong>
-       <small>{dayLabel(o.date)}{o.kind==='gathering'?' · '+(o.verified?'Date confirmed':'To be confirmed'):''}</small></span>
-     </button>
-    </li>;})}</ul>
-   </details>}
-  </div>
-  {active&&active.date.slice(0,7)===month&&<section className={styles.side} data-testid="actual-gathering" aria-labelledby="wm-day-title">
-   <h2 className={styles.heading} id="wm-day-title">{dayLabel(active.date)}</h2>
-   <p><strong>{kindTitle(active)}</strong></p>
-   <p className={styles.quiet}>{clockTime(active.startsAt)} to {clockTime(active.endsAt)}, Las Vegas time</p>
-   {!active.verified&&<p className="ui-notice" data-tone="warning">This date is waiting for confirmation.</p>}
-   <div className={styles.actions}>
-    {active.kind==='gathering'&&joinable(active.id)&&<button type="button" className="ui-button" disabled={busy} onClick={()=>void joinGathering(active.id)}>Join the gathering</button>}
-    {canVolunteer(active)&&<button type="button" className="ui-button ui-button-secondary" disabled={busy} onClick={()=>void post({type:'volunteer',occurrenceIds:[active.id]})}>Request to host this date</button>}
-   </div>
-   {active.kind==='gathering'&&!joinable(active.id)&&<p className={styles.quiet}>The meeting link appears here when joining opens.</p>}
-   {cap('view_materials')&&published.filter(m=>m.kind==='reading'&&m.key===active.readingKey).map(m=><div key={m.key} className={styles.material}>
-    <h3 className={styles.heading}>Reading: {m.body.title}</h3><p>{m.body.summary}</p>
-    <ul>{m.body.items.map((item,i)=><li key={i}>{item}</li>)}</ul>
-    <p className={styles.quiet}>Source: {m.body.sourceLabel}</p>
-   </div>)}
-  </section>}
+   <MonthCalendar month={month} rows={rows} today={today} selected={selected} onSelect={onOpen}/>
+   {rows.length===0&&<div className="ui-glass"><EmptyState icon={<CalendarDays/>} title="No gatherings this month">Scheduled gatherings will appear on this calendar.</EmptyState></div>}
+  </>}
+
+  {cap('volunteer_host')&&<VolunteerCard month={month} rows={rows} today={today} busy={busy} onSubmit={ids=>post({type:'volunteer',occurrenceIds:ids})}/>}
+
+  <button type="button" className={'ui-button ui-button-secondary ui-button-block '+styles.mineButton} onClick={onMine}>My upcoming gatherings <CalendarDays size={20}/></button>
  </div>;
 }
