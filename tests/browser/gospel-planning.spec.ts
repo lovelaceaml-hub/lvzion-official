@@ -156,7 +156,7 @@ test('member availability, proposed session, partner response, change and one sh
  await sessionSheet(page).getByLabel('Note (optional)').fill('Fictional shared note');
  await sessionSheet(page).getByRole('button',{name:'Save shared result'}).click();
  await expect(saved(page)).toContainText('Shared result saved');
- await expect(page.getByRole('heading',{name:'Recent sessions'})).toBeVisible();
+ // The ended session is listed once: in the week on screen, or under recent sessions when another week is shown.
  await expect(page.locator('.gp-session-row')).toContainText('Result recorded');
 
  await gp.as(member.ben);
@@ -223,6 +223,7 @@ test('manager sets up places and roles without seeing ministry records',async({p
  await page.getByLabel('New place').fill('Fictional Community Room');
  await page.getByRole('button',{name:'Add place'}).click();
  await expect(saved(page)).toContainText('Place added');
+ await page.getByRole('button',{name:'Roles'}).click();
  await page.getByRole('combobox',{name:/^Member/}).selectOption('44444444-4444-4444-8444-000000000101');
  await page.getByRole('combobox',{name:/^Role/}).selectOption('schedule');
  await page.getByRole('combobox',{name:/^Scope/}).selectOption({label:'Demo Unit A1 only'});
@@ -242,12 +243,12 @@ test('manager sets up places and roles without seeing ministry records',async({p
 
 test('revoked access clears the screen on the next refresh',async({page})=>{
  const gp=await openGospel(page,{as:member.gina});
- await expect(page.getByRole('heading',{name:'Your sessions'})).toBeVisible();
+ await expect(page.getByRole('heading',{name:'This week'})).toBeVisible();
  // Apps are open to every signed-in member (2026-10-24), so access ends by suspending the account.
  await gp.sql(`update app_private.account_links set technical_enabled=false where member_id='44444444-4444-4444-8444-000000000107'`);
  await gp.as(member.gina);
  await expect(page.getByText('is not available for this account or group')).toBeVisible();
- await expect(page.getByRole('heading',{name:'Your sessions'})).toHaveCount(0);
+ await expect(page.getByRole('heading',{name:'This week'})).toHaveCount(0);
  await gp.close();
 });
 
@@ -274,7 +275,7 @@ test('tabs switch by swipe and the bottom navigation, with the center Apps launc
 test('dark appearance keeps the module style',async({page})=>{
  await page.addInitScript(()=>{try{localStorage.setItem('lvz.appearance.v1','dark');}catch{}});
  const gp=await openGospel(page,{as:member.gina});
- await expect(page.getByRole('heading',{name:'Your sessions'})).toBeVisible();
+ await expect(page.getByRole('heading',{name:'This week'})).toBeVisible();
  await expect(page.locator('html')).toHaveAttribute('data-lvz-scheme','dark');
  await expect(page.locator('.app-frame')).toHaveAttribute('data-lvz-module','gospel-planning');
  await gp.close();
