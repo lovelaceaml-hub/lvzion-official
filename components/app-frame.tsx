@@ -72,7 +72,7 @@ export default function AppFrame({children}:{children:ReactNode}){
  return <Register.Provider value={setRegistration}>
   {immersive?children:<div className="app-frame" data-route={path} data-lvz-module={moduleKey??undefined} data-signed-out={signedOut} data-header-content={Boolean(controls?.headerContent)} data-viewport={Boolean(controls?.viewport)}>
    <header className="app-frame-header" aria-label="Application header">
-    <a className="app-frame-heading" href="/" aria-label={`${title}. Go to Home`}><Icon size={24}/><span>{title}</span></a>
+    <a className="app-frame-heading" href="/" aria-label={`${title}. Go to Home`}><span className="app-frame-tile" aria-hidden="true"><Icon size={24}/></span><span className="app-frame-name"><strong>{title}</strong><small aria-hidden="true">{title==='LV Zion'?'Your community':'LV Zion'}</small></span></a>
     {signedOut?signedOutLink():<a className="app-frame-avatar" href={controls?.profileHref??"/members/manage?tab=profile"} aria-label="My profile">{avatar||<UserRound size={23}/>}</a>}
     {controls?.headerContent?<div className="app-frame-header-content">{controls.headerContent}</div>:null}
    </header>

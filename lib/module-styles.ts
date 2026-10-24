@@ -1,5 +1,5 @@
 /**
- * Which Atlas style each module wears. The shared AppFrame sets
+ * Which palette each module wears on the shared Liquid Opal material. The shared AppFrame sets
  * data-lvz-module from the first matching route prefix; the palette for each
  * key lives in styles/lvz-tokens.css. Add a module here (and its token block
  * there) to give it its own style. See docs/design/LVZ-DESIGN-CONTRACT.md.
@@ -7,14 +7,14 @@
 export type ModuleIconName='room'|'people'|'sun'|'display'|'calendar'|'heart'|'music'|'clipboard'|'apps';
 export type ModuleStyle={key:string;routes:string[];title:string;icon:ModuleIconName;atlas:string;darkByDesign?:boolean};
 export const moduleStyles:ModuleStyle[]=[
- {key:'study-rooms',routes:['/modules/study-rooms'],title:'Study Rooms',icon:'room',atlas:'Lavender Softform'},
- {key:'contacts',routes:['/modules/contacts'],title:'Contacts',icon:'people',atlas:'Tidal Teal'},
- {key:'work-mission',routes:['/modules/work-mission-prayer'],title:'Morning Prayer',icon:'sun',atlas:'Linen Editorial'},
- {key:'continuous-display',routes:['/modules/continuous-display','/display-operations-review'],title:'Church Display',icon:'display',atlas:'Pearl Garden'},
- {key:'members',routes:['/members/manage','/member-preview','/roster-preview','/enrollment-preview'],title:'Members',icon:'people',atlas:'Graphite & Chrome'},
- {key:'gospel-planning',routes:['/modules/gospel-planning'],title:'Gospel Planning',icon:'clipboard',atlas:'Skyline Grid'},
- {key:'worship-duty',routes:['/modules/worship-duty'],title:'Worship Duty',icon:'calendar',atlas:'Midnight Sapphire',darkByDesign:true},
- {key:'mothers-love',routes:['/modules/mothers-love'],title:'Mother’s Love',icon:'heart',atlas:'Rose Quartz'},
+ {key:'study-rooms',routes:['/modules/study-rooms'],title:'Study Rooms',icon:'room',atlas:'Liquid Opal, Lavender Softform values'},
+ {key:'contacts',routes:['/modules/contacts'],title:'Contacts',icon:'people',atlas:'Liquid Opal, teal'},
+ {key:'work-mission',routes:['/modules/work-mission-prayer'],title:'Morning Prayer',icon:'sun',atlas:'Liquid Opal, linen'},
+ {key:'continuous-display',routes:['/modules/continuous-display','/display-operations-review'],title:'Church Display',icon:'display',atlas:'Liquid Opal, garden'},
+ {key:'members',routes:['/members/manage','/member-preview','/roster-preview','/enrollment-preview'],title:'Members',icon:'people',atlas:'Liquid Opal, graphite'},
+ {key:'gospel-planning',routes:['/modules/gospel-planning'],title:'Gospel Planning',icon:'clipboard',atlas:'Liquid Opal, sky'},
+ {key:'worship-duty',routes:['/modules/worship-duty'],title:'Worship Duty',icon:'calendar',atlas:'Liquid Opal, sapphire'},
+ {key:'mothers-love',routes:['/modules/mothers-love'],title:'Mother’s Love',icon:'heart',atlas:'Liquid Opal, rose'},
  {key:'concert',routes:['/modules/concert'],title:'Concert',icon:'music',atlas:'Aurora Night',darkByDesign:true},
  {key:'song-library',routes:['/modules/song-library'],title:'Song library',icon:'music',atlas:'Copper Noir',darkByDesign:true},
 ];

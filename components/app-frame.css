@@ -1,102 +1,78 @@
-/* Shared glass accents surround opaque, readable module content. */
-.app-frame{--frame-top:calc(68px + env(safe-area-inset-top,0px));--frame-bottom:calc(88px + env(safe-area-inset-bottom,0px));padding-top:var(--frame-top);padding-bottom:var(--frame-bottom);min-height:100dvh}
-.app-frame-header,.app-frame-nav{position:fixed;left:var(--lvz-space-2);right:var(--lvz-space-2);margin:auto;max-width:900px;z-index:40;border:1px solid var(--lvz-surface);background:color-mix(in srgb,var(--lvz-surface) 94%,var(--lvz-accent-soft));box-shadow:inset 0 1px 2px var(--lvz-surface),0 4px 20px color-mix(in srgb,var(--lvz-ink) 9%,transparent)}
-.app-frame-header{top:calc(var(--lvz-space-2) + env(safe-area-inset-top,0px));min-height:52px;border-radius:var(--lvz-radius-round);padding:var(--lvz-space-1) var(--lvz-space-2) var(--lvz-space-1) var(--lvz-space-4);display:flex;align-items:center;justify-content:space-between;gap:var(--lvz-space-2)}
-.app-frame-heading{display:flex;align-items:center;gap:var(--lvz-space-2);min-width:0;min-height:var(--lvz-tap);font-size:var(--lvz-text-lg);font-weight:var(--lvz-weight-bold);line-height:1.2;color:var(--lvz-ink);text-decoration:none;border-radius:var(--lvz-radius-md)}
-.app-frame-heading span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.app-frame-heading svg{flex:none;color:var(--lvz-accent)}
-.app-frame-avatar{flex:none;display:grid;place-items:center;width:44px;height:44px;border-radius:var(--lvz-radius-round);border:1px solid var(--lvz-line);background:linear-gradient(145deg,var(--lvz-surface),var(--lvz-accent-soft));color:var(--lvz-accent-strong);font-size:var(--lvz-text-sm);font-weight:var(--lvz-weight-bold);text-decoration:none;box-shadow:inset 0 1px 2px var(--lvz-surface)}
-.app-frame-nav{bottom:calc(var(--lvz-space-2) + env(safe-area-inset-bottom,0px));display:grid;grid-template-columns:repeat(5,minmax(0,1fr));align-items:center;border-radius:var(--lvz-radius-round);padding:var(--lvz-space-1) var(--lvz-space-2);min-height:72px}
-.app-frame-nav>a,.app-frame-nav>button{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:var(--lvz-space-1);min-width:0;min-height:60px;border:0;padding:var(--lvz-space-1) 0;background:none;color:var(--lvz-ink-quiet);font-size:var(--lvz-text-xs);line-height:1.2;text-align:center;text-decoration:none;border-radius:var(--lvz-radius-md)}
-.app-frame-nav [aria-current="page"]{color:var(--lvz-accent-strong);font-weight:var(--lvz-weight-bold)}
-.app-frame-nav .app-frame-apps{color:var(--lvz-accent-strong);font-weight:var(--lvz-weight-bold);position:relative;isolation:isolate;gap:2px;margin-top:-12px}
-.app-frame-orb{width:52px;height:48px;display:grid;place-items:center}
-.app-frame-apps:before{content:"";position:absolute;z-index:-1;top:-4px;width:72px;height:72px;border-radius:var(--lvz-radius-round);border:1px solid var(--lvz-surface);background:radial-gradient(circle at 30% 20%,var(--lvz-surface),var(--lvz-accent-soft) 70%);box-shadow:inset 0 0 8px var(--lvz-surface),0 3px 12px color-mix(in srgb,var(--lvz-accent) 18%,transparent)}
+/*
+ * Shared frame in the Liquid Opal material (Atlas 14, Study Rooms availability):
+ * a gradient-tinted ground, a frosted header with the app's rounded icon tile,
+ * name and a small subtitle, and a floating rounded dock with a round raised
+ * gradient Apps button. Every app wears the same frame; only its palette changes.
+ */
+.app-frame{--frame-top:calc(72px + env(safe-area-inset-top,0px));--frame-bottom:calc(112px + env(safe-area-inset-bottom,0px));padding-top:var(--frame-top);padding-bottom:var(--frame-bottom);min-height:100dvh;background:var(--lvz-backdrop);background-attachment:fixed;color:var(--lvz-ink)}
+
+/* Header: full width, frosted, hairline below. */
+.app-frame-header{position:fixed;top:0;left:0;right:0;z-index:40;display:flex;align-items:center;justify-content:space-between;gap:var(--lvz-space-3);min-height:var(--frame-top);padding:calc(var(--lvz-space-2) + env(safe-area-inset-top,0px)) var(--lvz-gutter) var(--lvz-space-2);border-bottom:1px solid var(--lvz-line);background:color-mix(in srgb,var(--lvz-surface) 92%,transparent);box-shadow:0 2px 14px color-mix(in srgb,var(--lvz-accent) 8%,transparent)}
+.app-frame-heading{display:flex;align-items:center;gap:var(--lvz-space-3);min-width:0;min-height:var(--lvz-tap);color:var(--lvz-ink);text-decoration:none;border-radius:var(--lvz-radius-md)}
+.app-frame-tile{flex:none;display:grid;place-items:center;width:44px;height:44px;border-radius:14px;background:var(--lvz-action);color:var(--lvz-on-accent);box-shadow:var(--lvz-action-shadow)}
+.app-frame-tile svg{width:24px;height:24px}
+.app-frame-name{display:flex;flex-direction:column;min-width:0;line-height:1.15}
+.app-frame-name strong{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:var(--lvz-text-lg);font-weight:var(--lvz-weight-bold);letter-spacing:-.025em}
+.app-frame-name small{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;margin-top:3px;font-size:11px;font-weight:var(--lvz-weight-strong);letter-spacing:.14em;text-transform:uppercase;color:var(--lvz-ink-quiet)}
+.app-frame-avatar{flex:none;display:grid;place-items:center;width:44px;height:44px;border-radius:var(--lvz-radius-round);border:2px solid color-mix(in srgb,var(--lvz-glass-edge) 80%,transparent);background:var(--lvz-action);color:var(--lvz-on-accent);font-size:var(--lvz-text-sm);font-weight:var(--lvz-weight-bold);text-decoration:none;box-shadow:var(--lvz-action-shadow)}
+.app-frame-header :focus-visible{outline:3px solid var(--lvz-focus);outline-offset:3px}
+
+/* Floating rounded dock. */
+.app-frame-nav{position:fixed;left:var(--lvz-space-3);right:var(--lvz-space-3);bottom:calc(var(--lvz-space-3) + env(safe-area-inset-bottom,0px));z-index:40;margin:auto;max-width:620px;display:grid;grid-template-columns:repeat(5,minmax(0,1fr));align-items:center;min-height:76px;padding:var(--lvz-space-1) var(--lvz-space-2);border:var(--lvz-glass-border);border-radius:36px;background:color-mix(in srgb,var(--lvz-surface) 82%,transparent);box-shadow:inset 0 1px 2px var(--lvz-glint),0 -2px 18px color-mix(in srgb,var(--lvz-accent) 16%,transparent),0 10px 26px color-mix(in srgb,var(--lvz-ink) 14%,transparent)}
+.app-frame-nav>a,.app-frame-nav>button{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:var(--lvz-space-1);min-width:0;min-height:60px;border:0;padding:var(--lvz-space-1) 0;background:none;color:var(--lvz-ink-quiet);font-size:var(--lvz-text-xs);line-height:1.2;text-align:center;text-decoration:none;border-radius:var(--lvz-radius-lg)}
+.app-frame-nav>a>span,.app-frame-nav>button>span{max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.app-frame-nav [aria-current="page"]{color:var(--lvz-accent);font-weight:var(--lvz-weight-bold)}
+.app-frame-nav>:focus-visible{outline:3px solid var(--lvz-focus);outline-offset:2px}
+
+/* Round raised gradient Apps button with a soft halo. */
+.app-frame-nav .app-frame-apps{position:relative;justify-content:flex-start;gap:var(--lvz-space-1);margin-top:-30px;min-height:84px;padding:0;color:var(--lvz-accent);font-weight:var(--lvz-weight-strong);overflow:visible}
+.app-frame-orb{position:relative;isolation:isolate;overflow:hidden;flex:none;display:grid;place-items:center;width:60px;height:60px;border-radius:50%;background:var(--lvz-action);color:var(--lvz-on-accent);box-shadow:0 0 0 7px color-mix(in srgb,var(--lvz-surface) 62%,transparent),var(--lvz-action-shadow),0 6px 16px color-mix(in srgb,var(--lvz-accent) 30%,transparent)}
+.app-frame-orb svg{position:relative;z-index:1;width:26px;height:26px}
+.app-frame-orb:after{content:"";position:absolute;inset:0;pointer-events:none;background:linear-gradient(115deg,transparent 25%,color-mix(in srgb,var(--lvz-glass-edge) 40%,transparent) 48%,transparent 70%);background-size:250% 100%;animation:lvz-glass-shimmer 8s ease-in-out infinite}
+@keyframes lvz-glass-shimmer{0%,65%,100%{background-position:180% 0}35%{background-position:-80% 0}}
+@media(prefers-reduced-motion:reduce){.app-frame-orb:after,.app-frame-apps:after{animation:none}}
+
+@supports(backdrop-filter:blur(16px)){
+ .app-frame-header{background:color-mix(in srgb,var(--lvz-surface) 72%,transparent);-webkit-backdrop-filter:blur(16px);backdrop-filter:blur(16px)}
+ .app-frame-nav{background:color-mix(in srgb,var(--lvz-surface) 62%,transparent);-webkit-backdrop-filter:blur(16px);backdrop-filter:blur(16px)}
+}
+@media(prefers-reduced-transparency:reduce){.app-frame-header,.app-frame-nav{background:var(--lvz-surface);-webkit-backdrop-filter:none;backdrop-filter:none}}
+
+/* More sheet. */
 .app-frame-menu-heading{display:flex;justify-content:space-between;align-items:center}
-.app-frame-menu button,.app-frame-menu a{display:flex;align-items:center;gap:var(--lvz-space-3);min-height:48px;border:0;background:none;color:var(--lvz-ink);text-decoration:none;font-size:var(--lvz-text-md)}
-.app-frame-menu-heading button{min-width:44px;justify-content:center}
+.app-frame-menu-heading h2{margin:0;font-size:var(--lvz-text-xl);letter-spacing:-.03em}
+.app-frame-menu .ui-sheet-body>div:not(.app-frame-menu-heading)>*,.app-frame-menu .ui-sheet-body>a{display:flex;align-items:center;gap:var(--lvz-space-3);width:100%;min-height:56px;margin-top:var(--lvz-space-2);padding:0 var(--lvz-space-4);border:var(--lvz-glass-border);border-radius:var(--lvz-radius-lg);background:var(--lvz-glass);box-shadow:var(--lvz-glass-shadow);color:var(--lvz-ink);text-decoration:none;font-size:var(--lvz-text-md)}
+.app-frame-menu .ui-sheet-body svg{color:var(--lvz-accent)}
+.app-frame-menu-heading button{display:grid;place-items:center;min-width:44px;min-height:44px;border:0;border-radius:50%;background:var(--lvz-glass);color:var(--lvz-ink)}
 .app-frame-page-actions:empty{display:none}
 .app-frame-page-actions{max-width:var(--lvz-content-max);margin:auto;padding:var(--lvz-space-2) var(--lvz-gutter)}
 .app-frame-content .lvz-body{padding-top:var(--lvz-space-3)}
-.app-frame-content .lvz-experience{min-height:0}
+.app-frame-content .lvz-experience{min-height:0;padding-bottom:0}
+.app-frame-content>.ui-page{min-height:calc(100dvh - var(--frame-top) - var(--frame-bottom))}
+
+/* Study Rooms timetable: the frame keeps clearance for the floating tray and dock. */
 .app-frame:not([data-viewport="true"]) .app-frame-content .sr-app[data-view="schedule"] .sr-main{padding-top:var(--lvz-space-2)}
 .app-frame:not([data-viewport="true"]) .app-frame-content .sr-scroll,.app-frame:not([data-viewport="true"]) .app-frame-content .sr-app[data-selection="true"] .sr-scroll{max-height:calc(100dvh - 380px - env(safe-area-inset-top,0px) - env(safe-area-inset-bottom,0px))}
-.app-frame-content .sr-reserve-dock{bottom:var(--frame-bottom);z-index:35}
+.app-frame-content .sr-reserve-dock{bottom:calc(var(--frame-bottom) + 6px);z-index:35}
 .app-frame:not([data-viewport="true"]) .app-frame-content .sr-main,.app-frame:not([data-viewport="true"]) .app-frame-content .sr-app[data-view="schedule"] .sr-main{padding-bottom:100px}
-@supports(backdrop-filter:blur(16px)){
- .app-frame-header,.app-frame-nav{background:color-mix(in srgb,var(--lvz-surface) 84%,transparent);-webkit-backdrop-filter:blur(16px);backdrop-filter:blur(16px)}
-}
-@media(prefers-reduced-transparency:reduce){.app-frame-header,.app-frame-nav{background:var(--lvz-surface);backdrop-filter:none}}
-.app-frame-content>.ui-page{min-height:calc(100dvh - var(--frame-top) - var(--frame-bottom))}
-.app-frame-content .lvz-experience{padding-bottom:0}
 
-/* Edge-to-edge header and a clearly separated, jewel-like Apps dock. */
-.app-frame{--frame-top:calc(60px + env(safe-area-inset-top,0px));--frame-bottom:calc(100px + env(safe-area-inset-bottom,0px))}
-.app-frame-header{top:0;left:0;right:0;max-width:none;min-height:var(--frame-top);border:0;border-bottom:1px solid var(--lvz-line);border-radius:0;padding:calc(var(--lvz-space-1) + env(safe-area-inset-top,0px)) var(--lvz-space-4) var(--lvz-space-1);box-shadow:0 3px 12px color-mix(in srgb,var(--lvz-ink) 8%,transparent)}
-.app-frame-nav{bottom:calc(var(--lvz-space-3) + env(safe-area-inset-bottom,0px));min-height:76px;border:1px solid var(--lvz-surface);background:linear-gradient(145deg,color-mix(in srgb,var(--lvz-surface) 94%,transparent),color-mix(in srgb,var(--lvz-accent-soft) 88%,transparent));box-shadow:inset 0 2px 2px var(--lvz-surface),inset 0 -3px 5px color-mix(in srgb,var(--lvz-accent) 12%,transparent),0 12px 28px color-mix(in srgb,var(--lvz-ink) 24%,transparent),0 0 0 5px color-mix(in srgb,var(--lvz-surface) 55%,transparent)}
-.app-frame-nav .app-frame-apps{width:72px;height:72px;min-height:72px;justify-self:center;align-self:center;margin: -14px 0 0;padding:8px 0 6px;gap:2px;border:1px solid var(--lvz-surface);border-radius:50%;overflow:hidden;background:radial-gradient(ellipse at 30% 12%,var(--lvz-surface),var(--lvz-accent-soft) 52%,color-mix(in srgb,var(--lvz-accent) 30%,var(--lvz-surface)) 100%);box-shadow:inset 0 0 0 3px color-mix(in srgb,var(--lvz-surface) 65%,transparent),inset 0 -5px 9px color-mix(in srgb,var(--lvz-accent) 20%,transparent),inset 0 4px 7px var(--lvz-surface),0 6px 13px color-mix(in srgb,var(--lvz-ink) 27%,transparent),0 0 16px color-mix(in srgb,var(--lvz-accent-soft) 80%,transparent)}
-.app-frame-apps:before{inset:4px;top:4px;width:auto;height:auto;border:1px solid color-mix(in srgb,var(--lvz-surface) 80%,transparent);background:none;box-shadow:none}
-.app-frame-apps:after{content:"";position:absolute;inset:0;z-index:-1;pointer-events:none;background:linear-gradient(115deg,transparent 25%,color-mix(in srgb,var(--lvz-surface) 85%,transparent) 48%,transparent 70%);background-size:250% 100%;animation:lvz-glass-shimmer 7s ease-in-out infinite}
-.app-frame-apps .app-frame-orb{height:32px;width:40px}
-.app-frame-orb svg{fill:color-mix(in srgb,var(--lvz-accent) 85%,transparent);stroke:var(--lvz-accent-strong);stroke-width:1.2;filter:drop-shadow(0 1px 1px var(--lvz-surface))}
-.app-frame-content .sr-reserve-dock{bottom:calc(var(--frame-bottom) + 6px)}
-@keyframes lvz-glass-shimmer{0%,65%,100%{background-position:180% 0}35%{background-position:-80% 0}}
-@media(prefers-reduced-motion:reduce){.app-frame-apps:after{animation:none}}
-@media(prefers-reduced-transparency:reduce){.app-frame-nav{background:var(--lvz-surface);backdrop-filter:none}}
-
-/* Optional module tabs belong to the shared header, above page content. */
-.app-frame[data-header-content="true"]{--frame-top:calc(104px + env(safe-area-inset-top,0px))}
-.app-frame[data-header-content="true"] .app-frame-header{display:grid;grid-template-columns:minmax(0,1fr) auto;grid-template-rows:60px 44px;gap:0;padding:env(safe-area-inset-top,0px) 0 0}
-.app-frame[data-header-content="true"] .app-frame-heading{margin-left:var(--lvz-space-4)}
-.app-frame[data-header-content="true"] .app-frame-avatar{margin-right:var(--lvz-space-4)}
-.app-frame-header-content{grid-column:1 / -1;min-width:0;height:44px;padding:0}
+/* Optional module tabs belong to the shared header, below the title row. */
+.app-frame[data-header-content="true"]{--frame-top:calc(128px + env(safe-area-inset-top,0px))}
+.app-frame[data-header-content="true"] .app-frame-header{display:grid;grid-template-columns:minmax(0,1fr) auto;grid-template-rows:56px auto;row-gap:var(--lvz-space-2);align-items:center}
+.app-frame-header-content{grid-column:1 / -1;min-width:0;height:52px;padding:0}
 
 /* A timetable uses the complete remaining viewport; its own scroller supplies
- * clearance for the floating action tray and navigation. Other pages retain
- * the frame's normal document flow and bottom padding. */
+ * clearance for the floating action tray and navigation. */
 .app-frame[data-viewport="true"]{display:flex;flex-direction:column;box-sizing:border-box;height:100dvh;min-height:0;padding-bottom:0;overflow:hidden}
 .app-frame[data-viewport="true"]>.app-frame-content{flex:1;min-height:0}
 .app-frame[data-viewport="true"]>.app-frame-content>.ui-page{height:100%;min-height:0}
 
-/* Approved Lavender Softform chrome, scoped to the Study Rooms module style. */
-.app-frame[data-lvz-module="study-rooms"]{background:radial-gradient(ellipse at 20% 0%,var(--lvz-surface),transparent 65%),var(--lvz-ground);color:var(--lvz-ink)}
-.app-frame[data-lvz-module="study-rooms"] .app-frame-header{background:linear-gradient(145deg,var(--lvz-surface),color-mix(in srgb,var(--lvz-accent-soft) 45%,var(--lvz-surface)));border-bottom:1px solid var(--lvz-line);box-shadow:inset 0 1px 0 var(--lvz-surface),0 4px 12px color-mix(in srgb,var(--lvz-ink) 12%,transparent)}
-.app-frame[data-lvz-module="study-rooms"][data-header-content="true"] .app-frame-header{border-radius:0 0 var(--lvz-radius-lg) var(--lvz-radius-lg);border-bottom:0}
-.app-frame[data-lvz-module="study-rooms"] .app-frame-heading{font-size:var(--lvz-text-xl);letter-spacing:-.025em;color:var(--lvz-ink)}
-.app-frame[data-lvz-module="study-rooms"] .app-frame-heading svg{width:28px;height:28px;color:var(--lvz-ink)}
-.app-frame[data-lvz-module="study-rooms"] .app-frame-avatar{background:linear-gradient(145deg,var(--lvz-surface),var(--lvz-accent-soft));border-color:var(--lvz-surface);color:var(--lvz-ink);font-weight:var(--lvz-weight-strong);box-shadow:inset 0 1px 3px var(--lvz-surface),inset 0 -2px 4px color-mix(in srgb,var(--lvz-accent) 13%,transparent),0 3px 7px color-mix(in srgb,var(--lvz-ink) 16%,transparent)}
-.app-frame[data-lvz-module="study-rooms"] .app-frame-nav{left:var(--lvz-space-2);right:var(--lvz-space-2);bottom:calc(var(--lvz-space-2) + env(safe-area-inset-bottom,0px));height:82px;min-height:82px;padding:var(--lvz-space-1) var(--lvz-space-2);border-radius:calc(var(--lvz-radius-lg) + var(--lvz-space-2));background:linear-gradient(145deg,var(--lvz-surface),var(--lvz-accent-soft));border:1px solid var(--lvz-surface);box-shadow:inset 0 2px 3px var(--lvz-surface),inset 0 -3px 7px color-mix(in srgb,var(--lvz-accent) 15%,transparent),0 7px 20px color-mix(in srgb,var(--lvz-ink) 21%,transparent),0 0 0 3px color-mix(in srgb,var(--lvz-surface) 40%,transparent)}
-.app-frame[data-lvz-module="study-rooms"] .app-frame-nav>a,.app-frame[data-lvz-module="study-rooms"] .app-frame-nav>button{position:relative;min-height:64px;gap:var(--lvz-space-1);padding:var(--lvz-space-1) 0 var(--lvz-space-2);color:var(--lvz-ink-quiet);font-size:var(--lvz-text-xs);font-weight:var(--lvz-weight-regular)}
-.app-frame[data-lvz-module="study-rooms"] .app-frame-nav [aria-current="page"]{color:var(--lvz-accent-strong);font-weight:var(--lvz-weight-strong)}
-.app-frame[data-lvz-module="study-rooms"] .app-frame-nav [aria-current="page"]:after{content:"";position:absolute;left:25%;right:25%;bottom:0;height:3px;border-radius:var(--lvz-radius-round);background:var(--lvz-accent)}
-.app-frame[data-lvz-module="study-rooms"] .app-frame-nav .app-frame-apps{width:76px;height:84px;min-height:84px;margin:-14px 0 0;padding:0;gap:var(--lvz-space-1);justify-content:flex-start;overflow:visible;border:0;border-radius:0;background:none;box-shadow:none;color:var(--lvz-ink);font-weight:var(--lvz-weight-strong)}
-.app-frame[data-lvz-module="study-rooms"] .app-frame-apps:before{inset:auto;top:-5px;left:50%;width:74px;height:74px;transform:translateX(-50%);border-radius:calc(var(--lvz-radius-lg) + 5px);border:1px solid var(--lvz-surface);background:linear-gradient(145deg,var(--lvz-surface),var(--lvz-accent-soft));box-shadow:inset 0 1px 3px var(--lvz-surface),0 4px 10px color-mix(in srgb,var(--lvz-ink) 17%,transparent)}
-.app-frame[data-lvz-module="study-rooms"] .app-frame-apps:after{display:none}
-.app-frame[data-lvz-module="study-rooms"] .app-frame-apps .app-frame-orb{position:relative;isolation:isolate;overflow:hidden;flex:none;width:64px;height:64px;border:1px solid var(--lvz-surface);border-radius:var(--lvz-radius-lg);background:radial-gradient(ellipse at 25% 5%,color-mix(in srgb,var(--lvz-accent-soft) 75%,var(--lvz-accent)),transparent 45%),linear-gradient(155deg,var(--lvz-accent),var(--lvz-accent-strong));box-shadow:inset 0 2px 4px color-mix(in srgb,var(--lvz-surface) 85%,transparent),inset 0 -4px 7px color-mix(in srgb,var(--lvz-ink) 45%,transparent),inset 0 0 0 2px color-mix(in srgb,var(--lvz-accent-soft) 25%,transparent),0 2px 5px color-mix(in srgb,var(--lvz-ink) 20%,transparent)}
-.app-frame[data-lvz-module="study-rooms"] .app-frame-orb:after{content:"";position:absolute;inset:0;pointer-events:none;background:linear-gradient(115deg,transparent 25%,color-mix(in srgb,var(--lvz-surface) 50%,transparent) 48%,transparent 70%);background-size:250% 100%;animation:lvz-glass-shimmer 8s ease-in-out infinite}
-.app-frame[data-lvz-module="study-rooms"] .app-frame-orb svg{position:relative;z-index:1;width:29px;height:29px;fill:var(--lvz-surface);stroke:var(--lvz-surface);stroke-width:1;filter:drop-shadow(0 1px 1px color-mix(in srgb,var(--lvz-ink) 25%,transparent))}
-.app-frame[data-lvz-module="study-rooms"] .app-frame-nav>:focus-visible,.app-frame[data-lvz-module="study-rooms"] .app-frame-avatar:focus-visible{outline:3px solid var(--lvz-focus);outline-offset:3px}
-@supports(backdrop-filter:blur(12px)){
- .app-frame[data-lvz-module="study-rooms"] .app-frame-nav{background:linear-gradient(145deg,color-mix(in srgb,var(--lvz-surface) 70%,transparent),color-mix(in srgb,var(--lvz-accent-soft) 48%,transparent));-webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px)}
-}
-@media(prefers-reduced-motion:reduce){.app-frame[data-lvz-module="study-rooms"] .app-frame-orb:after{animation:none}}
-@media(prefers-reduced-transparency:reduce){
- .app-frame[data-lvz-module="study-rooms"] .app-frame-header,.app-frame[data-lvz-module="study-rooms"] .app-frame-nav{background:var(--lvz-surface);-webkit-backdrop-filter:none;backdrop-filter:none}
-}
-
 /* Signed out and public pages: header with the brand and one session action, no member dock. */
 .app-frame[data-signed-out="true"]{--frame-bottom:calc(var(--lvz-space-8) + env(safe-area-inset-bottom,0px))}
-.app-frame-session{flex:none;display:inline-flex;align-items:center;gap:var(--lvz-space-2);min-height:var(--lvz-tap);padding:0 var(--lvz-space-4);border:1px solid var(--lvz-line-input);border-radius:var(--lvz-radius-round);background:var(--lvz-surface);color:var(--lvz-accent);font-size:var(--lvz-text-sm);font-weight:var(--lvz-weight-strong);text-decoration:none}
+.app-frame-session{flex:none;display:inline-flex;align-items:center;gap:var(--lvz-space-2);min-height:var(--lvz-tap);padding:0 var(--lvz-space-4);border:1px solid var(--lvz-line);border-radius:var(--lvz-radius-round);background:var(--lvz-glass-strong);color:var(--lvz-accent);font-size:var(--lvz-text-sm);font-weight:var(--lvz-weight-bold);text-decoration:none;box-shadow:inset 0 1px 2px var(--lvz-glint)}
 .app-frame-session:hover{background:var(--lvz-accent-soft)}
 
 /* Focused fields scroll clear of the fixed header and dock. */
-html{scroll-padding-top:calc(76px + env(safe-area-inset-top,0px));scroll-padding-bottom:calc(112px + env(safe-area-inset-bottom,0px))}
+html{scroll-padding-top:calc(84px + env(safe-area-inset-top,0px));scroll-padding-bottom:calc(120px + env(safe-area-inset-bottom,0px))}
 @media(forced-colors:active){.app-frame-header,.app-frame-nav{border:1px solid CanvasText}}
-
-/* Skyline Grid chrome for Groups & Gospel Planning: flat, square-edged, no blur or shadow. */
-.app-frame[data-lvz-module="gospel-planning"] :is(.app-frame-header,.app-frame-nav){background:var(--lvz-surface);border:1px solid var(--lvz-line);box-shadow:none;-webkit-backdrop-filter:none;backdrop-filter:none}
-.app-frame[data-lvz-module="gospel-planning"] .app-frame-nav{border-radius:var(--lvz-radius-md)}
-.app-frame[data-lvz-module="gospel-planning"] .app-frame-nav .app-frame-apps{border-radius:var(--lvz-radius-md);background:var(--lvz-accent);color:var(--lvz-on-accent);border:0;box-shadow:none}
-.app-frame[data-lvz-module="gospel-planning"] .app-frame-apps:before,.app-frame[data-lvz-module="gospel-planning"] .app-frame-apps:after{display:none}
-.app-frame[data-lvz-module="gospel-planning"] .app-frame-orb svg{fill:none;stroke:currentColor;filter:none}
-.app-frame[data-lvz-module="gospel-planning"] .app-frame-avatar{background:var(--lvz-accent-soft);box-shadow:none}
+@media(min-width:900px){.app-frame-header{padding-left:var(--lvz-space-8);padding-right:var(--lvz-space-8)}}
