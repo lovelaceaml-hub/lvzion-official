@@ -26,3 +26,16 @@ export function findLoadedContacts(records:readonly ContactSummary[],memberId:st
   &&matchesFilter(c,filter)
  ).sort((a,b)=>a.name.localeCompare(b.name,'en-US'));
 }
+/** Follow-up times are shown on the Las Vegas calendar, whatever the device's own zone. */
+const dayKey=new Intl.DateTimeFormat('en-CA',{timeZone:'America/Los_Angeles',year:'numeric',month:'2-digit',day:'2-digit'});
+export type DueTag='Overdue'|'Today'|'Tomorrow';
+/** A short tag for a scheduled follow-up: past due, due today or due tomorrow (Las Vegas days); null when later or invalid. */
+export function dueTag(due:string,now:Date=new Date()):DueTag|null{
+ const at=new Date(due);if(!Number.isFinite(at.getTime())||!Number.isFinite(now.getTime()))return null;
+ if(at.getTime()<now.getTime())return 'Overdue';
+ const today=dayKey.format(now),day=dayKey.format(at);
+ if(day===today)return 'Today';
+ // Next calendar day by date arithmetic, so a 23- or 25-hour daylight-saving day cannot skip or repeat a date.
+ const [y,m,d]=today.split('-').map(Number);
+ return day===new Date(Date.UTC(y,m-1,d+1)).toISOString().slice(0,10)?'Tomorrow':null;
+}
