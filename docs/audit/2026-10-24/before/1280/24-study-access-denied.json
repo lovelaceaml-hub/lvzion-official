@@ -1,0 +1,20 @@
+{
+ "url": "/modules/study-rooms/members",
+ "title": "LV Zion Official",
+ "theme": null,
+ "h1": [
+  "Who can book"
+ ],
+ "header": "Study RoomsGE",
+ "dockVisible": true,
+ "brandMentions": 0,
+ "overflowX": false,
+ "coveredByDock": [],
+ "waiting": null,
+ "ground": "rgb(242, 244, 241)",
+ "frameGround": "#f2f4f1",
+ "accent": "#1f5c4d",
+ "errors": [
+  "Failed to load resource: the server responded with a status of 403 (Forbidden)"
+ ]
+}

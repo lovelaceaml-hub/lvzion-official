@@ -38,8 +38,8 @@ for(const width of [390,1280])test(`owner setup view at ${width}px keeps the clo
 test('signed-out shell explains access and offers sign in',async({page})=>{
  await page.goto('/modules/study-rooms');
  await expect(page.getByRole('heading',{name:'Study Room Reservation'})).toBeVisible();
- await expect(page.getByRole('link',{name:'Sign in'})).toBeVisible();
- await expect(page.getByRole('status')).not.toHaveText('Checking your reservation access…');
+ await expect(page.getByRole('main').getByRole('link',{name:'Sign in'})).toBeVisible();
+ await expect(page.getByRole('status')).not.toHaveText('Loading Study Rooms…');
  await checkLayout(page);await capture(page,'signed-out-390');
 });
 test('Home navigation and swipe between booking views work',async({page})=>{

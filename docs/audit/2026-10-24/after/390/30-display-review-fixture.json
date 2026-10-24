@@ -1,0 +1,18 @@
+{
+ "url": "/display-operations-review",
+ "title": "Display Operations Review · Fictional",
+ "theme": null,
+ "h1": [
+  "Church Display"
+ ],
+ "header": "Church Display",
+ "dockVisible": true,
+ "brandMentions": 0,
+ "overflowX": false,
+ "coveredByDock": [],
+ "waiting": null,
+ "ground": "rgb(245, 246, 242)",
+ "frameGround": "#eff1e7",
+ "accent": "#49643e",
+ "errors": []
+}

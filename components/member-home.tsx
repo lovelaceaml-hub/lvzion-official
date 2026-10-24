@@ -6,6 +6,7 @@ import {
  Pencil,Pin,ShieldCheck,UsersRound,X
 } from './home-icons';
 import type {Workspace} from '../lib/contracts';
+import ModuleIcon from './module-icon';
 import {
  actionNotices,activitiesForPreview,addCalendarDays,canManage,
  cleanFavorites,conceptModules,formatDay,greeting,initials,localDay,localTime,monthCells,
@@ -142,7 +143,7 @@ export default function MemberHome({workspace:w,demo=false,manageHref,experience
  function nowMark(){
   return <li className="lvz-now" key="now" aria-label={'Now, '+displayTime(now)}><span aria-hidden="true">{displayTime(now)}</span><i aria-hidden="true"/></li>;
  }
- const appIcon=(a:ModuleEntry,className:string)=><span className={className} aria-hidden="true">{a.shortName}</span>;
+ const appIcon=(a:ModuleEntry,className:string)=><span className={className} aria-hidden="true"><ModuleIcon route={'route' in a?String(a.route):undefined}/></span>;
  return <div className="lvz-experience">
   <FrameControls name={w.self.name} profileHref={route('profile')} onHome={resetHome} onApps={openApps}
    left={{label:'Calendar',icon:'calendar',onClick:()=>{setSection('home');choosePeriod('calendar');},active:section==='home'&&period==='calendar'}}

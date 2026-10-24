@@ -61,7 +61,7 @@ export default function DisplayManager(){
    const payload=await r.json() as{screens?:DisplayScreenR2[]};
    setAllScreens(payload.screens??[]);
    const next=(payload.screens??[]).find(candidate=>candidate.id===preferredScreen.current)??payload.screens?.[0];
-   if(next)preferredScreen.current=next.id;if(!next){setScreen(null);setSlides([]);setPairCode('');setStatus('No display has been assigned to your account.','warning');return;}
+   if(next)preferredScreen.current=next.id;if(!next){setScreen(null);setSlides([]);setPairCode('');setStatus('','info');return;}
    setScreen(next);
    if(!editing.current){
     setSlides(next.items||[]);setSelected(0);setDirty(false);
@@ -155,7 +155,7 @@ export default function DisplayManager(){
    </label>}
    {screen&&<nav className="ui-tabs" aria-label="Church Display sections">{tabs.map(t=><button key={t} type="button" className="ui-tab" aria-current={tab===t?'page':undefined} onClick={()=>setTab(t)}>{capital(t)}</button>)}</nav>}
    {status&&<p className="ui-notice" data-tone={tone} role="status">{status}</p>}
-   {!screen?<div className="ui-empty"><strong>No display to manage</strong>Display management needs a manager grant for at least one screen.</div>:<div className="cd-layout" {...swipe}>
+   {!screen?<div className="ui-empty"><strong>No display to manage yet</strong>No screen has been assigned to your account. A display owner can give you a manager grant for a screen.</div>:<div className="cd-layout" {...swipe}>
    {tab==='content'&&<><section className="cd-main" aria-labelledby="cd-slides-title">
     <div className="cd-heading"><h2 id="cd-slides-title" className="ui-section-title">Slides <span className="cd-count">{slides.length} of {MAX_DISPLAY_SLIDES}</span></h2>
      <button type="button" className="ui-button ui-button-secondary" disabled={busy||slides.length>=MAX_DISPLAY_SLIDES} onClick={()=>{update(a=>[...a,newSlide('announcement')]);setSelected(slides.length);}}>Add slide</button></div>

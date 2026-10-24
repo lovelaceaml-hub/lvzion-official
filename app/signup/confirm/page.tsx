@@ -42,7 +42,7 @@ export default function ConfirmSignup(){
  }
 
  return <main className="auth-box">
-  <a className="ui-wordmark auth-mark" href="/" aria-label="LV Zion home">LV<span>Zion</span></a>
+  
   <h1>Confirm your email.</h1>
   <p>Confirm only if you created this account. Your profile will start with age category, group, and unit Unassigned.</p>
   <button type="button" disabled={!ready||busy} onClick={confirm}>{busy?'Confirming…':'Confirm and create my profile'}</button>

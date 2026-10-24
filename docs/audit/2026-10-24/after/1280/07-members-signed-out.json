@@ -1,0 +1,21 @@
+{
+ "url": "/members",
+ "title": "LV Zion Official",
+ "theme": null,
+ "h1": [
+  "My Week"
+ ],
+ "header": "LV ZionSign in",
+ "dockVisible": false,
+ "brandMentions": 1,
+ "overflowX": false,
+ "coveredByDock": [],
+ "waiting": null,
+ "ground": "rgb(245, 246, 242)",
+ "frameGround": "#f5f6f2",
+ "accent": "#18513e",
+ "errors": [
+  "Failed to load resource: the server responded with a status of 401 (Unauthorized)",
+  "Failed to load resource: the server responded with a status of 401 (Unauthorized)"
+ ]
+}
