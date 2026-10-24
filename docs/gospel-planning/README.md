@@ -59,20 +59,20 @@ To swap styles: change `GOSPEL_PLANNING_THEME` in `lib/gospel-planning/theme.ts`
 | Check | Result |
 | --- | --- |
 | `npm run typecheck` | Passed |
-| `npx next build` (compile only, no test suite) | Passed. Next.js 16.4.0 also printed a security advisory recommending an upgrade; not acted on. |
+| `npm run build` (typecheck plus compile since #56; no test suite) | Passed after merging main `9cf2531`. Next.js 16.4.0 also printed a security advisory recommending an upgrade; not acted on. |
 | `tests/gospel-planning.test.ts` (unit: contract, statuses, dates, theme, route guards) | 11 passed |
 | `tests/gospel-planning-database.test.ts` (PGlite, all migrations + fictional seed + `supabase/tests/gospel_planning.sql`) | 116 SQL assertions passed |
 | `scripts/gospel-planning/test-races.mjs` (real PostgreSQL 16, two connections, local disposable cluster) | 9 passed: overlapping acceptances, answer vs change, stale publish, double report, revoked access, ended leadership, simultaneous first saves, lock-guarded commitments, private tables |
 | `tests/browser/gospel-planning.spec.ts` (Playwright, phone size, real module route; API calls run the real SQL in an in-process database) | 9 passed |
 
-Not run: the full repository suite (`npm run build`, `npm run check`, `npm run test:db`, all browser tests), per the standing rule that full suites need Anthony's explicit approval. No hosted database, real sign-in or physical phone was used. Browser runs used the locally installed Chromium 1194 because Playwright 1.64's own browser is not installed on this Mac.
+Not run: the full repository suite (`npm test`, `npm run test:db`, all browser tests), per the standing rule that full suites need Anthony's explicit approval. No hosted database, real sign-in or physical phone was used. Browser runs used the locally installed Chromium 1194 because Playwright 1.64's own browser is not installed on this Mac.
 
 Run again:
 
 ```bash
 node --experimental-strip-types --test tests/gospel-planning.test.ts tests/gospel-planning-database.test.ts
 node scripts/gospel-planning/test-races.mjs
-npx next build && npx playwright test tests/browser/gospel-planning.spec.ts
+npm run build && npx playwright test tests/browser/gospel-planning.spec.ts
 ```
 
 Screenshots: [phone, member preaching](screenshots/gospel-member-preaching-phone.png), [phone, leader week](screenshots/gospel-leader-week-phone.png), [phone, member group](screenshots/gospel-member-group-phone.png), [phone, manage](screenshots/gospel-manage-phone.png), [desktop, group](screenshots/gospel-group-desktop.png).
