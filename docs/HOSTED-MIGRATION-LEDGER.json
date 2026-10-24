@@ -1,7 +1,7 @@
 {
  "project_ref": "otecqlkqirncotytbfns",
  "applied_via": "Supabase MCP apply_migration",
- "verified_on": "2026-10-14",
+ "verified_on": "2026-10-24",
  "fresh_start_verified_on": "2026-10-16",
  "verification_mode": "The original six foundation/runtime/owner entries have stored normalized definition comparisons. Later entries retain their entry-specific verification scope. The October 16 correction was tested, applied and read back; this update is not a complete re-hash of all hosted migrations.",
  "entries": [
@@ -215,6 +215,66 @@
    "verified_on": "2026-10-16",
    "applied_via": "Supabase CLI db query --linked (Management API), then schema_migrations row recorded",
    "verification": "Before applying, live module_allowed and member_module_home definitions were byte-identical (md5) to the repository versions. Readback: study_group_access present, module_allowed includes study_leader_access, anon cannot execute the wrapper, authenticated can, the internal helper is not executable by authenticated."
+  },
+  {
+   "name": "worship_duty_review",
+   "hosted_version": "20261015020427",
+   "repository_version": "20261024160000",
+   "source": "supabase/migrations/20261024160000_worship_duty_review.sql",
+   "status": "applied",
+   "verified_on": "2026-10-24",
+   "applied_via": "Supabase MCP apply_migration by a Codex session on 2026-10-15 (not recorded in the ledger at the time)",
+   "verification": "2026-10-24 read-only check: hosted stored statement md5 equals the Oct 14 source (commit e1d522e) byte for byte. The repository file differs only in comments. Live state: module approved, one owner manager grant, one song-editor grant, 8 Worship departments, 0 services. Do not reapply."
+  },
+  {
+   "name": "worship_duty_authenticated_queries",
+   "hosted_version": "20261015020453",
+   "repository_version": "20261024160100",
+   "source": "supabase/migrations/20261024160100_worship_duty_authenticated_queries.sql",
+   "status": "applied",
+   "verified_on": "2026-10-24",
+   "applied_via": "Supabase MCP apply_migration by a Codex session on 2026-10-15 (not recorded in the ledger at the time)",
+   "verification": "2026-10-24 read-only check: hosted stored statement md5 equals the Oct 14 source (commit e1d522e) byte for byte. The repository file differs only in comments. Live state: module approved, one owner manager grant, one song-editor grant, 8 Worship departments, 0 services. Do not reapply."
+  },
+  {
+   "name": "worship_duty_live_activation",
+   "hosted_version": "20261015020458",
+   "repository_version": "20261024160200",
+   "source": "supabase/migrations/20261024160200_worship_duty_live_activation.sql",
+   "status": "applied",
+   "verified_on": "2026-10-24",
+   "applied_via": "Supabase MCP apply_migration by a Codex session on 2026-10-15 (not recorded in the ledger at the time)",
+   "verification": "2026-10-24 read-only check: hosted stored statement md5 equals the Oct 14 source (commit e1d522e) byte for byte. The repository file differs only in comments and the Apps tile accent (#3184ff in the file, #3d7464 live; cosmetic, left unchanged). Live state: module approved, one owner manager grant, one song-editor grant, 8 Worship departments, 0 services. Do not reapply."
+  },
+  {
+   "name": "worship_duty_live_setup",
+   "hosted_version": "20261015020506",
+   "repository_version": "20261024160300",
+   "source": "supabase/migrations/20261024160300_worship_duty_live_setup.sql",
+   "status": "applied",
+   "verified_on": "2026-10-24",
+   "applied_via": "Supabase MCP apply_migration by a Codex session on 2026-10-15 (not recorded in the ledger at the time)",
+   "verification": "2026-10-24 read-only check: hosted stored statement md5 equals the Oct 14 source (commit e1d522e) byte for byte. The repository file differs only in comments. Live state: module approved, one owner manager grant, one song-editor grant, 8 Worship departments, 0 services. Do not reapply."
+  },
+  {
+   "name": "worship_duty_operations",
+   "hosted_version": "20261015020511",
+   "repository_version": "20261024160400",
+   "source": "supabase/migrations/20261024160400_worship_duty_operations.sql",
+   "status": "applied",
+   "verified_on": "2026-10-24",
+   "applied_via": "Supabase MCP apply_migration by a Codex session on 2026-10-15 (not recorded in the ledger at the time)",
+   "verification": "2026-10-24 read-only check: hosted stored statement md5 equals the Oct 14 source (commit e1d522e) byte for byte. The repository file differs only in comments. Live state: module approved, one owner manager grant, one song-editor grant, 8 Worship departments, 0 services. Do not reapply."
+  },
+  {
+   "name": "gospel_planning_core",
+   "hosted_version": "20261024150000",
+   "repository_version": "20261024150000",
+   "source": "supabase/migrations/20261024150000_gospel_planning_core.sql",
+   "status": "applied",
+   "verified_on": "2026-10-24",
+   "applied_via": "Supabase CLI db push --linked from an isolated workdir holding placeholders for all 27 hosted versions plus this file; dry run listed only this migration",
+   "verification": "Readback: module gospel-planning status draft, accent #1863a3, 0 grants; 17 gp_private tables, all with row level security; 0 places, 0 Gospel roles; total modules 6, total module grants unchanged at 5. Signed-out GET /api/gospel-planning and POST /api/gospel-planning/command return 401 on deployment dpl_Dk1iD3B8JfNQGhFkCTtKMggfHTLv."
   }
  ],
  "normalization": {
@@ -222,41 +282,10 @@
   "hosted": "Remove whitespace from each stored statement; these stored statements already omit comments and outer transaction wrappers.",
   "purpose": "Comparison of known migration definitions, not cryptographic attestation or a full semantic/security review."
  },
- "unapplied_repository_migrations": [
-  {
-   "repository_version": "20261024160000",
-   "name": "worship_duty_review",
-   "apply_order": 1,
-   "status": "unapplied; awaiting Anthony approval"
-  },
-  {
-   "repository_version": "20261024160100",
-   "name": "worship_duty_authenticated_queries",
-   "apply_order": 2,
-   "status": "unapplied; awaiting Anthony approval"
-  },
-  {
-   "repository_version": "20261024160200",
-   "name": "worship_duty_live_activation",
-   "apply_order": 3,
-   "status": "unapplied; awaiting Anthony approval"
-  },
-  {
-   "repository_version": "20261024160300",
-   "name": "worship_duty_live_setup",
-   "apply_order": 4,
-   "status": "unapplied; awaiting Anthony approval"
-  },
-  {
-   "repository_version": "20261024160400",
-   "name": "worship_duty_operations",
-   "apply_order": 5,
-   "status": "unapplied; awaiting Anthony approval"
-  }
- ],
+ "unapplied_repository_migrations": [],
  "warning": "Hosted versions differ from repository filenames. Never replay applied migrations or use blind db push. Re-read current hosted metadata before release, including concurrent module work. The fresh calendar correction is applied: Study Room booking is enabled for existing grants and weekly restrictions are empty. Do not reinstate superseded defaults.",
- "metadata_reconciled_at": "2026-10-15T01:02:00Z",
- "metadata_reconciliation": "Historical full reconciliation observed 20 applied versions. October 16 adds the verified fresh-calendar mapping; it is not a new exhaustive reconciliation of unrelated concurrent module migrations.",
+ "metadata_reconciled_at": "2026-10-24T19:00:00Z",
+ "metadata_reconciliation": "2026-10-24 full listing of hosted schema_migrations: 28 versions. The five Worship migrations were found already applied on 2026-10-15 and are now mapped; gospel_planning_core applied 2026-10-24. Every repository migration is applied.",
  "latest_correction_record": "FRESH-START-2026-10-16.md",
  "owner_data_steps": [
   {
@@ -280,6 +309,7 @@
   "reason": "Sort after the latest applied migration 20261016200000 so repository order matches the order they will be applied.",
   "foundation_check": "Disposable PGlite and local PostgreSQL 16 runs apply every current migration first, then the Worship files; all Worship database, integration and browser checks pass.",
   "hosted_check": "Not performed on 2026-10-24: the supabase-lvz connector needed authorization. Last hosted evidence (2026-10-14): zero Worship modules, tables, RPCs and grants. Whether the interrupted 2026-10-14 apply attempt left anything is unverified; run the read-only queries in docs/worship-duty/MIGRATION-STATUS.md first.",
-  "details": "docs/worship-duty/MIGRATION-STATUS.md"
+  "details": "docs/worship-duty/MIGRATION-STATUS.md",
+  "hosted_finding_2026_10_24": "Already applied 2026-10-15 as 20261015020427-20261015020511 with the Oct 14 SQL; verified identical apart from comments and the tile accent. Nothing reapplied."
  }
 }
