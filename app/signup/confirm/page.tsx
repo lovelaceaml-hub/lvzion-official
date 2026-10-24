@@ -2,7 +2,7 @@
 
 import {useEffect,useRef,useState} from 'react';
 import {forgetConfirmation,pendingConfirmation} from '../../../lib/confirmation-cache';
-import '../../../components/members.css';
+import AuthShell from '../../../components/auth-shell';
 import {postJson} from '../../../lib/post-json';
 
 const PENDING_KEY='lvz:confirmation:pkce';
@@ -41,14 +41,12 @@ export default function ConfirmSignup(){
   finally{setBusy(false);}
  }
 
- return <main className="auth-box">
-  
-  <h1>Confirm your email.</h1>
-  <p>Confirm only if you created this account. Your profile will start with age category, group, and unit Unassigned.</p>
-  <button type="button" disabled={!ready||busy} onClick={confirm}>{busy?'Confirming…':'Confirm and create my profile'}</button>
-  {!ready&&!message&&<p>Open the newest confirmation email in the browser where you signed up.</p>}
-  {message&&<p role="alert" aria-live="assertive">{message}</p>}
-  {signIn&&<p><a href="/sign-in" onClick={()=>forgetConfirmation(PENDING_KEY)}>Sign in to finish my profile</a></p>}
-  <p><a href="/sign-in" onClick={()=>forgetConfirmation(PENDING_KEY)}>Return to sign in</a></p>
- </main>;
+ return <AuthShell eyebrow="Almost there" title="Confirm your email." lede="Confirm only if you created this account."
+  after={<ul className="lvz-auth-links"><li><a className="ui-link" href="/sign-in" onClick={()=>forgetConfirmation(PENDING_KEY)}>Return to sign in</a></li></ul>}>
+  <p>Your profile will start with age category, group, and unit <strong>Unassigned</strong> until an authorized leader verifies and places you.</p>
+  <button type="button" className="ui-button ui-button-block" disabled={!ready||busy} onClick={confirm}>{busy?'Confirming…':'Confirm and create my profile'}</button>
+  {!ready&&!message&&<p className="lvz-auth-alt">Open the newest confirmation email in the browser where you signed up.</p>}
+  {message&&<p role="alert" aria-live="assertive" className="ui-notice" data-tone="danger">{message}</p>}
+  {signIn&&<p className="lvz-auth-alt"><a className="ui-link" href="/sign-in" onClick={()=>forgetConfirmation(PENDING_KEY)}>Sign in to finish my profile</a></p>}
+ </AuthShell>;
 }

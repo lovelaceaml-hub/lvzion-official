@@ -1,0 +1,50 @@
+/*
+ * Account screens (sign in, sign up, confirmation, recovery, activation,
+ * access requests) in the Liquid Opal material: Atlas main-signin and
+ * main-signup. Values come only from styles/lvz-tokens.css.
+ */
+.lvz-auth{width:100%;max-width:calc(520px + 2 * var(--lvz-gutter));margin:0 auto;padding:var(--lvz-space-6) var(--lvz-gutter) var(--lvz-space-12);color:var(--lvz-ink)}
+.lvz-auth-mark{display:grid;place-items:center;width:64px;height:64px;margin:var(--lvz-space-2) 0 var(--lvz-space-5);border-radius:var(--lvz-radius-lg);background:var(--lvz-action);color:var(--lvz-on-accent);box-shadow:var(--lvz-action-shadow)}
+.lvz-auth .ui-heading{margin:0 0 var(--lvz-space-6)}
+.lvz-auth-card{padding:var(--lvz-space-6) var(--lvz-space-5)}
+.lvz-auth-card>:first-child{margin-top:0}
+.lvz-auth-card>:last-child{margin-bottom:0}
+.lvz-auth-card p{margin:0 0 var(--lvz-space-4);color:var(--lvz-ink-quiet)}
+.lvz-auth-card h2{margin:0 0 var(--lvz-space-2);font-size:var(--lvz-text-lg);letter-spacing:-.02em}
+.lvz-auth-card strong{color:var(--lvz-ink)}
+
+/* Fields: label above a rounded glass input. */
+.lvz-auth-form{margin:0}
+.lvz-auth-form fieldset{min-width:0;margin:0;padding:0;border:0}
+.lvz-auth-form fieldset:disabled{opacity:.8}
+.lvz-auth .ui-input{border-color:var(--lvz-line);border-radius:var(--lvz-radius-md)}
+.lvz-auth .ui-input::placeholder{color:var(--lvz-ink-quiet);opacity:.8}
+.lvz-auth .ui-field{color:var(--lvz-ink)}
+.lvz-auth-pair{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:var(--lvz-space-3)}
+.lvz-auth-labelrow{display:flex;align-items:center;justify-content:space-between;gap:var(--lvz-space-2);margin:calc(-1 * var(--lvz-space-3)) 0 calc(-1 * var(--lvz-space-2))}
+.lvz-auth-labelrow .ui-button{min-height:var(--lvz-tap);margin-right:calc(-1 * var(--lvz-space-3));font-size:var(--lvz-text-sm)}
+.lvz-auth-help{display:block;margin:calc(-1 * var(--lvz-space-2)) 0 var(--lvz-space-4);font-size:var(--lvz-text-sm);font-weight:var(--lvz-weight-regular);color:var(--lvz-ink-quiet)}
+.lvz-auth-note{font-size:var(--lvz-text-sm)}
+.lvz-auth-forgot{display:inline-flex;align-items:center;min-height:var(--lvz-tap);margin:calc(-1 * var(--lvz-space-2)) 0 var(--lvz-space-2)}
+.lvz-auth-form .ui-button-block{margin-top:var(--lvz-space-2)}
+.lvz-auth-card .ui-notice{margin:var(--lvz-space-4) 0 0}
+.lvz-auth-card .ui-notice[role="status"]:not([data-tone]){color:var(--lvz-ink)}
+.lvz-auth-card>.ui-notice:first-child,.lvz-auth-card>section>.ui-notice:first-child{margin:0 0 var(--lvz-space-4)}
+.lvz-auth-alt{margin:var(--lvz-space-4) 0 0!important;text-align:center;font-size:var(--lvz-text-sm)}
+.lvz-auth-alt a,.lvz-auth-links a{display:inline-flex;align-items:center;min-height:var(--lvz-tap)}
+.lvz-auth-links{display:flex;flex-wrap:wrap;justify-content:center;gap:0 var(--lvz-space-5);margin:var(--lvz-space-4) 0 0;padding:0;list-style:none;font-size:var(--lvz-text-sm)}
+.lvz-auth-action{margin-top:var(--lvz-space-2)}
+.lvz-auth-foot{margin:var(--lvz-space-5) 0 0;text-align:center;font-size:var(--lvz-text-sm);color:var(--lvz-ink-quiet)}
+.lvz-auth-after{margin-top:var(--lvz-space-5);font-size:var(--lvz-text-sm);color:var(--lvz-ink-quiet)}
+.lvz-auth-after p{margin:0 0 var(--lvz-space-2)}
+.lvz-auth-after a{display:inline-flex;align-items:center;min-height:var(--lvz-tap)}
+.lvz-auth .captcha-box{overflow-x:auto;max-width:100%;margin:var(--lvz-space-2) 0 var(--lvz-space-4)}
+
+/* Resend panel inside the check-email card. */
+.lvz-auth details{margin:var(--lvz-space-4) 0;padding:var(--lvz-space-2) 0 0;border-top:1px solid var(--lvz-line)}
+.lvz-auth summary{display:flex;align-items:center;min-height:var(--lvz-tap);color:var(--lvz-accent);font-weight:var(--lvz-weight-bold);cursor:pointer}
+.lvz-auth details p{margin:var(--lvz-space-2) 0}
+.lvz-auth details form{margin-top:var(--lvz-space-3)}
+
+@media(max-width:350px){.lvz-auth-pair{grid-template-columns:minmax(0,1fr);gap:0}.lvz-auth-card{padding:var(--lvz-space-5) var(--lvz-space-4)}}
+@media(min-width:900px){.lvz-auth{padding-top:var(--lvz-space-10)}.lvz-auth-card{padding:var(--lvz-space-8)}}
