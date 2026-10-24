@@ -81,7 +81,7 @@ export default function AppFrame({children}:{children:ReactNode}){
    {signedOut?null:<nav className="app-frame-nav" aria-label="Main navigation">
     {action({label:'Home',icon:'home',onClick:controls?.onHome,href:controls?.onHome?undefined:'/members',active:path==='/members'})}
     {action(left)}
-    <button type="button" className="app-frame-apps" aria-label="Open apps" aria-haspopup="dialog" onClick={()=>controls?.onApps?controls.onApps():setApps(true)}><span className="app-frame-orb"><Grid2X2 size={25}/></span><span>Apps</span></button>
+    <button type="button" className="app-frame-apps" aria-label="Open apps" aria-haspopup="dialog" onClick={()=>controls?.onApps?controls.onApps():setApps(true)}><span className="app-frame-orb"><Grid2X2 size={25}/></span></button>
     {action(right)}
     <button type="button" aria-current={controls?.moreActive?'page':undefined} aria-haspopup={controls?.onMore?undefined:'dialog'} onClick={()=>controls?.onMore?controls.onMore():setMore(true)}><MoreHorizontal size={24}/><span>More</span></button>
    </nav>}
