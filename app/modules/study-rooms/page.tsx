@@ -2,6 +2,7 @@
 import {useCallback,useEffect,useRef,useState} from 'react';
 import Reservations from '../../../components/study-rooms/reservations';
 import '../../../components/study-rooms/reservations.css';
+import {PageHeading} from '../../../components/ui-kit';
 import {StudyOperationsManager} from '../../../components/study-rooms/operations';
 import {dayKey,vegasDay} from '../../../lib/study-rooms/domain';
 import type {Schedule,BookingCommand} from '../../../lib/study-rooms/domain';
@@ -99,16 +100,18 @@ export default function StudyRooms(){
   }catch(e){if(access.current(ticket)&&accessDenied(e))clearAccess(e.message,e.status);throw e;}
  }
 
- if(!data)return <div className="ui-page sr-app">
+ if(!data)return <div className="ui-page sr-app sr-shell">
   <main className="ui-main ui-narrow">
-   <h1 className="ui-title">Study Room Reservation</h1>
-   <p role="status" className={error?'ui-notice':'ui-lede'} data-tone={error?(signedOut?'warning':'danger'):undefined}>{error||'Loading Study Rooms…'}</p>
-   {error&&<p className="ui-hint">{signedOut?'Sign in to reserve a study room.':'Study Rooms needs a Study Rooms grant from a leader.'}</p>}
-   {error&&<div className="sr-sheet-actions sr-shell-actions">
-    {signedOut&&<a className="ui-button" href="/sign-in">Sign in</a>}
-    {day&&<button type="button" className={signedOut?'ui-button ui-button-secondary':'ui-button'} onClick={()=>{void load(day);}}>Try again</button>}
-    <a className="ui-link sr-home-link" href="/members">Return to Home</a>
-   </div>}
+   <PageHeading eyebrow="A place to focus" title="Study Room Reservation" lede="Rooms, whiteboards and TVs for focused study."/>
+   <div className="ui-glass sr-shell-card">
+    <p role="status" className={error?'ui-notice':'ui-lede'} data-tone={error?(signedOut?'warning':'danger'):undefined}>{error||'Loading Study Rooms…'}</p>
+    {error&&<p className="ui-hint">{signedOut?'Sign in to reserve a study room.':'Study Rooms needs a Study Rooms grant from a leader.'}</p>}
+    {error&&<div className="sr-shell-actions">
+     {signedOut&&<a className="ui-button" href="/sign-in">Sign in</a>}
+     {day&&<button type="button" className={signedOut?'ui-button ui-button-secondary':'ui-button'} onClick={()=>{void load(day);}}>Try again</button>}
+     <a className="ui-link sr-home-link" href="/members">Return to Home</a>
+    </div>}
+   </div>
   </main>
  </div>;
 

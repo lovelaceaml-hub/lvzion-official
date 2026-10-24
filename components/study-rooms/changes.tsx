@@ -38,10 +38,11 @@ export function BookingChanges({booking:b,schedule:s,submit,loadDay,changeDay}:{
  }
 
  return <>
-  {future&&s.bookingsOpen!==false&&<button type="button" className="ui-button ui-button-secondary" onClick={()=>open('reschedule')}>Edit / reschedule</button>}
-  {running&&<button type="button" className="ui-button ui-button-secondary" onClick={()=>open('end_early')}>End early</button>}
+  {future&&s.bookingsOpen!==false&&<button type="button" className="ui-button ui-button-quiet" onClick={()=>open('reschedule')}>Edit / reschedule</button>}
+  {running&&<button type="button" className="ui-button ui-button-quiet" onClick={()=>open('end_early')}>End early</button>}
   {message&&<p role="status" className="sr-inline-status">{message}</p>}
   <dialog ref={dialog} className="ui-sheet sr-dialog" aria-label="Change reservation" onCancel={e=>{if(busy)e.preventDefault();}}><div className="ui-sheet-body">
+   <p className="ui-eyebrow">{mode==='reschedule'?'Edit reservation':'End early'}</p>
    <h2>{mode==='reschedule'?'Change your reservation':'Release remaining time'}</h2>
    <p className="ui-hint">{mode==='reschedule'?'Your original reservation stays intact unless the change succeeds.':'All selected resources release their remaining full 30-minute slots together. Elapsed time stays in the history.'}</p>
    {error&&<p role="alert" className="ui-notice sr-error" data-tone="danger">{error}</p>}
@@ -63,7 +64,7 @@ export function BookingChanges({booking:b,schedule:s,submit,loadDay,changeDay}:{
      <button type="button" className="ui-button ui-button-secondary ui-button-block" disabled={busy} onClick={close}>Keep original reservation</button>
     </div>
    </form>:<>
-    <dl className="sr-summary">
+    <dl className="ui-glass ui-pairs sr-summary sr-change-summary">
      <dt>Original</dt><dd>{b.day} · {range(b.start,b.end)}</dd>
      <dt>{mode==='reschedule'?'New time':'Release from'}</dt><dd>{mode==='reschedule'?day+' · '+range(start,end):clock(nextSlot(s.nowMinute))}</dd>
      {mode==='reschedule'&&<><dt>Resource</dt><dd>{resourceNames(data.resources,selection)}</dd></>}
@@ -81,7 +82,7 @@ export function BookingChanges({booking:b,schedule:s,submit,loadDay,changeDay}:{
 export function ResourceManagement({data,today,save}:{data:AdminData;today:string;save:(c:AdminCommand)=>Promise<void>}){
  const {busy,error,message,send}=useReceiptSave<Omit<AdminCommand,'requestId'>>(save,'Management change saved. Existing bookings were not displaced.');
  const closures=data.closures.filter(c=>c.active);
- return <section className="sr-section">
+ return <section className="ui-glass sr-section">
   <h2>Resources & date closures</h2>
   <p className="ui-hint">Closing a resource or time cannot evict an existing reservation. Cancel or reschedule affected bookings explicitly first.</p>
   {error&&<p role="alert" className="ui-notice sr-error" data-tone="danger">{error}</p>}

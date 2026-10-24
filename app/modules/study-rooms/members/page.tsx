@@ -1,7 +1,10 @@
 'use client';
 import {useCallback,useEffect,useState} from 'react';
+import '../../../../components/study-rooms/reservations.css';
 import '../../../../components/study-rooms/group-access.css';
 import {accessState,type GroupAccessData,type GroupAccessMember} from '../../../../lib/study-rooms/group-access';
+import {ChevronLeft,ShieldCheck,UsersRound} from '../../../../components/home-icons';
+import {EmptyState,IconBox,PageHeading,SectionHeader,initialsOf} from '../../../../components/ui-kit';
 
 async function call(options?:RequestInit):Promise<GroupAccessData>{
  const response=await fetch('/api/study-rooms/access',{...options,cache:'no-store',headers:{'content-type':'application/json'}});
@@ -14,6 +17,7 @@ async function call(options?:RequestInit):Promise<GroupAccessData>{
 function MemberRow({member,busy,toggle}:{member:GroupAccessMember;busy:boolean;toggle:(m:GroupAccessMember)=>void}){
  const state=accessState(member);
  return <li className="ui-row sr-access-row">
+  <IconBox round>{initialsOf(member.name)}</IconBox>
   <div className="ui-row-body">
    <strong>{member.name}{member.self?' (you)':''}</strong>
    <small>{member.unit} · {state.note}</small>
@@ -43,20 +47,20 @@ export default function GroupAccess(){
   finally{setBusy('');}
  }
 
- return <div className="ui-page">
+ return <div className="ui-page sr-access">
   <main className="ui-main ui-narrow">
-   <a className="ui-link sr-access-back" href="/modules/study-rooms">Back to Study Rooms</a>
-   <h1 className="ui-title">Who can book</h1>
-   <p className="ui-lede">Leaders can always book. Turn booking on for members of your group.</p>
+   <a className="ui-link sr-access-back" href="/modules/study-rooms"><ChevronLeft size={18}/>Back to Study Rooms</a>
+   <PageHeading eyebrow="Study Rooms · group leaders" title="Who can book" lede="Leaders can always book. Turn booking on for members of your group."/>
    {message&&<p role="status" className="ui-notice" data-tone="success">{message}</p>}
    {error&&<p role="alert" className="ui-notice" data-tone={denied?'warning':'danger'}>{denied===401?'Sign in to manage who can book.':denied===403?'Only group leaders can change who books in their group.':error}</p>}
    {denied===401&&<a className="ui-button" href="/sign-in">Sign in</a>}
-   {!data&&!error&&<p className="ui-empty">Loading your group…</p>}
+   {!data&&!error&&<p className="ui-hint" role="status">Loading your group…</p>}
    {data?.groups.map(g=><section key={g.id} aria-labelledby={'group-'+g.id}>
-    <h2 className="ui-section-title" id={'group-'+g.id}>{g.name}</h2>
-    {g.members.length?<ul className="ui-list">{g.members.map(m=><MemberRow key={m.id} member={m} busy={busy===m.id} toggle={m2=>{void toggle(m2);}}/>)}</ul>
-     :<p className="ui-empty">No members are placed in this group yet.</p>}
+    <SectionHeader id={'group-'+g.id} title={g.name} note={`${g.members.filter(m=>accessState(m).on).length} of ${g.members.length} can book`}/>
+    <div className="ui-glass ui-glass-tight">{g.members.length?<ul className="ui-list">{g.members.map(m=><MemberRow key={m.id} member={m} busy={busy===m.id} toggle={m2=>{void toggle(m2);}}/>)}</ul>
+     :<EmptyState icon={<UsersRound/>} title="No members yet">No members are placed in this group yet.</EmptyState>}</div>
    </section>)}
+   {data&&<div className="ui-glass sr-callout"><span className="sr-callout-icon" aria-hidden="true"><ShieldCheck size={22}/></span><div><strong>Access is deliberate</strong><p>Turning booking on lets that member reserve study rooms, whiteboards and TVs. Leaders and reservation managers always stay on.</p></div></div>}
   </main>
  </div>;
 }

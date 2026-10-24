@@ -1,7 +1,7 @@
 import {test,expect,type Locator,type Page} from '@playwright/test';
 import {openStudyRoute} from './study-route-fixture';
 
-// Synthetic real-route checks for the approved attached tabs and floating controls.
+// Synthetic real-route checks for the Liquid Opal planner: pill resource control, planner card and floating tray.
 // Colors and decorative effects are reviewed visually; these assertions protect access to the schedule.
 async function box(locator:Locator){
  const value=await locator.boundingBox();
@@ -28,13 +28,15 @@ test('compiled glass surfaces retain supported backdrop blur',async({page})=>{
 for(const width of [320,390,1280]){
  const height=width>900?900:844;
 
- test(`attached resource tabs filter the grid and preserve the chosen date at ${width}px`,async({page})=>{
+ test(`pill resource control filters the grid and preserves the chosen date at ${width}px`,async({page})=>{
   await page.setViewportSize({width,height});
   await openStudyRoute(page);
   const header=page.getByRole('banner',{name:'Application header'});
-  const tabs=page.locator('.sr-header-tabs');
+  const tabs=page.locator('.sr-resource-tabs');
+  // Liquid Opal (Atlas study-availability): the pill control sits in the content, above the dates.
   await expect(tabs).toHaveCount(1);
-  await expect(header.locator('.app-frame-header-content .sr-header-tabs')).toHaveCount(1);
+  await expect(header.locator('.sr-resource-tabs')).toHaveCount(0);
+  await expect(page.getByRole('main').locator('.sr-resource-tabs')).toHaveCount(1);
   await expect(tabs.getByRole('button')).toHaveCount(3);
   await expect(page.locator('.sr-day')).toHaveCount(4);
   await page.locator('.sr-day').nth(1).click();
@@ -56,55 +58,55 @@ for(const width of [320,390,1280]){
   const [headerBox,tabsBox,datesBox,gridBox]=await Promise.all([
    box(header),box(tabs),box(page.locator('.sr-date-window')),box(page.locator('.sr-scroll')),
   ]);
-  expect(tabsBox.y).toBeGreaterThanOrEqual(headerBox.y);
-  expect(tabsBox.y+tabsBox.height).toBeLessThanOrEqual(headerBox.y+headerBox.height+1);
-  expect(datesBox.y).toBeGreaterThanOrEqual(headerBox.y+headerBox.height-1);
+  expect(tabsBox.y).toBeGreaterThanOrEqual(headerBox.y+headerBox.height-1);
+  expect(tabsBox.y+tabsBox.height).toBeLessThanOrEqual(datesBox.y+1);
   expect(datesBox.y+datesBox.height).toBeLessThanOrEqual(gridBox.y+1);
   expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);
-  await capture(page,`lavender-header-tabs-${width}`);
+  await capture(page,`opal-resource-tabs-${width}`);
  });
 
- test(`full-height grid stays usable beneath the floating Reserve card at ${width}px`,async({page})=>{
+ test(`planner card stays usable beside the floating Reserve tray at ${width}px`,async({page})=>{
   await page.setViewportSize({width,height});
   await openStudyRoute(page);
   const scroll=page.locator('.sr-scroll'),tray=page.locator('.sr-reserve-dock');
   const nav=page.getByRole('navigation',{name:'Main navigation'});
   await expect(scroll).toBeVisible();
   await expect(tray.getByRole('button',{name:'Reserve',exact:true})).toBeEnabled();
-  await expect.poll(async()=>{
-   const grid=await box(scroll);
-   return Math.abs(grid.y+grid.height-height);
-  }).toBeLessThanOrEqual(2);
   const before=await box(scroll),beforeTop=await scroll.evaluate(el=>el.scrollTop);
   const openSlot=page.getByRole('button',{name:'Room 2, 11:00 AM, available',exact:true});
   await openSlot.click();
   await expect(openSlot).toHaveAttribute('aria-pressed','true');
   await expect(tray.locator('.sr-selection-summary')).toContainText('Room 2');
+  await expect(tray.locator('.sr-selection-summary')).toContainText('11:00–11:30 AM');
+  // Selecting never resizes or scrolls the planner.
   const after=await box(scroll);
   expect(Math.abs(after.y-before.y)).toBeLessThanOrEqual(1);
   expect(Math.abs(after.height-before.height)).toBeLessThanOrEqual(1);
   expect(await scroll.evaluate(el=>el.scrollTop)).toBe(beforeTop);
+  // The tray floats clear of the planner (below it on phones, in the side rail on wide screens) and above the dock.
   const trayBox=await box(tray),navBox=await box(nav),appsBox=await box(nav.getByRole('button',{name:'Open apps'}));
-  expect(trayBox.y).toBeGreaterThan(after.y);
-  expect(trayBox.y+trayBox.height).toBeLessThan(after.y+after.height);
-  expect(trayBox.x).toBeGreaterThanOrEqual(after.x-1);
-  expect(trayBox.x+trayBox.width).toBeLessThanOrEqual(after.x+after.width+1);
+  if(width>=1100)expect(trayBox.x).toBeGreaterThanOrEqual(after.x+after.width-1);
+  else{
+   expect(trayBox.y).toBeGreaterThanOrEqual(after.y+after.height-1);
+   expect(trayBox.x).toBeGreaterThanOrEqual(after.x-24);
+   expect(trayBox.x+trayBox.width).toBeLessThanOrEqual(after.x+after.width+24);
+  }
   expect(trayBox.y+trayBox.height).toBeLessThanOrEqual(Math.min(navBox.y,appsBox.y)+1);
-  await capture(page,`lavender-selected-overlay-${width}`);
+  // The planner keeps a usable height on every supported phone.
+  expect(after.height).toBeGreaterThanOrEqual(width>=1100?240:200);
+  await capture(page,`opal-selected-tray-${width}`);
 
-  // Padding inside the scroller must let the final time slot clear both floating surfaces.
-  // An ordinary click, with no force, also proves the controls do not intercept that slot.
+  // The final slot scrolls fully into the planner, and an ordinary click (no force) proves nothing covers it.
   await scroll.evaluate(el=>el.scrollTop=el.scrollHeight);
   const finalSlot=page.getByRole('button',{name:'Room 2, 10:30 PM, available',exact:true});
   await expect(finalSlot).toBeInViewport({ratio:1});
   const finalBox=await box(finalSlot),headerRow=await box(scroll.getByRole('columnheader',{name:'Time',exact:true}));
-  const floating=await box(tray);
   expect(finalBox.y).toBeGreaterThanOrEqual(headerRow.y+headerRow.height-1);
-  expect(finalBox.y+finalBox.height).toBeLessThanOrEqual(floating.y-1);
+  expect(finalBox.y+finalBox.height).toBeLessThanOrEqual(after.y+after.height+1);
   await finalSlot.click();
   await expect(finalSlot).toHaveAttribute('aria-pressed','true');
-  await expect(tray.locator('.sr-selection-summary')).toContainText('10:30 PM');
-  await capture(page,`lavender-last-slot-${width}`);
+  await expect(tray.locator('.sr-selection-summary')).toContainText('10:30–11:00 PM');
+  await capture(page,`opal-last-slot-${width}`);
   await tray.getByRole('button',{name:'Reserve',exact:true}).click();
   const dialog=page.getByRole('dialog',{name:'Reserve a resource'});
   await expect(dialog).toBeVisible();
