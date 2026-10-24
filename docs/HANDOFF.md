@@ -1,6 +1,6 @@
 # LV Zion Official — current handoff
 
-Updated October 19, 2026. This handoff and `AGENTS.md` describe the application to build and operate now. Milestone-specific release records are evidence, not additional product requirements.
+Updated October 24, 2026. This handoff and `AGENTS.md` describe the application to build and operate now. Milestone-specific release records are evidence, not additional product requirements.
 
 ## Authoritative requirements
 
@@ -15,6 +15,17 @@ Anthony's October 24 decision replaces the competing Day Sheet, glass and 24-the
 ## Groups & Gospel Planning — draft, October 24, 2026
 
 My Preaching (availability, proposed sessions, partner confirmation, one shared result) and My Group (Member Updates, Gospel Review, Gospel Plan, Request for Overseer) are built on the member foundation with migration `20261024150000_gospel_planning_core.sql`, unapplied. Draft module, no grants. Atlas style Skyline Grid. Tested locally with fictional data only. [Status and the approval list](gospel-planning/README.md).
+
+## October 24, 2026 release
+
+Anthony approved and released four changes, deployed from clean checkouts with the Vercel CLI (automatic Git deploys stay off):
+
+- **Security (#69):** Next.js 16.4.3 and nodemailer 10.2.1 close critical Next.js advisories (remote code execution, Server Actions denial of service) and the nodemailer address-parsing advisories.
+- **Design and function repair (#67):** one shared base (Atlas Layered Tabs) and an Atlas style per app; Appearance is System, Light or Dark; signed-out pages no longer show the member dock on sign-in and sign-up; clearer access and empty states; a Page not found page. [Audit](audit/2026-10-24/README.md), [design contract](design/LVZ-DESIGN-CONTRACT.md).
+- **Worship Duty (#48):** live for the owner only (`LVZ_WORSHIP_DUTY_ENABLED=true`). Its database objects were already applied on October 15 and verified identical; nothing was reapplied. See [migration status](worship-duty/MIGRATION-STATUS.md) and the [owner setup steps](worship-duty/README.md).
+- **Groups & Gospel Planning (#68):** migration `20261024150000_gospel_planning_core` applied; module registered as **draft with no grants**. It stays closed until Anthony approves the module, grants access and adds places and roles. See [Gospel Planning](gospel-planning/README.md).
+
+Verified live, signed out: sign-in, sign-up, Appearance, Study Rooms and Gospel Planning render; other modules redirect to sign-in; every module API returns 401; `www` redirects to `lvz.app`. Focused checks only, no full suite. Not yet verified: any signed-in screen, a real owner Worship setup, physical phones and the TV.
 
 ## Device appearance — released October 19, 2026
 
@@ -35,8 +46,8 @@ Read-only live GET checks of Study Rooms availability and administration returne
 - Repository: `lovelaceaml-hub/lvzion-official`.
 - Vercel: `lvzion-official`, project `prj_4icc6S1jw8OVKWD9AOI1oiB5fwYe`, team `lvzion`.
 - Supabase: `otecqlkqirncotytbfns`, Las Vegas Zion organization.
-- Production source: `0197e83f1ee5fd28ceaaea3cc339b1a9ab800580`.
-- Production deployment: `dpl_HVSBqrSGcvVaTQupPhwaAkU7FDVk`, READY, `lvz.app` and `www.lvz.app` aliases verified.
+- Production source: `26c0916` (main after #69, #67, #48 and #68).
+- Production deployment: `dpl_Dk1iD3B8JfNQGhFkCTtKMggfHTLv`, READY on `lvz.app` and `www.lvz.app`. Rollback: `dpl_HvC39eN73t1HQfut8BKi2LZS2xbX` (design repair, without the Worship flag) or `dpl_HVSBqrSGcvVaTQupPhwaAkU7FDVk` (October 19).
 - Fresh calendar correction: repository migration `20261016180000_study_rooms_fresh_calendar.sql`, applied hosted version `20261016173939`.
 
 Documentation-only commits after the runtime source do not require another deployment. Read current provider state rather than assuming a recorded snapshot cannot change. Automatic Git deployments remain disabled; no unrequested previews are authorized.

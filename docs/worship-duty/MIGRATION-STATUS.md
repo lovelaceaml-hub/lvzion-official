@@ -23,31 +23,19 @@ Migration 3 stops with an error if there is not exactly one verified owner, if a
 - **Real local stack:** the native harness (real local Auth, PostgREST and PostgreSQL 16) applies all current migrations, then the Worship ones. 9 integration checks and 44 browser checks pass. See [LAUNCH.md](LAUNCH.md).
 - **Fresh-start boundary:** comments that named another application were removed. No migration references an outside system, imports records or seeds a schedule.
 
-## Hosted read-only check: not performed on October 24
+## Hosted state: applied (verified October 24)
 
-The `supabase-lvz` connector in this session needs authorization and was unavailable, so no hosted query ran. The last hosted evidence is the October 14 read-only check (zero Worship modules, tables, RPCs and grants) and the repository ledger, which lists no Worship entries. A Codex session on October 14 ended while applying the first Worship migration with an expired-request error; whether anything reached the hosted database is **unverified**.
+The October 24 read-only check found all five Worship migrations **already applied on October 15** by a Codex session, as hosted versions `20261015020427`, `20261015020453`, `20261015020458`, `20261015020506` and `20261015020511`. Their stored statements match the October 14 source (commit `e1d522e`) byte for byte. The renumbered repository files differ only in comments and, in the activation file, the Apps tile accent (`#3184ff` in the file, `#3d7464` live; cosmetic, left unchanged).
 
-Before applying anything, run these read-only queries on `otecqlkqirncotytbfns` and expect all zeros:
+Live readback: the module is approved, the verified owner holds the only grant (manager) and the song-editor appointment, all 8 Worship departments are mapped, and there are no services yet. **Do not reapply these files.** The mapping is recorded in `docs/HOSTED-MIGRATION-LEDGER.json`.
 
-```sql
-select count(*) from supabase_migrations.schema_migrations where name like '%worship%';
-select count(*) from information_schema.tables where table_schema in ('app_private','public') and table_name like 'worship%';
-select count(*) from pg_proc p join pg_namespace n on n.oid=p.pronamespace where n.nspname in ('app_private','public') and p.proname like 'worship%';
-select count(*) from app_private.app_modules where module_key='worship-duty';
-```
+## Applying
 
-If any count is not zero, stop: a partial application needs its own review before migration 1 is retried.
-
-## Applying (only after Anthony approves)
-
-1. Rerun the read-only queries above and re-read hosted migration metadata, including any work merged after October 24.
-2. Apply the five files one at a time in the order above with the supported migration tool, never `supabase db push` across the mismatched historical ledger.
-3. After each one, read back the hosted version, then check table RLS, `EXECUTE` grants on the `worship_*` public functions, the module row and the owner grants.
-4. Record each hosted version in `docs/HOSTED-MIGRATION-LEDGER.json` and in this file.
+Nothing remains to apply. Any future Worship schema change needs a new migration that sorts after the latest hosted version, a read-only check first, and a ledger entry.
 
 ## Required flag
 
-The page and API also require the existing production settings (`VERCEL=1`, `VERCEL_ENV=production`, `LVZ_PRODUCTION_ACTIVATED=true`, `LVZ_DATABASE_ENV=production`, `LVZ_APP_ORIGIN=https://lvz.app`, `LVZ_SUPABASE_EXPECTED_REF=otecqlkqirncotytbfns`) plus **`LVZ_WORSHIP_DUTY_ENABLED=true`**, which is off today. It is a Worship-only switch and does not change other modules.
+The page and API also require the existing production settings (`VERCEL=1`, `VERCEL_ENV=production`, `LVZ_PRODUCTION_ACTIVATED=true`, `LVZ_DATABASE_ENV=production`, `LVZ_APP_ORIGIN=https://lvz.app`, `LVZ_SUPABASE_EXPECTED_REF=otecqlkqirncotytbfns`) plus **`LVZ_WORSHIP_DUTY_ENABLED=true`**, turned on for Production on October 24, 2026. It is a Worship-only switch and does not change other modules.
 
 ## Rollback
 

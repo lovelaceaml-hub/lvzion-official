@@ -1,6 +1,6 @@
 # Groups & Gospel Planning
 
-Updated October 24, 2026. Status: **built and tested locally with fictional data; not released.** The module is registered as a draft with no grants. Nothing is seeded, no hosted migration has been applied, and nobody can open it on https://lvz.app yet.
+Updated October 24, 2026. Status: **deployed on https://lvz.app, closed.** Migration `20261024150000_gospel_planning_core` was applied on October 24, 2026 and the code is live, but the module is still a draft with no grants, places or roles, so nobody can use it yet. Steps 2, 3 and 5 of the release list below are done; step 4 (first setup) and step 6 (signed-in live checks) remain.
 
 This supersedes the R1 fictional preview and R2 review SQL in draft PR #11 (`feature/gospel-planning-r1`). That branch was not merged; its useful parts were rebuilt on current `main`.
 
