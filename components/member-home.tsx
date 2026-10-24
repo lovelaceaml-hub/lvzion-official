@@ -191,7 +191,7 @@ export default function MemberHome({workspace:w,demo=false,manageHref,experience
  return <div className="lvz-experience">
   <FrameControls name={w.self.name} profileHref={route('profile')} onHome={resetHome} onApps={openApps}
    left={{label:'Calendar',icon:'calendar',onClick:()=>{setSection('home');choosePeriod('calendar');},active:section==='home'&&period==='calendar'}}
-   right={{label:'Notifications',icon:'bell',onClick:()=>switchSection('notifications'),active:section==='notifications'}}
+   right={{label:'Notifications',short:'Updates',icon:'bell',onClick:()=>switchSection('notifications'),active:section==='notifications'}}
    more={userManages?[{label:'Manage',icon:'people',onClick:()=>switchSection('manage')}]:[]}/>
   {demo&&<div className="lvz-demo-banner"><Info size={16}/><span>Fictional content only. No official activities or apps are connected.</span></div>}
   <main className="lvz-body">

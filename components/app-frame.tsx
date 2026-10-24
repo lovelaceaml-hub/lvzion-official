@@ -7,7 +7,8 @@ import {moduleStyleFor} from '../lib/module-styles';
 import './app-frame.css';
 const icons={home:House,calendar:CalendarDays,clock:Clock3,apps:Grid2X2,people:UsersRound,user:UserRound,display:Monitor,room:DoorOpen,bell:Bell,info:Info,more:MoreHorizontal,sun:Sun,contrast:Contrast,heart:Heart,music:Music,clipboard:ClipboardList};
 type IconName=keyof typeof icons;
-export type FrameAction={label:string;icon:IconName;onClick?:()=>void;href?:string;active?:boolean;disabled?:boolean};
+/** short: an optional shorter visible dock label; the accessible name stays label. */
+export type FrameAction={label:string;short?:string;icon:IconName;onClick?:()=>void;href?:string;active?:boolean;disabled?:boolean};
 /** module: an Atlas style key from lib/module-styles.ts; null wears the shared base; omitted follows the route. */
 type Controls={left:FrameAction;right:FrameAction;more?:FrameAction[];onMore?:()=>void;moreActive?:boolean;onHome?:()=>void;onApps?:()=>void;name?:string;profileHref?:string;title?:string;headerContent?:ReactNode;viewport?:boolean;module?:string|null};
 type Registration={path:string;controls:Controls};
@@ -62,8 +63,8 @@ export default function AppFrame({children}:{children:ReactNode}){
  const right=controls?.right??{label:'Profile',icon:'user' as const,href:'/members/manage?tab=profile'};
  const avatar=controls?.name?initials(controls.name):name;
  const title=controls?.title??details.title;
- function action(item:FrameAction){const Symbol=icons[item.icon];const inner=<><Symbol size={22}/><span>{item.label}</span></>;
-  return item.href?<a href={item.href} aria-current={item.active?'page':undefined}>{inner}</a>:<button type="button" disabled={item.disabled} aria-current={item.active?'page':undefined} onClick={item.onClick}>{inner}</button>;
+ function action(item:FrameAction){const Symbol=icons[item.icon];const inner=<><Symbol size={22}/><span>{item.short??item.label}</span></>;const name=item.short&&item.short!==item.label?item.label:undefined;
+  return item.href?<a href={item.href} aria-label={name} aria-current={item.active?'page':undefined}>{inner}</a>:<button type="button" aria-label={name} disabled={item.disabled} aria-current={item.active?'page':undefined} onClick={item.onClick}>{inner}</button>;
  }
  function signedOutLink(){
   if(path==='/sign-in')return <a className="app-frame-session" href="/sign-up">Create account</a>;

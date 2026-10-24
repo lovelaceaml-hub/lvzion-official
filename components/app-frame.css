@@ -26,7 +26,7 @@
 
 /* Round raised gradient Apps button with a soft halo. */
 .app-frame-nav .app-frame-apps{position:relative;justify-content:flex-start;gap:var(--lvz-space-1);margin-top:-30px;min-height:84px;padding:0;color:var(--lvz-accent);font-weight:var(--lvz-weight-strong);overflow:visible}
-.app-frame-orb{position:relative;isolation:isolate;overflow:hidden;flex:none;display:grid;place-items:center;width:60px;height:60px;border-radius:50%;background:var(--lvz-action);color:var(--lvz-on-accent);box-shadow:0 0 0 7px color-mix(in srgb,var(--lvz-surface) 62%,transparent),var(--lvz-action-shadow),0 6px 16px color-mix(in srgb,var(--lvz-accent) 30%,transparent)}
+.app-frame-orb{max-width:none;position:relative;isolation:isolate;overflow:hidden;flex:none;display:grid;place-items:center;width:60px;height:60px;border-radius:50%;background:var(--lvz-action);color:var(--lvz-on-accent);box-shadow:0 0 0 7px color-mix(in srgb,var(--lvz-surface) 62%,transparent),var(--lvz-action-shadow),0 6px 16px color-mix(in srgb,var(--lvz-accent) 30%,transparent)}
 .app-frame-orb svg{position:relative;z-index:1;width:26px;height:26px}
 .app-frame-orb:after{content:"";position:absolute;inset:0;pointer-events:none;background:linear-gradient(115deg,transparent 25%,color-mix(in srgb,var(--lvz-glass-edge) 40%,transparent) 48%,transparent 70%);background-size:250% 100%;animation:lvz-glass-shimmer 8s ease-in-out infinite}
 @keyframes lvz-glass-shimmer{0%,65%,100%{background-position:180% 0}35%{background-position:-80% 0}}
