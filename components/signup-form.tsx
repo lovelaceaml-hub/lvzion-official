@@ -3,7 +3,8 @@
 import {useEffect,useRef,useState,type FormEvent} from 'react';
 import {signupNames} from '../lib/signup-name';
 import CaptchaChallenge from './captcha-challenge';
-import './members.css';
+import AuthShell from './auth-shell';
+import {ArrowRight} from './home-icons';
 import {postJson} from '../lib/post-json';
 
 const SUBMITTED_KEY='lvz:signup:check-email';
@@ -104,52 +105,55 @@ export default function SignupForm({enabled,local,siteKey}:{enabled:boolean;loca
   setResetVersion(v=>v+1);
  }
 
- return <main className="auth-box">
-  
-  {submitted?<section aria-live="polite">
-   <h1>Check your email.</h1>
-   <p role="status">{message}</p>
+ if(submitted)return <AuthShell eyebrow="Almost there" title="Check your email." lede="Confirm your address to finish creating your account."
+  after={<ul className="lvz-auth-links"><li><a className="ui-link" href="/sign-in">Already confirmed? Sign in</a></li></ul>}>
+  <section aria-live="polite">
+   <p role="status" className="ui-notice">{message}</p>
    <p>Your age category, group, and unit will remain <strong>Unassigned</strong> until an authorized leader verifies and places you.</p>
    <p>Check your inbox and spam folder. Open the newest confirmation link and choose <strong>Confirm and continue</strong>.</p>
    <details className="signup-resend">
     <summary>Didn't receive the email?</summary>
     <p>Delivery can take a few minutes. Enter your signup email to request another link. Your account must still be awaiting email confirmation.</p>
-    <form onSubmit={resend}>
-     <label htmlFor="signup-resend-email">Email used to sign up</label>
-     <input id="signup-resend-email" type="email" name="resendEmail" autoComplete="email" autoCapitalize="none" maxLength={254} required disabled={resendBusy||resendCooldown}/>
-     <button type="submit" disabled={resendBusy||resendCooldown}>{resendBusy?'Requesting…':resendCooldown?'Please wait one minute':'Resend confirmation'}</button>
+    <form className="lvz-auth-form" onSubmit={resend}>
+     <div className="ui-field"><label htmlFor="signup-resend-email">Email used to sign up</label>
+      <input className="ui-input" id="signup-resend-email" type="email" name="resendEmail" autoComplete="email" autoCapitalize="none" maxLength={254} required disabled={resendBusy||resendCooldown}/></div>
+     <button type="submit" className="ui-button ui-button-block" disabled={resendBusy||resendCooldown}>{resendBusy?'Requesting…':resendCooldown?'Please wait one minute':'Resend confirmation'}</button>
     </form>
-    {resendStatus&&<p role="status">{resendStatus}</p>}
-    {resendError&&<p role="alert">{resendError}</p>}
+    {resendStatus&&<p role="status" className="ui-notice">{resendStatus}</p>}
+    {resendError&&<p role="alert" className="ui-notice" data-tone="danger">{resendError}</p>}
    </details>
-   <p><a href="/sign-in">Already confirmed? Sign in</a></p>
-   <button type="button" className="secondary" onClick={startOver}>Create another account</button>
-  </section>:<>
-   <h1>Create your account.</h1>
-   <p>Use your personal email. After confirmation, your age category, group, and unit will be <strong>Unassigned</strong> until an authorized leader verifies and places you.</p>
-   {!enabled&&<p role="status">Account signup will open once email delivery is ready. Please check back soon.</p>}
-   <p className="fine-print">First and last name are both required and will appear together on your member profile.</p>
-   <form onSubmit={submit}>
-    <fieldset disabled={!enabled||busy} className="signup-fields">
-     <label htmlFor="signup-first-name">First name</label>
-     <input id="signup-first-name" name="firstName" type="text" autoComplete="given-name" autoCapitalize="words" maxLength={80} required/>
-     <label htmlFor="signup-last-name">Last name</label>
-     <input id="signup-last-name" name="lastName" type="text" autoComplete="family-name" autoCapitalize="words" maxLength={80} required/>
-     <label htmlFor="signup-email">Personal email</label>
-     <input id="signup-email" name="email" type="email" autoComplete="username" inputMode="email" autoCapitalize="none" spellCheck={false} maxLength={254} required/>
-     <label htmlFor="new-password">Password</label>
-     <input id="new-password" name="password" type={show?'text':'password'} autoComplete="new-password" minLength={6} maxLength={128} required aria-describedby="password-help"/>
-     <button type="button" className="secondary" aria-pressed={show} onClick={()=>setShow(!show)}>{show?'Hide password':'Show password'}</button>
-     <p id="password-help" className="fine-print">Use at least 6 characters. Your password manager can suggest and save a strong password.</p>
-     <div hidden aria-hidden="true"><label>Website<input name="website" tabIndex={-1} autoComplete="off"/></label></div>
-     {enabled&&!local&&<CaptchaChallenge siteKey={siteKey} onToken={setCaptcha} onError={()=>setError('Verification unavailable. Reload and try again.')} resetVersion={resetVersion}/>}
-     <button type="submit" disabled={!enabled||busy||(!local&&!captcha)}>{busy?'Creating account…':'Create account'}</button>
-    </fieldset>
-   </form>
-   {error&&<p role="alert" aria-live="assertive">{error}</p>}
-   <p>Already have a member record or invitation? Use your invitation or <a href="/request-access">ask your leader to verify access</a>.</p>
-   <p><a href="/sign-in">Sign in</a> · <a href="/reset-password">Password recovery</a></p>
-   <p>No personal email? Contact your authorized leader.</p>
-  </>}
- </main>;
+   <button type="button" className="ui-button ui-button-secondary ui-button-block" onClick={startOver}>Create another account</button>
+  </section>
+ </AuthShell>;
+
+ return <AuthShell eyebrow="Join your community" title="Create your account." lede="Use your personal email, then confirm it to finish."
+  after={<div className="lvz-auth-after">
+   <p><a className="ui-link" href="/sign-in">Already have an account? Sign in</a></p>
+   <p>Already have a member record or invitation? Use your invitation or <a className="ui-link" href="/request-access">ask your leader to verify access</a>.</p>
+   <p><a className="ui-link" href="/reset-password">Password recovery</a>. No personal email? Contact your authorized leader.</p>
+  </div>}>
+  {!enabled&&<p role="status" className="ui-notice lvz-auth-closed" data-tone="warning">Account signup will open once email delivery is ready. Please check back soon.</p>}
+  <form className="lvz-auth-form" onSubmit={submit}>
+   <fieldset disabled={!enabled||busy} className="signup-fields">
+    <div className="lvz-auth-pair">
+     <div className="ui-field"><label htmlFor="signup-first-name">First name</label>
+      <input className="ui-input" id="signup-first-name" name="firstName" type="text" autoComplete="given-name" autoCapitalize="words" maxLength={80} placeholder="First name" required/></div>
+     <div className="ui-field"><label htmlFor="signup-last-name">Last name</label>
+      <input className="ui-input" id="signup-last-name" name="lastName" type="text" autoComplete="family-name" autoCapitalize="words" maxLength={80} placeholder="Last name" required/></div>
+    </div>
+    <p className="lvz-auth-help">First and last name are both required and appear together on your member profile.</p>
+    <div className="ui-field"><label htmlFor="signup-email">Personal email</label>
+     <input className="ui-input" id="signup-email" name="email" type="email" autoComplete="username" inputMode="email" autoCapitalize="none" spellCheck={false} maxLength={254} placeholder="you@example.com" required/></div>
+    <div className="ui-field"><div className="lvz-auth-labelrow"><label htmlFor="new-password">Password</label>
+      <button type="button" className="ui-button ui-button-quiet" aria-pressed={show} onClick={()=>setShow(!show)}>{show?'Hide password':'Show password'}</button></div>
+     <input className="ui-input" id="new-password" name="password" type={show?'text':'password'} autoComplete="new-password" minLength={6} maxLength={128} placeholder="Create a password" required aria-describedby="password-help"/></div>
+    <p id="password-help" className="lvz-auth-help">Use at least 6 characters. Your password manager can suggest and save a strong password.</p>
+    <p className="lvz-auth-note">New profiles begin <strong>Unassigned</strong> to age category, group, and unit. An authorized leader verifies your membership and placement.</p>
+    <div hidden aria-hidden="true"><label>Website<input name="website" tabIndex={-1} autoComplete="off"/></label></div>
+    {enabled&&!local&&<CaptchaChallenge siteKey={siteKey} onToken={setCaptcha} onError={()=>setError('Verification unavailable. Reload and try again.')} resetVersion={resetVersion}/>}
+    <button type="submit" className="ui-button ui-button-block" disabled={!enabled||busy||(!local&&!captcha)}>{busy?'Creating account…':<>Create account <ArrowRight size={20}/></>}</button>
+   </fieldset>
+  </form>
+  {error&&<p role="alert" aria-live="assertive" className="ui-notice" data-tone="danger">{error}</p>}
+ </AuthShell>;
 }

@@ -3,7 +3,7 @@ import {useEffect,useState}from'react';
 import UnassignedMember from '../../components/unassigned-member';
 import MemberHome from '../../components/member-home';
 import type{Workspace}from'../../lib/contracts';
-import '../../components/members.css';
+import AuthShell from '../../components/auth-shell';
 import{emptyModuleFeed,parseModuleFeed}from'../../lib/app-runtime';
 import type{ModuleFeed}from'../../lib/app-runtime';
 import {postJson} from '../../lib/post-json';
@@ -24,8 +24,10 @@ export default function Members(){
   window.addEventListener('focus',onFocus);
   return()=>{controller.abort();window.removeEventListener('focus',onFocus);};
  },[]);
- if(!data)return <main className="auth-box"><h1>My Week</h1><p role="status">{error||'Loading your authorized member space…'}</p>
-  {error&&<p><a href="/sign-in">Sign in</a></p>}</main>;
+ if(!data)return <AuthShell mark={false} eyebrow="Your community" title="My Week">
+  <p role="status" className="ui-notice">{error||'Loading your authorized member space…'}</p>
+  {error&&<a className="ui-button ui-button-block lvz-auth-action" href="/sign-in">Sign in</a>}
+ </AuthShell>;
  if(data.self.status==='intake'&&!data.permissions.organization)return <UnassignedMember data={data}/>;
  return <MemberHome workspace={data} manageHref="/members/manage" experience={experience}
  onFavoriteUpdate={async(moduleIds,expectedVersion)=>{

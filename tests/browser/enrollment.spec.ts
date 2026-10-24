@@ -29,6 +29,7 @@ test('Unassigned member shows own profile and no group navigation at phone size'
 test('leader must choose the hierarchy and explicitly verify before assigning',async({page})=>{
  await page.goto('/enrollment-preview');await page.getByLabel('Fictional signup lifecycle').selectOption('leader');
  await page.getByRole('button',{name:'Manage',exact:true}).click();
+ await page.getByRole('button',{name:'Placement',exact:true}).click();
  const queue=page.locator('section').filter({has:page.getByRole('heading',{name:'Unassigned members',exact:true})});
  await queue.getByLabel('Age category').selectOption({label:'Demo Age Category'});
  await queue.getByLabel('Group').selectOption({label:'Demo Group A'});
@@ -42,7 +43,7 @@ test('leader must choose the hierarchy and explicitly verify before assigning',a
  await expect(page.getByText('enrollment / assign',{exact:true})).toBeVisible();
 });
 test('leader can decline an unverified signup with retained history',async({page})=>{
- await page.goto('/enrollment-preview');await page.getByLabel('Fictional signup lifecycle').selectOption('leader');await page.getByRole('button',{name:'Manage',exact:true}).click();
+ await page.goto('/enrollment-preview');await page.getByLabel('Fictional signup lifecycle').selectOption('leader');await page.getByRole('button',{name:'Manage',exact:true}).click();await page.getByRole('button',{name:'Placement',exact:true}).click();
  await page.getByText('Decline this signup',{exact:true}).click();await page.getByLabel('Reason for declining').fill('Verified fictional duplicate profile');await page.getByRole('button',{name:'Decline signup',exact:true}).click();
  await expect(page.getByText('enrollment / reject',{exact:true})).toBeVisible();
 });

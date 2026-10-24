@@ -50,11 +50,9 @@ Leadership comes from the existing member appointments. Every request rechecks t
 - Server: `app/api/gospel-planning` (read) and `app/api/gospel-planning/command` (write): signed-in members only, same-origin JSON, strict field checking in `lib/gospel-planning/contract.ts`, generic error messages, no caching.
 - Screens: `app/modules/gospel-planning`, `components/gospel-planning/*`, shared app frame, shared `ui-` building blocks and tokens only.
 
-### Design: Skyline Grid
+### Design: Liquid Opal, sky palette
 
-Gospel Planning wears the Theme Atlas style **Skyline Grid** (light blue-grey ground, white surfaces, navy text, blue `#1863a3` actions, square-edged grid look). Why: it is the Atlas style made for schedules and organization, which is what this app is; it is unused by every other app; and it reads clearly at every age with no decorative imagery. Light, Dark and System appearance all keep it.
-
-The style is registered in `lib/module-styles.ts` (key `gospel-planning`, Atlas Skyline Grid) with its light and dark token blocks in `styles/lvz-tokens.css`; the shared frame applies it. To swap styles, change that entry and its token block. Module CSS uses tokens only, so Light, Dark and System appearance work without changes.
+Since October 24, 2026 every app shares one design language, Liquid Opal (the Atlas Study Rooms screen), and only the palette changes per app. Gospel Planning wears the sky-blue palette (blue `#1863a3` actions with an indigo gradient partner) on the shared material: gradient-tinted ground, frosted glass cards, pill segmented controls, round date chips and the floating dock. It has no Atlas screens of its own, so My Preaching follows `main-week`, My Group follows `organization-members` and Manage follows `mission-manage`. The palette is registered in `lib/module-styles.ts` (key `gospel-planning`) with its light and dark token blocks in `styles/lvz-tokens.css`. Module CSS uses tokens only. Side-by-side captures: `docs/design/atlas-build/gospel-*.jpg`.
 
 ## Verification (October 24, 2026, local only)
 

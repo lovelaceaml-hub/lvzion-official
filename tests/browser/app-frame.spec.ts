@@ -37,7 +37,7 @@ test('frame adapts to another module and remains on access-denied screens',async
 test('avatar endpoint denies anonymous access without caching profile data',async({request})=>{
  const r=await request.get('/api/members/avatar');expect(r.status()).toBe(401);expect(r.headers()['cache-control']).toContain('no-store');expect(await r.json()).not.toHaveProperty('initials');
 });
-test('slim resource tabs attach to the header above dates and respect reduced motion',async({page})=>{
+test('pill resource control sits above the dates in the content and respects reduced motion',async({page})=>{
  await page.setViewportSize({width:320,height:760});
  await openStudyRoute(page);
  const days=page.locator('.sr-day');await expect(days).toHaveCount(4);
@@ -45,14 +45,13 @@ test('slim resource tabs attach to the header above dates and respect reduced mo
  const dates=await days.evaluateAll(items=>items.map(el=>({day:el.getAttribute('data-date')!,special:el.getAttribute('data-special')})));
  for(const date of dates)expect(date.special).toBe(String([2,6].includes(new Date(date.day+'T12:00:00Z').getUTCDay())));
  const headerElement=page.getByRole('banner',{name:'Application header'});
- await expect(page.locator('.sr-header-tabs')).toHaveCount(1);
- await expect(headerElement.locator('.app-frame-header-content .sr-header-tabs')).toHaveCount(1);
- const dateBox=await page.locator('.sr-date-window').boundingBox(),resourceBox=await page.locator('.sr-header-tabs').boundingBox();
- expect(resourceBox!.y+resourceBox!.height).toBeLessThanOrEqual(dateBox!.y+1);expect(resourceBox!.height).toBeLessThanOrEqual(50);
+ // Liquid Opal: the header stays compact; the resource pill control belongs to the planner content.
+ await expect(page.locator('.sr-resource-tabs')).toHaveCount(1);
+ await expect(headerElement.locator('.app-frame-header-content')).toHaveCount(0);
+ const dateBox=await page.locator('.sr-date-window').boundingBox(),resourceBox=await page.locator('.sr-resource-tabs').boundingBox();
+ expect(resourceBox!.y+resourceBox!.height).toBeLessThanOrEqual(dateBox!.y+1);expect(resourceBox!.height).toBeLessThanOrEqual(60);
  const header=await headerElement.boundingBox();expect(header!.x).toBe(0);expect(header!.width).toBe(320);
- expect(resourceBox!.y).toBeGreaterThanOrEqual(header!.y);
- expect(resourceBox!.y+resourceBox!.height).toBeLessThanOrEqual(header!.y+header!.height+1);
- expect(dateBox!.y).toBeGreaterThanOrEqual(header!.y+header!.height-1);
+ expect(resourceBox!.y).toBeGreaterThanOrEqual(header!.y+header!.height-1);
  const orb=await page.locator('.app-frame-apps .app-frame-orb').boundingBox();expect(orb!.width).toBe(orb!.height);
  await page.emulateMedia({reducedMotion:'reduce'});
  expect(await page.locator('.app-frame-apps').evaluate(el=>getComputedStyle(el,'::after').animationName)).toBe('none');

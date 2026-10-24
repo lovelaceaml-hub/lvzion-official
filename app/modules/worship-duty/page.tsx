@@ -3,11 +3,13 @@ import {requireMember} from '../../../lib/server/supabase';
 import {worshipOperationalEnabled} from '../../../lib/worship-duty/activation';
 import {parseModuleFeed} from '../../../lib/app-runtime';
 import ConnectedWorkspace from '../../../components/worship-duty/connected-workspace';
+import {EmptyState,Glass,PageHeading} from '../../../components/ui-kit';
+import {CalendarDays} from '../../../components/home-icons';
 import '../../../components/worship-duty/worship-duty.css';
 export const dynamic='force-dynamic';
 export const metadata={title:'Worship Duty · LV Zion',robots:{index:false,follow:false}};
 function Notice({children}:{children:string}){
- return <div className="ui-page wd-page"><main className="ui-main ui-narrow wd-main"><p className="ui-kicker">Worship Duty</p><h1 className="ui-title">Worship Duty</h1><p className="ui-lede">{children}</p><p><a className="ui-link" href="/members">Back to My Week</a></p></main></div>;
+ return <div className="ui-page wd-page"><main className="ui-main ui-narrow wd-main"><PageHeading eyebrow="Prepare to serve" title="Worship Duty"/><Glass className="wd-state"><EmptyState icon={<CalendarDays/>} title="Worship Duty is not available" action={<a className="ui-button ui-button-secondary" href="/members">Back to My Week</a>}>{children}</EmptyState></Glass></main></div>;
 }
 export default async function Page(){
  let client;

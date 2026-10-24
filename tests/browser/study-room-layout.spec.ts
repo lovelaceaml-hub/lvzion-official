@@ -137,7 +137,7 @@ test('schedule labels every half-hour and selected slots open the reservation fo
  await expect(tile).toBeEnabled();
  await expect(page.getByRole('button',{name:'Reserve',exact:true})).toBeEnabled();
  await tile.click();
- await expect(page.locator('.sr-selection-summary')).toContainText('11:00 AM');
+ await expect(page.locator('.sr-selection-summary')).toContainText('11:00–11:30 AM');
  await page.getByRole('button',{name:'Reserve',exact:true}).click();
  await expect(page.getByRole('dialog',{name:'Reserve a resource'})).toBeVisible();
 });

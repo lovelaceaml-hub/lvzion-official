@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {contactCounts,findLoadedContacts} from '../lib/contacts/presentation.ts';
+import {contactCounts,dueTag,findLoadedContacts} from '../lib/contacts/presentation.ts';
 import type {ContactSummary} from '../lib/contacts/server-contract.ts';
 const owner='00000000-0000-4000-9000-000000000001',other='00000000-0000-4000-9000-000000000002';
 const record=(id:number,name:string,lifecycle:ContactSummary['lifecycle'],archived=false,ownerId=owner):ContactSummary=>({
@@ -29,4 +29,16 @@ test('Malformed workspace missing owner identifiers fails closed',()=>{
  const malformed={...record(9,'Should remain hidden','active'),ownerId:undefined};
  assert.deepEqual(findLoadedContacts([malformed as unknown as ContactSummary],undefined as unknown as string,'all',''),[]);
  assert.equal(contactCounts([malformed as unknown as ContactSummary],undefined as unknown as string).loaded,0);
+});
+test('Follow-up tags use Las Vegas calendar days, including across the daylight-saving change',()=>{
+ const now=new Date('2026-10-24T17:00:00Z'); // 10:00 AM in Las Vegas
+ assert.equal(dueTag('2026-10-24T16:00:00Z',now),'Overdue');
+ assert.equal(dueTag('2026-10-25T06:30:00Z',now),'Today'); // 11:30 PM Las Vegas, already the 25th in UTC
+ assert.equal(dueTag('2026-10-25T18:00:00Z',now),'Tomorrow');
+ assert.equal(dueTag('2026-10-26T18:00:00Z',now),null);
+ assert.equal(dueTag('not a date',now),null);
+ // November 1, 2026 has 25 hours in Las Vegas: a fixed 24-hour step would land on the same date.
+ const fallBack=new Date('2026-11-01T07:30:00Z'); // 12:30 AM PDT
+ assert.equal(dueTag('2026-11-02T18:00:00Z',fallBack),'Tomorrow');
+ assert.equal(dueTag('2026-11-02T07:30:00Z',fallBack),'Today'); // 11:30 PM PST, still November 1
 });

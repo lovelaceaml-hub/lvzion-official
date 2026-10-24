@@ -14,7 +14,7 @@ try{
  await cp(join(root,'components/contacts'),join(dir,'components/contacts'),{recursive:true});
  await cp(join(root,'lib/contacts'),join(dir,'lib/contacts'),{recursive:true});
  // Shared Day Sheet pieces the module uses: header, swipe hook, tokens and ui- classes.
- for(const path of ['components/app-header.tsx','components/app-frame.tsx','components/app-frame.css','components/app-switcher.tsx','components/app-switcher.css','lib/app-runtime.ts','lib/member-experience.ts','lib/contracts.ts','components/home-icons.tsx','components/module-icon.tsx','lib/module-styles.ts','lib/use-swipe-tabs.ts','lib/design-tokens.ts','styles/lvz-tokens.css','styles/lvz-ui.css'])
+ for(const path of ['components/app-header.tsx','components/app-frame.tsx','components/app-frame.css','components/app-switcher.tsx','components/app-switcher.css','lib/app-runtime.ts','lib/member-experience.ts','lib/contracts.ts','components/home-icons.tsx','components/ui-kit.tsx','components/module-icon.tsx','lib/module-styles.ts','lib/use-swipe-tabs.ts','lib/design-tokens.ts','styles/lvz-tokens.css','styles/lvz-ui.css'])
   await cp(join(root,path),join(dir,path));
  await symlink(join(root,'node_modules'),join(dir,'node_modules'),'dir');
  await cp(join(root,'package.json'),join(dir,'package.json'));

@@ -1,10 +1,26 @@
 'use client';
-import {useEffect,useState} from 'react';
-import type {ChurchOffset,DisplaySlide} from '../lib/continuous-display/live-contract';
+import {useEffect,useState,type ReactNode} from 'react';
+import {CalendarDays,Clock3,FileText,Heart,MapPin,Plus,Settings,Sun} from './home-icons';
+import {EmptyState,Glass,IconBox,SectionHeader,Tag} from './ui-kit';
+import type {ChurchOffset,DisplayKind,DisplaySlide} from '../lib/continuous-display/live-contract';
 import {CHURCH_TIME_ZONE,churchDateTime,churchLocal,churchTimeToUtc,offsetForChurchTime,slideEligible} from '../lib/continuous-display/live-contract';
 import type {DisplayMotionMode,DisplayScreenR2,OperatingDay,OperatingHours} from '../lib/continuous-display/operations';
 import {minuteValue,parseDisplayMotionMode,parseOperatingHours,standardOperatingHours,timeValue} from '../lib/continuous-display/operations';
 export type Command=(action:string,extra?:Record<string,unknown>)=>Promise<void>;
+/** Leading icon for a slide row or tile, by content type. */
+export function KindIcon({kind,size=22}:{kind:DisplayKind;size?:number}){
+ if(kind==='schedule')return <CalendarDays size={size}/>;
+ if(kind==='event')return <MapPin size={size}/>;
+ if(kind==='campaign')return <Heart size={size}/>;
+ return <FileText size={size}/>;
+}
+/** Glass disclosure card: icon box, title and a short note; the chevron comes from CSS. */
+function Disclosure({id,icon,title,note,children}:{id:string;icon:ReactNode;title:string;note?:ReactNode;children:ReactNode}){
+ return <details className="cd-disclosure">
+  <summary><IconBox>{icon}</IconBox><span className="cd-disclosure-title" id={id}>{title}</span>{note?<small>{note}</small>:null}</summary>
+  <div className="cd-disclosure-body">{children}</div>
+ </details>;
+}
 const weekdays=['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
 const isoFromWall=(wall:string,current:string)=> {
  const preferred=offsetForChurchTime(current);
@@ -61,8 +77,7 @@ export function OperatingHoursEditor({screen,busy,command}:{screen:DisplayScreen
  const save=async()=>{if(!valid){setError('Each active day needs an end time after the start.');return;}
   await command('hours',{expectedVersion:screen.configVersion,hours});setError('');
  };
- return <section className="cd-block" aria-labelledby="cd-hours-title">
-  <h2 id="cd-hours-title" className="ui-section-title">Hours</h2>
+ return <Disclosure id="cd-hours-title" icon={<Clock3/>} title="Operating hours" note={(screen.operatingHours??[]).length?'Limited':'Any time'}>
   <p className="ui-hint">Outside these Las Vegas hours the TV shows a quiet welcome. It does not turn the TV off.</p>
   <label className="cd-check">
    <input type="checkbox" checked={hours.length>0} onChange={e=>{setHours(e.target.checked?standardOperatingHours():[]);setDirty(true);}}/>
@@ -79,7 +94,7 @@ export function OperatingHoursEditor({screen,busy,command}:{screen:DisplayScreen
   </ul>}
   {error&&<p role="alert" className="ui-notice" data-tone="danger">{error}</p>}
   <button type="button" className="ui-button ui-button-secondary ui-button-block" disabled={busy||!dirty||!valid} onClick={()=>void save()}>Save operating hours</button>
- </section>;
+ </Disclosure>;
 }
 export function PublicationControls({screen,busy,command,draftDirty}:{
  screen:DisplayScreenR2;busy:boolean;command:Command;draftDirty:boolean;
@@ -92,15 +107,17 @@ export function PublicationControls({screen,busy,command,draftDirty}:{
   Boolean(screen.publishedUntil&&Date.parse(screen.publishedUntil)>Date.now()+minutes*60000);
  const overrideActive=!!screen.overrideSlideId&&!!screen.overrideUntil&&Date.parse(screen.overrideUntil)>Date.now();
  return <>
-  <section className="cd-block" aria-labelledby="cd-override-title">
-   <h2 id="cd-override-title" className="ui-section-title">On the TV now</h2>
-   <p className="ui-hint">The published playlist, not your unsaved draft. Each TV moves through it on its own, so this page cannot show the exact slide on screen.</p>
-   {screen.publishedItems?.length?<ol className="ui-list">{screen.publishedItems.map((s,i)=><li key={s.id} className="ui-row">
-    <span className="cd-lead">{i+1}</span><span className="ui-row-body"><strong>{s.title}</strong><small>{s.duration}s · {s.kind.slice(0,1).toUpperCase()+s.kind.slice(1)}</small></span></li>)}</ol>:<p className="ui-hint">Nothing is published yet.</p>}
+  <section className="cd-group" aria-labelledby="cd-override-title">
+   <SectionHeader id="cd-override-title" title="On the TV now" note={screen.publishedItems?.length?`Published v${screen.publishedVersion}`:undefined}/>
+   <p className="ui-hint cd-lead-hint">The published playlist, not your unsaved draft. Each TV moves through it on its own, so this page cannot show the exact slide on screen.</p>
+   {screen.publishedItems?.length?<Glass tight as="div"><ol className="ui-list">{screen.publishedItems.map((s,i)=><li key={s.id} className="ui-row">
+    <IconBox><KindIcon kind={s.kind}/></IconBox><span className="ui-row-body"><strong>{s.title}</strong><small>{s.duration}s · {s.kind.slice(0,1).toUpperCase()+s.kind.slice(1)}</small></span>
+    {overrideActive&&screen.overrideSlideId===s.id?<Tag tone="success">Featured</Tag>:<Tag>{String(i+1).padStart(2,'0')}</Tag>}</li>)}</ol></Glass>
+   :<Glass as="div" className="cd-state"><EmptyState icon={<FileText/>} title="Nothing is published yet">Approve and publish a draft to put it on paired TVs.</EmptyState></Glass>}
   </section>
-  <section className="cd-block" aria-labelledby="cd-feature-title">
-   <h2 id="cd-feature-title" className="ui-section-title">Feature a slide for a while</h2>
-   <p className="ui-hint">Keep one published slide on screen for a short time. This cannot add new wording or run past the publication end.</p>
+  <Glass className="cd-card" aria-labelledby="cd-feature-title">
+   <div className="cd-card-head"><IconBox><Sun/></IconBox><div><h2 id="cd-feature-title">Feature a slide for a while</h2>
+   <p className="ui-hint">Keep one published slide on screen for a short time. This cannot add new wording or run past the publication end.</p></div></div>
    {overrideActive&&<p className="ui-notice">Featuring <strong>{screen.publishedItems?.find(s=>s.id===screen.overrideSlideId)?.title||'a published slide'}</strong> until {new Date(screen.overrideUntil!).toLocaleTimeString('en-US',{timeZone:CHURCH_TIME_ZONE})}.</p>}
    <div className="cd-fields">
     <label className="ui-field">Approved slide<select className="ui-input" value={selected} disabled={!available.length} onChange={e=>setSelected(e.target.value)}>
@@ -117,31 +134,30 @@ export function PublicationControls({screen,busy,command,draftDirty}:{
     }}>Feature approved slide</button>
     <button type="button" className="ui-button ui-button-quiet" disabled={busy||!overrideActive} onClick={()=>void command('clearOverride')}>End emphasis</button>
    </div>
-  </section>
-  <section className="cd-block" aria-labelledby="cd-restore-title">
-   <h2 id="cd-restore-title" className="ui-section-title">Earlier versions</h2>
-   <p className="ui-hint">Restoring brings back earlier approved wording with its original dates. A version whose dates have passed cannot come back.</p>
-   {screen.history.length?<ul className="ui-list">{screen.history.map(h=><li key={h.id} className="ui-row">
-    <span className="cd-lead">v{h.generation}</span><span className="ui-row-body"><strong>Published {churchDateTime(h.publishedAt)}</strong><small>Ends {churchDateTime(h.until)}</small></span>
-    <button type="button" className="ui-button ui-button-secondary" disabled={busy||h.generation===screen.publishedVersion||Date.parse(h.until)<=Date.now()}
+  </Glass>
+  <section className="cd-group" aria-labelledby="cd-restore-title">
+   <SectionHeader id="cd-restore-title" title="Earlier versions"/>
+   <p className="ui-hint cd-lead-hint">Restoring brings back earlier approved wording with its original dates. A version whose dates have passed cannot come back.</p>
+   {screen.history.length?<Glass tight as="div"><ul className="ui-list">{screen.history.map(h=><li key={h.id} className="ui-row cd-version">
+    <IconBox>v{h.generation}</IconBox><span className="ui-row-body"><strong>Published {churchDateTime(h.publishedAt)}</strong><small>Ends {churchDateTime(h.until)}</small></span>
+    <button type="button" className="ui-button ui-button-secondary cd-small-button" disabled={busy||h.generation===screen.publishedVersion||Date.parse(h.until)<=Date.now()}
      onClick={()=>{if(window.confirm('Restore this previously approved publication as a NEW version?'))
        void command('restore',{publicationId:h.id,expectedGeneration:screen.publishedVersion});}}>Restore v{h.generation}</button>
-   </li>)}</ul>:<p className="ui-hint">Nothing has been published yet.</p>}
+   </li>)}</ul></Glass>:<p className="ui-hint">Nothing has been published yet.</p>}
    {draftDirty&&<p className="ui-hint">Unsaved edits are not part of a featured or restored version.</p>}
   </section>
  </>;
 }
 export function NewScreenEditor({busy,command}:{busy:boolean;command:Command}){
  const [name,setName]=useState('');
- return <section className="cd-block" aria-labelledby="cd-new-screen-title">
-  <h2 id="cd-new-screen-title" className="ui-section-title">Add another TV</h2>
+ return <Disclosure id="cd-new-screen-title" icon={<Plus/>} title="Add another display">
   <p className="ui-hint">Each display is separate. A new one starts off, empty and unpaired. Only the display owner can add one.</p>
   <label className="ui-field">Display name<input className="ui-input" value={name} maxLength={80} placeholder="Example: Fellowship Hall TV"
     onChange={e=>setName(e.target.value)}/></label>
   <button type="button" className="ui-button ui-button-secondary ui-button-block" disabled={busy||name.trim().length<3}
     onClick={()=>{void command('createScreen',{label:name.trim()});setName('');}}>
    Add display</button>
- </section>;
+ </Disclosure>;
 }
 const motionModes:{id:DisplayMotionMode;label:string;description:string}[]=[
  {id:'standard',label:'Standard',description:'Slow, steady movement'},
@@ -153,8 +169,7 @@ export function DisplayMotionEditor({screen,busy,command}:{screen:DisplayScreenR
  const current=parseDisplayMotionMode(screen.motionMode);
  const [selected,setSelected]=useState<DisplayMotionMode>(current);
  useEffect(()=>setSelected(parseDisplayMotionMode(screen.motionMode)),[screen.id,screen.motionMode,screen.configVersion]);
- return <section className="cd-block" aria-labelledby="cd-motion-title">
-  <h2 id="cd-motion-title" className="ui-section-title">Motion on this TV</h2>
+ return <Disclosure id="cd-motion-title" icon={<Settings/>} title="Motion on this TV" note={motionModes.find(m=>m.id===current)?.label}>
   <p className="ui-hint">How much the background moves on {screen.label}. This never changes or publishes content, and a TV set to reduce motion always stays still.</p>
   <fieldset className="cd-fieldset cd-motion">
    <legend className="ui-visually-hidden">Motion for {screen.label}</legend>
@@ -168,5 +183,5 @@ export function DisplayMotionEditor({screen,busy,command}:{screen:DisplayScreenR
    onClick={()=>void command('motion',{expectedVersion:screen.configVersion,motionMode:selected})}>
    Save screen motion
   </button>
- </section>;
+ </Disclosure>;
 }

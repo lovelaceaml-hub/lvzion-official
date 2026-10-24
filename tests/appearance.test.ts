@@ -70,5 +70,8 @@ test('every module in the registry has a style, and every style is readable',()=
    assert.ok(contrast(accent,bg)>=4.5,label+' links '+contrast(accent,bg).toFixed(2));
   }
   assert.ok(contrast(onAccent,accent)>=4.5,label+' button text');
+  // The gradient action runs from the accent to its partner; labels stay readable across it.
+  const partner=read('accent-2');assert.ok(partner,label+' defines the gradient partner');
+  assert.ok(contrast(onAccent,partner!)>=4.5,label+' button text on the gradient end '+contrast(onAccent,partner!).toFixed(2));
  }
 });

@@ -1,4 +1,4 @@
-/* Church Display settings pieces (dates, hours, motion). Management only; the TV player never loads this file. */
+/* Church Display settings pieces (dates, hours, motion) in Liquid Opal. Management only; the TV player never loads this file. */
 .cd-fieldset{min-width:0;margin:var(--lvz-space-4) 0 0;padding:0;border:0}
 .cd-fieldset>legend{padding:0;margin-bottom:var(--lvz-space-2);font-size:var(--lvz-text-sm);font-weight:var(--lvz-weight-bold);color:var(--lvz-ink-quiet)}
 .cd-check{display:flex;align-items:center;gap:var(--lvz-space-3);min-height:var(--lvz-tap);font-weight:var(--lvz-weight-strong)}
@@ -6,8 +6,21 @@
 .cd-pair-fields{display:grid;grid-template-columns:minmax(0,3fr) minmax(0,2fr);column-gap:var(--lvz-space-3)}
 .cd-choice{cursor:pointer}
 .cd-choice:has(input:checked) strong{color:var(--lvz-accent)}
+.cd-motion{margin-top:0}
 
-/* Hours: one row per day, the day name first like a time on the sheet. */
+/* Glass disclosure cards: icon box, title and current state; the chevron turns when open. */
+.cd-disclosure{margin:0;padding:0 var(--lvz-space-4);border:var(--lvz-glass-border);border-radius:var(--lvz-radius-xl);background:var(--lvz-glass);box-shadow:var(--lvz-glass-shadow)}
+@supports(backdrop-filter:blur(12px)){.cd-disclosure{-webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px)}}
+.cd-disclosure>summary{display:flex;align-items:center;gap:var(--lvz-space-3);min-height:72px;padding:var(--lvz-space-3) 0;list-style:none;cursor:pointer}
+.cd-disclosure>summary::-webkit-details-marker{display:none}
+.cd-disclosure>summary::after{content:'';flex:none;width:8px;height:8px;margin:0 var(--lvz-space-1);border-right:2px solid var(--lvz-ink-quiet);border-bottom:2px solid var(--lvz-ink-quiet);transform:rotate(45deg);transition:transform var(--lvz-duration-fast) var(--lvz-ease)}
+.cd-disclosure[open]>summary::after{transform:rotate(-135deg)}
+.cd-disclosure-title{flex:1;min-width:0;font-size:var(--lvz-text-md);font-weight:var(--lvz-weight-bold);color:var(--lvz-ink)}
+.cd-disclosure>summary small{white-space:nowrap;font-size:var(--lvz-text-sm);color:var(--lvz-ink-quiet)}
+.cd-disclosure-body{padding:var(--lvz-space-3) 0 var(--lvz-space-5);border-top:1px solid var(--lvz-line)}
+.cd-disclosure-body>.ui-hint:first-child{margin-top:0}
+
+/* Hours: one row per day, the day name first. */
 .cd-days{margin-bottom:var(--lvz-space-4)}
 .cd-day{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:0 var(--lvz-space-3);align-items:end}
 .cd-day>.cd-check{grid-column:1/-1}

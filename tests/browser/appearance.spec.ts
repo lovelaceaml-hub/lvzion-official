@@ -11,7 +11,7 @@ test('Dark survives reload and module navigation, and each app keeps its own sty
  await page.getByRole('radio',{name:/^Dark\b/}).check();
  await expect(page.locator('html')).toHaveAttribute('data-lvz-scheme','dark');
  await page.reload();await expect(page.getByRole('radio',{name:/^Dark\b/})).toBeChecked();
- expect(await ground(page)).toBe('#0f1613');
+ expect(await ground(page)).toBe('#111027');
  await openStudyRoute(page);
  await expect(page.locator('.app-frame')).toHaveAttribute('data-lvz-module','study-rooms');
  expect(await ground(page)).toBe('#16111e');

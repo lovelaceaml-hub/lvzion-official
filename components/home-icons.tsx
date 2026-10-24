@@ -37,3 +37,8 @@ export const Music=make(<><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3
 export const Heart=make(<path d="M19 14c1.5-1.5 3-3.2 3-5.5A5.5 5.5 0 0 0 12 5.6 5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4 3 5.5l7 7z"/>);
 export const ClipboardList=make(<><rect x="5" y="4" width="14" height="17" rx="2"/><path d="M9 2h6v4H9zM9 11h6m-6 4h4"/></>);
 export const LogIn=make(<><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4M10 17l5-5-5-5M15 12H3"/></>);
+export const Search=make(<><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></>);
+export const Plus=make(<path d="M12 5v14M5 12h14"/>);
+export const BookOpen=make(<><path d="M3 5.5C5.5 4.5 8.5 4.5 12 6.5v13c-3.5-2-6.5-2-9-1z"/><path d="M21 5.5c-2.5-1-5.5-1-9 1v13c3.5-2 6.5-2 9-1z"/></>);
+export const Settings=make(<><circle cx="12" cy="12" r="3"/><path d="M12 2v3m0 14v3M4.9 4.9 7 7m10 10 2.1 2.1M2 12h3m14 0h3M4.9 19.1 7 17m10-10 2.1-2.1"/></>);
+export const FileText=make(<><path d="M14 3H6a1 1 0 0 0-1 1v16a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V8z"/><path d="M14 3v5h5M9 13h6m-6 4h6"/></>);

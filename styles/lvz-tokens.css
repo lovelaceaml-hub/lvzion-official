@@ -1,12 +1,12 @@
 /*
  * LV Zion design tokens. Contract: docs/design/LVZ-DESIGN-CONTRACT.md.
  *
- * One shared base (frame, type, spacing, radii, controls, states) in a neutral
- * palette from Anthony's Theme Atlas: Layered Tabs, the Atlas "Foundation"
- * direction used on its main-* screens (home, sign in, profile). Each module
- * wears its own Atlas style by redefining only the palette tokens (and,
- * optionally, --lvz-font-display and the radius scale) inside its
- * [data-lvz-module] scope, which the shared AppFrame sets from the route.
+ * One design language everywhere: Liquid Opal from Anthony's Theme Atlas
+ * (the Study Rooms availability screen, Anthony's direction of October 24,
+ * 2026). Every app uses the same material (gradient-tinted ground, frosted
+ * glass panels, gradient pill actions, round date chips, floating dock); each
+ * app changes only its palette (accent, its gradient partner and two backdrop
+ * tints) inside its [data-lvz-module] scope, which the AppFrame sets.
  *
  * Light and dark come from the device appearance choice (Light, Dark or
  * System), resolved before first paint to :root[data-lvz-scheme].
@@ -14,20 +14,27 @@
 :root{
  color-scheme:light;
 
- /* Base palette, light: Atlas 01 Layered Tabs. */
- --lvz-ground:#f5f6f2;
- --lvz-surface:#ffffff;
- --lvz-sunken:#e9eee9;
- --lvz-ink:#172c24;
- --lvz-ink-quiet:#4b6257;
- --lvz-ink-faint:#869690;
- --lvz-line:#dce5dd;
- --lvz-line-input:#7b8c84;
- --lvz-accent:#18513e;
- --lvz-accent-strong:#113a2c;
- --lvz-accent-soft:#e2ece5;
+ /* Base palette, light: Atlas 14 Liquid Opal (violet). */
+ --lvz-ground:#ecefff;
+ --lvz-surface:#f8f9ff;
+ --lvz-sunken:#e0e3fa;
+ --lvz-ink:#25234f;
+ --lvz-ink-quiet:#57548a;
+ --lvz-ink-faint:#9896c2;
+ --lvz-line:#d3d1f2;
+ --lvz-line-input:#7d7ab4;
+ --lvz-accent:#6146c9;
+ --lvz-accent-strong:#4a33a8;
+ --lvz-accent-soft:#e4dffb;
  --lvz-on-accent:#ffffff;
- --lvz-focus:#18513e;
+ --lvz-focus:#6146c9;
+ /* Liquid Opal material: gradient partner of the accent, two backdrop tints,
+  * the glass edge and the highlight on raised controls. */
+ --lvz-accent-2:#3b73c4;
+ --lvz-tint-1:#b9e8ff;
+ --lvz-tint-2:#ffc5ef;
+ --lvz-glass-edge:#ffffff;
+ --lvz-glint:rgb(255 255 255 / 70%);
  --lvz-alert:#b4532a;
  --lvz-danger:#9b2b20;
  --lvz-danger-soft:#fbe7e2;
@@ -72,12 +79,13 @@
  --lvz-gutter-wide:48px;
 
  /* Shape */
- --lvz-radius-sm:8px;
- --lvz-radius-md:12px;
- --lvz-radius-lg:16px;
+ --lvz-radius-sm:10px;
+ --lvz-radius-md:16px;
+ --lvz-radius-lg:24px;
  --lvz-radius-round:999px;
- --lvz-shadow-sheet:0 -8px 24px rgb(23 44 36 / 12%);
- --lvz-shadow-pop:0 6px 18px rgb(23 44 36 / 14%);
+ --lvz-radius-xl:30px;
+ --lvz-shadow-sheet:0 -8px 28px rgb(37 35 79 / 16%);
+ --lvz-shadow-pop:0 8px 20px rgb(37 35 79 / 14%);
 
  /* Size */
  --lvz-tap:44px;
@@ -98,22 +106,27 @@
  :root{--lvz-gutter:var(--lvz-gutter-wide)}
 }
 
-/* Base palette, dark: a Layered Tabs companion (deep green-black paper). */
+/* Base palette, dark: a Liquid Opal night companion (the same material). */
 :root[data-lvz-scheme="dark"]{
  color-scheme:dark;
- --lvz-ground:#0f1613;
- --lvz-surface:#17211d;
- --lvz-sunken:#1f2b26;
- --lvz-ink:#e8f0ec;
- --lvz-ink-quiet:#a9bcb3;
- --lvz-ink-faint:#6b7f77;
- --lvz-line:#2b3a34;
- --lvz-line-input:#7a8f86;
- --lvz-accent:#82caa9;
- --lvz-accent-strong:#a6ddc4;
- --lvz-accent-soft:#1d3a2f;
- --lvz-on-accent:#0b1f17;
- --lvz-focus:#82caa9;
+ --lvz-ground:#111027;
+ --lvz-surface:#1c1a3a;
+ --lvz-sunken:#252349;
+ --lvz-ink:#eeecff;
+ --lvz-ink-quiet:#b8b5e2;
+ --lvz-ink-faint:#77749f;
+ --lvz-line:#34315f;
+ --lvz-line-input:#8a87bf;
+ --lvz-accent:#b5a6ff;
+ --lvz-accent-strong:#d3caff;
+ --lvz-accent-soft:#2d2860;
+ --lvz-on-accent:#16113a;
+ --lvz-focus:#b5a6ff;
+ --lvz-accent-2:#8dc1f6;
+ --lvz-tint-1:#1f5a8f;
+ --lvz-tint-2:#6b2f6d;
+ --lvz-glass-edge:rgb(255 255 255 / 12%);
+ --lvz-glint:rgb(255 255 255 / 28%);
  --lvz-alert:#ffb184;
  --lvz-danger:#ffb3a9;
  --lvz-danger-soft:#47242c;
@@ -124,154 +137,200 @@
  --lvz-time-marker:#ff829a;
  --lvz-scrim:rgb(0 0 0 / 55%);
  --lvz-shadow-sheet:0 -8px 24px rgb(0 0 0 / 45%);
- --lvz-shadow-pop:0 6px 18px rgb(0 0 0 / 40%);
+ --lvz-shadow-pop:0 8px 20px rgb(0 0 0 / 40%);
 }
 
 /*
- * Module styles. Each scope redefines palette tokens only. A module that is
- * dark by design (an "after dark" Atlas pick) keeps its palette in both
- * schemes. Status colors (danger, warning, success) follow the base scheme.
+ * Module palettes. Each scope redefines palette tokens only; the material
+ * (below) is the same for every app. Concert and Song library are dark by
+ * design and keep their palette in both schemes. Status colors (danger,
+ * warning, success) follow the base scheme.
  */
 
-/* Study Rooms: Lavender Softform, approved October 19, 2026 (Atlas 11, the
- * Liquid Opal family). Layout and values unchanged; now also covers the
- * Study Rooms member screens. */
+/* Study Rooms: the approved Lavender Softform values (Liquid Opal family). */
 [data-lvz-module="study-rooms"]{
  --lvz-ground:#eee8fa;--lvz-surface:#f8f4ff;--lvz-sunken:#dcd0e9;
  --lvz-ink:#291347;--lvz-ink-quiet:#665480;--lvz-ink-faint:#9787ad;
  --lvz-line:#d0c1e4;--lvz-line-input:#9072b5;
  --lvz-accent:#7041a8;--lvz-accent-strong:#472369;--lvz-accent-soft:#e2d3fb;--lvz-on-accent:#ffffff;--lvz-focus:#6021a2;
+ --lvz-accent-2:#4f63c4;--lvz-tint-1:#b9e8ff;--lvz-tint-2:#ffc5ef;
  --lvz-time-marker:#d91736;
- --lvz-radius-md:16px;--lvz-radius-lg:24px;
- --lvz-shadow-sheet:0 12px 28px rgb(66 36 98 / 20%);--lvz-shadow-pop:0 6px 16px rgb(66 36 98 / 20%);
 }
 :root[data-lvz-scheme="dark"] [data-lvz-module="study-rooms"]{
  --lvz-ground:#16111e;--lvz-surface:#221a2e;--lvz-sunken:#2c2239;
  --lvz-ink:#f1eaff;--lvz-ink-quiet:#c4b5da;--lvz-ink-faint:#7c6c93;
  --lvz-line:#3c3050;--lvz-line-input:#9a85b8;
  --lvz-accent:#bb9cf0;--lvz-accent-strong:#d6c2f8;--lvz-accent-soft:#38294d;--lvz-on-accent:#1b1028;--lvz-focus:#bb9cf0;
+ --lvz-accent-2:#9fb4f5;--lvz-tint-1:#1f4f80;--lvz-tint-2:#6b2f6d;
  --lvz-time-marker:#ff7d93;
- --lvz-shadow-sheet:0 12px 28px rgb(0 0 0 / 45%);--lvz-shadow-pop:0 6px 16px rgb(0 0 0 / 40%);
 }
 
-/* Contacts: Tidal Teal (Atlas 18). */
+/* Contacts: teal. */
 [data-lvz-module="contacts"]{
  --lvz-ground:#e7f4f1;--lvz-surface:#f8fffd;--lvz-sunken:#d6ebe6;
  --lvz-ink:#153c3e;--lvz-ink-quiet:#456a6b;--lvz-ink-faint:#86a5a2;
  --lvz-line:#c3e0da;--lvz-line-input:#6c8f8e;
  --lvz-accent:#086568;--lvz-accent-strong:#054a4c;--lvz-accent-soft:#d3ecea;--lvz-on-accent:#ffffff;--lvz-focus:#086568;
+ --lvz-accent-2:#1d6a96;--lvz-tint-1:#b2efe3;--lvz-tint-2:#bfe0ff;
 }
 :root[data-lvz-scheme="dark"] [data-lvz-module="contacts"]{
  --lvz-ground:#0b1819;--lvz-surface:#122426;--lvz-sunken:#192e30;
  --lvz-ink:#e3f4f2;--lvz-ink-quiet:#9fc1bf;--lvz-ink-faint:#5e7c7b;
  --lvz-line:#25403f;--lvz-line-input:#6f9593;
  --lvz-accent:#62cbc7;--lvz-accent-strong:#8fdeda;--lvz-accent-soft:#133a3a;--lvz-on-accent:#052021;--lvz-focus:#62cbc7;
+ --lvz-accent-2:#7cc4ee;--lvz-tint-1:#0f5258;--lvz-tint-2:#1b4a70;
 }
 
-/* Work Mission: Linen Editorial (Atlas 15), with the editorial serif titles. */
+/* Work Mission (Morning Prayer): warm linen brown and gold. */
 [data-lvz-module="work-mission"]{
  --lvz-ground:#f4eee3;--lvz-surface:#fffaf1;--lvz-sunken:#ebe2d2;
  --lvz-ink:#292c25;--lvz-ink-quiet:#625f52;--lvz-ink-faint:#a49d8c;
  --lvz-line:#e0d6c3;--lvz-line-input:#8c826f;
  --lvz-accent:#6d5436;--lvz-accent-strong:#4f3b24;--lvz-accent-soft:#efe4d2;--lvz-on-accent:#ffffff;--lvz-focus:#6d5436;
- --lvz-font-display:var(--lvz-font-serif);--lvz-display-weight:400;--lvz-display-tracking:-.01em;
+ --lvz-accent-2:#94591f;--lvz-tint-1:#ffdcae;--lvz-tint-2:#f8cfc0;
 }
 :root[data-lvz-scheme="dark"] [data-lvz-module="work-mission"]{
  --lvz-ground:#191612;--lvz-surface:#24201a;--lvz-sunken:#2e2921;
  --lvz-ink:#f4ece0;--lvz-ink-quiet:#c5baa7;--lvz-ink-faint:#7d7363;
  --lvz-line:#3d3529;--lvz-line-input:#8f8370;
  --lvz-accent:#dbbb8f;--lvz-accent-strong:#ecd3ae;--lvz-accent-soft:#3a2f22;--lvz-on-accent:#231a0e;--lvz-focus:#dbbb8f;
+ --lvz-accent-2:#f0c27a;--lvz-tint-1:#5a3d1a;--lvz-tint-2:#5a2b25;
 }
 
-/* Members and organization: Graphite & Chrome (Atlas 04). */
+/* Members and organization: graphite. */
 [data-lvz-module="members"]{
  --lvz-ground:#e8e9eb;--lvz-surface:#f7f7f8;--lvz-sunken:#dcdee1;
  --lvz-ink:#171b20;--lvz-ink-quiet:#50575f;--lvz-ink-faint:#9097a0;
  --lvz-line:#c9ccd1;--lvz-line-input:#7a818a;
  --lvz-accent:#343a43;--lvz-accent-strong:#1f2329;--lvz-accent-soft:#dfe1e5;--lvz-on-accent:#ffffff;--lvz-focus:#343a43;
+ --lvz-accent-2:#3f5878;--lvz-tint-1:#d5e1f0;--lvz-tint-2:#e5e0f2;
 }
 :root[data-lvz-scheme="dark"] [data-lvz-module="members"]{
  --lvz-ground:#121417;--lvz-surface:#1b1e22;--lvz-sunken:#24282d;
  --lvz-ink:#eceef1;--lvz-ink-quiet:#aab1ba;--lvz-ink-faint:#666d76;
  --lvz-line:#33383f;--lvz-line-input:#7f8791;
  --lvz-accent:#cfd4db;--lvz-accent-strong:#eceef1;--lvz-accent-soft:#2c3036;--lvz-on-accent:#15181c;--lvz-focus:#cfd4db;
+ --lvz-accent-2:#a9bbd6;--lvz-tint-1:#2a3b55;--lvz-tint-2:#3b3350;
 }
 
-/* Continuous Display management: Pearl Garden (Atlas 19). The paired TV
- * player at /display keeps its published composition and is not themed. */
+/* Continuous Display management: garden green. The paired TV player at
+ * /display keeps its published composition and is not themed. */
 [data-lvz-module="continuous-display"]{
  --lvz-ground:#eff1e7;--lvz-surface:#fcfdf7;--lvz-sunken:#e2e6d7;
  --lvz-ink:#2b4230;--lvz-ink-quiet:#5a6a57;--lvz-ink-faint:#9aa693;
  --lvz-line:#d4dbc8;--lvz-line-input:#7d8a76;
  --lvz-accent:#49643e;--lvz-accent-strong:#344a2c;--lvz-accent-soft:#e1e9d6;--lvz-on-accent:#ffffff;--lvz-focus:#49643e;
+ --lvz-accent-2:#2b6b55;--lvz-tint-1:#cfeec0;--lvz-tint-2:#c4ecdf;
 }
 :root[data-lvz-scheme="dark"] [data-lvz-module="continuous-display"]{
  --lvz-ground:#121710;--lvz-surface:#1b2219;--lvz-sunken:#232c20;
  --lvz-ink:#e9efe3;--lvz-ink-quiet:#b0bea8;--lvz-ink-faint:#68765f;
  --lvz-line:#313b2c;--lvz-line-input:#7f8f77;
  --lvz-accent:#aacb9b;--lvz-accent-strong:#c7e0bb;--lvz-accent-soft:#263421;--lvz-on-accent:#13200f;--lvz-focus:#aacb9b;
+ --lvz-accent-2:#8fd3b5;--lvz-tint-1:#2b4a22;--lvz-tint-2:#1d4a3c;
 }
 
-/* Groups & Gospel Planning: Skyline Grid (Atlas 22), square-edged grid material. */
+/* Groups & Gospel Planning: sky blue. */
 [data-lvz-module="gospel-planning"]{
- --lvz-ground:#eaf0f5;--lvz-surface:#ffffff;--lvz-sunken:#dde6ee;
- --lvz-ink:#16304b;--lvz-ink-quiet:#526b81;--lvz-ink-faint:#93a6b8;
- --lvz-line:#bbcedd;--lvz-line-input:#6f8599;
+ --lvz-ground:#eaf0f8;--lvz-surface:#f9fbff;--lvz-sunken:#dde6f1;
+ --lvz-ink:#16304b;--lvz-ink-quiet:#4e677e;--lvz-ink-faint:#93a6b8;
+ --lvz-line:#c8d7e6;--lvz-line-input:#6f8599;
  --lvz-accent:#1863a3;--lvz-accent-strong:#114a7b;--lvz-accent-soft:#dbe8f4;--lvz-on-accent:#ffffff;--lvz-focus:#1863a3;
- --lvz-radius-sm:4px;--lvz-radius-md:7px;--lvz-radius-lg:7px;
- --lvz-shadow-sheet:0 -1px 0 #bbcedd;--lvz-shadow-pop:0 0 0 1px #bbcedd;
+ --lvz-accent-2:#3651b8;--lvz-tint-1:#bde5ff;--lvz-tint-2:#cfd8ff;
 }
 :root[data-lvz-scheme="dark"] [data-lvz-module="gospel-planning"]{
  --lvz-ground:#0d1621;--lvz-surface:#142130;--lvz-sunken:#1b2a3c;
  --lvz-ink:#e6eef6;--lvz-ink-quiet:#a3b8cb;--lvz-ink-faint:#5f7487;
  --lvz-line:#2a3d52;--lvz-line-input:#7891a8;
  --lvz-accent:#74b3ec;--lvz-accent-strong:#a2cdf4;--lvz-accent-soft:#19324b;--lvz-on-accent:#08192a;--lvz-focus:#74b3ec;
- --lvz-shadow-sheet:0 -1px 0 #2a3d52;--lvz-shadow-pop:0 0 0 1px #2a3d52;
+ --lvz-accent-2:#9fb0f5;--lvz-tint-1:#164c7a;--lvz-tint-2:#2a3570;
 }
 
-/* Mother's Love: Rose Quartz (Atlas 08). Ready for the module; no route yet. */
+/* Worship Duty: sapphire blue (light) and the Midnight Sapphire night (dark). */
+[data-lvz-module="worship-duty"]{
+ --lvz-ground:#eaf0ff;--lvz-surface:#f7f9ff;--lvz-sunken:#dde5fa;
+ --lvz-ink:#0f2147;--lvz-ink-quiet:#4a5d85;--lvz-ink-faint:#8d9cc0;
+ --lvz-line:#c9d5f0;--lvz-line-input:#6f82ad;
+ --lvz-accent:#1f4fbf;--lvz-accent-strong:#163a8f;--lvz-accent-soft:#dbe5ff;--lvz-on-accent:#ffffff;--lvz-focus:#1f4fbf;
+ --lvz-accent-2:#4338b8;--lvz-tint-1:#b8d4ff;--lvz-tint-2:#cfc8ff;
+}
+:root[data-lvz-scheme="dark"] [data-lvz-module="worship-duty"]{
+ --lvz-ground:#061122;--lvz-surface:#0c203a;--lvz-sunken:#12294a;
+ --lvz-ink:#f1f6ff;--lvz-ink-quiet:#a6bddb;--lvz-ink-faint:#5d789c;
+ --lvz-line:#284c78;--lvz-line-input:#7f9cc4;
+ --lvz-accent:#5c9dff;--lvz-accent-strong:#8bb9ff;--lvz-accent-soft:#16335c;--lvz-on-accent:#061122;--lvz-focus:#5c9dff;
+ --lvz-accent-2:#8f8bff;--lvz-tint-1:#123d7a;--lvz-tint-2:#2c2a6e;
+}
+
+/* Mother's Love: rose. Ready for the module; no route yet. */
 [data-lvz-module="mothers-love"]{
  --lvz-ground:#fae8e8;--lvz-surface:#fff6f2;--lvz-sunken:#f2d9da;
  --lvz-ink:#462331;--lvz-ink-quiet:#7a4f62;--lvz-ink-faint:#b78f9f;
  --lvz-line:#e8c6cd;--lvz-line-input:#9a6c7e;
  --lvz-accent:#aa365d;--lvz-accent-strong:#832445;--lvz-accent-soft:#f6dbe2;--lvz-on-accent:#ffffff;--lvz-focus:#aa365d;
+ --lvz-accent-2:#8a3a9a;--lvz-tint-1:#ffd1dc;--lvz-tint-2:#f3d0ff;
 }
 :root[data-lvz-scheme="dark"] [data-lvz-module="mothers-love"]{
  --lvz-ground:#1b1014;--lvz-surface:#28181e;--lvz-sunken:#331f27;
  --lvz-ink:#fbe9ee;--lvz-ink-quiet:#d6abba;--lvz-ink-faint:#8a6371;
  --lvz-line:#46293a;--lvz-line-input:#a0778a;
  --lvz-accent:#f08cb0;--lvz-accent-strong:#f6b2ca;--lvz-accent-soft:#3e2029;--lvz-on-accent:#2a0f1a;--lvz-focus:#f08cb0;
+ --lvz-accent-2:#d9a0f0;--lvz-tint-1:#6b2840;--lvz-tint-2:#55286b;
 }
 
-/* Worship Duty: Midnight Sapphire (Atlas 03). Dark by design in both schemes. */
-[data-lvz-module="worship-duty"],:root[data-lvz-scheme="dark"] [data-lvz-module="worship-duty"]{
- color-scheme:dark;
- --lvz-ground:#061122;--lvz-surface:#0c203a;--lvz-sunken:#12294a;
- --lvz-ink:#f1f6ff;--lvz-ink-quiet:#a6bddb;--lvz-ink-faint:#5d789c;
- --lvz-line:#284c78;--lvz-line-input:#7f9cc4;
- --lvz-accent:#5c9dff;--lvz-accent-strong:#8bb9ff;--lvz-accent-soft:#16335c;--lvz-on-accent:#061122;--lvz-focus:#5c9dff;
- --lvz-alert:#ffb184;--lvz-danger:#ffb3a9;--lvz-danger-soft:#47242c;--lvz-warning:#f3d58c;--lvz-warning-soft:#40361f;--lvz-success:#9ae3b2;--lvz-success-soft:#173a2a;--lvz-time-marker:#ff829a;
-}
-
-/* Concert: Aurora Night (Atlas 10). Dark by design. Ready for the module. */
+/* Concert: Aurora Night. Dark by design. Ready for the module. */
 [data-lvz-module="concert"],:root[data-lvz-scheme="dark"] [data-lvz-module="concert"]{
  color-scheme:dark;
  --lvz-ground:#0e1025;--lvz-surface:#191b38;--lvz-sunken:#22244a;
  --lvz-ink:#f4f2ff;--lvz-ink-quiet:#b9b9e1;--lvz-ink-faint:#6c6c9c;
  --lvz-line:#494675;--lvz-line-input:#8d8bbd;
  --lvz-accent:#a08aff;--lvz-accent-strong:#c2b5ff;--lvz-accent-soft:#2c2b5a;--lvz-on-accent:#101125;--lvz-focus:#a08aff;
+ --lvz-accent-2:#7fc4f0;--lvz-tint-1:#1f4f80;--lvz-tint-2:#5a2a6e;--lvz-glass-edge:rgb(255 255 255 / 12%);--lvz-glint:rgb(255 255 255 / 28%);
  --lvz-alert:#ffb184;--lvz-danger:#ffb3a9;--lvz-danger-soft:#47242c;--lvz-warning:#f3d58c;--lvz-warning-soft:#40361f;--lvz-success:#9ae3b2;--lvz-success-soft:#173a2a;--lvz-time-marker:#ff829a;
 }
 
-/* Song library: Copper Noir (Atlas 13). Dark by design. Ready for the module. */
+/* Song library: Copper Noir. Dark by design. Ready for the module. */
 [data-lvz-module="song-library"],:root[data-lvz-scheme="dark"] [data-lvz-module="song-library"]{
  color-scheme:dark;
  --lvz-ground:#17120e;--lvz-surface:#241e17;--lvz-sunken:#2e261d;
  --lvz-ink:#fff1dd;--lvz-ink-quiet:#c7b29b;--lvz-ink-faint:#7d6b58;
  --lvz-line:#66503a;--lvz-line-input:#a08c75;
  --lvz-accent:#dea465;--lvz-accent-strong:#ecc191;--lvz-accent-soft:#3b2d1f;--lvz-on-accent:#22160a;--lvz-focus:#dea465;
+ --lvz-accent-2:#f0c27a;--lvz-tint-1:#5a3d1a;--lvz-tint-2:#5a2b25;--lvz-glass-edge:rgb(255 255 255 / 12%);--lvz-glint:rgb(255 255 255 / 28%);
  --lvz-alert:#ffb184;--lvz-danger:#ffb3a9;--lvz-danger-soft:#47242c;--lvz-warning:#f3d58c;--lvz-warning-soft:#40361f;--lvz-success:#9ae3b2;--lvz-success-soft:#173a2a;--lvz-time-marker:#ff829a;
 }
 
-/* A module scope paints its own ground so its style starts at the frame edge. */
-[data-lvz-module]{background:var(--lvz-ground);color:var(--lvz-ink)}
+/*
+ * Liquid Opal material, derived from the palette. Declared on every module
+ * scope as well as :root so each app's palette flows into the same material.
+ *  --lvz-backdrop  the soft gradient-tinted page ground
+ *  --lvz-glass     frosted panel fill; pair with --lvz-glass-border and --lvz-glass-shadow
+ *  --lvz-action    gradient fill for primary actions, the selected pill and the selected date chip
+ */
+:root,[data-lvz-module]{
+ --lvz-backdrop:radial-gradient(at 0 25%,color-mix(in srgb,var(--lvz-tint-1) 62%,transparent),transparent 42%),radial-gradient(at 100% 5%,color-mix(in srgb,var(--lvz-tint-2) 46%,transparent),transparent 42%),radial-gradient(at 60% 92%,color-mix(in srgb,var(--lvz-accent-soft) 95%,transparent),transparent 62%),var(--lvz-ground);
+ --lvz-glass:linear-gradient(120deg,color-mix(in srgb,var(--lvz-surface) 84%,transparent),color-mix(in srgb,var(--lvz-surface) 62%,transparent) 50%,color-mix(in srgb,var(--lvz-accent-soft) 62%,transparent));
+ --lvz-glass-strong:linear-gradient(120deg,color-mix(in srgb,var(--lvz-surface) 94%,transparent),color-mix(in srgb,var(--lvz-surface) 80%,var(--lvz-accent-soft)));
+ --lvz-glass-border:1px solid var(--lvz-glass-edge);
+ --lvz-glass-shadow:inset 0 1px 3px var(--lvz-glint),0 8px 22px color-mix(in srgb,var(--lvz-accent) 13%,transparent);
+ --lvz-action:linear-gradient(120deg,var(--lvz-accent),color-mix(in srgb,var(--lvz-accent) 60%,var(--lvz-accent-2)) 45%,var(--lvz-accent-2));
+ --lvz-action-shadow:inset 0 1px 2px var(--lvz-glint),0 4px 12px color-mix(in srgb,var(--lvz-accent) 30%,transparent);
+}
+:root[data-lvz-scheme="dark"],:root[data-lvz-scheme="dark"] [data-lvz-module]{
+ --lvz-glass:linear-gradient(120deg,color-mix(in srgb,var(--lvz-surface) 88%,transparent),color-mix(in srgb,var(--lvz-surface) 70%,transparent) 50%,color-mix(in srgb,var(--lvz-accent-soft) 70%,transparent));
+ --lvz-glass-shadow:inset 0 1px 2px var(--lvz-glint),0 10px 26px rgb(0 0 0 / 35%);
+ --lvz-action-shadow:inset 0 1px 2px var(--lvz-glint),0 4px 14px rgb(0 0 0 / 40%);
+}
+
+/* Light scheme (owner request, Oct 24): a near-white ground (about 1% of the
+ * app colour), white surfaces and mostly-white glass, so colour reads as an
+ * accent rather than a wash. Dark, Concert and Song library keep their material. */
+:root:not([data-lvz-scheme="dark"]),:root:not([data-lvz-scheme="dark"]) [data-lvz-module]:not([data-lvz-module="concert"]):not([data-lvz-module="song-library"]){
+ --lvz-surface:#ffffff;
+ --lvz-backdrop:radial-gradient(at 0 25%,color-mix(in srgb,var(--lvz-tint-1) 4%,transparent),transparent 42%),radial-gradient(at 100% 5%,color-mix(in srgb,var(--lvz-tint-2) 3%,transparent),transparent 42%),color-mix(in srgb,var(--lvz-accent) 1%,#ffffff);
+ --lvz-glass:linear-gradient(120deg,rgb(255 255 255 / 98%),rgb(255 255 255 / 96%) 55%,color-mix(in srgb,var(--lvz-accent-soft) 8%,#ffffff));
+ --lvz-glass-strong:#ffffff;
+}
+
+/* A module scope paints its own material ground so its style starts at the frame edge. */
+[data-lvz-module]{background:var(--lvz-backdrop);background-attachment:fixed;color:var(--lvz-ink)}

@@ -4,11 +4,11 @@
  * tests/design-tokens.test.ts keeps the two in step.
  */
 export const designTokens={
- ground:'#f5f6f2',
- surface:'#ffffff',
- ink:'#172c24',
- accent:'#18513e',
- darkGround:'#0f1613',
+ ground:'#ecefff',
+ surface:'#f8f9ff',
+ ink:'#25234f',
+ accent:'#6146c9',
+ darkGround:'#111027',
 } as const;
 
 /** Swipe thresholds shared by every tabbed screen (see lib/use-swipe-tabs.ts). */

@@ -26,7 +26,7 @@ try{
  check('shared frame shows Home, My Duties, Apps, Manage and More',await nav.getByRole('button',{name:'My Duties'}).isVisible()&&await nav.getByRole('button',{name:'Manage'}).isVisible()&&await nav.getByRole('button',{name:'Open apps'}).isVisible()&&await nav.getByRole('button',{name:'Home'}).isVisible()&&await nav.getByRole('button',{name:'More'}).isVisible());
  const palette=e=>({module:e.dataset.lvzModule,ground:getComputedStyle(e).getPropertyValue('--lvz-ground').trim().toLowerCase(),accent:getComputedStyle(e).getPropertyValue('--lvz-accent').trim().toLowerCase(),title:e.querySelector('.app-frame-heading')?.textContent});
  const light=await page.locator('.app-frame').evaluate(palette);
- check('shared registry applies Midnight Sapphire to Worship',light.module==='worship-duty'&&light.ground==='#061122'&&light.title==='Worship Duty');
+ check('shared registry applies the Liquid Opal sapphire palette to Worship',light.module==='worship-duty'&&light.ground==='#eaf0ff'&&light.title==='Worship Duty');
  await nav.getByRole('button',{name:'Manage'}).click();await page.getByRole('heading',{name:'Manage',exact:true}).waitFor();check('bottom bar switches the Worship section',true);
  await nav.getByRole('button',{name:'My Duties'}).click();await page.getByRole('heading',{name:'My Duties',exact:true}).waitFor();
 
@@ -78,7 +78,7 @@ try{
  const night=await browser.newContext({viewport:{width:390,height:844},colorScheme:'dark'});await login(night,'test-101@example.invalid',normal.password);
  const dark=await night.newPage();await dark.goto(base+'/modules/worship-duty');await dark.getByRole('heading',{name:'My Duties',exact:true}).waitFor();
  check('Dark scheme resolves on the Worship page',await dark.evaluate(()=>document.documentElement.dataset.lvzScheme==='dark'));
- const darkPalette=await dark.locator('.app-frame').evaluate(palette);check('Dark mode keeps the same Sapphire palette',darkPalette.ground===light.ground&&darkPalette.accent===light.accent&&darkPalette.module==='worship-duty');
+ const darkPalette=await dark.locator('.app-frame').evaluate(palette);check('Dark mode uses the midnight sapphire companion',darkPalette.ground==='#061122'&&darkPalette.accent!==light.accent&&darkPalette.module==='worship-duty');
  check('Dark mode duty card stays readable',await dark.locator('.wd-cards').getByText('Usher #2',{exact:true}).waitFor({timeout:10000}).then(()=>true,()=>false));
  await capture(dark,'my-duties-dark');await night.close();
  await owner.close();await outsider.close();await member.close();await leader.close();console.log(`PASS: ${passes} real local browser checks.`);

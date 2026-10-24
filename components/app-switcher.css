@@ -1,14 +1,32 @@
-/* Authorized Apps switcher shared by LV Zion modules. */
+/*
+ * Authorized Apps sheet (Atlas main-apps, Liquid Opal): heading, search, and a
+ * two-column grid of glass app tiles. The tile rules are shared with the Home
+ * Applications sheet. Values come only from styles/lvz-tokens.css.
+ */
+.lvz-switcher{max-height:92dvh}
 .lvz-switcher .ui-sheet-body{padding-top:var(--lvz-space-5)}
-.lvz-switcher-heading{display:flex;align-items:center;justify-content:space-between;gap:var(--lvz-space-3);margin-bottom:var(--lvz-space-2)}
-.lvz-switcher-heading h2{margin:0;font-size:var(--lvz-text-xl);font-weight:var(--lvz-weight-bold)}
-.lvz-switcher-heading button{display:grid;place-items:center;width:var(--lvz-tap);height:var(--lvz-tap);border:0;border-radius:var(--lvz-radius-md);background:none;color:var(--lvz-ink)}
+.lvz-switcher-heading{display:flex;align-items:flex-start;justify-content:space-between;gap:var(--lvz-space-3);margin-bottom:var(--lvz-space-2)}
+.lvz-switcher-heading h2{margin:var(--lvz-space-1) 0 0;font:var(--lvz-display-weight) var(--lvz-text-2xl)/1.1 var(--lvz-font-display);letter-spacing:-.04em}
+.lvz-switcher-heading button{flex:none;display:grid;place-items:center;width:var(--lvz-tap);height:var(--lvz-tap);padding:0;border:var(--lvz-glass-border);border-radius:50%;background:var(--lvz-glass-strong);box-shadow:var(--lvz-glass-shadow);color:var(--lvz-ink)}
 .lvz-switcher-heading button:hover{background:var(--lvz-accent-soft)}
 .lvz-switcher .ui-hint{margin:0 0 var(--lvz-space-4)}
-.lvz-switcher-list{list-style:none;margin:0;padding:0;border-top:1px solid var(--lvz-line)}
-.lvz-switcher-list li{border-bottom:1px solid var(--lvz-line)}
-.lvz-switcher-list a{display:flex;align-items:center;gap:var(--lvz-space-3);min-height:60px;padding:var(--lvz-space-2) 0;color:var(--lvz-ink);text-decoration:none}
-.lvz-switcher-symbol{display:grid;place-items:center;flex:none;width:40px;height:40px;border-radius:var(--lvz-radius-md);background:var(--lvz-accent-soft);color:var(--lvz-accent);font-size:var(--lvz-text-xs);font-weight:var(--lvz-weight-bold)}
-.lvz-switcher-name{flex:1;min-width:0;font-weight:var(--lvz-weight-strong)}
-.lvz-switcher-list svg{flex:none;color:var(--lvz-ink-quiet)}
-.lvz-switcher-list a:hover .lvz-switcher-name{text-decoration:underline}
+.lvz-switcher .ui-search{margin-bottom:var(--lvz-space-4)}
+.lvz-switcher-empty{padding:var(--lvz-space-4) 0;color:var(--lvz-ink-quiet)}
+
+/* App tiles: icon box, name, purpose and "Open app"; an optional pin sits in the corner. */
+.lvz-app-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:var(--lvz-space-3);margin:0;padding:0;list-style:none}
+.lvz-app-tile{display:flex;flex-direction:column;min-height:196px;padding:var(--lvz-space-4);border-radius:var(--lvz-radius-lg)}
+.lvz-app-symbol{width:48px;height:48px;margin-bottom:var(--lvz-space-3)}
+.lvz-app-symbol svg{width:24px;height:24px}
+.lvz-app-open{display:flex;flex:1;flex-direction:column;align-items:flex-start;gap:var(--lvz-space-1);min-width:0;padding:0;border:0;background:none;color:var(--lvz-ink);font:inherit;text-align:left;text-decoration:none;cursor:pointer}
+.lvz-app-open:after{content:"";position:absolute;inset:0;border-radius:inherit}
+.lvz-app-open:focus-visible{outline:none}
+.lvz-app-open:focus-visible:after{outline:3px solid var(--lvz-focus);outline-offset:2px}
+.lvz-app-open strong{font-size:var(--lvz-text-md);font-weight:var(--lvz-weight-bold);letter-spacing:-.02em;line-height:1.2;overflow-wrap:anywhere}
+.lvz-app-open small{display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden;font-size:var(--lvz-text-xs);line-height:1.45;color:var(--lvz-ink-quiet)}
+.lvz-app-open:hover strong{color:var(--lvz-accent)}
+.lvz-app-go{display:inline-flex;align-items:center;gap:var(--lvz-space-1);margin-top:auto;padding-top:var(--lvz-space-2);font-size:var(--lvz-text-sm);font-weight:var(--lvz-weight-bold);color:var(--lvz-accent)}
+.lvz-pin-button{position:absolute;z-index:1;top:var(--lvz-space-3);right:var(--lvz-space-3);display:grid;place-items:center;width:var(--lvz-tap);height:var(--lvz-tap);padding:0;border:1px solid transparent;border-radius:50%;background:none;color:var(--lvz-ink-faint)}
+.lvz-pin-button:hover{background:var(--lvz-accent-soft)}
+.lvz-pin-button.lvz-pin-on{border-color:var(--lvz-line);background:color-mix(in srgb,var(--lvz-accent-soft) 80%,transparent);color:var(--lvz-accent)}
+@media(max-width:350px){.lvz-app-grid{grid-template-columns:minmax(0,1fr)}.lvz-app-tile{min-height:0}}
