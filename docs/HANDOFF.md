@@ -8,6 +8,10 @@ LV Zion Official is a self-contained, phone-first application at https://lvz.app
 
 Keep compact module headers and the prominent center Apps launcher. The launcher shows only server-authorized modules. Continue the approved [Day Sheet design contract](design/LVZ-DESIGN-CONTRACT.md), shared tokens, accessible controls and phone-first layouts.
 
+## Groups & Gospel Planning — draft, October 24, 2026
+
+My Preaching (availability, proposed sessions, partner confirmation, one shared result) and My Group (Member Updates, Gospel Review, Gospel Plan, Request for Overseer) are built on the member foundation with migration `20261024150000_gospel_planning_core.sql`, unapplied. Draft module, no grants. Atlas style Skyline Grid. Tested locally with fictional data only. [Status and the approval list](gospel-planning/README.md).
+
 ## Device appearance — released October 19, 2026
 
 **More → Appearance** now offers 24 optional device themes on the [real app](https://lvz.app/appearance). **Current app design** restores the existing module defaults, including Study Rooms’ Lavender Softform. Source `0197e83f1ee5fd28ceaaea3cc339b1a9ab800580`, deployment `dpl_HVSBqrSGcvVaTQupPhwaAkU7FDVk`, READY with both production aliases verified. Type checking, 9 selected unit checks, 13 selected browser checks, optimized compilation and 7 compiled-app browser checks passed. Live theme persistence/reset and anonymous denials were verified; no full suite or real hosted booking was run. See [scope and verification](design/APPEARANCE.md) and the [release receipt](design/APPEARANCE-RELEASE.json).

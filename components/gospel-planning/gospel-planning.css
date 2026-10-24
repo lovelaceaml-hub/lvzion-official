@@ -1,0 +1,85 @@
+/* Groups & Gospel Planning. Built only from shared --lvz tokens, so the module's Atlas style
+   (lib/gospel-planning/theme.ts) or any device appearance recolors it without edits here. */
+.gp-app{max-width:var(--lvz-reading-max);padding-bottom:calc(120px + env(safe-area-inset-bottom,0px));overflow-x:clip}
+.gp-tabs{margin-top:var(--lvz-space-2)}
+.gp-week{display:grid;grid-template-columns:44px minmax(0,1fr) 44px;align-items:center;gap:var(--lvz-space-2);margin:var(--lvz-space-3) 0;
+ padding:var(--lvz-space-1);border:1px solid var(--lvz-line);border-radius:var(--lvz-radius-lg);background:var(--lvz-surface)}
+.gp-week>span{display:flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:var(--lvz-space-1);text-align:center;font-size:var(--lvz-text-sm)}
+.gp-icon-button{display:grid;place-items:center;width:44px;height:44px;padding:0;border:0;border-radius:var(--lvz-radius-md);background:none;color:var(--lvz-accent);font-size:var(--lvz-text-xl);line-height:1}
+.gp-icon-button:hover{background:var(--lvz-accent-soft)}
+.gp-small-button{min-height:var(--lvz-tap);padding:0 var(--lvz-space-3);font-size:var(--lvz-text-sm)}
+
+.gp-tab-body{display:grid;gap:var(--lvz-space-2)}
+.gp-section{padding:var(--lvz-space-4) 0 var(--lvz-space-2);border-top:1px solid var(--lvz-line)}
+.gp-tab-body>.gp-section:first-child,.gp-group-name+.gp-section{border-top:0}
+.gp-section-heading{display:flex;align-items:center;justify-content:space-between;gap:var(--lvz-space-3)}
+.gp-section-heading h2{display:flex;align-items:center;gap:var(--lvz-space-2);margin:0;font-size:var(--lvz-text-lg);font-weight:var(--lvz-weight-bold)}
+.gp-step{display:inline-grid;place-items:center;width:26px;height:26px;border-radius:var(--lvz-radius-sm);background:var(--lvz-accent-soft);color:var(--lvz-accent);font-size:var(--lvz-text-sm)}
+.gp-section-note{margin:var(--lvz-space-1) 0 var(--lvz-space-3)}
+.gp-group-name{margin:0;color:var(--lvz-ink-quiet);font-size:var(--lvz-text-sm)}
+.gp-group-name strong{color:var(--lvz-ink)}
+
+.gp-next{display:grid;gap:var(--lvz-space-2);margin-top:var(--lvz-space-3);border-left:4px solid var(--lvz-accent)}
+.gp-next p{margin:0}
+.gp-next-when strong{display:block;font-size:var(--lvz-text-lg)}
+.gp-next-where{color:var(--lvz-ink-quiet)}
+.gp-empty{padding:var(--lvz-space-4) 0;color:var(--lvz-ink-quiet)}
+.gp-empty strong{display:block;color:var(--lvz-ink);font-size:var(--lvz-text-md)}
+.gp-empty p{margin:var(--lvz-space-1) 0 0}
+
+.gp-session-row{align-items:flex-start}
+.gp-time{display:grid;flex:none;width:96px;gap:2px;font-variant-numeric:tabular-nums}
+.gp-time small{font-size:var(--lvz-text-xs);color:var(--lvz-ink-quiet)}
+.gp-chip{flex:none;align-self:center;max-width:9.5rem;padding:2px var(--lvz-space-2);border-radius:var(--lvz-radius-sm);background:var(--lvz-accent-soft);color:var(--lvz-accent-strong);font-size:var(--lvz-text-xs);font-weight:var(--lvz-weight-strong);text-align:center;line-height:1.35}
+.gp-chip[data-tone="success"]{background:var(--lvz-success-soft);color:var(--lvz-success)}
+.gp-chip[data-tone="warning"]{background:var(--lvz-warning-soft);color:var(--lvz-warning)}
+.gp-chip[data-tone="danger"]{background:var(--lvz-danger-soft);color:var(--lvz-danger)}
+.gp-chip[data-tone="quiet"]{background:var(--lvz-sunken);color:var(--lvz-ink-quiet)}
+
+.gp-summary{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:1px;margin:var(--lvz-space-2) 0;overflow:hidden;border:1px solid var(--lvz-line);border-radius:var(--lvz-radius-md);background:var(--lvz-line)}
+.gp-summary div{display:grid;gap:2px;padding:var(--lvz-space-2) var(--lvz-space-3);background:var(--lvz-surface)}
+.gp-summary dt{font-size:var(--lvz-text-xs);color:var(--lvz-ink-quiet)}
+.gp-summary dd{margin:0;font-size:var(--lvz-text-xl);font-weight:var(--lvz-weight-bold);font-variant-numeric:tabular-nums}
+.gp-published{margin:var(--lvz-space-2) 0;white-space:pre-wrap;overflow-wrap:anywhere}
+.gp-published p{margin:0 0 var(--lvz-space-2)}
+.gp-draft{display:grid;gap:var(--lvz-space-2);margin-top:var(--lvz-space-3);border-style:dashed}
+.gp-draft p{margin:0;white-space:pre-wrap;overflow-wrap:anywhere}
+.gp-draft-label{font-size:var(--lvz-text-sm)}
+
+.gp-sheet-heading{display:flex;align-items:center;justify-content:space-between;gap:var(--lvz-space-3);margin-bottom:var(--lvz-space-3)}
+.gp-sheet-heading h2{margin:0;font-size:var(--lvz-text-xl)}
+.gp-sheet-when{margin:0 0 var(--lvz-space-2);font-variant-numeric:tabular-nums}
+.gp-subheading{margin:var(--lvz-space-5) 0 var(--lvz-space-1);font-size:var(--lvz-text-sm);color:var(--lvz-ink-quiet)}
+.gp-form{display:grid;gap:var(--lvz-space-1);margin-top:var(--lvz-space-2)}
+.gp-form textarea.ui-input{resize:vertical;min-height:88px}
+.gp-inline{grid-template-columns:minmax(0,1fr) auto;align-items:end;gap:var(--lvz-space-3)}
+.gp-inline .ui-field{margin:0}
+.gp-two{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:var(--lvz-space-3)}
+.gp-actions{display:flex;flex-wrap:wrap;align-items:center;gap:var(--lvz-space-2);margin:var(--lvz-space-3) 0}
+.gp-actions .ui-hint{flex-basis:100%;margin:0}
+.gp-quiet-actions{border-top:1px solid var(--lvz-line);padding-top:var(--lvz-space-3)}
+.gp-choice{display:grid;gap:var(--lvz-space-1);margin:0 0 var(--lvz-space-3);padding:0;border:0}
+.gp-choice label,.gp-check{display:flex;align-items:center;gap:var(--lvz-space-2);min-height:var(--lvz-tap);font-size:var(--lvz-text-md)}
+.gp-choice input,.gp-check input{width:22px;height:22px;accent-color:var(--lvz-accent)}
+.gp-people legend{margin-bottom:var(--lvz-space-1)}
+.gp-range{margin:0 0 var(--lvz-space-3);padding:var(--lvz-space-3);border:1px solid var(--lvz-line);border-radius:var(--lvz-radius-md)}
+.gp-range legend{padding:0 var(--lvz-space-1);font-size:var(--lvz-text-sm);font-weight:var(--lvz-weight-bold)}
+.gp-contacts{margin-top:var(--lvz-space-3)}
+.gp-history{display:grid;gap:var(--lvz-space-3);margin:var(--lvz-space-3) 0;padding:0 0 0 var(--lvz-space-4);border-left:2px solid var(--lvz-line);list-style:none}
+.gp-history p{margin:var(--lvz-space-1) 0;white-space:pre-wrap;overflow-wrap:anywhere}
+.ui-row-body small{overflow-wrap:anywhere}
+
+/* Frame chrome on this module: square-edged grid look of the chosen style, from tokens only. */
+.app-frame[data-route="/modules/gospel-planning"] .app-frame-header{background:var(--lvz-surface);border-bottom:1px solid var(--lvz-line)}
+.app-frame[data-route="/modules/gospel-planning"] .app-frame-nav{background:var(--lvz-surface);border-top:1px solid var(--lvz-line)}
+.app-frame[data-route="/modules/gospel-planning"] .app-frame-nav [aria-current="page"]{color:var(--lvz-accent);font-weight:var(--lvz-weight-strong)}
+
+@media (min-width:900px){
+ .gp-app{max-width:calc(var(--lvz-reading-max) + 2 * var(--lvz-gutter))}
+ .gp-summary{grid-template-columns:repeat(6,minmax(0,1fr))}
+}
+@media (max-width:360px){
+ .gp-time{width:80px}
+ .gp-chip{max-width:7rem}
+ .gp-inline{grid-template-columns:1fr}
+}

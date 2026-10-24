@@ -791,7 +791,7 @@ declare a uuid;ap public.member_placements;leader boolean;group_lead boolean;mgr
       'groupLeader',gp_private.group_leader(m.id,p.group_id)) order by m.display_name,m.id)
     from public.members m left join public.member_placements p on p.id=(gp_private.placement(m.id)).id
     where gp_private.has_access(m.id)),'[]'::jsonb),
-   'groups',coalesce((select jsonb_agg(jsonb_build_object('id',g.id,'name',g.name,'units',coalesce((select jsonb_agg(jsonb_build_object('id',u.id,'name',u.name) order by u.name)
+   'groups',coalesce((select jsonb_agg(jsonb_build_object('id',g.id,'name',g.name,'category',c.name,'units',coalesce((select jsonb_agg(jsonb_build_object('id',u.id,'name',u.name) order by u.name)
       from public.church_units u where u.group_id=g.id and u.is_active),'[]'::jsonb)) order by c.sort_order,c.name,g.name)
     from public.church_groups g join public.age_categories c on c.id=g.age_category_id where g.is_active and c.is_active),'[]'::jsonb)) end
  ) into result;
