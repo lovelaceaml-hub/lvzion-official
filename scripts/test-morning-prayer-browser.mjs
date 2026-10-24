@@ -13,8 +13,8 @@ try{
  await mkdir(join(dir,'styles'),{recursive:true});
  await cp(join(root,'components/morning-prayer'),join(dir,'components/morning-prayer'),{recursive:true});
  await cp(join(root,'lib/morning-prayer/time.ts'),join(dir,'lib/morning-prayer/time.ts'));
- // Shared Day Sheet pieces the module uses: header, swipe hook, tokens and ui- classes.
- for(const path of ['components/app-header.tsx','components/app-frame.tsx','components/app-frame.css','components/app-switcher.tsx','components/app-switcher.css','lib/app-runtime.ts','lib/member-experience.ts','lib/contracts.ts','components/home-icons.tsx','components/module-icon.tsx','lib/module-styles.ts','lib/use-swipe-tabs.ts','lib/design-tokens.ts','styles/lvz-tokens.css','styles/lvz-ui.css'])
+ // Shared pieces the module uses: frame, Liquid Opal kit, swipe hook, tokens and ui- classes.
+ for(const path of ['components/app-header.tsx','components/app-frame.tsx','components/ui-kit.tsx','components/app-frame.css','components/app-switcher.tsx','components/app-switcher.css','lib/app-runtime.ts','lib/member-experience.ts','lib/contracts.ts','components/home-icons.tsx','components/module-icon.tsx','lib/module-styles.ts','lib/use-swipe-tabs.ts','lib/design-tokens.ts','styles/lvz-tokens.css','styles/lvz-ui.css'])
   await cp(join(root,path),join(dir,path));
  await symlink(join(root,'node_modules'),join(dir,'node_modules'),'dir');
  await cp(join(root,'package.json'),join(dir,'package.json'));

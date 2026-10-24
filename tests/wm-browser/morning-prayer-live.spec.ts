@@ -33,6 +33,8 @@ async function useMonthTextFallback(page:Page){
 test('real client supports Home Schedule Me Manage across phone and tablet widths',async({page})=>{
  await setup(page);
  await page.getByRole('button',{name:'Schedule',exact:true}).click();
+ await expect(page.getByRole('group',{name:'Days this week'})).toBeVisible();
+ await page.getByRole('button',{name:'Month',exact:true}).click();
  await expect(page.getByRole('region',{name:'Monthly Morning Prayer gathering calendar'})).toBeVisible();
  await page.getByRole('button',{name:'Me',exact:true}).click();
  await expect(page.getByRole('button',{name:'Confirm hosting'})).toBeVisible();

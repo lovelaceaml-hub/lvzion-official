@@ -1,12 +1,20 @@
 'use client';
 import {useState} from 'react';
 import {vegasInstant,vegasToday} from '../../lib/morning-prayer/time';
+import {CalendarDays,ClipboardList,FileText,Plus,ShieldCheck,UsersRound} from '../home-icons';
+import {EmptyState,IconBox,PageHeading,SectionHeader,Segmented,Tag} from '../ui-kit';
 import styles from './morning-prayer.module.css';
 import MorningPrayerOperations from './MorningPrayerOperations';
-import {MONTH_PATTERN,ZONE,dayLabel,lines} from './shared';
+import {CardSummary} from './parts';
+import {MONTH_PATTERN,ZONE,dayLabel,lines,statusTag} from './shared';
 import type {Kind,ManageArea} from './shared';
 import type {Screen} from './MorningPrayerLive';
 const AREA_LABELS:Record<ManageArea,string>={schedule:'Schedule',materials:'Materials',people:'People'};
+const AREA_HEADINGS:Record<ManageArea,[string,string]>={
+ schedule:['Plan the schedule.','Every date, host and meeting link is set deliberately.'],
+ materials:['Prepare materials.','Drafts are checked against an approved source, then published separately.'],
+ people:['Choose who takes part.','Only the app owner can change access.']
+};
 
 // Form state lives in the shell so drafts survive tab switches and month reloads.
 export function useGatheringForm(){
@@ -25,6 +33,10 @@ export function useMaterialForm(){
  };
 }
 
+/**
+ * Atlas mission-manage in Liquid Opal: pill Schedule/Materials/People control and
+ * glass form cards. Each form stays closed until opened; every capability gate is unchanged.
+ */
 export default function ManageTab(props:Screen&{
  canManage:boolean;area:ManageArea;onArea:(area:ManageArea)=>void;ownerAccess:boolean;onOwnerAccess:(allowed:boolean)=>void;
  monthDraft:string;onMonthDraft:(value:string)=>void;onMonth:(month:string)=>void;
@@ -33,7 +45,10 @@ export default function ManageTab(props:Screen&{
  onReload:()=>Promise<boolean>;onNotice:(message:string)=>void;
 }){
  const {data,rows,today,published,busy,cap,post,canManage,ownerAccess,gathering:g,material:m}=props;
- if(!canManage)return <p className="ui-empty"><strong>You do not manage Morning Prayer</strong>The app owner assigns management separately from group and department roles.</p>;
+ if(!canManage)return <div className={styles.screen}>
+  <PageHeading eyebrow="Authorized management" title="Manage"/>
+  <div className="ui-glass"><EmptyState icon={<ShieldCheck/>} title="You do not manage Morning Prayer">The app owner assigns management separately from group and department roles.</EmptyState></div>
+ </div>;
  const areas:ManageArea[]=[
   ...(cap('manage_schedule')||cap('review_requests')?['schedule' as const]:[]),
   ...(cap('edit_materials')||cap('publish_materials')?['materials' as const]:[]),
@@ -53,16 +68,17 @@ export default function ManageTab(props:Screen&{
    .then(saved=>{if(saved)m.clear();});
  }
  const field='ui-field',input='ui-input';
- return <div className={styles.form}>
-  <nav className={'ui-tabs '+styles.subTabs} aria-label="Manage sections">{areas.map(x=>
-   <button key={x} type="button" className="ui-tab" aria-pressed={area===x} onClick={()=>props.onArea(x)}>{AREA_LABELS[x]}</button>)}
-  </nav>
-  {area==='schedule'&&<label className={styles.inline}>Month<input className={input} type="month" value={props.monthDraft} placeholder="YYYY-MM" pattern="[0-9]{4}-(0[1-9]|1[0-2])" onChange={e=>{
+ const [heading,lede]=AREA_HEADINGS[area];
+ return <div className={styles.screen+' '+styles.form}>
+  <PageHeading eyebrow="Authorized management" title={heading} lede={lede}/>
+  {areas.length>1&&<Segmented label="Manage sections" value={area} onChange={props.onArea} options={areas.map(x=>[x,AREA_LABELS[x]] as const)}/>}
+
+  {area==='schedule'&&<label className={'ui-glass ui-glass-tight '+styles.monthRow}><span>Month</span><input className={input} type="month" value={props.monthDraft} placeholder="YYYY-MM" pattern="[0-9]{4}-(0[1-9]|1[0-2])" onChange={e=>{
    const value=e.target.value;props.onMonthDraft(value);
    if(MONTH_PATTERN.test(value)){props.onMonth(value);g.set({date:value===vegasToday().slice(0,7)?vegasToday():value+'-01'});}
   }}/></label>}
 
-  {area==='schedule'&&cap('manage_schedule')&&<details className={styles.disclosure}><summary>Add a gathering</summary><div className={styles.disclosureBody}>
+  {area==='schedule'&&cap('manage_schedule')&&<details className={styles.disclosure}><CardSummary icon={<Plus size={22}/>} title="Add a gathering"/><div className={styles.disclosureBody}>
    <p className={styles.quiet}>Enter the date and Las Vegas time. Confirm the date after saving.</p>
    <label className={field}>Date<input className={input} type="date" value={g.date} onChange={e=>g.set({date:e.target.value})}/></label>
    <div className={styles.two}>
@@ -72,12 +88,13 @@ export default function ManageTab(props:Screen&{
    <label className={field}>Occurrence type<select className={input} value={g.kind} onChange={e=>g.set({kind:e.target.value as Kind})}>
     <option value="gathering">Live gathering</option><option value="app_day">Pray Daily app day</option><option value="cancelled">Cancelled occurrence</option>
    </select></label>
-   <button type="button" disabled={busy} className="ui-button" onClick={saveGathering}>Save gathering</button>
+   <button type="button" disabled={busy} className="ui-button ui-button-block" onClick={saveGathering}>Save gathering</button>
   </div></details>}
 
   {area==='schedule'&&cap('review_requests')&&pending.length>0&&<section aria-labelledby="wm-requests-title">
-   <h2 className={styles.heading} id="wm-requests-title">Hosting requests <span className="ui-count">{pending.length}</span></h2>
-   <ul className="ui-list">{pending.map(r=><li key={r.id} className={'ui-row '+styles.rowWrap}>
+   <SectionHeader id="wm-requests-title" title={<>Hosting requests <span className="ui-count">{pending.length}</span></>}/>
+   <div className="ui-glass ui-glass-tight"><ul className="ui-list">{pending.map(r=><li key={r.id} className={'ui-row '+styles.rowWrap}>
+    <IconBox><UsersRound size={22}/></IconBox>
     <span className="ui-row-body">
      <strong>{r.requester}</strong>
      <small>{r.kind==='volunteer'?'Wants to host':'Asks for a change'} · {dayLabel(r.date||rows.find(o=>o.id===r.occurrenceId)?.date||today)}{r.note?' · Private note: '+r.note:''}</small>
@@ -86,13 +103,13 @@ export default function ManageTab(props:Screen&{
      <button type="button" className="ui-button" disabled={busy} onClick={()=>void post({type:'review',requestId:r.id,decision:'approve'})}>Approve</button>
      <button type="button" className="ui-button ui-button-secondary" disabled={busy} onClick={()=>void post({type:'review',requestId:r.id,decision:'decline'})}>Decline</button>
     </span>
-   </li>)}</ul>
+   </li>)}</ul></div>
   </section>}
 
   {area==='schedule'&&cap('manage_schedule')&&rows.length>0&&<section aria-labelledby="wm-gatherings-title">
-   <h2 className={styles.heading} id="wm-gatherings-title">Gatherings this month</h2>
-   {rows.filter(o=>o.date>=today).map(o=><details key={o.id} className={styles.disclosure}>
-    <summary>{dayLabel(o.date)} · {o.host}<small>{o.verified?'Confirmed':'To confirm'}</small></summary>
+   <SectionHeader id="wm-gatherings-title" title="Gatherings this month"/>
+   {rows.some(o=>o.date>=today)?<div className="ui-glass ui-glass-tight">{rows.filter(o=>o.date>=today).map(o=>{const tag=statusTag(o);return <details key={o.id} className={styles.rowDisclosure}>
+    <summary><IconBox><CalendarDays size={22}/></IconBox><span className="ui-row-body"><strong>{dayLabel(o.date)}</strong><small>{o.kind==='gathering'?o.host:o.kind==='app_day'?'Pray Daily app day':'Cancelled'}</small></span><Tag tone={tag.tone}>{o.verified?tag.label:'To confirm'}</Tag></summary>
     <div className={styles.disclosureBody}>
      <div className={styles.actions}>
       <button type="button" className="ui-button" disabled={busy||o.verified||o.kind!=='gathering'} onClick={()=>void post({type:'schedule',occurrenceId:o.id,mode:'verify'})}>Confirm date</button>
@@ -113,15 +130,17 @@ export default function ManageTab(props:Screen&{
       <button type="button" className="ui-button ui-button-secondary" disabled={busy||!props.readingSelection} onClick={()=>void post({type:'link_reading',occurrenceId:o.id,readingKey:props.readingSelection},true)}>Link reading</button>
      </div>}
     </div>
-   </details>)}
+   </details>;})}</div>
+   :<div className="ui-glass"><EmptyState icon={<CalendarDays/>} title="No upcoming dates this month">Past dates stay in the schedule history.</EmptyState></div>}
   </section>}
 
   {area==='materials'&&cap('publish_materials')&&<section aria-labelledby="wm-publish-title">
-   <h2 className={styles.heading} id="wm-publish-title">Ready to publish</h2>
-   {data.drafts.length?<ul className="ui-list">{data.drafts.map(d=><li key={d.id} className={styles.disclosure}>
-    <div className={styles.material}>
-     <h3>{d.body.title}</h3>
-     <p className={styles.quiet}>{d.sourceState==='checked'?'Source checked':'Source needs checking before publishing'}</p>
+   <SectionHeader id="wm-publish-title" title="Ready to publish" note={data.drafts.length?String(data.drafts.length):undefined}/>
+   {data.drafts.length?<div className="ui-glass ui-glass-tight"><ul className="ui-list">{data.drafts.map(d=><li key={d.id} className={styles.draft}>
+    <div className="ui-row">
+     <IconBox>{d.kind==='reading'?<ClipboardList size={22}/>:<FileText size={22}/>}</IconBox>
+     <span className="ui-row-body"><strong>{d.body.title}</strong><small>{d.sourceState==='checked'?'Source checked':'Source needs checking before publishing'}</small></span>
+     <Tag tone={d.sourceState==='checked'?'success':'warning'}>{d.kind==='reading'?'Reading':'PWP'}</Tag>
     </div>
     <details className={styles.review}><summary>Review draft</summary>
      <div className={styles.material}>
@@ -131,10 +150,10 @@ export default function ManageTab(props:Screen&{
      </div>
      <button type="button" className="ui-button" disabled={busy||d.sourceState!=='checked'} onClick={()=>void post({type:'material_publish',materialId:d.id})}>Publish</button>
     </details>
-   </li>)}</ul>:<p className={styles.quiet}>No drafts are waiting to be published.</p>}
+   </li>)}</ul></div>:<div className="ui-glass"><EmptyState icon={<FileText/>} title="Nothing waiting">No drafts are waiting to be published.</EmptyState></div>}
   </section>}
 
-  {area==='materials'&&cap('edit_materials')&&<details className={styles.disclosure}><summary>New reading or PWP</summary>
+  {area==='materials'&&cap('edit_materials')&&<details className={styles.disclosure}><CardSummary icon={<Plus size={22}/>} title="New reading or PWP"/>
    <form className={styles.disclosureBody} action="/api/morning-prayer/setup" method="post" onSubmit={event=>{event.preventDefault();saveMaterial();}}>
     <p className={styles.quiet}>Copy the wording from an approved source. Publishing is a separate step.</p>
     <label className={field}>Type<select className={input} value={m.kind} onChange={e=>m.edit({kind:e.target.value as typeof m.kind})}>
@@ -149,7 +168,7 @@ export default function ManageTab(props:Screen&{
     <label className={field}>Activities or points (one per line, up to five)<textarea className={input} required name="items" rows={4} value={m.items} onChange={e=>m.edit({items:e.target.value})}/></label>
     <label className={field}>Source<input className={input} required name="source" maxLength={100} value={m.sourceLabel} onChange={e=>m.edit({sourceLabel:e.target.value})}/></label>
     <label className={styles.check}><input type="checkbox" checked={m.sourceChecked} onChange={e=>m.set({sourceChecked:e.target.checked})}/> I have checked the content against the permitted source.</label>
-    <button className="ui-button" disabled={busy} type="submit">Save draft</button>
+    <button className="ui-button ui-button-block" disabled={busy} type="submit">Save draft</button>
    </form>
   </details>}
 
