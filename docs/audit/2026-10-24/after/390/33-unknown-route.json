@@ -1,0 +1,20 @@
+{
+ "url": "/does-not-exist",
+ "title": "Page not found | LV Zion Official",
+ "theme": null,
+ "h1": [
+  "Page not found"
+ ],
+ "header": "LV Zion",
+ "dockVisible": true,
+ "brandMentions": 1,
+ "overflowX": false,
+ "coveredByDock": [],
+ "waiting": null,
+ "ground": "rgb(245, 246, 242)",
+ "frameGround": "#f5f6f2",
+ "accent": "#18513e",
+ "errors": [
+  "Failed to load resource: the server responded with a status of 404 (Not Found)"
+ ]
+}

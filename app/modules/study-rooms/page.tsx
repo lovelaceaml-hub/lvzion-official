@@ -1,6 +1,5 @@
 'use client';
 import {useCallback,useEffect,useRef,useState} from 'react';
-import AppHeader from '../../../components/app-header';
 import Reservations from '../../../components/study-rooms/reservations';
 import '../../../components/study-rooms/reservations.css';
 import {StudyOperationsManager} from '../../../components/study-rooms/operations';
@@ -27,7 +26,7 @@ const vegasTime=()=>new Date().toLocaleTimeString('en-US',{hour:'numeric',minute
 export default function StudyRooms(){
  const [day,setDay]=useState(''),[data,setData]=useState<Schedule|null>(null),[admin,setAdmin]=useState<AdminData>(),[operations,setOperations]=useState<StudyOperationsData>();
  const [error,setError]=useState(''),[warning,setWarning]=useState(''),[lastRefresh,setLastRefresh]=useState('');
- const [leadsGroup,setLeadsGroup]=useState(false);
+ const [leadsGroup,setLeadsGroup]=useState(false),[signedOut,setSignedOut]=useState(false);
  const bookingHorizon=useRef(4);
  const sequence=useRef(0),controller=useRef<AbortController|null>(null);
  const access=useRef(createAccessEpoch()).current;
@@ -35,15 +34,15 @@ export default function StudyRooms(){
  /** Drops every in-flight read so a late response cannot repaint an older day or access state. */
  const cancelReads=useCallback(()=>{sequence.current++;controller.current?.abort();},[]);
  const clearScreen=useCallback(()=>{setData(null);setAdmin(undefined);setOperations(undefined);},[]);
- const clearAccess=useCallback((message:string)=>{
+ const clearAccess=useCallback((message:string,status?:number)=>{
   access.invalidate();cancelReads();clearScreen();
-  setLastRefresh('');setWarning('');setError(message);
+  setLastRefresh('');setWarning('');setError(message);setSignedOut(status===401);
  },[access,cancelReads,clearScreen]);
 
  const loadDay=useCallback(async(date:string):Promise<Schedule>=>{
   dayKey(date);const ticket=access.capture();
   try{const value=await readJSON<Schedule>(scheduleUrl(date));access.assert(ticket);return value;}
-  catch(e){if(access.current(ticket)&&accessDenied(e))clearAccess(e.message);throw e;}
+  catch(e){if(access.current(ticket)&&accessDenied(e))clearAccess(e.message,e.status);throw e;}
  },[access,clearAccess]);
 
  const load=useCallback(async(date:string):Promise<boolean>=>{
@@ -61,13 +60,13 @@ export default function StudyRooms(){
    access.assert(ticket);
    if(id!==sequence.current)return false;
    if(Number.isSafeInteger(schedule.horizon)&&schedule.horizon>=1&&schedule.horizon<=31)bookingHorizon.current=schedule.horizon;
-   setData(schedule);setAdmin(config);setOperations(policy);setError('');setWarning('');
+   setData(schedule);setAdmin(config);setOperations(policy);setError('');setWarning('');setSignedOut(false);
    setLastRefresh(vegasTime());
    return true;
   }catch(e){
    if(e instanceof SupersededRead||!access.current(ticket)||id!==sequence.current||abort.signal.aborted)return false;
    const message=e instanceof Error?e.message:'Unable to refresh reservations.';
-   if(accessDenied(e))clearAccess(message);
+   if(accessDenied(e))clearAccess(message,e.status);
    else{setError(message);setWarning('Availability could not be refreshed. The server will recheck every reservation before saving.');}
    return false;
   }
@@ -82,7 +81,7 @@ export default function StudyRooms(){
   const ticket=access.capture();
   try{await readJSON(path,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(command)});}
   catch(e){
-   if(accessDenied(e)){if(access.current(ticket))clearAccess(e.message);}
+   if(accessDenied(e)){if(access.current(ticket))clearAccess(e.message,e.status);}
    else if(e instanceof RequestError&&e.status===409&&access.current(ticket))await load(day);
    throw e;
   }
@@ -97,22 +96,19 @@ export default function StudyRooms(){
   try{
    const result=await readJSON<HistoryPage>('/api/study-rooms/history?'+new URLSearchParams({from:query.from,to:query.to,offset:String(query.offset),managed:String(query.managed)}));
    access.assert(ticket);return result;
-  }catch(e){if(access.current(ticket)&&accessDenied(e))clearAccess(e.message);throw e;}
+  }catch(e){if(access.current(ticket)&&accessDenied(e))clearAccess(e.message,e.status);throw e;}
  }
 
  if(!data)return <div className="ui-page sr-app">
-  <AppHeader homeHref="/members"/>
   <main className="ui-main ui-narrow">
-   <p className="ui-kicker">Study rooms</p>
    <h1 className="ui-title">Study Room Reservation</h1>
-   <p role="status" className={error?'ui-notice':'ui-lede'} data-tone={error?'danger':undefined}>{error||'Checking your reservation access…'}</p>
-   <p className="ui-hint">Study Room access requires sign-in and an explicit module grant.</p>
-   <div className="sr-sheet-actions sr-shell-actions">
-    {day&&error&&<button type="button" className="ui-button" onClick={()=>{void load(day);}}>Try again</button>}
-    <a className="ui-button ui-button-secondary" href="/sign-in">Sign in</a>
-    {day&&!error&&<button type="button" className="ui-button ui-button-secondary" onClick={()=>{void load(day);}}>Try again</button>}
-    <a className="ui-link sr-home-link" href="/members">Return to LV Zion Home</a>
-   </div>
+   <p role="status" className={error?'ui-notice':'ui-lede'} data-tone={error?(signedOut?'warning':'danger'):undefined}>{error||'Loading Study Rooms…'}</p>
+   {error&&<p className="ui-hint">{signedOut?'Sign in to reserve a study room.':'Study Rooms needs a Study Rooms grant from a leader.'}</p>}
+   {error&&<div className="sr-sheet-actions sr-shell-actions">
+    {signedOut&&<a className="ui-button" href="/sign-in">Sign in</a>}
+    {day&&<button type="button" className={signedOut?'ui-button ui-button-secondary':'ui-button'} onClick={()=>{void load(day);}}>Try again</button>}
+    <a className="ui-link sr-home-link" href="/members">Return to Home</a>
+   </div>}
   </main>
  </div>;
 

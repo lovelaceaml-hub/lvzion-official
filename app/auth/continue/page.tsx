@@ -40,7 +40,7 @@ export default function ContinueAuth(){
   finally{setBusy(false);}
  }
 
- return <main className="auth-box"><a className="ui-wordmark auth-mark" href="/" aria-label="LV Zion home">LV<span>Zion</span></a>
+ return <main className="auth-box">
   <h1>Confirm your request</h1>
   <p>Continue only if you requested signup, account access, or password recovery. This confirmation signs you in to the account associated with the email.</p>
   <button type="button" disabled={!ready||busy} onClick={confirm}>{busy?'Confirming…':'Confirm and continue'}</button>

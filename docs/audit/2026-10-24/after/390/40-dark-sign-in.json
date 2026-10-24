@@ -1,0 +1,18 @@
+{
+ "url": "/sign-in",
+ "title": "LV Zion Official",
+ "theme": null,
+ "h1": [
+  "Welcome back."
+ ],
+ "header": "LV ZionCreate account",
+ "dockVisible": false,
+ "brandMentions": 1,
+ "overflowX": false,
+ "coveredByDock": [],
+ "waiting": null,
+ "ground": "rgb(15, 22, 19)",
+ "frameGround": "#0f1613",
+ "accent": "#82caa9",
+ "errors": []
+}

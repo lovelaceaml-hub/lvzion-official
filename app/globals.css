@@ -1,4 +1,3 @@
-/* Global styles: the Day Sheet tokens and shared building blocks. See docs/design/LVZ-DESIGN-CONTRACT.md. */
+/* Global styles: the shared LV Zion tokens (base + module styles) and shared building blocks. See docs/design/LVZ-DESIGN-CONTRACT.md. */
 @import '../styles/lvz-tokens.css';
 @import '../styles/lvz-ui.css';
-@import '../styles/lvz-themes.css';

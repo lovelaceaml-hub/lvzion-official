@@ -23,7 +23,7 @@ button{cursor:pointer}
 
 /* Titles: serif for the page title only; everything else is system text. */
 .ui-kicker{margin:0;font-size:var(--lvz-text-sm);color:var(--lvz-ink-quiet)}
-.ui-title{margin:var(--lvz-space-1) 0 var(--lvz-space-2);font:var(--lvz-weight-regular) var(--lvz-text-2xl)/var(--lvz-leading-tight) var(--lvz-font-serif);letter-spacing:-.01em;text-wrap:balance}
+.ui-title{margin:var(--lvz-space-1) 0 var(--lvz-space-2);font:var(--lvz-display-weight) var(--lvz-text-2xl)/var(--lvz-leading-tight) var(--lvz-font-display);letter-spacing:var(--lvz-display-tracking);text-wrap:balance}
 .ui-lede{margin:0;max-width:60ch;color:var(--lvz-ink-quiet)}
 .ui-section-title{margin:var(--lvz-space-8) 0 var(--lvz-space-3);font-size:var(--lvz-text-sm);font-weight:var(--lvz-weight-bold);color:var(--lvz-ink-quiet)}
 @media (min-width:900px){.ui-title{font-size:var(--lvz-text-3xl)}}

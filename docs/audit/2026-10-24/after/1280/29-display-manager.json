@@ -1,0 +1,18 @@
+{
+ "url": "/modules/continuous-display",
+ "title": "LV Zion Official",
+ "theme": null,
+ "h1": [
+  "Church Display"
+ ],
+ "header": "Church DisplayGE",
+ "dockVisible": true,
+ "brandMentions": 0,
+ "overflowX": false,
+ "coveredByDock": [],
+ "waiting": null,
+ "ground": "rgb(245, 246, 242)",
+ "frameGround": "#eff1e7",
+ "accent": "#49643e",
+ "errors": []
+}

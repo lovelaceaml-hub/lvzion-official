@@ -1,0 +1,18 @@
+{
+ "url": "/members/manage?tab=profile",
+ "title": "LV Zion Official",
+ "theme": null,
+ "h1": [
+  "Welcome, Gina."
+ ],
+ "header": "ProfileGE",
+ "dockVisible": true,
+ "brandMentions": 0,
+ "overflowX": false,
+ "coveredByDock": [],
+ "waiting": null,
+ "ground": "rgb(245, 246, 242)",
+ "frameGround": "#f5f6f2",
+ "accent": "#18513e",
+ "errors": []
+}

@@ -1,0 +1,18 @@
+{
+ "url": "/members/manage",
+ "title": "LV Zion Official",
+ "theme": null,
+ "h1": [
+  "Manage with care."
+ ],
+ "header": "MembersEE",
+ "dockVisible": true,
+ "brandMentions": 1,
+ "overflowX": false,
+ "coveredByDock": [],
+ "waiting": null,
+ "ground": "rgb(245, 246, 242)",
+ "frameGround": "#e8e9eb",
+ "accent": "#343a43",
+ "errors": []
+}

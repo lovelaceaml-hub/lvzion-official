@@ -25,7 +25,7 @@ export default function MemberWorkspace({data:w,execute,demo=false,invite}:Props
  const candidates=[...new Map([...w.directory,...w.managedMembers,...w.departments.flatMap(d=>d.members)].map(m=>[m.id,m])).values()];
  const tabKeys=['week','people',...(manage?['manage']:[]),'profile'];
  const swipe=useSwipeTabs(tabKeys,tab,next=>{setTab(next);setMessage('');});
- return <main className="members-app" {...swipe}><FrameControls name={w.self.name} left={{label:'My Group',icon:'people',onClick:()=>setTab('people'),active:tab==='people'}} right={{label:'Profile',icon:'user',onClick:()=>setTab('profile'),active:tab==='profile'}} more={manage?[{label:'Manage',icon:'people',onClick:()=>setTab('manage')}]:[]}/>
+ return <main className="members-app" {...swipe}><FrameControls name={w.self.name} module={tab==='profile'?null:'members'} title={tab==='profile'?'Profile':'Members'} left={{label:'My Group',icon:'people',onClick:()=>setTab('people'),active:tab==='people'}} right={{label:'Profile',icon:'user',onClick:()=>setTab('profile'),active:tab==='profile'}} more={manage?[{label:'Manage',icon:'people',onClick:()=>setTab('manage')}]:[]}/>
 
  {demo&&<a className="demo-experience-link" href="/experience-preview">Explore the next-generation Home and My Week experience →</a>}
  {demo&&<p className="demo-note">Fictional preview · Changes stay in this page session · Not a real login</p>}

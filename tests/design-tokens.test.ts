@@ -14,7 +14,7 @@ test('script tokens match the CSS token file',()=>{
  assert.equal(token('accent'),designTokens.accent);
 });
 
-test('the manifest uses the Day Sheet colors',async()=>{
+test('the manifest uses the shared base colors',async()=>{
  const {default:manifest}=await import('../app/manifest.ts');
  const m=manifest();
  assert.equal(m.theme_color,designTokens.accent);
