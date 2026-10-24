@@ -33,11 +33,13 @@ test('fictional phone editor supports screen switching and versioned operating h
   await route.fulfill({status:200,contentType:'application/json',
    body:JSON.stringify(data.action==='createScreen'?{screenId:'30000000-0000-4000-8000-000000000002'}:{configVersion:1})});
  });
- await page.goto('/display-operations-review');await expect(page.getByRole('heading',{name:'Church Display'})).toBeVisible();
+ await page.goto('/display-operations-review');await expect(page.getByRole('heading',{level:1,name:'Shape the message.'})).toBeVisible();
  await page.locator('.ui-tabs').getByRole('button',{name:'Screens',exact:true}).click();
+ await page.locator('summary',{hasText:'Operating hours'}).click();
  await page.getByLabel('Limit playback to selected hours').check();
  await page.getByRole('button',{name:'Save operating hours'}).click();
  await expect.poll(()=>writes.some(w=>w.action==='hours'&&w.hours.length===7)).toBeTruthy();
+ await page.locator('summary',{hasText:'Add another display'}).click();
  await page.getByLabel('Display name').fill('Fellowship Hall TV');
  await page.getByRole('button',{name:'Add display'}).click();
  await expect(page.getByLabel('Choose display')).toHaveValue('30000000-0000-4000-8000-000000000002');
@@ -115,7 +117,7 @@ test('paired player respects Las Vegas operating hours and immediate approved em
 test('manager fits a 320px phone on every tab and a sideways swipe changes tabs',async({page})=>{
  await page.setViewportSize({width:320,height:700});
  await page.route('**/api/display/manage',route=>route.fulfill({status:200,contentType:'application/json',body:JSON.stringify({screens:[baseScreen()]})}));
- await page.goto('/display-operations-review');await expect(page.getByRole('heading',{name:'Church Display'})).toBeVisible();
+ await page.goto('/display-operations-review');await expect(page.getByRole('heading',{level:1,name:'Shape the message.'})).toBeVisible();
  for(const tab of ['Content','Playlist','Publish','Screens']){
   await page.locator('.ui-tabs').getByRole('button',{name:tab,exact:true}).click();
   await expect(page.locator('.ui-tabs').getByRole('button',{name:tab,exact:true})).toHaveAttribute('aria-current','page');

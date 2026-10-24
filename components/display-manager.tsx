@@ -1,20 +1,38 @@
 'use client';
-import {useEffect,useRef,useState} from 'react';
+/**
+ * Church Display management in the shared Liquid Opal material.
+ * Content follows Atlas display-editor (slide tiles, a framed TV preview, fields in glass cards),
+ * Playlist follows display-playlist (stat tiles, ordered glass rows, a floating save tray),
+ * Publish frames the TV preview (display-tv) above versions, approval and the published playlist,
+ * Screens follows display-devices (stat tiles, display and TV rows with status tags, pairing card).
+ * The TV itself (/display) is not styled here.
+ */
+import {useEffect,useRef,useState,type ReactNode} from 'react';
 import {FrameControls} from './app-frame';
-import {ArrowDown,ArrowUp,X} from './home-icons';
+import {ArrowDown,ArrowUp,Check,Clock3,FileText,Monitor,Plus,X} from './home-icons';
+import {EmptyState,Glass,IconBox,PageHeading,SectionHeader,StatGrid,StatTile,Tag,Tray} from './ui-kit';
 import {useSwipeTabs} from '../lib/use-swipe-tabs';
 import DisplayVisual from './display-visual';
 import type{ChurchOffset,DisplayKind,DisplaySlide,DisplayStyle}from'../lib/continuous-display/live-contract';
 import {MAX_DISPLAY_SLIDES,churchDateTime,churchLocal,churchTimeToUtc,offsetForChurchTime,parseDisplaySlides}from'../lib/continuous-display/live-contract';
 import type {DisplayScreenR2} from '../lib/continuous-display/operations';
-import {DisplayMotionEditor,OperatingHoursEditor,PublicationControls,NewScreenEditor,SlideEligibilityEditor} from './display-operations-controls';
+import {DisplayMotionEditor,KindIcon,OperatingHoursEditor,PublicationControls,NewScreenEditor,SlideEligibilityEditor} from './display-operations-controls';
 const tabs=['content','playlist','publish','screens'] as const;
 type Tab=typeof tabs[number];
 type Tone='info'|'success'|'warning'|'danger';
 const styles:DisplayStyle[]=['editorial','schedule','event','campaign'];
 const kinds:DisplayKind[]=['announcement','schedule','event','campaign'];
 const capital=(s:string)=>s.slice(0,1).toUpperCase()+s.slice(1);
+const two=(n:number)=>String(n).padStart(2,'0');
 const defaultWall=(days=0)=>churchLocal(new Date(Date.now()+days*86400000).toISOString());
+/** A TV that checked in within this window counts as online. */
+const ONLINE_MS=45000;
+const headings:Record<Tab,{title:string;lede:string}>={
+ content:{title:'Shape the message.',lede:'Edit a slide and check it on the TV preview.'},
+ playlist:{title:'Plan the playlist.',lede:'Slides play top to bottom, then start again.'},
+ publish:{title:'Review and publish.',lede:'Check every slide, date, name and word as it will read in a shared room.'},
+ screens:{title:'Your displays',lede:'Only explicitly paired TVs receive publications.'}
+};
 const notices:Record<string,string>={
  save:'Draft saved. Approval is still required.',
  approve:'Exact draft approved. Publishing is a separate action.',
@@ -29,6 +47,13 @@ const notices:Record<string,string>={
 function OffsetSelect({value,onChange}:{value:ChurchOffset;onChange:(offset:ChurchOffset)=>void}){
  return <label className="ui-field">Clock<select className="ui-input" value={value} onChange={e=>onChange(e.target.value as ChurchOffset)}><option value="-07:00">Daylight time (PDT)</option><option value="-08:00">Standard time (PST)</option></select></label>;
 }
+/** Glass card with an icon box, a title and one line of guidance. */
+function Card({id,icon,title,hint,children,className}:{id:string;icon:ReactNode;title:ReactNode;hint?:ReactNode;children:ReactNode;className?:string}){
+ return <Glass className={'cd-card'+(className?' '+className:'')} aria-labelledby={id}>
+  <div className="cd-card-head"><IconBox>{icon}</IconBox><div><h2 id={id}>{title}</h2>{hint?<p className="ui-hint">{hint}</p>:null}</div></div>
+  {children}
+ </Glass>;
+}
 function newSlide(kind:DisplayKind):DisplaySlide{
  const date=churchLocal(new Date().toISOString()).slice(0,10);
  return{id:'slide-'+crypto.randomUUID().slice(0,12),kind,style:kind==='announcement'?'editorial':kind,
@@ -39,10 +64,11 @@ function newSlide(kind:DisplayKind):DisplaySlide{
 export default function DisplayManager(){
  const [screen,setScreen]=useState<DisplayScreenR2|null>(null);
  const [allScreens,setAllScreens]=useState<DisplayScreenR2[]>([]);
+ const [loaded,setLoaded]=useState(false);
  const preferredScreen=useRef<string|null>(null);
  const [slides,setSlides]=useState<DisplaySlide[]>([]);
  const [tab,setTab]=useState<Tab>('content');
- const [selected,setSelected]=useState(0),[status,setStatusText]=useState('Loading your displays…');
+ const [selected,setSelected]=useState(0),[status,setStatusText]=useState('');
  const [tone,setTone]=useState<Tone>('info');
  const setStatus=(text:string,nextTone:Tone='danger')=>{setStatusText(text);setTone(nextTone);};
  const [busy,setBusy]=useState(false),[dirty,setDirty]=useState(false);
@@ -72,6 +98,7 @@ export default function DisplayManager(){
    }
    setStatus('');
   }catch{setStatus('The display manager could not connect. Check your network and reload.');}
+  finally{setLoaded(true);}
  }
  useEffect(()=>{void load();const focus=()=>{if(!editing.current)void load();};window.addEventListener('focus',focus);return()=>window.removeEventListener('focus',focus);},[]);
  async function command(action:string,extra:Record<string,unknown>={}){
@@ -109,6 +136,12 @@ export default function DisplayManager(){
  const active=slides[selected]??null;
  const canPublish=!!screen&&!dirty&&screen.draftVersion>0&&screen.approvedVersion===screen.draftVersion;
  const swipe=useSwipeTabs(tabs,tab,setTab);
+ const devices=screen?.devices??[];
+ const paired=devices.filter(d=>!d.revoked);
+ const online=(lastSeen:string|null)=>!!lastSeen&&Date.now()-Date.parse(lastSeen)<ONLINE_MS;
+ const onlineCount=paired.filter(d=>online(d.lastSeen)).length;
+ const loop=slides.reduce((sum,s)=>sum+(Number.isFinite(s.duration)?s.duration:0),0);
+ const addSlide=()=>{update(a=>[...a,newSlide('announcement')]);setSelected(slides.length);};
  const updateRow=(index:number,s:DisplaySlide,row:number,patch:Partial<{time:string;label:string}>)=>
   change(index,{rows:(s.rows??[]).map((v,j)=>j===row?{...v,...patch}:v)});
  const fields=(index:number,s:DisplaySlide)=> <div className="cd-fields">
@@ -123,31 +156,30 @@ export default function DisplayManager(){
     <input className="ui-input" aria-label={`Time for activity ${i+1}`} value={r.time} placeholder="Time" maxLength={28} onChange={e=>updateRow(index,s,i,{time:e.target.value})}/>
     <input className="ui-input" aria-label={`Activity ${i+1}`} value={r.label} placeholder="Activity" maxLength={80} onChange={e=>updateRow(index,s,i,{label:e.target.value})}/>
     <button type="button" className="cd-icon-button" aria-label={`Remove activity ${i+1}`} onClick={()=>change(index,{rows:(s.rows??[]).filter((_,j)=>j!==i)})}><X/></button></div>)}
-    {(s.rows?.length||0)<3&&<button type="button" className="ui-button ui-button-quiet" onClick={()=>change(index,{rows:[...(s.rows??[]),{time:'',label:''}]})}>Add activity</button>}
+    {(s.rows?.length||0)<3&&<button type="button" className="ui-button ui-button-secondary cd-add-row" onClick={()=>change(index,{rows:[...(s.rows??[]),{time:'',label:''}]})}><Plus size={18}/>Add activity</button>}
    </fieldset>}
   <div className="cd-span"><SlideEligibilityEditor slide={s} overallStartsAt={screen?.startsAt||undefined} overallEndsAt={screen?.endsAt||undefined}
    onChange={patch=>change(index,patch)} onError={text=>setStatus(text)}/></div>
  </div>;
- const windowEditor=<section className="cd-block" aria-labelledby="cd-window-title"><h2 id="cd-window-title" className="ui-section-title">When it shows</h2>
-  <p className="ui-hint">Las Vegas time. On the two days a year the clocks change, pick the matching offset.</p><div className="cd-fields">
-  <label className="ui-field">Starts<input className="ui-input" type="datetime-local" value={startWall} onChange={e=>editWindow(setStartWall)(e.target.value)}/></label>
-  <OffsetSelect value={startOffset} onChange={editWindow(setStartOffset)}/>
-  <label className="ui-field">Ends<input className="ui-input" type="datetime-local" value={endWall} onChange={e=>editWindow(setEndWall)(e.target.value)}/></label>
-  <OffsetSelect value={endOffset} onChange={editWindow(setEndOffset)}/>
- </div></section>;
+ const windowEditor=<Card id="cd-window-title" icon={<Clock3/>} title="When it shows" hint="Las Vegas time. On the two days a year the clocks change, pick the matching offset.">
+  <div className="cd-fields">
+   <label className="ui-field">Starts<input className="ui-input" type="datetime-local" value={startWall} onChange={e=>editWindow(setStartWall)(e.target.value)}/></label>
+   <OffsetSelect value={startOffset} onChange={editWindow(setStartOffset)}/>
+   <label className="ui-field">Ends<input className="ui-input" type="datetime-local" value={endWall} onChange={e=>editWindow(setEndWall)(e.target.value)}/></label>
+   <OffsetSelect value={endOffset} onChange={editWindow(setEndOffset)}/>
+  </div>
+ </Card>;
  const preview=(slide:DisplaySlide|null,caption:string)=><aside className="cd-side" aria-label="TV preview">
-  <h2 className="ui-section-title">{caption}</h2>
-  <div className="cd-stage cd-small-preview"><DisplayVisual slide={slide} preview/></div>
-  <p className="ui-hint">Preview only. Nothing reaches the TV until it is approved and published.</p>
+  <figure className="cd-frame"><div className="cd-stage"><DisplayVisual slide={slide} preview/></div></figure>
+  <p className="cd-frame-note"><strong>{caption}</strong> · Preview only. Nothing reaches the TV until it is approved and published.</p>
  </aside>;
  const moveSlide=(from:number,to:number)=>{update(a=>{const copy=[...a];[copy[from],copy[to]]=[copy[to],copy[from]];return copy;});setSelected(to);};
+ const heading=screen?headings[tab]:{title:'Your displays',lede:''};
  return <div className="ui-page cd-manage">
   <FrameControls title="Church Display" left={{label:'Content',icon:'display',onClick:()=>setTab('content'),active:tab==='content'}} right={{label:'Screens',icon:'display',onClick:()=>setTab('screens'),active:tab==='screens'}} more={[{label:'Playlist',icon:'calendar',onClick:()=>setTab('playlist')},{label:'Publish',icon:'display',onClick:()=>setTab('publish')}]}/>
   <main className="ui-main">
-   <p className="ui-kicker">{screen?.label||'Your displays'}</p>
-   <h1 className="ui-title">Church Display</h1>
-   {screen&&<p className="ui-lede">{screen.enabled?'Playing on paired TVs':'Not playing on any TV'} · Published v{screen.publishedVersion}</p>}
-   {allScreens.length>1&&<label className="ui-field cd-screen-picker">Choose display
+   <PageHeading eyebrow={screen?.label||'Church Display'} title={heading.title} lede={heading.lede||undefined}/>
+   {allScreens.length>1&&<label className="ui-glass ui-glass-tight cd-context"><IconBox><Monitor size={22}/></IconBox>
     <select className="ui-input" aria-label="Choose display" value={screen?.id??''} onChange={e=>{
      if(dirty&&!window.confirm('Discard unsaved slide changes before switching screens?'))return;
      preferredScreen.current=e.target.value;editing.current=false;setDirty(false);setPairCode('');void load();
@@ -155,52 +187,98 @@ export default function DisplayManager(){
    </label>}
    {screen&&<nav className="ui-tabs" aria-label="Church Display sections">{tabs.map(t=><button key={t} type="button" className="ui-tab" aria-current={tab===t?'page':undefined} onClick={()=>setTab(t)}>{capital(t)}</button>)}</nav>}
    {status&&<p className="ui-notice" data-tone={tone} role="status">{status}</p>}
-   {!screen?<div className="ui-empty"><strong>No display to manage yet</strong>No screen has been assigned to your account. A display owner can give you a manager grant for a screen.</div>:<div className="cd-layout" {...swipe}>
-   {tab==='content'&&<><section className="cd-main" aria-labelledby="cd-slides-title">
-    <div className="cd-heading"><h2 id="cd-slides-title" className="ui-section-title">Slides <span className="cd-count">{slides.length} of {MAX_DISPLAY_SLIDES}</span></h2>
-     <button type="button" className="ui-button ui-button-secondary" disabled={busy||slides.length>=MAX_DISPLAY_SLIDES} onClick={()=>{update(a=>[...a,newSlide('announcement')]);setSelected(slides.length);}}>Add slide</button></div>
-    {slides.length===0?<div className="ui-empty"><strong>No slides yet</strong>Add an announcement or schedule. Until something is published, the TV shows a quiet welcome.</div>:<>
-     <ul className="ui-list">{slides.map((s,i)=><li key={s.id}><button type="button" className="ui-row cd-slide-row" aria-pressed={selected===i} onClick={()=>setSelected(i)}>
-      <span className="cd-lead">{i+1}</span><span className="ui-row-body"><strong>{s.title||'Untitled'}</strong><small>{capital(s.kind)} · {s.duration}s</small></span></button></li>)}</ul>
-     {active&&<div className="ui-surface cd-editor"><div className="cd-heading"><h2 className="cd-editor-title">Slide {selected+1}</h2>
+   {!loaded?<Glass className="cd-state"><EmptyState icon={<Monitor/>} title="Loading" role="status">Loading your displays…</EmptyState></Glass>
+   :!screen?<Glass className="cd-state"><EmptyState icon={<Monitor/>} title="No display to manage yet">No screen has been assigned to your account. A display owner can give you a manager grant for a screen.</EmptyState></Glass>
+   :<div className="cd-layout" data-tab={tab} {...swipe}>
+   {tab==='content'&&<>
+    <section className="cd-area-strip" aria-labelledby="cd-slides-title">
+     <SectionHeader id="cd-slides-title" title="Slides" note={`${slides.length} of ${MAX_DISPLAY_SLIDES}`}/>
+     {slides.length===0?<Glass className="cd-state" as="div"><EmptyState icon={<FileText/>} title="No slides yet"
+      action={<button type="button" className="ui-button" disabled={busy} onClick={addSlide}><Plus size={20}/>Add slide</button>}>Add an announcement or schedule. Until something is published, the TV shows a quiet welcome.</EmptyState></Glass>
+     :<ol className="cd-strip" data-no-swipe>{slides.map((s,i)=><li key={s.id}><button type="button" className="cd-tile" aria-pressed={selected===i} onClick={()=>setSelected(i)}>
+       <span className="cd-tile-top"><span className="cd-tile-n">{two(i+1)}</span><KindIcon kind={s.kind} size={18}/></span><strong>{s.title||'Untitled'}</strong><small>{capital(s.kind)} · {s.duration}s</small></button></li>)}
+      <li><button type="button" className="cd-tile cd-tile-add" disabled={busy||slides.length>=MAX_DISPLAY_SLIDES} onClick={addSlide}><Plus size={22}/><strong>Add slide</strong></button></li>
+     </ol>}
+    </section>
+    {preview(active,active?`Slide ${selected+1}`:'Quiet welcome')}
+    <div className="cd-area-main">
+     {active&&<Glass className="cd-card cd-editor" aria-labelledby="cd-editor-title"><div className="cd-card-head"><IconBox><KindIcon kind={active.kind}/></IconBox><div><h2 id="cd-editor-title">Slide {selected+1}</h2><p className="ui-hint">{capital(active.kind)} · {active.duration}s</p></div>
       <button type="button" className="ui-button ui-button-quiet cd-danger-text" onClick={()=>{update(a=>a.filter((_,i)=>i!==selected));setSelected(Math.max(0,selected-1));}}>Remove slide</button></div>
-      {fields(selected,active)}</div>}
-    </>}
-    {windowEditor}
-    <button type="button" className="ui-button ui-button-block cd-primary-action" disabled={busy||!dirty} onClick={save}>{busy?'Saving…':'Save draft'}</button>
-   </section>{preview(active,'Preview')}</>}
-   {tab==='playlist'&&<section className="cd-main cd-narrow" aria-labelledby="cd-order-title"><h2 id="cd-order-title" className="ui-section-title">Order on the TV</h2>
-    <p className="ui-hint">Slides play top to bottom, then start again. Changes stay a draft until approved and published.</p>
-    {slides.length===0?<div className="ui-empty"><strong>No slides yet</strong>Add slides on the Content tab.</div>:<ol className="ui-list">{slides.map((s,i)=><li className="ui-row cd-order" key={s.id}><span className="cd-lead">{i+1}</span><span className="ui-row-body"><strong>{s.title}</strong><small>{s.duration}s · {capital(s.style)}</small></span>
-     <button type="button" className="cd-icon-button" aria-label={`Move ${s.title} earlier`} disabled={i===0} onClick={()=>moveSlide(i,i-1)}><ArrowUp/></button>
-     <button type="button" className="cd-icon-button" aria-label={`Move ${s.title} later`} disabled={i===slides.length-1} onClick={()=>moveSlide(i,i+1)}><ArrowDown/></button>
-    </li>)}</ol>}
-    <button type="button" className="ui-button ui-button-block cd-primary-action" disabled={busy||!dirty} onClick={save}>Save playlist draft</button>
-   </section>}
-   {tab==='publish'&&<><section className="cd-main" aria-labelledby="cd-review-title"><h2 id="cd-review-title" className="ui-section-title">Review and publish</h2>
-    <dl className="cd-versions"><div><dt>Draft</dt><dd>v{screen.draftVersion}</dd></div><div><dt>Approved</dt><dd>{screen.approvedVersion===null?'None':'v'+screen.approvedVersion}</dd></div><div><dt>Published</dt><dd>v{screen.publishedVersion}</dd></div></dl>
-    <p className="ui-hint">Check every slide, date, name and word as it will read on a TV in a shared room. Approval for another app does not cover the TV.</p>
-    {windowEditor}
-    <div className="cd-actions">
-     <button type="button" className="ui-button ui-button-secondary" disabled={busy||dirty||screen.draftVersion<1||screen.approvedVersion===screen.draftVersion} onClick={()=>command('approve',{expectedVersion:screen.draftVersion})}>Approve exact revision</button>
-     <button type="button" className="ui-button" disabled={busy||!canPublish} onClick={()=>command('publish',{expectedVersion:screen.draftVersion})}>Publish approved playlist</button>
+      {fields(selected,active)}</Glass>}
+     {windowEditor}
+     <Tray className="cd-tray" eyebrow={`Draft v${screen.draftVersion}`} summary={dirty?'Unsaved changes':'All saved'}>
+      <button type="button" className="ui-button" disabled={busy||!dirty} onClick={save}>{busy?'Saving…':'Save draft'}</button>
+     </Tray>
     </div>
-    {dirty&&<p className="ui-notice" data-tone="warning">You have unsaved changes. Save, then approve the new revision before publishing.</p>}
-    <PublicationControls key={screen.id} screen={screen} busy={busy} command={command} draftDirty={dirty}/>
-   </section>{preview(slides[0]??null,'First slide')}</>}
-   {tab==='screens'&&<section className="cd-main cd-narrow" aria-labelledby="cd-pair-title"><h2 id="cd-pair-title" className="ui-section-title">Pair a TV</h2>
-    <p className="ui-hint">A TV never signs in with a member account. Open <strong>lvz.app/display</strong> on the TV, then type the code shown here.</p>
-    <div className="ui-row cd-pair"><span className="ui-row-body"><strong>{screen.label}</strong><small>{screen.enabled?'Enabled for paired TVs':'Not paired yet'} · Published v{screen.publishedVersion}</small></span></div>
-    <button type="button" className="ui-button ui-button-block cd-primary-action" disabled={busy} onClick={()=>command('pair')}>Create one-time pairing code</button>
-    {pairCode&&<div className="ui-surface cd-pair-code" aria-live="polite"><span className="ui-hint">Type this on lvz.app/display. It expires in five minutes.</span><strong>{pairCode}</strong></div>}
-    <h2 className="ui-section-title">Paired TVs</h2>{screen.devices.length?<ul className="ui-list">{screen.devices.map(d=><li className="ui-row" key={d.id}><span className="ui-row-body"><strong>{d.revoked?'Revoked':d.lastSeen&&Date.now()-Date.parse(d.lastSeen)<45000?'Online · checking in':'Offline or not checking in'}</strong><small>Last seen: {d.lastSeen?churchDateTime(d.lastSeen):'Not yet checked in'}</small></span>{!d.revoked&&<button type="button" className="ui-button ui-button-secondary cd-danger-text" disabled={busy} onClick={()=>{if(window.confirm('Revoke this screen immediately when it next checks in?'))void command('revoke',{deviceId:d.id});}}>Revoke</button>}</li>)}</ul>:<p className="ui-hint">No TV is paired. An unpaired TV cannot receive approved content.</p>}
-    <p className="ui-hint">A TV plays no sound. If the network drops or the publication ends, it falls back to a quiet welcome. Revoking takes effect at its next check-in.</p>
+   </>}
+   {tab==='playlist'&&<div className="cd-area-main cd-narrow">
+    <StatGrid label="Playlist summary">
+     <StatTile label="Slides" value={slides.length} note={`of ${MAX_DISPLAY_SLIDES} in this draft`}/>
+     <StatTile label="Paired TVs" value={paired.length} note={paired.length?'on this display':'None paired yet'}/>
+    </StatGrid>
+    <SectionHeader id="cd-order-title" title="Order on the TV" note={slides.length?`${loop}s loop`:undefined}/>
+    {slides.length===0?<Glass className="cd-state" as="div"><EmptyState icon={<FileText/>} title="No slides yet"
+     action={<button type="button" className="ui-button ui-button-secondary" onClick={()=>setTab('content')}>Go to Content</button>}>Add slides on the Content tab.</EmptyState></Glass>
+    :<Glass tight as="div"><ol className="ui-list" aria-labelledby="cd-order-title">{slides.map((s,i)=><li className="ui-row cd-order" key={s.id}>
+     <IconBox><KindIcon kind={s.kind}/></IconBox>
+     <span className="ui-row-body"><strong>{s.title}</strong><small><Tag>{two(i+1)}</Tag>{s.duration} sec · {capital(s.style)}</small></span>
+     <span className="cd-move">
+      <button type="button" className="cd-icon-button" aria-label={`Move ${s.title} earlier`} disabled={i===0} onClick={()=>moveSlide(i,i-1)}><ArrowUp size={20}/></button>
+      <button type="button" className="cd-icon-button" aria-label={`Move ${s.title} later`} disabled={i===slides.length-1} onClick={()=>moveSlide(i,i+1)}><ArrowDown size={20}/></button>
+     </span>
+    </li>)}</ol></Glass>}
+    <Tray className="cd-tray" eyebrow="Playlist" summary={dirty?'Unsaved order':`${slides.length} slide${slides.length===1?'':'s'} · v${screen.draftVersion}`}>
+     <button type="button" className="ui-button" disabled={busy||!dirty} onClick={save}>Save playlist draft</button>
+    </Tray>
+   </div>}
+   {tab==='publish'&&<>
+    {preview(slides[0]??null,'First slide')}
+    <div className="cd-area-main">
+     <div className="cd-versions"><StatGrid label="Versions">
+      <StatTile label="Draft" value={'v'+screen.draftVersion}/>
+      <StatTile label="Approved" value={screen.approvedVersion===null?'None':'v'+screen.approvedVersion}/>
+      <StatTile label="Published" value={'v'+screen.publishedVersion} tone="accent"/>
+     </StatGrid></div>
+     {dirty&&<p className="ui-notice" data-tone="warning">You have unsaved changes. Save, then approve the new revision before publishing.</p>}
+     {windowEditor}
+     <Card id="cd-review-title" icon={<Check/>} title="Approve, then publish" hint="Approval for another app does not cover the TV. Publishing is a separate step after approval.">
+      <div className="cd-actions">
+       <button type="button" className="ui-button ui-button-secondary" disabled={busy||dirty||screen.draftVersion<1||screen.approvedVersion===screen.draftVersion} onClick={()=>command('approve',{expectedVersion:screen.draftVersion})}>Approve exact revision</button>
+       <button type="button" className="ui-button" disabled={busy||!canPublish} onClick={()=>command('publish',{expectedVersion:screen.draftVersion})}>Publish approved playlist</button>
+      </div>
+     </Card>
+     <PublicationControls key={screen.id} screen={screen} busy={busy} command={command} draftDirty={dirty}/>
+    </div>
+   </>}
+   {tab==='screens'&&<div className="cd-area-main cd-narrow">
+    <StatGrid label="Paired TVs summary">
+     <StatTile label="Paired TVs" value={paired.length} note={paired.length?'on this display':'None paired yet'}/>
+     <StatTile label="Online now" value={onlineCount} note="Checked in within a minute"/>
+    </StatGrid>
+    <SectionHeader id="cd-devices-title" title="This display"/>
+    <Glass tight as="div" className="cd-devices"><ul className="ui-list" aria-labelledby="cd-devices-title">
+     <li className="ui-row"><IconBox><Monitor size={22}/></IconBox><span className="ui-row-body"><strong>{screen.label}</strong><small>{screen.enabled?'Enabled for paired TVs':'Not paired yet'} · Published v{screen.publishedVersion}</small></span>
+      <Tag tone={screen.enabled?'success':undefined}>{screen.enabled?'Playing':'Off'}</Tag></li>
+     {devices.map((d,i)=>{const live=!d.revoked&&online(d.lastSeen);
+      return <li className="ui-row cd-device" key={d.id}><IconBox round><Monitor size={20}/></IconBox>
+       <span className="ui-row-body"><strong>TV {i+1}</strong><small>Last seen: {d.lastSeen?churchDateTime(d.lastSeen):'Not yet checked in'}</small>
+        {!d.revoked&&<button type="button" className="cd-text-button cd-danger-text" aria-label={`Revoke TV ${i+1}`} disabled={busy} onClick={()=>{if(window.confirm('Revoke this screen immediately when it next checks in?'))void command('revoke',{deviceId:d.id});}}>Revoke</button>}</span>
+       <Tag tone={d.revoked?'danger':live?'success':undefined}>{d.revoked?'Revoked':live?'Online':'Offline'}</Tag></li>;})}
+    </ul>{devices.length===0&&<p className="ui-hint cd-devices-empty">No TV is paired. An unpaired TV cannot receive approved content.</p>}</Glass>
+    <Glass className="cd-pair-card" aria-labelledby="cd-pair-title">
+     <h2 id="cd-pair-title" className="ui-eyebrow">{pairCode?'One-time pairing code':'Pair a TV'}</h2>
+     <div className="cd-pair-code" aria-live="polite">{pairCode?<><strong>{pairCode}</strong><p>Type this on lvz.app/display. It expires in five minutes.</p></>
+      :<p>A TV never signs in with a member account. Open <strong>lvz.app/display</strong> on the TV, then type the one-time code created here.</p>}</div>
+     <button type="button" className="ui-button ui-button-block" disabled={busy} onClick={()=>command('pair')}>Create one-time pairing code</button>
+    </Glass>
+    <Glass className="cd-callout" as="div"><span className="cd-callout-icon" aria-hidden="true"><Check size={22}/></span><div><strong>Pairing and publishing are separate</strong>
+     <p>A TV plays no sound. If the network drops or the publication ends, it falls back to a quiet welcome. Revoking takes effect at its next check-in.</p></div></Glass>
+    <SectionHeader title="Display settings"/>
     <DisplayMotionEditor key={'motion-'+screen.id} screen={screen} busy={busy} command={command}/>
     <OperatingHoursEditor key={screen.id} screen={screen} busy={busy} command={command}/>
     <NewScreenEditor busy={busy} command={command}/>
-   </section>}
+   </div>}
    </div>}
   </main>
  </div>;
 }
-

@@ -10,7 +10,7 @@ export const metadata={title:'Display Operations Review · Fictional',robots:'no
  */
 export default function DisplayOperationsReview(){
  if(process.env.VERCEL_ENV==='production')notFound();
- return <><aside style={{padding:12,background:'#fff4d9',fontSize:13,fontWeight:700,textAlign:'center'}}>
+ return <><aside className="cd-review-banner">
   DEVELOPMENT ONLY · FICTIONAL TV MANAGEMENT · NOT A CHURCH PUBLICATION
  </aside><DisplayManager/></>;
 }
