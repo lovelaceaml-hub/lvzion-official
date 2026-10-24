@@ -5,14 +5,14 @@
  "h1": [
   "Welcome, Gina."
  ],
- "header": "MembersGE",
+ "header": "ProfileGE",
  "dockVisible": true,
  "brandMentions": 0,
  "overflowX": false,
  "coveredByDock": [],
  "waiting": null,
  "ground": "rgb(245, 246, 242)",
- "frameGround": "#e8e9eb",
- "accent": "#343a43",
+ "frameGround": "#f5f6f2",
+ "accent": "#18513e",
  "errors": []
 }

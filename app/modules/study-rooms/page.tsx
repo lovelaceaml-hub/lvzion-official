@@ -102,8 +102,8 @@ export default function StudyRooms(){
  if(!data)return <div className="ui-page sr-app">
   <main className="ui-main ui-narrow">
    <h1 className="ui-title">Study Room Reservation</h1>
-   <p role="status" className={error?'ui-notice':'ui-lede'} data-tone={error?(signedOut?'warning':'danger'):undefined}>{error?(signedOut?'Sign in to reserve a study room.':error):'Loading Study Rooms…'}</p>
-   {error&&<p className="ui-hint">Study Rooms needs sign-in and a Study Rooms grant from a leader.</p>}
+   <p role="status" className={error?'ui-notice':'ui-lede'} data-tone={error?(signedOut?'warning':'danger'):undefined}>{error||'Loading Study Rooms…'}</p>
+   {error&&<p className="ui-hint">{signedOut?'Sign in to reserve a study room.':'Study Rooms needs a Study Rooms grant from a leader.'}</p>}
    {error&&<div className="sr-sheet-actions sr-shell-actions">
     {signedOut&&<a className="ui-button" href="/sign-in">Sign in</a>}
     {day&&<button type="button" className={signedOut?'ui-button ui-button-secondary':'ui-button'} onClick={()=>{void load(day);}}>Try again</button>}

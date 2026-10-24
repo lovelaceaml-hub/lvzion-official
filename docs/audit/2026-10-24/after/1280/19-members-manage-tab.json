@@ -9,11 +9,7 @@
  "dockVisible": true,
  "brandMentions": 1,
  "overflowX": false,
- "coveredByDock": [
-  "reason",
-  "reason",
-  "Record appointment"
- ],
+ "coveredByDock": [],
  "waiting": null,
  "ground": "rgb(245, 246, 242)",
  "frameGround": "#e8e9eb",
