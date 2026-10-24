@@ -8,9 +8,9 @@ const eventLabel={submitted:'Request',clarification:'Question',reply:'Reply',ans
 
 export default function Group({data,send,busy}:{data:Workspace;send:Send;busy:boolean}){
  const leader=data.me.groupLeader||data.me.unitLeader;
- if(!data.me.placed)return <div className="gp-tab-body"><Empty title="You are not placed in a group">My Group opens after a leader places you in a group and unit.</Empty></div>;
+ if(!data.me.placed)return <div className="gp-tab-body"><Empty title="You are not placed in a group">My Group opens after a leader places you in a group.</Empty></div>;
  return <div className="gp-tab-body">
-  <p className="gp-group-name"><strong>{data.me.groupName}</strong> · {data.me.unitName}</p>
+  <p className="gp-group-name"><strong>{data.me.groupName}</strong>{data.me.unitName?' · '+data.me.unitName:data.me.inGroup?' · No unit':' · Group you lead'}</p>
   <MemberUpdates data={data} send={send} busy={busy} leader={leader}/>
   <GospelReview data={data} leader={leader}/>
   <GospelPlan data={data} send={send} busy={busy}/>

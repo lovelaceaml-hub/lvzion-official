@@ -6,7 +6,7 @@ import Group from '../../../components/gospel-planning/group';
 import Manage from '../../../components/gospel-planning/manage';
 import {NoticeContext,newRequestId,type Notice,type Send} from '../../../components/gospel-planning/shared';
 import '../../../components/gospel-planning/gospel-planning.css';
-import {addDays,mondayOf,vegasDay,weekLabel,type Action,type Workspace} from '../../../lib/gospel-planning/contract';
+import {GROUP_SCOPED,addDays,mondayOf,vegasDay,weekLabel,type Action,type Workspace} from '../../../lib/gospel-planning/contract';
 import {useSwipeTabs} from '../../../lib/use-swipe-tabs';
 
 type Tab='preaching'|'group'|'manage';
@@ -25,13 +25,15 @@ class RequestError extends Error{constructor(message:string,readonly status:numb
 export default function GospelPlanning(){
  const [week,setWeek]=useState(''),[data,setData]=useState<Workspace|null>(null),[error,setError]=useState<RequestError|null>(null);
  const [tab,setTab]=useState<Tab>('preaching'),[busy,setBusy]=useState(false),[notice,setNotice]=useState<Notice>(null);
+ // '' means the member's own group; otherwise a group they lead by appointment.
+ const [group,setGroup]=useState('');
  const sequence=useRef(0);
 
 
  const load=useCallback(async(target:string)=>{
   const id=++sequence.current;
   try{
-   const response=await fetch('/api/gospel-planning?week='+encodeURIComponent(target),{cache:'no-store'});
+   const response=await fetch('/api/gospel-planning?week='+encodeURIComponent(target)+(group?'&group='+encodeURIComponent(group):''),{cache:'no-store'});
    const result=await response.json().catch(()=>({error:'The server response could not be read. Please refresh.'}));
    if(id!==sequence.current)return;
    if(!response.ok){
@@ -41,7 +43,7 @@ export default function GospelPlanning(){
    }
    setData(result as Workspace);setError(null);
   }catch{if(id===sequence.current)setError(new RequestError('Could not reach the server. Check your connection and try again.',0));}
- },[]);
+ },[group]);
  useEffect(()=>{setWeek(mondayOf(vegasDay()));},[]);
  useEffect(()=>{if(!week)return;void load(week);const refresh=()=>{void load(week);};window.addEventListener('focus',refresh);return()=>window.removeEventListener('focus',refresh);},[week,load]);
 
@@ -49,7 +51,7 @@ export default function GospelPlanning(){
   setBusy(true);setNotice(null);
   try{
    const response=await fetch('/api/gospel-planning/command',{method:'POST',cache:'no-store',headers:{'Content-Type':'application/json'},
-    body:JSON.stringify({action,requestId:newRequestId(),payload})});
+    body:JSON.stringify({action,requestId:newRequestId(),payload:group&&GROUP_SCOPED.includes(action)?{...payload,groupId:group}:payload})});
    const result=await response.json().catch(()=>({}));
    if(!response.ok){
     setNotice({tone:response.status===409?'warning':'danger',text:result.error??'This could not be saved.'});
@@ -59,7 +61,7 @@ export default function GospelPlanning(){
    setNotice({tone:'success',text:saved[action]??'Saved.'});await load(week);return true;
   }catch{setNotice({tone:'danger',text:'Could not reach the server. Refresh to check whether your change was saved.'});return false;}
   finally{setBusy(false);}
- },[load,week]);
+ },[load,week,group]);
 
  const tabs=useMemo<Tab[]>(()=>data?.me.manager?['preaching','group','manage']:['preaching','group'],[data?.me.manager]);
  const current=tabs.includes(tab)?tab:'preaching';
@@ -87,6 +89,8 @@ export default function GospelPlanning(){
    <div className="ui-tabs gp-tabs" role="tablist" aria-label="Gospel Planning sections">
     {tabs.map(t=><button key={t} type="button" role="tab" id={'gp-tab-'+t} aria-controls="gp-panel" aria-selected={current===t} className="ui-tab" onClick={()=>setTab(t)}>{tabLabel[t]}</button>)}
    </div>
+   {current!=='manage'&&(data.groups?.length??0)>1&&<label className="ui-field gp-group-choice">Group<select className="ui-input" value={group||data.me.groupId||''} onChange={e=>{setGroup(e.target.value===data.me.ownGroupId?'':e.target.value);}}>
+    {data.groups.map(g=><option key={g.id} value={g.id}>{g.name}{g.own?' (my group)':g.leader?' (I lead)':''}</option>)}</select></label>}
    {current!=='manage'&&<nav className="gp-week" aria-label="Week">
     <button type="button" className="gp-icon-button" aria-label="Previous week" onClick={()=>setWeek(addDays(week,-7))}>‹</button>
     <span><strong>{weekLabel(week)}</strong>{week!==mondayOf(data.today)&&<button type="button" className="ui-button ui-button-quiet gp-small-button" onClick={()=>setWeek(mondayOf(data.today))}>This week</button>}</span>

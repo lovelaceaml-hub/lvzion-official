@@ -16,7 +16,7 @@ import type {InvitationInput} from './onboarding-panel';
 import OrganizationPanel from './organization-panel';
 import PlacementPicker from './placement-picker';
 import LeadershipForm from './leadership-form';
-import {unitPath} from '../lib/organization';
+import {placementPath} from '../lib/organization';
 import {canManage,formatDay,localDay,weekDays} from '../lib/member-experience';
 import type {MemberActivity} from '../lib/member-experience';
 import {emptyModuleFeed,parseModuleFeed} from '../lib/app-runtime';
@@ -37,7 +37,7 @@ const longDay=(day:string)=>formatDay(day,{weekday:'long',month:'long',day:'nume
 /** "Group · Unit" for a placement, as on Home; the full path stays in forms and the editor. */
 function shortPlace(w:Workspace,unitId?:string|null,groupId?:string|null){
  const unit=w.units.find(u=>u.id===unitId),group=w.groups.find(g=>g.id===(unit?.parentId??groupId));
- return [group?.name,unit?.name].filter(Boolean).join(' · ')||'Unassigned';
+ return group?[group.name,unit?.name??'No unit'].join(' · '):'Unassigned';
 }
 const viewCopy:Record<View,{title:string;lede:string}>={
  members:{title:'Manage with care.',lede:'Visibility follows the access you were granted.'},
@@ -146,7 +146,7 @@ export default function MemberWorkspace({data:w,execute,demo=false,invite}:Props
     <SearchField label="Find a member" placeholder="Find a member" value={memberSearch} onChange={e=>setMemberSearch(e.target.value)}/>
     <div className="ui-glass ui-glass-tight"><ul className="ui-list name-list">{w.managedMembers.filter(p=>p.name.toLowerCase().includes(memberSearch.trim().toLowerCase())).map(p=><li key={p.id}><Row className="member-row" lead={<IconBox>{initialsOf(p.name)}</IconBox>} title={p.name} detail={shortPlace(w,p.unitId,p.groupId)} end={statusTag(p)} onClick={()=>setSelected(p)}/></li>)}</ul>
      {!w.managedMembers.length&&<EmptyState icon={<UsersRound/>} title="No members in your scope">Members you are authorized to manage appear here.</EmptyState>}
-     <details className="member-disclosure"><summary>{demo?'Add a fictional member':'Add a member record'}</summary><form onSubmit={e=>submit(e,'member.create')}><label>Name<input name="name" required minLength={2} maxLength={120}/></label><PlacementPicker data={w} manageableOnly unitLabel="Primary unit"/><Reason/><button disabled={busy||!w.units.some(u=>u.canManage)}>Create member record</button><p className="fine-print">Creates a person and primary placement, not a login account.</p></form></details>
+     <details className="member-disclosure"><summary>{demo?'Add a fictional member':'Add a member record'}</summary><form onSubmit={e=>submit(e,'member.create')}><label>Name<input name="name" required minLength={2} maxLength={120}/></label><PlacementPicker data={w} manageableOnly unitLabel="Primary unit"/><Reason/><button disabled={busy||!(w.units.some(u=>u.canManage)||w.groups.some(g=>g.canManage))}>Create member record</button><p className="fine-print">Creates a person and primary placement, not a login account.</p></form></details>
     </div>
     {views.some(v=>v[0]==='placement')&&<button type="button" className="ui-button ui-button-secondary ui-button-block member-cta" onClick={openPlacement}>View placement workspace<ChevronRight size={20}/></button>}
    </section>}
@@ -157,7 +157,7 @@ export default function MemberWorkspace({data:w,execute,demo=false,invite}:Props
   </>}
   {area==='placement'&&<>
    <OnboardingPanel view="placement" data={w} execute={execute} demo={demo} invite={invite??(async()=>{throw new Error('Invitation delivery unavailable.');})}/>
-   {!!w.transfers.length&&<Glass className="member-card" aria-labelledby="members-transfers-title"><SectionHeader id="members-transfers-title" title="Transfers needing attention" note={plural(w.transfers.length,'request','requests')}/>{w.transfers.map(t=><form className="sub-card" key={t.id} onSubmit={e=>submit(e,'transfer.decide',{id:t.id})}><Row lead={<IconBox>{initialsOf(t.name)}</IconBox>} title={t.name} detail={'Destination: '+unitPath(w,t.unitId)} end={<Tag tone="warning">{t.status}</Tag>}/><label>Decision<select name="decision">{t.canDecide&&<><option value="accepted">Accept into receiving group</option><option value="rejected">Reject request</option></>}{t.requestedBy===w.self.id&&<option value="cancelled">Cancel my request</option>}</select></label><Reason/><button disabled={busy||(!t.canDecide&&t.requestedBy!==w.self.id)}>Record decision</button></form>)}</Glass>}
+   {!!w.transfers.length&&<Glass className="member-card" aria-labelledby="members-transfers-title"><SectionHeader id="members-transfers-title" title="Transfers needing attention" note={plural(w.transfers.length,'request','requests')}/>{w.transfers.map(t=><form className="sub-card" key={t.id} onSubmit={e=>submit(e,'transfer.decide',{id:t.id})}><Row lead={<IconBox>{initialsOf(t.name)}</IconBox>} title={t.name} detail={'Destination: '+placementPath(w,t.groupId,t.unitId)} end={<Tag tone="warning">{t.status}</Tag>}/><label>Decision<select name="decision">{t.canDecide&&<><option value="accepted">Accept into receiving group</option><option value="rejected">Reject request</option></>}{t.requestedBy===w.self.id&&<option value="cancelled">Cancel my request</option>}</select></label><Reason/><button disabled={busy||(!t.canDecide&&t.requestedBy!==w.self.id)}>Record decision</button></form>)}</Glass>}
    <OrganizationPanel data={w} execute={execute}/>
   </>}
   {area==='departments'&&<>
@@ -176,7 +176,7 @@ export default function MemberWorkspace({data:w,execute,demo=false,invite}:Props
  {tab==='profile'&&<div className="member-view">
   <Glass className="member-identity"><span className="member-avatar" aria-hidden="true">{initialsOf(w.self.name)}</span><h2>{w.self.name}</h2><p>{placement}</p><Tag>{w.self.status==='inactive'?'Inactive member':'Active member'}</Tag></Glass>
   <Glass tight><ul className="ui-list">
-   <li><Row lead={<IconBox><MapPin size={22}/></IconBox>} title="My placement" detail={w.self.unitId?unitPath(w,w.self.unitId).replaceAll(' / ',' · '):placement}/></li>
+   <li><Row lead={<IconBox><MapPin size={22}/></IconBox>} title="My placement" detail={w.self.unitId?placementPath(w,w.self.groupId,w.self.unitId).replaceAll(' / ',' · '):placement}/></li>
    <li><button type="button" className="ui-row" aria-expanded={contactsOpen} aria-controls="member-contacts" onClick={()=>setContactsOpen(!contactsOpen)}><IconBox><FileText size={22}/></IconBox><span className="ui-row-body"><strong>Contact information</strong><small>{[w.contacts.email,w.contacts.phone].filter(Boolean).join(' · ')||'Add your own private contact details'}</small></span><ChevronRight size={18} className={contactsOpen?'member-chevron-open':undefined}/></button></li>
    <li><Row href="/appearance" lead={<IconBox><Contrast size={22}/></IconBox>} title="Appearance" detail="Light, dark or match this device"/></li>
   </ul></Glass>
@@ -193,9 +193,9 @@ export default function MemberWorkspace({data:w,execute,demo=false,invite}:Props
  </div>}
 
  {selected&&<dialog ref={dialog} onCancel={()=>setSelected(null)} aria-label="Manage member" className="ui-sheet member-dialog" data-no-swipe><div className="ui-sheet-body">
-  <div className="member-dialog-head"><IconBox>{initialsOf(selected.name)}</IconBox><div><h2>{selected.name}</h2><p>{unitPath(w,selected.unitId)}</p></div><button type="button" className="ui-button ui-button-secondary" onClick={()=>setSelected(null)} aria-label="Close member editor">Close</button></div>
+  <div className="member-dialog-head"><IconBox>{initialsOf(selected.name)}</IconBox><div><h2>{selected.name}</h2><p>{placementPath(w,selected.groupId,selected.unitId)}</p></div><button type="button" className="ui-button ui-button-secondary" onClick={()=>setSelected(null)} aria-label="Close member editor">Close</button></div>
   <div className="ui-glass"><form onSubmit={e=>submit(e,'member.rename',{memberId:selected.id})}><label>Official display name<input name="name" defaultValue={selected.name} required minLength={2} maxLength={120}/></label><Reason/><button disabled={busy}>Save name</button></form></div>
-  {selected.status!=='intake'&&<details className="member-disclosure ui-glass"><summary>Change primary placement</summary><form onSubmit={e=>{e.preventDefault();const p=Object.fromEntries(new FormData(e.currentTarget).entries()) as Record<string,string>;const dest=w.units.find(u=>u.id===p.unitId);void send(dest?.parentId!==selected.groupId&&!perms.organization?'transfer.request':'member.move',{...p,memberId:selected.id});}}><PlacementPicker data={w} excludeUnitId={selected.unitId} unitLabel="Destination unit"/><Reason/><button disabled={busy}>Submit placement change</button><p className="fine-print">Cross-group moves need receiving-group acceptance unless a separately authorized administrator transfers directly.</p></form></details>}
+  {selected.status!=='intake'&&<details className="member-disclosure ui-glass"><summary>Change primary placement</summary><form onSubmit={e=>{e.preventDefault();const p=Object.fromEntries(new FormData(e.currentTarget).entries()) as Record<string,string>;const destGroup=w.units.find(u=>u.id===p.unitId)?.parentId??p.groupId;void send(destGroup!==selected.groupId&&!perms.organization?'transfer.request':'member.move',{...p,memberId:selected.id});}}><PlacementPicker data={w} excludeUnitId={selected.unitId} unitLabel="Destination unit"/><Reason/><button disabled={busy}>Submit placement change</button><p className="fine-print">Cross-group moves need receiving-group acceptance unless a separately authorized administrator transfers directly.</p></form></details>}
   {perms.organization&&selected.status!=='intake'&&selected.id!==w.self.id&&<details className="member-disclosure ui-glass"><summary>Change active status</summary><form onSubmit={e=>submit(e,'member.status',{memberId:selected.id,status:selected.status==='active'?'inactive':'active'})}><Reason/><button disabled={busy}>{selected.status==='active'?'Make inactive':'Reactivate'}</button><p className="fine-print">History is retained. Suspended sessions do not regain access after reactivation; a fresh sign-in is required.</p></form></details>}
  </div></dialog>}
  <footer className="member-footer">LV Zion Official · {demo?'Synthetic records only':'Permission-scoped member workspace'}</footer></main>;

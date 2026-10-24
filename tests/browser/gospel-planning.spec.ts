@@ -243,9 +243,10 @@ test('manager sets up places and roles without seeing ministry records',async({p
 test('revoked access clears the screen on the next refresh',async({page})=>{
  const gp=await openGospel(page,{as:member.gina});
  await expect(page.getByRole('heading',{name:'Your sessions'})).toBeVisible();
- await gp.sql(`update app_private.module_access_grants set ended_at=clock_timestamp() where member_id='44444444-4444-4444-8444-000000000107'`);
+ // Apps are open to every signed-in member (2026-10-24), so access ends by suspending the account.
+ await gp.sql(`update app_private.account_links set technical_enabled=false where member_id='44444444-4444-4444-8444-000000000107'`);
  await gp.as(member.gina);
- await expect(page.getByText('has not been assigned to your account')).toBeVisible();
+ await expect(page.getByText('is not available for this account or group')).toBeVisible();
  await expect(page.getByRole('heading',{name:'Your sessions'})).toHaveCount(0);
  await gp.close();
 });

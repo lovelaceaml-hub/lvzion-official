@@ -105,7 +105,7 @@ export default function StudyRooms(){
    <PageHeading eyebrow="A place to focus" title="Study Room Reservation" lede="Rooms, whiteboards and TVs for focused study."/>
    <div className="ui-glass sr-shell-card">
     <p role="status" className={error?'ui-notice':'ui-lede'} data-tone={error?(signedOut?'warning':'danger'):undefined}>{error||'Loading Study Rooms…'}</p>
-    {error&&<p className="ui-hint">{signedOut?'Sign in to reserve a study room.':'Study Rooms needs a Study Rooms grant from a leader.'}</p>}
+    {error&&<p className="ui-hint">{signedOut?'Sign in to reserve a study room.':'Study Rooms is not available for this account right now.'}</p>}
     {error&&<div className="sr-shell-actions">
      {signedOut&&<a className="ui-button" href="/sign-in">Sign in</a>}
      {day&&<button type="button" className={signedOut?'ui-button ui-button-secondary':'ui-button'} onClick={()=>{void load(day);}}>Try again</button>}

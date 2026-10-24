@@ -275,6 +275,16 @@
    "verified_on": "2026-10-24",
    "applied_via": "Supabase CLI db push --linked from an isolated workdir holding placeholders for all 27 hosted versions plus this file; dry run listed only this migration",
    "verification": "Readback: module gospel-planning status draft, accent #1863a3, 0 grants; 17 gp_private tables, all with row level security; 0 places, 0 Gospel roles; total modules 6, total module grants unchanged at 5. Signed-out GET /api/gospel-planning and POST /api/gospel-planning/command return 401 on deployment dpl_Dk1iD3B8JfNQGhFkCTtKMggfHTLv."
+  },
+  {
+   "name": "open_access_group_placement",
+   "hosted_version": "20261024170000",
+   "repository_version": "20261024170000",
+   "source": "supabase/migrations/20261024170000_open_access_group_placement.sql",
+   "status": "applied",
+   "verified_on": "2026-10-24",
+   "applied_via": "Supabase CLI db push --linked from an isolated workdir with placeholders for all 28 hosted versions; dry run listed only this migration",
+   "verification": "Pre-checks: latest hosted 20261024150000, one bootstrap owner with 3 admin roles, gospel-planning draft, no null-unit placements, 5 active grants. Readback: gospel-planning approved, member_placements.unit_id nullable, 6 approved modules, owner module_allowed on gospel-planning true, active grants unchanged at 5. Deployed with main d6a5a2c as dpl_44xMWbaPe2D4RyyhuBAbYir87Wwu; signed-out module APIs return 401."
   }
  ],
  "normalization": {
@@ -294,6 +304,13 @@
    "applied_on": "2026-10-16",
    "approved_by": "Anthony (owner), 2026-10-16",
    "verification": "Readback: four weekly restrictions (Tue 19:30-20:30; Sat 10:00-11:00, 14:30-15:30, 19:30-20:30), calendar version 3, one audit event study_rooms.owner_service_times, bookings open unchanged."
+  },
+  {
+   "name": "organization_import",
+   "source": "Not in Git (real member names). Owner-supplied sign-up sheet and leader screenshots, applied as one transaction via Supabase MCP execute_sql.",
+   "applied_on": "2026-10-24",
+   "approved_by": "Anthony (owner), 2026-10-24",
+   "verification": "Categories renamed to Brothers/Sisters and Student Brothers, Student Sisters and Pastoral Staff added; 8 placeholder groups and their units deactivated (not deleted); 18 leader-named groups, 3 units, 75 active members (owner reused, 74 new) all placed (72 group-only); 17 group leaders, 2 unit leaders (both lead outside their own group), 4 pastoral staff; one audit event per member plus a structure event. Display-name checksum matched the approved plan."
   }
  ],
  "worship_duty_audit": {

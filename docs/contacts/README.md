@@ -1,5 +1,7 @@
 # Contacts — official LV Zion module
 
+**October 24, 2026 decision (draft, not applied):** migration `20261024170000_open_access_group_placement.sql` opens Contacts to every signed-in member. Each member gets a **private workspace of their own records** and can create contacts in it; every query stays `owner_member_id = the signed-in member`, so nobody (including leaders and the owner) reads another member's contacts or notes. Sharing, export and messaging stay disabled. Production still needs `LVZ_CONTACTS_OWNER_PILOT=true` for the page and API; the owner-only description below applies until the migration is applied.
+
 **Current supported scope:** a **private, owner-only** Contacts application integrated with **[lvz.app/modules/contacts](https://lvz.app/modules/contacts)**. It uses the regular verified LV Zion sign-in and appears in Apps only for an individually authorized member. It is **not** a public contact directory or the fully launched multi-member Shared Contact Tracker.
 
 **Contacts R5 feature-release evidence (historical artifact):** Vercel `dpl_35kWj2cAcYYNjHq2fhc5XpAcofrv`, application commit `87c5a8573ca01f7216f2c78df1da5b827b7380d2`, **READY**, October 14, 2026. The newer READY production deployment `dpl_FFquRhvQkTW1xv1gRVz1SuKBg66S` (source `de5dcdede5fc740873fddfa36467d9d47f318fd6`) retains the Contacts UI; check [the current handoff](../HANDOFF.md) for any later deployment. GitHub documentation commits do not automatically redeploy.

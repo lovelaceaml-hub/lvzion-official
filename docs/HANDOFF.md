@@ -6,7 +6,24 @@ Updated October 24, 2026. This handoff and `AGENTS.md` describe the application 
 
 LV Zion Official is a self-contained, phone-first application at https://lvz.app. Only explicitly approved requirements govern its modules. All schedules, assignments and events are deliberately configured within this application; empty calendars are valid. A design reference supplies appearance or interaction, not data or scheduling policy. Preserve existing accounts, grants, organizational history and intentionally entered records.
 
-Keep compact module headers and the prominent center Apps launcher. The launcher shows only server-authorized modules. Continue the approved [Day Sheet design contract](design/LVZ-DESIGN-CONTRACT.md), shared tokens, accessible controls and phone-first layouts.
+Keep compact module headers and the prominent center Apps launcher. The launcher shows only server-authorized modules (after the October 24 decisions: every approved module for every signed-in member). Continue the approved [Day Sheet design contract](design/LVZ-DESIGN-CONTRACT.md), shared tokens, accessible controls and phone-first layouts.
+
+## Access and placement decisions — October 24, 2026 (draft, not applied)
+
+Anthony decided on 2026-10-24, superseding "module access only by explicit grant" and "leadership follows the leader's placement". One migration, `supabase/migrations/20261024170000_open_access_group_placement.sql`, implements all of it; it is on a draft PR and is **not applied** to the hosted database, and production env is unchanged.
+
+1. **Every approved app is open to every signed-in member** (confirmed account, enabled account link, active or Unassigned). Use access is automatic; managing still needs an explicit `manager` grant. Implemented centrally: `app_private.current_member_id()` now means the signed-in member (the former meaning is `organization_member_id()`, still used by member administration), `module_allowed` (use), `module_manager` (manage) and `member_module_home` (the Apps list).
+   - Contacts: each member gets a private workspace of their own records and can create in it; nobody, including the owner, reads another member's records. Production also needs `LVZ_CONTACTS_OWNER_PILOT=true` (the page and API are off without it).
+   - Continuous Display: members open the app and see a "cannot manage" notice; only managers (explicit grant or owner) reach management, publishing and pairing, and per-screen permissions still apply.
+   - Study Rooms: members book under the existing rules; holds, administration and other members' details stay with managers. "Who can book" now shows everyone with an account as on automatically.
+   - Work Mission Prayer: member view only (schedule, materials, joining a gathering); hosting, reviewing and management still need explicit capabilities.
+   - Worship Duty: My Duties for members; Manage (department manager plus manager grant), Presider/song planning and Setup stay role-gated. Setup's switch is now the explicit "participation grant" needed before department scheduling.
+   - Groups & Gospel Planning: approved by the migration (recorded against the bootstrap owner). Members open it; Unassigned members see the neutral unplaced view and cannot write.
+2. **The owner manages every approved app automatically**, including future ones, with no grant rows: `app_private.is_owner()` = bootstrap receipt + usable account + a current member, technical or department administrator appointment.
+3. **Group-only placement.** `member_placements.unit_id` (and transfer destinations) may be null; the (unit, group) foreign key still applies when a unit is given. Commands accept `groupId` with an optional `unitId`. Group leaders see and place group-only members; unit leaders see only their unit.
+4. **Leadership is independent of placement** (added the same day). `actor_has` no longer requires a leader to be placed in the group or unit they lead, and appointments name any active group or unit. Gospel Planning lets a leader open any group they lead (group switcher, optional `groupId`); in their own group they act only per their own roles there.
+
+Tests: `tests/open-access-group-placement-database.test.ts` (111 SQL assertions in the hosted order) plus updated module DB tests. Before applying, run the read-only checks listed in the PR.
 
 ## Design repair: one base, a style per app (October 24, 2026, draft, not released)
 
@@ -85,7 +102,7 @@ The owner-requested organization has four age categories, two groups per categor
 
 ## Other module boundaries
 
-Contacts remains an explicitly granted private owner workspace. Preserve forced RLS, author-only notes, do-not-contact and audit controls. Sharing, export and communications remain separately controlled. [Owner guide](contacts/USER-GUIDE.md), [operations](contacts/OPERATIONS.md), [verification](contacts/VERIFICATION.md).
+Contacts is an explicitly granted private owner workspace until the October 24 migration is applied; then every signed-in member has a private workspace of their own records. Preserve forced RLS, author-only notes, do-not-contact and audit controls. Sharing, export and communications remain separately controlled. [Owner guide](contacts/USER-GUIDE.md), [operations](contacts/OPERATIONS.md), [verification](contacts/VERIFICATION.md).
 
 Continuous Display uses approved publications and explicitly paired devices. Do not confuse a browser test with physical TV acceptance. [Operations](continuous-display/OPERATIONS-R2.md).
 

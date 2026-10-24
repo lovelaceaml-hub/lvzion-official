@@ -23,7 +23,7 @@ export default function EnrollmentPanel({data:w,execute,demo=false}:{data:Worksp
   <form className="ui-glass" onSubmit={e=>void submit(e,'enrollment.assign',m.id)}>
    <PlacementPicker data={w} manageableOnly/>
    <label>Membership and identity verified<select name="verified" required defaultValue="no"><option value="no">Not yet verified</option><option value="yes">I independently verified membership and identity</option></select></label>
-   <label>Verification and placement reason<input name="reason" required minLength={5} maxLength={500} placeholder="Record the verified placement context"/></label><button className="member-primary" disabled={busy||!w.units.some(u=>u.canManage)}>Verify and assign member</button>
+   <label>Verification and placement reason<input name="reason" required minLength={5} maxLength={500} placeholder="Record the verified placement context"/></label><button className="member-primary" disabled={busy||!(w.units.some(u=>u.canManage)||w.groups.some(g=>g.canManage))}>Verify and assign member</button>
    <p className="fine-print">Confirm the person is a member and check for an existing record. Email confirmation proves ownership of the address. It does not verify church membership.</p>
   </form>
   <details className="member-disclosure ui-glass ui-glass-tight"><summary>Decline this signup</summary><p className="member-quiet">Use this for an unverified person or a duplicate profile. Existing member records stay separate, and the decision is retained.</p><form onSubmit={e=>void submit(e,'enrollment.reject',m.id)}><label>Reason for declining<input name="reason" required minLength={5} maxLength={500}/></label><button className="secondary" disabled={busy}>Decline signup</button></form></details>

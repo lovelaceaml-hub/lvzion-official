@@ -15,7 +15,9 @@ export default function Manage({data,send,busy}:{data:Workspace;send:Send;busy:b
  const [label,setLabel]=useState(''),[memberId,setMemberId]=useState(''),[capability,setCapability]=useState<Capability>('schedule'),[groupId,setGroupId]=useState(''),[unitId,setUnitId]=useState('');
  if(!m)return null;
  const member=m.members.find(x=>x.id===memberId);
- const scheduleUnits=m.groups.find(g=>g.id===member?.groupId)?.units??[];
+ // Publish and schedule may cover a group the member leads by appointment, not only their own group.
+ const roleGroup=capability!=='oversee'&&groupId?m.groups.find(g=>g.id===groupId):m.groups.find(g=>g.id===member?.groupId);
+ const scheduleUnits=roleGroup?.units??[];
  return <div className="gp-tab-body">
   <p className="ui-notice">Setup only. Managing this app does not open any group plan, member update, request or session.</p>
   <Section title="Approved meeting places" note="Sessions can be planned only at places listed here. Use public meeting places, not home addresses.">
@@ -35,17 +37,19 @@ export default function Manage({data,send,busy}:{data:Workspace;send:Send;busy:b
    </li>)}</ul>:<p className="ui-hint">No Gospel roles assigned yet.</p>}
    <form className="gp-form" onSubmit={async e=>{e.preventDefault();
     const payload:Record<string,unknown>={memberId,capability};
-    if(capability==='oversee')payload.groupId=groupId;
+    if(groupId&&(capability==='oversee'||groupId!==member?.groupId))payload.groupId=groupId;
     if(capability==='schedule'&&unitId)payload.unitId=unitId;
-    if(await send('capability.grant',payload)){setMemberId('');setUnitId('');}}}>
+    if(await send('capability.grant',payload)){setMemberId('');setUnitId('');setGroupId('');}}}>
     <label className="ui-field">Member<select className="ui-input" required value={memberId} onChange={e=>{setMemberId(e.target.value);setUnitId('');}}>
      <option value="">Choose a member with access</option>
      {m.members.map(x=><option key={x.id} value={x.id}>{x.name}{x.group?' · '+x.group:' · not placed'}{x.groupLeader?' · group leader':''}</option>)}</select></label>
     <label className="ui-field">Role<select className="ui-input" value={capability} onChange={e=>setCapability(e.target.value as Capability)}>
      {(['schedule','publish','oversee'] as const).map(c=><option key={c} value={c}>{roleLabel[c]}</option>)}</select></label>
     <p className="ui-hint">{roleHelp[capability]}</p>
+    {capability!=='oversee'&&member?.groupId&&<label className="ui-field">Group<select className="ui-input" value={groupId} onChange={e=>{setGroupId(e.target.value);setUnitId('');}}>
+     <option value="">Their own group ({member.group})</option>{m.groups.filter(g=>g.id!==member.groupId).map(g=><option key={g.id} value={g.id}>{g.category} · {g.name} (a group they lead)</option>)}</select></label>}
     {capability==='schedule'&&member?.groupId&&<label className="ui-field">Scope<select className="ui-input" value={unitId} onChange={e=>setUnitId(e.target.value)}>
-     <option value="">Whole group ({member.group})</option>{scheduleUnits.map(u=><option key={u.id} value={u.id}>{u.name} only</option>)}</select></label>}
+     <option value="">Whole group ({roleGroup?.name??member.group})</option>{scheduleUnits.map(u=><option key={u.id} value={u.id}>{u.name} only</option>)}</select></label>}
     {capability==='oversee'&&<label className="ui-field">Group they oversee<select className="ui-input" required value={groupId} onChange={e=>setGroupId(e.target.value)}>
      <option value="">Choose a group</option>{m.groups.map(g=><option key={g.id} value={g.id}>{g.category} · {g.name}</option>)}</select></label>}
     {capability==='publish'&&member&&!member.groupLeader&&<p className="ui-notice" data-tone="warning">Publisher needs a current group leader appointment.</p>}

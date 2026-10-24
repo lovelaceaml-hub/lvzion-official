@@ -94,7 +94,7 @@ export default function MemberHome({workspace:w,demo=false,manageHref,experience
  const recentNotices=(experience?.notifications??[]).filter(n=>!n.requiresAction||n.readAt!==null);
  const userManages=canManage(w);
  const group=w.groups.find(g=>g.id===w.self.groupId)?.name??'Unassigned';
- const unit=w.units.find(u=>u.id===w.self.unitId)?.name??'Unassigned';
+ const unit=w.units.find(u=>u.id===w.self.unitId)?.name??(w.self.groupId?'No unit':'Unassigned');
  const listDay=period==='today'?today:selectedDay;
  const activities=allActivities.filter(e=>e.date===listDay);
  const nowAt=listDay===today&&now?nowIndex(activities,now):-1;

@@ -36,6 +36,15 @@ Anthony requires a genuine fresh start. This applies to every module and superse
 - Preserve existing accounts, permissions, member history and intentionally entered records. Remove only positively identified unapproved defaults; audit any production correction.
 - Retain compact module headers and a prominent center Apps launcher in module bottom navigation.
 
+## Access and placement decisions — October 24, 2026
+
+Anthony's 2026-10-24 decisions supersede the earlier "module access only by explicit grant" rule and the rule that leadership follows the leader's own placement. Migration `20261024170000_open_access_group_placement.sql` implements them (draft PR, not applied to the hosted database).
+
+- **Open apps.** Every approved app is open to every signed-in member: a confirmed account with an enabled account link, including Unassigned (intake) members. They get ordinary use ("viewer") access. Managing still needs an explicit `manager` grant. Each module's own privacy rules still apply: members see only their own private records (contacts, bookings, duties) and what their group or role allows. Use `app_private.module_allowed` for use and `app_private.module_manager` for management in every module, including new ones.
+- **Owner everywhere.** The bootstrap owner (`bootstrap_receipts` plus a current member/technical/department administrator appointment) is manager on every approved app, including future ones, with no grant rows.
+- **Group-only placement.** Placement is Age category → Group → (optional) Unit. Group leaders see and place their group-only members; unit leaders see only their unit. Unit-scoped features (for example Gospel Planning Member Updates) do not apply to group-only members.
+- **Leadership is independent of placement.** A member has one primary placement and may also lead other groups or units. A `group_leader` or `unit_leader` appointment gives authority over the group or unit it names, not the leader's own placement group. The member's own group view (directory, My Group) still follows their placement.
+
 ## Read first
 
 Read README.md, docs/README.md, docs/HANDOFF.md, docs/ACTUAL-APP-SETUP.md and docs/RELEASE-GATES.md. The boundary above takes precedence over older installation receipts. For Contacts, also read docs/contacts/README.md, docs/contacts/OPERATIONS.md and docs/contacts/VERIFICATION.md. Organization implementation and its Build log are in docs/ORGANIZATION-WORKFLOW.md. Member instructions are in docs/USER-MANUAL.md. Reconcile hosted schema changes with docs/HOSTED-MIGRATION-LEDGER.json before applying SQL. Inspect current GitHub and production state before changing either; preserve concurrent development.
@@ -52,10 +61,10 @@ Use Node 24. Run `npm ci --ignore-scripts`, `npm run build` and `npm run test:br
 
 - Target the actual application at https://lvz.app. Do not publish a preview unless Anthony explicitly requests that preview.
 - Automatic Git deployments remain disabled in vercel.json. Private code pushes do not authorize automatic publication. Release deliberately after validation.
-- Self-service signup is authorized. New accounts start Unassigned to age category, group and unit; only authorized leaders assign placement.
+- Self-service signup is authorized. New accounts start Unassigned to age category, group and unit; only authorized leaders assign placement. A placement needs a group; the unit is optional.
 - Use only Supabase project otecqlkqirncotytbfns and validate the https://lvz.app origin. Do not modify unrelated projects or services.
 - Apply only pending, tested schema migrations. Reconcile the hosted ledger rather than replaying applied CREATE statements.
-- Do not broaden module access or remove authorization checks as part of this correction. A booking pause may be used for maintenance or local readiness, never as an external-system dependency.
+- Module access follows the October 24, 2026 decisions above. Do not broaden management or remove authorization checks beyond them. A booking pause may be used for maintenance or local readiness, never as an external-system dependency.
 - Do not place private emails, member records, credentials, Auth tokens or secrets in Git, logs, screenshots or exports. The owner chooses his password. Never invent organizational labels to activate an account.
 - Keep production credentials in provider stores. Personal credentials use Apple Passwords or macOS Keychain; do not access work password stores.
 - Do not purchase services or incur new costs without specific approval.

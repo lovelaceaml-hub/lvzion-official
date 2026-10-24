@@ -17,7 +17,10 @@ test('commands accept only their own fields; actor, role and scope fields are re
  assert.throws(()=>parseCommand({action:'availability.save',requestId:rid,payload:{expected:0,ranges:[]},memberId:id(1)}),ContractError);
  assert.throws(()=>parseCommand({action:'session.delete',requestId:rid,payload:{}}),ContractError);
  assert.throws(()=>parseCommand({action:'availability.save',requestId:'not-a-uuid',payload:{expected:0,ranges:[]}}),ContractError);
- assert.throws(()=>cmd('plan.save',{week:'2026-10-26',expected:0,review:'x',plan:'x',nextAction:'',groupId:id(2)}),ContractError);
+ // A group-scoped action may name a group the member leads; the database checks the appointment.
+ assert.equal(cmd('plan.save',{week:'2026-10-26',expected:0,review:'x',plan:'x',nextAction:'',groupId:id(2)}).payload.groupId,id(2));
+ assert.throws(()=>cmd('plan.save',{week:'2026-10-26',expected:0,review:'x',plan:'x',nextAction:'',groupId:'not-a-uuid'}),ContractError);
+ assert.throws(()=>cmd('session.respond',{id:id(3),expected:1,expectedResponse:0,response:'accepted',groupId:id(2)}),ContractError);
 });
 
 test('availability ranges stay small, ordered and bounded',()=>{
@@ -61,7 +64,7 @@ test('group plan, updates, requests and setup commands are strict',()=>{
  assert.deepEqual(cmd('capability.grant',{memberId:id(1),capability:'oversee',groupId:id(2)}).payload,{memberId:id(1),capability:'oversee',groupId:id(2)});
  assert.throws(()=>cmd('capability.grant',{memberId:id(1),capability:'oversee'}),ContractError);
  assert.throws(()=>cmd('capability.grant',{memberId:id(1),capability:'publish',unitId:id(3)}),ContractError);
- assert.throws(()=>cmd('capability.grant',{memberId:id(1),capability:'publish',groupId:id(2)}),ContractError);
+ assert.equal(cmd('capability.grant',{memberId:id(1),capability:'publish',groupId:id(2)}).payload.groupId,id(2));
  assert.equal(cmd('capability.grant',{memberId:id(1),capability:'schedule',unitId:id(3)}).payload.unitId,id(3));
  assert.throws(()=>cmd('capability.grant',{memberId:id(1),capability:'admin'}),ContractError);
  assert.throws(()=>cmd('location.add',{label:'x'}),/two characters/);

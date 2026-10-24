@@ -50,7 +50,7 @@ export default function GroupAccess(){
  return <div className="ui-page sr-access">
   <main className="ui-main ui-narrow">
    <a className="ui-link sr-access-back" href="/modules/study-rooms"><ChevronLeft size={18}/>Back to Study Rooms</a>
-   <PageHeading eyebrow="Study Rooms · group leaders" title="Who can book" lede="Leaders can always book. Turn booking on for members of your group."/>
+   <PageHeading eyebrow="Study Rooms · group leaders" title="Who can book" lede="Every signed-in member can book. Turn booking on for members of your group who have no app account yet."/>
    {message&&<p role="status" className="ui-notice" data-tone="success">{message}</p>}
    {error&&<p role="alert" className="ui-notice" data-tone={denied?'warning':'danger'}>{denied===401?'Sign in to manage who can book.':denied===403?'Only group leaders can change who books in their group.':error}</p>}
    {denied===401&&<a className="ui-button" href="/sign-in">Sign in</a>}
