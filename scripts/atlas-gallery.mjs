@@ -62,4 +62,22 @@ try{
    panel('Rebuilt · Light',e.images.light,640,400),panel('Rebuilt · Dark',e.images.dark,640,400),panel(`Atlas ${e.atlas} · Liquid Opal`,target,576,400)]);
  }
 }finally{await browser.close();rmSync(tmp,{recursive:true,force:true});}
+// A complete run (no name filter) also writes the gallery index.
+if(!filter){
+ const groups=[['main-','Home, My Week, Apps, notifications, sign in and sign up (base palette)'],['study-','Study Rooms'],['contacts-','Contacts'],['mission-','Work Mission Prayer'],['organization-','Members and organization'],['members-','Members and organization'],['main-profile','Profile'],['worship-','Worship Duty'],['display-','Church Display management'],['gospel-','Groups & Gospel Planning']];
+ const wide=new Set(entries('1280').map(e=>e.name));
+ const all=entries('390');
+ const section=e=>{const g=[...groups].reverse().find(([p])=>e.name.startsWith(p));return g?g[1]:'Other';};
+ const order=[...new Set(groups.map(g=>g[1])),'Other'];
+ let md='# Atlas side-by-side gallery\n\nEvery rebuilt screen in the shared Liquid Opal design language, captured from fictional fixtures (loopback servers, activation disabled). Each phone image shows: rebuilt Light | rebuilt Dark | the matching Atlas screen in Liquid Opal | the Study Rooms Liquid Opal reference. Wide images (1280px) show rebuilt Light | rebuilt Dark | the Atlas desktop screen.\n\nRegenerate: `npm run build`, then `LVZ_SWEEP_SPEC=atlas node scripts/design-sweep.mjs <shots>` and `node scripts/atlas-gallery.mjs <shots>`.\n';
+ for(const name of order){
+  const rows=all.filter(e=>section(e)===name);if(!rows.length)continue;
+  md+=`\n## ${name}\n`;
+  for(const e of rows){
+   md+=`\n### ${e.title}\n\nAtlas screen: \`${e.atlas}\`.${e.notes?' '+e.notes:''}\n\n![${e.title}, 390px](${e.name}-390.jpg)\n`;
+   if(wide.has(e.name))md+=`\n![${e.title}, 1280px](${e.name}-1280.jpg)\n`;
+  }
+ }
+ writeFileSync(join(out,'README.md'),md);
+}
 console.log(`Wrote ${made.length} images to ${out}`);

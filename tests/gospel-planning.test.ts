@@ -129,9 +129,9 @@ test('Las Vegas weeks and dates cross month, year and clock changes',()=>{
  assert.equal(vegasDay(new Date('2026-11-01T08:30:00Z')),'2026-11-01');
 });
 
-test('module wears its registered Atlas style and module CSS uses tokens only',async()=>{
+test('module wears its registered Liquid Opal palette and module CSS uses tokens only',async()=>{
  assert.equal(moduleStyleFor('/modules/gospel-planning')?.key,'gospel-planning');
- assert.equal(moduleStyleFor('/modules/gospel-planning')?.atlas,'Skyline Grid');
+ assert.equal(moduleStyleFor('/modules/gospel-planning')?.atlas,'Liquid Opal, sky');
  const css=await readFile('components/gospel-planning/gospel-planning.css','utf8');
  assert.doesNotMatch(css,/#[0-9a-f]{3,8}\b/i,'module CSS uses tokens, not raw colors');
  assert.doesNotMatch(css,/border-radius:\s*\d+px/,'module CSS uses radius tokens');
