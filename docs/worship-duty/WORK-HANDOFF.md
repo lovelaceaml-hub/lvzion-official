@@ -1,6 +1,6 @@
 # Work handoff: Worship Duty
 
-**Status, October 24, 2026:** the module is built and verified locally on draft [PR #48](https://github.com/lovelaceaml-hub/lvzion-official/pull/48) (branch `claude/refactor-worship-duty-3b2f97`, merged with main through `9cf2531`). It is not released. What Anthony must approve, in order, is in [README.md](README.md#ready-for-release-what-anthony-must-approve).
+**Status, October 24, 2026:** the module is built and verified locally on draft [PR #48](https://github.com/lovelaceaml-hub/lvzion-official/pull/48) (branch `claude/refactor-worship-duty-3b2f97`, merged with main through `8606dad`). It is not released. What Anthony must approve, in order, is in [README.md](README.md#ready-for-release-what-anthony-must-approve).
 
 ## Sources
 
@@ -14,7 +14,7 @@
 - `/modules/worship-duty` and `/api/worship-duty`: My Duties, Presider and Manage behind `requireMember()`, the module grant and the production flag.
 - `/modules/worship-duty/setup` and `/api/worship-duty/setup`: owner-only Services, People and Songs setup. The browser never supplies actor or role.
 - Persistent monthly planner (list and month calendar) with reviewed, atomic, versioned batches. Single-service editing, change requests, availability, song plans.
-- Shared app frame and the module-scoped Midnight Sapphire style.
+- Shared app frame and Midnight Sapphire from the shared module style registry (`lib/module-styles.ts`).
 - Five unapplied migrations, renumbered `20261024160000` to `20261024160400`.
 - Tests: Worship unit and PGlite database suites, the native local stack (`tests/integration/start-worship-stack.mjs`, `scripts/test-worship-integration.mjs`, `scripts/test-worship-browser.mjs`).
 
@@ -22,7 +22,7 @@
 
 1. **Hosted read-only check** (queries in [MIGRATION-STATUS.md](MIGRATION-STATUS.md)). Not run on October 24 because the Supabase connector needed authorization. An October 14 Codex session ended while applying the first migration; confirm nothing partial exists before applying.
 2. **Release steps** 1 to 6 in the README, each with Anthony's approval.
-3. **Shared frame requests** for the design session: a Worship entry in `routeDetails` (header icon) and moving the token block to the shared module-token contract. See [UI-QUALITY-REPORT.md](../design/worship-duty/UI-QUALITY-REPORT.md).
+3. No shared frame requests are open; see [UI-QUALITY-REPORT.md](../design/worship-duty/UI-QUALITY-REPORT.md).
 4. **Not built and not approved:** automatic fill, recurring service generation, song history analytics, push, email or calendar delivery, configurable extra duty pairs.
 
 ## Constraints

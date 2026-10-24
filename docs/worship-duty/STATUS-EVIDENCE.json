@@ -8,7 +8,10 @@
   "workstream_branch": "claude/refactor-worship-duty-3b2f97",
   "workstream_pr": 48,
   "pr_draft": true,
-  "superseded_prs": [25, 5],
+  "superseded_prs": [
+    25,
+    5
+  ],
   "supabase_project": "otecqlkqirncotytbfns",
   "hosted_inspection": {
     "last_performed": "2026-10-14",
@@ -30,15 +33,14 @@
   "owner_setup_api_implemented": true,
   "monthly_planner_persistent": true,
   "shared_app_frame": true,
-  "design": "Theme Atlas 03 Midnight Sapphire, route-scoped tokens",
+  "design": "Theme Atlas 03 Midnight Sapphire from the shared module style registry (lib/module-styles.ts); dark by design",
   "production_worship_flag_enabled": false,
   "verified_real_worship_auth_db_roundtrip": "local only (real local Auth, PostgREST, PostgreSQL 16); no hosted session",
   "tests_run_2026_10_24": {
-    "typecheck": "pass",
-    "next_build_compile": "pass",
-    "node_tests": "69 of 69 (Worship unit and database suites plus the four suites that list the renamed files)",
+    "build": "npm run build (typecheck + next build): pass",
+    "node_tests": "76 of 76 (Worship unit and database suites, the four suites that list the renamed files, appearance contrast)",
     "native_integration": "9 of 9",
-    "native_browser": "44 of 44",
+    "native_browser": "47 of 47 (includes registry style and Dark mode)",
     "full_suite": "not run (requires Anthony's explicit approval)"
   },
   "other_production_modules_changed_by_this_workstream": false,
@@ -48,5 +50,6 @@
     "docs/worship-duty/MIGRATION-STATUS.md",
     "docs/worship-duty/LAUNCH.md",
     "docs/design/worship-duty/UI-QUALITY-REPORT.md"
-  ]
+  ],
+  "main_merged_through": "8606dad"
 }

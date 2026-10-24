@@ -12,7 +12,7 @@ Under the October 16, 2026 fresh-start boundary in the root `AGENTS.md`, the mod
 - **Presider:** the song plan for an exact service (preparation songs in order, Glory, Thanks and Choir where they apply), save, confirm, and a copy-only text preview. Nothing is sent anywhere.
 - **Manage:** a monthly planner (list or month calendar) that stages up to 40 changes for one reviewed, all-or-nothing save; single-service editing; change requests waiting for a decision.
 - **Setup (owner only):** Services (create, edit, publish, cancel), People (department participation, module access, qualifications, scheduling and song-editor grants, per-service availability) and Songs (approved catalog).
-- **Look:** the shared app frame (header, bottom bar with center Apps) and the Theme Atlas "Midnight Sapphire" style, scoped to this module. Screenshots and notes: [UI-QUALITY-REPORT.md](../design/worship-duty/UI-QUALITY-REPORT.md).
+- **Look:** the shared app frame (header, bottom bar with center Apps) and the Theme Atlas "Midnight Sapphire" style from the shared module style registry. It is dark by design, so it looks the same in Light, Dark and System. Screenshots and notes: [UI-QUALITY-REPORT.md](../design/worship-duty/UI-QUALITY-REPORT.md).
 
 ## Ready for release: what Anthony must approve
 

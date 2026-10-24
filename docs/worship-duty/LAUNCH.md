@@ -23,7 +23,7 @@ Services begin as drafts. Editing and publication use exact service versions. Ca
 
 Monthly list/calendar planning stages at most 40 cells for explicit batch review. The database authorizes every cell before changing records, validates the final assignment combination and rolls the whole transaction back on a conflict. Legal swaps clear only changed cells before applying final candidates. Song details that have been used cannot be rewritten; archiving preserves the catalog entry and plans.
 
-The interface uses the shared app frame and the module-scoped Theme Atlas "Midnight Sapphire" style. No new design provider, member database or login is introduced. Las Vegas times are independent of the device timezone; skipped/repeated daylight-saving inputs are rejected.
+The interface uses the shared app frame and the Theme Atlas "Midnight Sapphire" style from the shared module style registry. No new design provider, member database or login is introduced. Las Vegas times are independent of the device timezone; skipped/repeated daylight-saving inputs are rejected.
 
 ## Verification commands
 
@@ -43,6 +43,14 @@ The stack serves the existing `.next` build, so compile first with `npx next bui
 The local harness creates the verified fictional owner through real Auth and enrollment before installing ordinary fixture administrators. Its mail sink accepts only example.invalid. Ephemeral credentials, session tokens, outbox and database files stay outside Git. Test-only migrations are not a hosted deployment.
 
 ## Verification observed so far
+
+October 24, 2026, second pass after merging main through `8606dad` (Next 16.4.3, shared style registry), focused checks only:
+
+- `npm run build` (typecheck + Next build): passed, no security advisory.
+- Node tests: 76 of 76 (the eight files below plus `appearance`).
+- Native stack: 9 of 9 integration checks and 47 of 47 browser checks, now including the registry style (`data-lvz-module="worship-duty"`, Sapphire ground, title) and Dark mode (device dark, `data-lvz-scheme="dark"`, same palette, duty card visible).
+
+First pass (main through `9cf2531`):
 
 October 24, 2026, on the merged branch (main through `9cf2531`), focused checks only; no full suite was run:
 
@@ -79,3 +87,4 @@ Retain the previous READY Vercel production deployment. Disable `LVZ_WORSHIP_DUT
 - Phase 2 redesign (same branch): the module screens now follow the locked Day Sheet contract with shared tokens, header, underlined swipe tabs, time-first hairline lists and a desktop side column. Accessible names used by the native browser script are unchanged; permissions, SQL and API contracts are untouched. Evidence and gaps: docs/design/worship-duty/UI-QUALITY-REPORT.md.
 - Fresh-start docs alignment (same branch, docs only): the Worship docs now follow the October 16 boundary in AGENTS.md. References to a separate duty application, its hosting and its spreadsheet, the migration framing and the handover gates that depended on another system were removed; schedules start empty from records configured in this app. Duty rules, permissions, migration status and verification history are unchanged. The fifth repository migration is now listed; the hosted ledger still has no Worship entries.
 - Completion (October 24, PR #48): merged main through `9cf2531` without conflicts. Worship now registers its views with the shared app frame and uses route-scoped Midnight Sapphire tokens; My Duties gained summary tiles and duty cards, the planner a Sunday-first month grid, and owner setup Services/People/Songs tabs. The five migrations were renumbered to `20261024160000` to `20261024160400` so they sort after the latest applied migration, and their comments no longer name another application. The setup database suite now runs on every current migration. The local seed loader swaps the fixture file's hosted-Auth guard (added October 16, which real local Auth trips) for a stricter disposable-cluster check. The browser script now covers the calendar planner and the song plan order, confirm and copy steps. Hosted read-only check not run: connector unauthorized.
+- Registry adoption (October 24, PR #48): merged main through `8606dad`. The route-scoped token block and the Worship frame-chrome overrides were removed; Worship now wears Midnight Sapphire from `lib/module-styles.ts` and `styles/lvz-tokens.css`, and its stylesheet reads tokens only. The browser script checks the registry style and Dark mode.

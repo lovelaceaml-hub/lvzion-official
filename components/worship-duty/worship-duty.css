@@ -1,52 +1,5 @@
-/* Worship Duty: shared base + Theme Atlas 03 "Midnight Sapphire" (Anthony, 2026-10-24).
- * The palette is scoped to this route, like Study Rooms. A device appearance chosen by the member still wins.
- * Move this token block to the shared module-token API once it lands; the rules below read tokens only. */
-.app-frame[data-route^="/modules/worship-duty"]{
- color-scheme:dark;
- --lvz-ground:#061122;
- --lvz-surface:#0c203a;
- --lvz-sunken:#081830;
- --lvz-ink:#f1f6ff;
- --lvz-ink-quiet:#a6bddb;
- --lvz-ink-faint:#8aa3c4;
- --lvz-line:#284c78;
- --lvz-line-input:#3f679c;
- --lvz-accent:#3184ff;
- --lvz-accent-strong:#62a0ff;
- --lvz-accent-soft:#12305a;
- --lvz-on-accent:#061122;
- --lvz-focus:#8bbcff;
- --lvz-alert:#ffb184;
- --lvz-danger:#ffb3a9;
- --lvz-danger-soft:#47242c;
- --lvz-warning:#f3d58c;
- --lvz-warning-soft:#40361f;
- --lvz-success:#9ae3b2;
- --lvz-success-soft:#173a2a;
- --lvz-time-marker:#ff829a;
- --lvz-radius-sm:9px;
- --lvz-radius-md:14px;
- --lvz-radius-lg:20px;
- --lvz-shadow-sheet:0 12px 28px rgb(0 0 0 / 45%);
- --lvz-shadow-pop:0 6px 16px rgb(0 0 0 / 35%);
- background:var(--lvz-ground);
- color:var(--lvz-ink);
-}
-
-/* Frame chrome: a solid framed header and bottom bar with an illuminated, squared Apps launcher. */
-.app-frame[data-route^="/modules/worship-duty"] .app-frame-header{background:var(--lvz-surface);border-bottom:1px solid var(--lvz-line);-webkit-backdrop-filter:none;backdrop-filter:none}
-.app-frame[data-route^="/modules/worship-duty"] .app-frame-heading{font-size:var(--lvz-text-xl);letter-spacing:-.02em;color:var(--lvz-ink)}
-.app-frame[data-route^="/modules/worship-duty"] .app-frame-heading svg{box-sizing:content-box;width:20px;height:20px;padding:8px;border-radius:var(--lvz-radius-md);background:var(--lvz-accent);color:var(--lvz-on-accent)}
-.app-frame[data-route^="/modules/worship-duty"] .app-frame-avatar{background:var(--lvz-accent);border-color:var(--lvz-accent-strong);color:var(--lvz-on-accent);font-weight:var(--lvz-weight-bold);box-shadow:none}
-.app-frame[data-route^="/modules/worship-duty"] .app-frame-nav{left:0;right:0;bottom:0;max-width:none;min-height:calc(76px + env(safe-area-inset-bottom,0px));padding:0 var(--lvz-space-2) env(safe-area-inset-bottom,0px);border:0;border-top:1px solid var(--lvz-line);border-radius:0;background:var(--lvz-surface);box-shadow:none;-webkit-backdrop-filter:none;backdrop-filter:none}
-.app-frame[data-route^="/modules/worship-duty"] .app-frame-nav>a,.app-frame[data-route^="/modules/worship-duty"] .app-frame-nav>button{color:var(--lvz-ink-quiet)}
-.app-frame[data-route^="/modules/worship-duty"] .app-frame-nav [aria-current="page"]{color:var(--lvz-accent-strong)}
-.app-frame[data-route^="/modules/worship-duty"] .app-frame-nav .app-frame-apps{width:72px;height:auto;min-height:76px;margin:-22px 0 0;padding:0;justify-content:flex-start;gap:var(--lvz-space-1);border:0;border-radius:0;overflow:visible;background:none;box-shadow:none;color:var(--lvz-accent-strong)}
-.app-frame[data-route^="/modules/worship-duty"] .app-frame-apps:before,.app-frame[data-route^="/modules/worship-duty"] .app-frame-apps:after{display:none}
-.app-frame[data-route^="/modules/worship-duty"] .app-frame-apps .app-frame-orb{width:56px;height:56px;border-radius:var(--lvz-radius-md);background:var(--lvz-accent);box-shadow:0 0 0 4px var(--lvz-ground),0 6px 18px color-mix(in srgb,var(--lvz-accent) 40%,transparent)}
-.app-frame[data-route^="/modules/worship-duty"] .app-frame-orb svg{fill:none;stroke:var(--lvz-on-accent);stroke-width:2;filter:none}
-.app-frame[data-route^="/modules/worship-duty"] .app-frame-nav>:focus-visible,.app-frame[data-route^="/modules/worship-duty"] .app-frame-avatar:focus-visible{outline:3px solid var(--lvz-focus);outline-offset:3px}
-
+/* Worship Duty page styles. The Midnight Sapphire palette comes from the shared module style registry
+ * (lib/module-styles.ts, styles/lvz-tokens.css), which also styles the frame; rules here read tokens only. */
 /* Page type: spaced kicker, bold sans title. */
 .wd-main{padding-top:var(--lvz-space-6)}
 .wd-main .ui-kicker{font-size:var(--lvz-text-xs);font-weight:var(--lvz-weight-bold);letter-spacing:.16em;text-transform:uppercase;color:var(--lvz-ink-quiet)}
@@ -69,7 +22,7 @@
 
 /* Segmented section control. */
 .wd-main>.ui-tabs{gap:var(--lvz-space-1);padding:var(--lvz-space-1);border:1px solid var(--lvz-line);border-radius:var(--lvz-radius-lg);background:var(--lvz-surface)}
-.wd-main>.ui-tabs .ui-tab{flex:1 1 0;padding:0 var(--lvz-space-3);border-radius:calc(var(--lvz-radius-lg) - 5px);box-shadow:none;color:var(--lvz-ink-quiet)}
+.wd-main>.ui-tabs .ui-tab{flex:1 1 0;padding:0 var(--lvz-space-3);border-radius:var(--lvz-radius-md);box-shadow:none;color:var(--lvz-ink-quiet)}
 .wd-main>.ui-tabs .ui-tab[aria-current="page"]{background:var(--lvz-accent);color:var(--lvz-on-accent);box-shadow:none}
 .wd-main>.ui-tabs .ui-tab:focus-visible{outline:3px solid var(--lvz-focus);outline-offset:2px}
 
@@ -167,7 +120,4 @@
 @media (min-width:640px){
  .wd-grid-form{grid-template-columns:1fr 1fr}
  .wd-grid-form>.ui-button,.wd-grid-form>.ui-notice,.wd-grid-form>.wd-check{grid-column:1/-1}
-}
-@media (prefers-reduced-transparency:reduce){
- .app-frame[data-route^="/modules/worship-duty"] .app-frame-apps .app-frame-orb{box-shadow:0 0 0 4px var(--lvz-ground)}
 }
