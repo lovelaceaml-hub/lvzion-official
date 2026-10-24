@@ -1,71 +1,110 @@
 'use client';
 import {useMemo,useState} from 'react';
-import {addDays,clockLabel,dayLabel,nextAction,rangeDates,sessionDay,sessionStatus,timeRange,vegasTime24,
+import {addDays,clockLabel,dayLabel,nextAction,rangeDates,sessionDay,sessionStatus,timeRange,vegasClock,vegasTime24,
  type Range,type Session,type Workspace} from '../../lib/gospel-planning/contract';
-import {Empty,Section,Sheet,StatusChip,type Send} from './shared';
+import {CalendarDays,Clock3,MapPin,UsersRound} from '../home-icons';
+import {DateStrip,IconBox,Row,Tray,initialsOf} from '../ui-kit';
+import {CardAction,DateBlock,Heading,Section,Sheet,StatusChip,WeekHeader,type Send,type WeekControl} from './shared';
 
 const responseLabel={pending:'Not answered yet',accepted:'Accepted',declined:'Declined'} as const;
+const others=(s:Session)=>s.participants.filter(p=>!p.self).map(p=>p.name);
+const who=(s:Session)=>s.mine?(others(s).length?'With '+others(s).join(' and '):'Session'):s.participants.map(p=>p.name).join(', ');
 
-function SessionRow({session,now,onOpen}:{session:Session;now:number;onOpen:()=>void}){
- const status=sessionStatus(session,now),partners=session.participants.filter(p=>!p.self).map(p=>p.name);
- return <li><button type="button" className="ui-row gp-session-row" onClick={onOpen}>
-  <span className="gp-time"><strong>{dayLabel(sessionDay(session))}</strong><small>{timeRange(session.start,session.end)}</small></span>
-  <span className="ui-row-body"><strong>{session.mine?(partners.length?'With '+partners.join(' and '):'Session'):session.participants.map(p=>p.name).join(', ')}</strong>
-   <small>{session.location.label}</small></span>
-  <StatusChip status={status}/>
- </button></li>;
+/** One session as a row: the day, who it is with, time and place, and its status tag. */
+function SessionRow({session,now,onOpen,current}:{session:Session;now:number;onOpen:()=>void;current?:boolean}){
+ const day=sessionDay(session);
+ return <li data-current={current?'true':undefined}><Row className="gp-session-row" onClick={onOpen} lead={<DateBlock day={day} small/>}
+  title={who(session)} detail={<>{vegasClock(session.start)} to {vegasClock(session.end)} · {session.location.label}
+   <span className="gp-row-meta"><StatusChip status={sessionStatus(session,now)}/></span></>}/></li>;
 }
 
-export default function Preaching({data,send,busy}:{data:Workspace;send:Send;busy:boolean}){
- const now=Date.now();
+export default function Preaching({data,send,busy,control}:{data:Workspace;send:Send;busy:boolean;control:WeekControl}){
+ const now=Date.now(),week=control.week,weekEnd=addDays(week,7);
  const [openId,setOpenId]=useState<string|null>(null),[planning,setPlanning]=useState<Session|'new'|null>(null),[editingAvailability,setEditingAvailability]=useState(false);
+ const [picked,setPicked]=useState('');
  // Own sessions still ahead, plus recent ones that still need the shared result.
  const upcoming=data.sessions.filter(s=>s.mine&&s.phase!=='cancelled'&&(Date.parse(s.end)>now||nextAction(s,now)==='report'));
  const needing=upcoming.find(s=>nextAction(s,now)!==null);
  const next=needing??upcoming.find(s=>Date.parse(s.end)>now);
- const recent=data.sessions.filter(s=>s.mine&&Date.parse(s.end)<=now&&!upcoming.includes(s)).reverse();
- const managed=data.sessions.filter(s=>!s.mine&&s.canManage);
+ // The week on screen holds your sessions and the ones you can publish or change; the rest of your own
+ // sessions (the last two weeks and the next six) are listed before or after it, so each appears once.
+ const inWeek=(s:Session)=>{const d=sessionDay(s);return d>=week&&d<weekEnd;};
+ const weekRows=data.sessions.filter(s=>inWeek(s)&&(s.mine||s.canManage));
+ const later=data.sessions.filter(s=>s.mine&&s.phase!=='cancelled'&&!inWeek(s)&&sessionDay(s)>=weekEnd);
+ const earlier=data.sessions.filter(s=>s.mine&&!inWeek(s)&&sessionDay(s)<week).reverse();
  const open=data.sessions.find(s=>s.id===openId)??null;
  const canPlan=data.me.placed&&data.locations.length>0&&data.candidates.length>1;
+ const days=Array.from({length:7},(_,i)=>addDays(week,i));
+ const selected=days.includes(picked)?picked:days.includes(data.today)?data.today:'';
+ const current=week<=data.today&&data.today<weekEnd;
  return <div className="gp-tab-body">
-  <Section title="Next" note={next?undefined:'Your next session and anything that needs your answer appear here.'}>
-   {next?<div className="ui-surface gp-next">
-    <p className="gp-next-when"><strong>{dayLabel(sessionDay(next),'long')}</strong> {timeRange(next.start,next.end)}</p>
-    <p className="gp-next-where">{next.location.label} · with {next.participants.filter(p=>!p.self).map(p=>p.name).join(' and ')}</p>
-    <p><StatusChip status={sessionStatus(next,now)}/> <span className="ui-hint">{sessionStatus(next,now).detail}</span></p>
-    <button type="button" className="ui-button ui-button-block" onClick={()=>setOpenId(next.id)}>
-     {nextAction(next,now)==='respond'?'Answer this session':nextAction(next,now)==='report'?'Record the shared result':'View session'}</button>
-   </div>:<Empty title="Nothing scheduled yet">{canPlan?'Plan a session with a partner from your group.':'Save your availability so leaders can plan with you.'}</Empty>}
-  </Section>
+  {next&&<NextCard session={next} now={now} onOpen={id=>setOpenId(id)}/>}
 
-  <Section title="Your sessions" action={canPlan?<button type="button" className="ui-button ui-button-secondary gp-small-button" onClick={()=>setPlanning('new')}>Plan a session</button>:undefined}>
-   {!data.me.placed?<p className="ui-hint">Preaching sessions start after you are placed in a group.</p>
-    :data.locations.length===0?<p className="ui-notice">No approved meeting places yet. A Gospel Planning manager adds them before sessions can be planned.</p>:null}
-   {upcoming.length?<ul className="ui-list">{upcoming.map(s=><SessionRow key={s.id} session={s} now={now} onOpen={()=>setOpenId(s.id)}/>)}</ul>
-    :<p className="ui-hint">No sessions in the next six weeks.</p>}
-  </Section>
+  <section className="gp-block" aria-labelledby="gp-week-title">
+   <WeekHeader control={control}/>
+   <div className="gp-week-strip" data-no-swipe>
+    <DateStrip label="Days of this week" days={days.map(d=>{const count=weekRows.filter(s=>sessionDay(s)===d&&s.phase!=='cancelled').length;
+     return {key:d,top:dayLabel(d).replace(/,.*$/,''),day:Number(d.slice(-2)),
+      bottom:count?<i className="gp-dot" aria-hidden="true"/>:d===data.today?'Today':new Date(d+'T12:00:00Z').toLocaleDateString('en-US',{month:'short',timeZone:'UTC'}),
+      label:dayLabel(d,'long')+(count?', '+count+(count===1?' session':' sessions'):', no sessions'),selected:d===selected,onClick:()=>setPicked(d)};})}/>
+   </div>
+   {weekRows.length?<div className="ui-glass ui-glass-tight gp-list-card"><ul className="ui-list" aria-label="Sessions this week">
+    {weekRows.map(s=><SessionRow key={s.id} session={s} now={now} current={sessionDay(s)===selected} onOpen={()=>setOpenId(s.id)}/>)}</ul></div>
+    :next?<div className="ui-glass ui-glass-tight gp-list-card gp-quiet-card"><Row lead={<IconBox round><CalendarDays size={22}/></IconBox>}
+     title={current?'Nothing planned this week':'Nothing planned that week'} detail="Your next session is shown above."/></div>
+    // Nothing ahead at all: one quiet note under the week, as the Atlas "Space for what matters" card.
+    :<div className="ui-glass ui-glass-tight gp-list-card gp-quiet-card"><Row lead={<IconBox round><UsersRound size={22}/></IconBox>} title="Nothing scheduled yet"
+     detail={!data.me.placed?'Preaching sessions start after you are placed in a group.':canPlan?'Plan a session with a partner from your group.':'Save your availability so leaders can plan with you.'}/></div>}
+  </section>
+
+  {canPlan?<Tray className="gp-tray" eyebrow="Plan ahead" summary="A partner, a place and a time">
+   <button type="button" className="ui-button gp-tray-button" onClick={()=>setPlanning('new')}>Plan a session</button></Tray>
+   :data.me.placed&&data.locations.length===0?<p className="ui-notice gp-plain">No approved meeting places yet. A Gospel Planning manager adds them before sessions can be planned.</p>:null}
+
+  {later.length>0&&<section className="gp-block" aria-labelledby={current?'gp-coming-up':'gp-later-sessions'}>
+   <Heading title={current?'Coming up':'Later sessions'}/>
+   <div className="ui-glass ui-glass-tight gp-list-card"><ul className="ui-list">{later.map(s=><SessionRow key={s.id} session={s} now={now} onOpen={()=>setOpenId(s.id)}/>)}</ul></div>
+  </section>}
+
+  {earlier.length>0&&<section className="gp-block" aria-labelledby={current?'gp-recent-sessions':'gp-earlier-sessions'}>
+   <Heading title={current?'Recent sessions':'Earlier sessions'}/>
+   <div className="ui-glass ui-glass-tight gp-list-card"><ul className="ui-list">{earlier.map(s=><SessionRow key={s.id} session={s} now={now} onOpen={()=>setOpenId(s.id)}/>)}</ul></div>
+  </section>}
 
   <Section title="Your availability" note="A few time ranges you are usually free. Saving availability is not agreeing to a session."
-   action={data.me.placed?<button type="button" className="ui-button ui-button-secondary gp-small-button" onClick={()=>setEditingAvailability(true)}>Edit</button>:undefined}>
-   {data.availability.ranges.length?<ul className="ui-list">{data.availability.ranges.map((r,i)=><li key={i} className="ui-row">
-    <span className="ui-row-body"><strong>{dayLabel(r.date)} · {clockLabel(r.from)} to {clockLabel(r.to)}</strong>
-     <small>{r.repeatWeeks>1?'Weekly for '+r.repeatWeeks+' weeks':'One day'}{r.skip.length?', skipping '+r.skip.map(d=>dayLabel(d)).join(', '):''}</small></span>
-   </li>)}</ul>:<p className="ui-hint">No availability saved.</p>}
+   action={data.me.placed?<CardAction onClick={()=>setEditingAvailability(true)}>Edit</CardAction>:undefined}>
+   {data.availability.ranges.length?<ul className="ui-list">{data.availability.ranges.map((r,i)=><li key={i}><Row lead={<IconBox><Clock3 size={22}/></IconBox>}
+    title={dayLabel(r.date)+' · '+clockLabel(r.from)+' to '+clockLabel(r.to)}
+    detail={(r.repeatWeeks>1?'Weekly for '+r.repeatWeeks+' weeks':'One day')+(r.skip.length?', skipping '+r.skip.map(d=>dayLabel(d)).join(', '):'')}/></li>)}</ul>
+    :<p className="gp-none">No availability saved.</p>}
   </Section>
-
-  {recent.length>0&&<Section title="Recent sessions" note="The last two weeks. One shared result is kept for each session.">
-   <ul className="ui-list">{recent.map(s=><SessionRow key={s.id} session={s} now={now} onOpen={()=>setOpenId(s.id)}/>)}</ul>
-  </Section>}
-
-  {managed.length>0&&<Section title="Group sessions this week" note="Sessions you can publish or change within your scope.">
-   <ul className="ui-list">{managed.map(s=><SessionRow key={s.id} session={s} now={now} onOpen={()=>setOpenId(s.id)}/>)}</ul>
-  </Section>}
 
   <SessionSheet session={open} now={now} send={send} busy={busy} onClose={()=>setOpenId(null)} onChange={s=>{setOpenId(null);setPlanning(s);}}/>
   <SessionForm open={planning!==null} session={planning==='new'?null:planning} data={data} send={send} busy={busy} onClose={()=>setPlanning(null)}/>
   <AvailabilityForm open={editingAvailability} data={data} send={send} busy={busy} onClose={()=>setEditingAvailability(false)}/>
  </div>;
 }
+
+/** The next session, or the one waiting on you, as a frosted card with its date block and one gradient action. */
+function NextCard({session,now,onOpen}:{session:Session;now:number;onOpen:(id:string)=>void}){
+ const status=sessionStatus(session,now),action=nextAction(session,now),day=sessionDay(session),names=others(session);
+ return <section className="ui-glass gp-next" aria-labelledby="gp-next-title">
+  <DateBlock day={day}/>
+  <div className="gp-next-body">
+   <p className="ui-eyebrow">{action==='respond'?'Your answer is needed':action==='report'?'After the session':'Next session'}</p>
+   <h2 id="gp-next-title">{timeRange(session.start,session.end)}</h2>
+   <p className="gp-next-meta"><StatusChip status={status}/></p>
+   <p className="gp-next-where"><MapPin size={16}/>{session.location.label}</p>
+   {names.length>0&&<p className="gp-next-where"><UsersRound size={16}/>With {names.join(' and ')}</p>}
+   <p className="gp-next-detail">{status.detail}</p>
+  </div>
+  <button type="button" className="ui-button ui-button-block gp-next-button" onClick={()=>onOpen(session.id)}>
+   {action==='respond'?'Answer this session':action==='report'?'Record the shared result':'View session'}</button>
+ </section>;
+}
+
+/** Partner initials in a round box. */
+export function Avatar({name}:{name:string}){return <IconBox round>{initialsOf(name)}</IconBox>;}
 
 function SessionSheet({session,now,send,busy,onClose,onChange}:{session:Session|null;now:number;send:Send;busy:boolean;onClose:()=>void;onChange:(s:Session)=>void}){
  const [outcome,setOutcome]=useState<'completed'|'not-held'>('completed'),[note,setNote]=useState(''),[reason,setReason]=useState(''),[correcting,setCorrecting]=useState(false);
@@ -75,14 +114,20 @@ function SessionSheet({session,now,send,busy,onClose,onChange}:{session:Session|
  const respond=(response:'accepted'|'declined')=>send('session.respond',{id:session.id,expected:session.version,expectedResponse:self?.responseVersion??0,response});
  const canChange=session.canEdit&&session.phase!=='cancelled'&&!session.report&&Date.parse(session.start)>now;
  return <Sheet open title="Session" onClose={onClose}>
-  <p className="gp-sheet-when"><strong>{dayLabel(sessionDay(session),'long')}</strong><br/>{timeRange(session.start,session.end)} · {session.location.label}</p>
-  <p><StatusChip status={status}/></p>
-  <p className="ui-hint">{status.detail}</p>
+  <div className="ui-glass gp-sheet-summary">
+   <DateBlock day={sessionDay(session)}/>
+   <div className="gp-next-body">
+    <p className="ui-eyebrow">{dayLabel(sessionDay(session),'long')}</p>
+    <strong className="gp-sheet-when">{timeRange(session.start,session.end)}</strong>
+    <p className="gp-next-where"><MapPin size={16}/>{session.location.label}</p>
+    <p className="gp-next-meta"><StatusChip status={status}/></p>
+    <p className="gp-next-detail">{status.detail}</p>
+   </div>
+  </div>
   <h3 className="gp-subheading">Partners</h3>
-  <ul className="ui-list">{session.participants.map(p=><li key={(p.id??'')+p.name} className="ui-row">
-   <span className="ui-row-body"><strong>{p.self?'You':p.name}</strong>
-    <small>{responseLabel[p.response]}{p.reconfirm?' · needs to confirm the change':''}{p.covered===false?(p.self?' · outside your saved availability':' · outside their saved availability'):''}</small></span>
-  </li>)}</ul>
+  <div className="ui-glass ui-glass-tight gp-list-card"><ul className="ui-list">{session.participants.map(p=><li key={(p.id??'')+p.name}><Row lead={<Avatar name={p.name}/>} title={p.self?'You':p.name}
+   detail={responseLabel[p.response]+(p.reconfirm?' · needs to confirm the change':'')+(p.covered===false?(p.self?' · outside your saved availability':' · outside their saved availability'):'')}/>
+  </li>)}</ul></div>
   {action==='respond'&&<div className="gp-actions">
    <button type="button" className="ui-button" disabled={busy} onClick={async()=>{if(await respond('accepted'))onClose();}}>Accept</button>
    <button type="button" className="ui-button ui-button-secondary" disabled={busy} onClick={async()=>{if(await respond('declined'))onClose();}}>Decline</button>

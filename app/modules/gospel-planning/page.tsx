@@ -4,9 +4,11 @@ import {FrameControls} from '../../../components/app-frame';
 import Preaching from '../../../components/gospel-planning/preaching';
 import Group from '../../../components/gospel-planning/group';
 import Manage from '../../../components/gospel-planning/manage';
-import {NoticeContext,newRequestId,type Notice,type Send} from '../../../components/gospel-planning/shared';
+import {NoticeContext,newRequestId,type Notice,type Send,type WeekControl} from '../../../components/gospel-planning/shared';
+import {ClipboardList} from '../../../components/home-icons';
+import {EmptyState,PageHeading} from '../../../components/ui-kit';
 import '../../../components/gospel-planning/gospel-planning.css';
-import {GROUP_SCOPED,addDays,mondayOf,vegasDay,weekLabel,type Action,type Workspace} from '../../../lib/gospel-planning/contract';
+import {GROUP_SCOPED,dayLabel,mondayOf,vegasDay,type Action,type Workspace} from '../../../lib/gospel-planning/contract';
 import {useSwipeTabs} from '../../../lib/use-swipe-tabs';
 
 type Tab='preaching'|'group'|'manage';
@@ -73,34 +75,40 @@ export default function GospelPlanning(){
 
  if(!data)return <main className="ui-main ui-narrow gp-app">
   <FrameControls {...controls}/>
-  <h1 className="ui-title">Groups &amp; Gospel Planning</h1>
-  <p role="status" className={error?'ui-notice':'ui-lede'} data-tone={error?'warning':undefined}>{error?.message??'Opening your group and preaching plans…'}</p>
-  <p className="ui-hint">This app needs sign-in and access assigned to your account.</p>
-  <div className="gp-actions">
-   {error&&error.status!==401&&error.status!==403&&<button type="button" className="ui-button" onClick={()=>{void load(week);}}>Try again</button>}
-   {error?.status===401&&<a className="ui-button" href="/sign-in">Sign in</a>}
-   <a className="ui-link" href="/members">Return to LV Zion Home</a>
+  <PageHeading eyebrow="Groups & Gospel Planning" title="Preaching, planned together" lede="Your group, your preaching partners and the week ahead."/>
+  <div className="ui-glass gp-loading">
+   <EmptyState icon={<ClipboardList/>} title={error?'Not available right now':'Opening your plans'}
+    action={<div className="gp-actions">
+     {error&&error.status!==401&&error.status!==403&&<button type="button" className="ui-button" onClick={()=>{void load(week);}}>Try again</button>}
+     {error?.status===401&&<a className="ui-button" href="/sign-in">Sign in</a>}
+     <a className="ui-button ui-button-secondary" href="/members">Return to LV Zion Home</a>
+    </div>}>
+    <span role="status" className="gp-loading-status" data-tone={error?'warning':undefined}>{error?.message??'Opening your group and preaching plans…'}</span>
+    <span className="gp-loading-hint">This app needs sign-in and access assigned to your account.</span>
+   </EmptyState>
   </div>
  </main>;
+
+ const me=data.me,placement=me.placed?[me.groupName,me.unitName??(me.inGroup?'No unit':'Group you lead')].filter(Boolean).join(' · '):'Not placed in a group yet';
+ const heading=current==='preaching'?{eyebrow:dayLabel(data.today,'long'),title:'My preaching',lede:placement}
+  :current==='group'?{eyebrow:'Your group',title:me.placed?me.groupName??'My group':'My group',lede:me.placed?[me.unitName??(me.inGroup?'No unit':null),me.groupLeader?'Group leader':me.unitLeader?'Unit leader':'Member'].filter(Boolean).join(' · '):'My Group opens after placement.'}
+  :{eyebrow:'Authorized management',title:'Places and roles',lede:'Approved meeting places and Gospel roles for every group.'};
+ const control:WeekControl={week,today:data.today,onWeek:setWeek};
 
  return <NoticeContext.Provider value={notice}>
   <main className="ui-main gp-app" data-gp-week={data.week} data-gp-viewer={data.me.id}>
    <FrameControls {...controls}/>
+   <PageHeading eyebrow={heading.eyebrow} title={heading.title} lede={heading.lede}/>
    <div className="ui-tabs gp-tabs" role="tablist" aria-label="Gospel Planning sections">
     {tabs.map(t=><button key={t} type="button" role="tab" id={'gp-tab-'+t} aria-controls="gp-panel" aria-selected={current===t} className="ui-tab" onClick={()=>setTab(t)}>{tabLabel[t]}</button>)}
    </div>
-   {current!=='manage'&&(data.groups?.length??0)>1&&<label className="ui-field gp-group-choice">Group<select className="ui-input" value={group||data.me.groupId||''} onChange={e=>{setGroup(e.target.value===data.me.ownGroupId?'':e.target.value);}}>
+   {current!=='manage'&&(data.groups?.length??0)>1&&<label className="ui-glass gp-group-choice"><span>Group</span><select className="ui-input" value={group||data.me.groupId||''} onChange={e=>{setGroup(e.target.value===data.me.ownGroupId?'':e.target.value);}}>
     {data.groups.map(g=><option key={g.id} value={g.id}>{g.name}{g.own?' (my group)':g.leader?' (I lead)':''}</option>)}</select></label>}
-   {current!=='manage'&&<nav className="gp-week" aria-label="Week">
-    <button type="button" className="gp-icon-button" aria-label="Previous week" onClick={()=>setWeek(addDays(week,-7))}>‹</button>
-    <span><strong>{weekLabel(week)}</strong>{week!==mondayOf(data.today)&&<button type="button" className="ui-button ui-button-quiet gp-small-button" onClick={()=>setWeek(mondayOf(data.today))}>This week</button>}</span>
-    <button type="button" className="gp-icon-button" aria-label="Next week" onClick={()=>setWeek(addDays(week,7))}>›</button>
-   </nav>}
    {notice&&<p role="status" className="ui-notice" data-tone={notice.tone}>{notice.text}</p>}
    {error&&<p role="alert" className="ui-notice" data-tone="warning">{error.message} The screen shows the last loaded version.</p>}
    <div id="gp-panel" role="tabpanel" aria-labelledby={'gp-tab-'+current} {...swipe}>
-    {current==='preaching'&&<Preaching data={data} send={send} busy={busy}/>}
-    {current==='group'&&<Group data={data} send={send} busy={busy}/>}
+    {current==='preaching'&&<Preaching data={data} send={send} busy={busy} control={control}/>}
+    {current==='group'&&<Group data={data} send={send} busy={busy} control={control}/>}
     {current==='manage'&&<Manage data={data} send={send} busy={busy}/>}
    </div>
   </main>

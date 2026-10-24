@@ -1,16 +1,18 @@
 'use client';
 import {useState} from 'react';
 import {dayLabel,type MemberUpdate,type OverseerRequest,type Workspace} from '../../lib/gospel-planning/contract';
-import {Empty,Section,Sheet,type Send} from './shared';
+import {FileText,UsersRound} from '../home-icons';
+import {IconBox,Row,initialsOf} from '../ui-kit';
+import {CardAction,Empty,Section,Sheet,WeekHeader,type Send,type WeekControl} from './shared';
 
 const requestStatus={open:'Waiting for the overseer',clarification:'Overseer asked a question',answered:'Answered',withdrawn:'Withdrawn'} as const;
 const eventLabel={submitted:'Request',clarification:'Question',reply:'Reply',answer:'Answer',withdrawn:'Withdrawn'} as const;
 
-export default function Group({data,send,busy}:{data:Workspace;send:Send;busy:boolean}){
+export default function Group({data,send,busy,control}:{data:Workspace;send:Send;busy:boolean;control:WeekControl}){
  const leader=data.me.groupLeader||data.me.unitLeader;
- if(!data.me.placed)return <div className="gp-tab-body"><Empty title="You are not placed in a group">My Group opens after a leader places you in a group.</Empty></div>;
+ if(!data.me.placed)return <div className="gp-tab-body"><div className="ui-glass"><Empty icon={<UsersRound/>} title="You are not placed in a group">My Group opens after a leader places you in a group.</Empty></div></div>;
  return <div className="gp-tab-body">
-  <p className="gp-group-name"><strong>{data.me.groupName}</strong>{data.me.unitName?' · '+data.me.unitName:data.me.inGroup?' · No unit':' · Group you lead'}</p>
+  <section className="gp-block" aria-labelledby="gp-week-title"><WeekHeader control={control}/></section>
   <MemberUpdates data={data} send={send} busy={busy} leader={leader}/>
   <GospelReview data={data} leader={leader}/>
   <GospelPlan data={data} send={send} busy={busy}/>
@@ -22,12 +24,13 @@ function MemberUpdates({data,send,busy,leader}:{data:Workspace;send:Send;busy:bo
  const [editing,setEditing]=useState<MemberUpdate|'new'|null>(null);
  const writable=data.units.filter(u=>u.canWrite);
  return <Section number={1} title="Member Updates" note={leader?'Private to your unit and group leaders. Never shared with the group or the published plan.':'Member updates are kept private to unit and group leaders.'}
-  action={leader&&writable.length?<button type="button" className="ui-button ui-button-secondary gp-small-button" onClick={()=>setEditing('new')}>Add update</button>:undefined}>
-  {leader&&(data.updates?.length?<ul className="ui-list">{data.updates.map(u=><li key={u.id}><button type="button" className="ui-row" onClick={()=>setEditing(u)}>
-   <span className="ui-row-body"><strong>{u.about??'General update'} · {u.unitName}</strong><small>{u.body}</small>
-    {u.nextAction&&<small>Next: {u.nextAction}{u.assignee?' · '+u.assignee:' · not assigned'}</small>}</span>
-   <span className="gp-chip" data-tone={u.status==='done'?'success':'info'}>{u.status==='done'?'Done':u.week<data.week?'Open from '+dayLabel(u.week):'Open'}</span>
-  </button></li>)}</ul>:<p className="ui-hint">No member updates for this week.</p>)}
+  action={leader&&writable.length?<CardAction onClick={()=>setEditing('new')}>Add update</CardAction>:undefined}>
+  {leader&&(data.updates?.length?<ul className="ui-list">{data.updates.map(u=><li key={u.id}><Row onClick={()=>setEditing(u)} className="gp-update-row"
+   lead={<IconBox round>{u.about?initialsOf(u.about):<FileText size={20}/>}</IconBox>}
+   title={u.about??'General update'}
+   detail={<><span className="gp-row-meta"><span className="ui-tag gp-chip" data-tone={u.status==='done'?'success':'info'}>{u.status==='done'?'Done':u.week<data.week?'Open from '+dayLabel(u.week):'Open'}</span>{u.unitName}</span>
+    <span className="gp-clamp">{u.body}</span>{u.nextAction&&<span className="gp-detail-line">Next: {u.nextAction}{u.assignee?' · '+u.assignee:' · not assigned'}</span>}</>}/></li>)}</ul>
+   :<p className="gp-none">No member updates for this week.</p>)}
   {leader&&<UpdateForm update={editing} data={data} send={send} busy={busy} onClose={()=>setEditing(null)}/>}
  </Section>;
 }
@@ -66,15 +69,15 @@ function GospelReview({data,leader}:{data:Workspace;leader:boolean}){
  const s=data.weekSummary,published=data.plan?.published;
  return <Section number={2} title="Gospel Review" note="What happened this week and what is still open.">
   {leader&&s&&<dl className="gp-summary">
-   <div><dt>Planned</dt><dd>{s.sessions}</dd></div>
+   <div data-tone="accent"><dt>Planned</dt><dd>{s.sessions}</dd></div>
    <div><dt>Proposed</dt><dd>{s.proposed}</dd></div>
    <div><dt>Awaiting partner</dt><dd>{s.awaiting}</dd></div>
    <div><dt>Confirmed</dt><dd>{s.confirmed}</dd></div>
    <div><dt>Results recorded</dt><dd>{s.resultsRecorded}</dd></div>
    <div><dt>Result needed</dt><dd>{s.resultsNeeded}</dd></div>
   </dl>}
-  {leader&&s&&<p className="ui-hint">Counts only sessions you can see in your scope. Each session counts once, however many partners report.</p>}
-  {published?.review?<p className="gp-published">{published.review}</p>:<p className="ui-hint">{leader?'No review has been published for this week.':'Your group has not published a review for this week.'}</p>}
+  {leader&&s&&<p className="gp-fine">Counts only sessions you can see in your scope. Each session counts once, however many partners report.</p>}
+  {published?.review?<p className="gp-published">{published.review}</p>:<p className="gp-none">{leader?'No review has been published for this week.':'Your group has not published a review for this week.'}</p>}
  </Section>;
 }
 
@@ -84,18 +87,18 @@ function GospelPlan({data,send,busy}:{data:Workspace;send:Send;busy:boolean}){
  const [form,setForm]=useState({review:'',plan:'',nextAction:'',responsibleId:''});
  const changed=draft&&draft.version!==draft.publishedVersion;
  return <Section number={3} title="Gospel Plan" note={plan?.canEdit?'Your draft stays private to leaders until it is published to the group.':'The plan your group has shared for this week.'}
-  action={plan?.canEdit?<button type="button" className="ui-button ui-button-secondary gp-small-button" onClick={()=>{setForm({review:draft?.review??'',plan:draft?.plan??'',nextAction:draft?.nextAction??'',responsibleId:draft?.responsibleId??''});setEditing(true);}}>{draft?'Edit draft':'Start draft'}</button>:undefined}>
+  action={plan?.canEdit?<CardAction onClick={()=>{setForm({review:draft?.review??'',plan:draft?.plan??'',nextAction:draft?.nextAction??'',responsibleId:draft?.responsibleId??''});setEditing(true);}}>{draft?'Edit draft':'Start draft'}</CardAction>:undefined}>
   {published?<div className="gp-published">
    <p>{published.plan||'No activities listed.'}</p>
-   {published.nextAction&&<p><strong>Next:</strong> {published.nextAction}{published.responsible?' · '+published.responsible:''}</p>}
-   <p className="ui-hint">Published {dayLabel(published.publishedAt.slice(0,10))} · version {published.version}</p>
-  </div>:<p className="ui-hint">No plan has been published for this week.</p>}
-  {draft&&<div className="gp-draft ui-surface">
+   {published.nextAction&&<p className="gp-plan-next"><strong>Next:</strong> {published.nextAction}{published.responsible?' · '+published.responsible:''}</p>}
+   <p className="gp-fine">Published {dayLabel(published.publishedAt.slice(0,10))} · version {published.version}</p>
+  </div>:<p className="gp-none">No plan has been published for this week.</p>}
+  {draft&&<div className="gp-draft">
    <p className="gp-draft-label"><strong>Leader draft</strong> · version {draft.version}{changed?' · not yet published':' · same as published'}</p>
    {draft.plan&&<p>{draft.plan}</p>}
-   {plan?.canPublish&&changed&&<button type="button" className="ui-button" disabled={busy} onClick={()=>send('plan.publish',{week:data.week,expected:draft.version})}>Publish to group</button>}
-   {!plan?.canPublish&&changed&&<p className="ui-hint">A leader with publishing authority publishes the draft.</p>}
-   <p className="ui-hint">Publishing shares only the review, plan and next action. Member updates and overseer requests are never included.</p>
+   {plan?.canPublish&&changed&&<button type="button" className="ui-button ui-button-block" disabled={busy} onClick={()=>send('plan.publish',{week:data.week,expected:draft.version})}>Publish to group</button>}
+   {!plan?.canPublish&&changed&&<p className="gp-fine">A leader with publishing authority publishes the draft.</p>}
+   <p className="gp-fine">Publishing shares only the review, plan and next action. Member updates and overseer requests are never included.</p>
   </div>}
   {plan?.canEdit&&<Sheet open={editing} title="Week draft" onClose={()=>setEditing(false)}>
    <form className="gp-form" onSubmit={async e=>{e.preventDefault();
@@ -119,12 +122,14 @@ function OverseerRequests({data,send,busy,leader}:{data:Workspace;send:Send;busy
  const reviewers=data.reviewers??[];
  const visible=leader||data.me.overseer||data.requests.length>0;
  return <Section number={4} title="Request for Overseer" note={visible?'Shared only between the requesting leader and the assigned overseer.':'Requests are shared only between a requesting leader and the assigned overseer.'}
-  action={leader&&reviewers.length?<button type="button" className="ui-button ui-button-secondary gp-small-button" onClick={()=>{setReviewerId(reviewers[0].id);setBody('');setCreating(true);}}>New request</button>:undefined}>
-  {leader&&!reviewers.length&&<p className="ui-hint">No overseer has been assigned to your group yet.</p>}
-  {visible&&(data.requests.length?<ul className="ui-list">{data.requests.map(r=><li key={r.id}><button type="button" className="ui-row" onClick={()=>setOpenId(r.id)}>
-   <span className="ui-row-body"><strong>{r.asReviewer?'From '+r.author+' · '+r.groupName:'To '+r.reviewer}</strong><small>{r.events[0]?.body}</small></span>
-   <span className="gp-chip" data-tone={r.nextActor===(r.asReviewer?'reviewer':'requester')?'warning':r.status==='answered'?'success':'info'}>{requestStatus[r.status]}</span>
-  </button></li>)}</ul>:<p className="ui-hint">No open requests.</p>)}
+  action={leader&&reviewers.length?<CardAction onClick={()=>{setReviewerId(reviewers[0].id);setBody('');setCreating(true);}}>New request</CardAction>:undefined}>
+  {leader&&!reviewers.length&&<p className="gp-none">No overseer has been assigned to your group yet.</p>}
+  {visible&&(data.requests.length?<ul className="ui-list">{data.requests.map(r=><li key={r.id}><Row onClick={()=>setOpenId(r.id)}
+   lead={<IconBox round>{initialsOf(r.asReviewer?r.author:r.reviewer)}</IconBox>}
+   title={r.asReviewer?'From '+r.author+' · '+r.groupName:'To '+r.reviewer}
+   detail={<><span className="gp-row-meta"><span className="ui-tag gp-chip" data-tone={r.nextActor===(r.asReviewer?'reviewer':'requester')?'warning':r.status==='answered'?'success':'info'}>{requestStatus[r.status]}</span></span>
+    <span className="gp-clamp">{r.events[0]?.body}</span></>}/></li>)}</ul>
+   :<p className="gp-none">No open requests.</p>)}
   <Sheet open={creating} title="New request for overseer" onClose={()=>setCreating(false)}>
    <form className="gp-form" onSubmit={async e=>{e.preventDefault();if(await send('request.create',{week:data.week,reviewerId,body}))setCreating(false);}}>
     <label className="ui-field">Overseer<select className="ui-input" value={reviewerId} onChange={e=>setReviewerId(e.target.value)}>{reviewers.map(r=><option key={r.id} value={r.id}>{r.name}</option>)}</select></label>
@@ -141,7 +146,7 @@ function RequestSheet({request,send,busy,onClose}:{request:OverseerRequest|null;
  if(!request)return <Sheet open={false} title="Request" onClose={onClose}>{null}</Sheet>;
  const reviewerTurn=request.asReviewer&&request.status==='open',requesterTurn=request.asAuthor&&request.status==='clarification';
  return <Sheet open title="Request for overseer" onClose={()=>{setBody('');onClose();}}>
-  <p className="ui-hint">{request.groupName} · to {request.reviewer} · {requestStatus[request.status]}</p>
+  <p className="gp-sheet-lede">{request.groupName} · to {request.reviewer} · <span className="ui-tag gp-chip">{requestStatus[request.status]}</span></p>
   <ol className="gp-history">{request.events.map((e,i)=><li key={i}><strong>{eventLabel[e.kind]} · {e.self?'You':e.actor}</strong>{e.body&&<p>{e.body}</p>}
    <small className="ui-hint">{new Date(e.recordedAt).toLocaleString('en-US',{timeZone:'America/Los_Angeles',month:'short',day:'numeric',hour:'numeric',minute:'2-digit'})}</small></li>)}</ol>
   {request.nextActor&&<p className="ui-hint">Next: {request.nextActor==='reviewer'?(request.asReviewer?'your answer':request.reviewer):(request.asAuthor?'your reply':request.author)}.</p>}
