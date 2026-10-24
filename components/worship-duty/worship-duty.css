@@ -1,0 +1,123 @@
+/* Worship Duty page styles. The Midnight Sapphire palette comes from the shared module style registry
+ * (lib/module-styles.ts, styles/lvz-tokens.css), which also styles the frame; rules here read tokens only. */
+/* Page type: spaced kicker, bold sans title. */
+.wd-main{padding-top:var(--lvz-space-6)}
+.wd-main .ui-kicker{font-size:var(--lvz-text-xs);font-weight:var(--lvz-weight-bold);letter-spacing:.16em;text-transform:uppercase;color:var(--lvz-ink-quiet)}
+.wd-main .ui-title{font:var(--lvz-weight-bold) var(--lvz-text-3xl)/var(--lvz-leading-tight) var(--lvz-font-sans);letter-spacing:-.03em}
+.wd-main .ui-lede{margin-bottom:var(--lvz-space-2)}
+.wd-main .ui-section-title{font-size:var(--lvz-text-xs);letter-spacing:.14em;text-transform:uppercase}
+.wd-main .ui-section-title .ui-count{margin-left:var(--lvz-space-2);vertical-align:1px;letter-spacing:0}
+.wd-header-actions{display:flex;flex-wrap:wrap;align-items:center;gap:var(--lvz-space-3);margin-top:var(--lvz-space-2)}
+.wd-header-actions .ui-link{display:inline-flex;align-items:center;min-height:var(--lvz-tap)}
+
+/* Phone: one column. Desktop: the list column plus a 320px side column for what needs attention. */
+.wd-main>.ui-kicker,.wd-main>.ui-title,.wd-main>.ui-lede,.wd-main>.ui-notice,.wd-main>.ui-empty,.wd-reading{max-width:var(--lvz-reading-max)}
+.wd-layout{display:grid;grid-template-areas:"main" "side";gap:0 var(--lvz-space-10)}
+/* Requests that need a decision come first on phones. */
+.wd-side-first{grid-template-areas:"side" "main"}
+.wd-col-main{grid-area:main;min-width:0}
+.wd-col-side{grid-area:side;min-width:0}
+.wd-controls{border:0;margin:0;padding:0;min-width:0}
+.wd-controls:disabled{opacity:.7}
+
+/* Segmented section control. */
+.wd-main>.ui-tabs{gap:var(--lvz-space-1);padding:var(--lvz-space-1);border:1px solid var(--lvz-line);border-radius:var(--lvz-radius-lg);background:var(--lvz-surface)}
+.wd-main>.ui-tabs .ui-tab{flex:1 1 0;padding:0 var(--lvz-space-3);border-radius:var(--lvz-radius-md);box-shadow:none;color:var(--lvz-ink-quiet)}
+.wd-main>.ui-tabs .ui-tab[aria-current="page"]{background:var(--lvz-accent);color:var(--lvz-on-accent);box-shadow:none}
+.wd-main>.ui-tabs .ui-tab:focus-visible{outline:3px solid var(--lvz-focus);outline-offset:2px}
+
+/* Framed panels: lists and forms sit on dark cards with fine sapphire rules. */
+.wd-main .ui-list{background:var(--lvz-surface);border:1px solid var(--lvz-line);border-radius:var(--lvz-radius-lg);padding:0 var(--lvz-space-4)}
+.wd-main .ui-list>li:last-child,.wd-main .ui-list>li:last-child>.ui-row,.wd-main .ui-list>li:last-child.ui-row{border-bottom:0}
+.wd-main .ui-list .ui-list,.wd-main .ui-surface .ui-list{padding:0 var(--lvz-space-3);background:var(--lvz-sunken)}
+.wd-main .ui-surface{background:var(--lvz-surface);border-color:var(--lvz-line)}
+.wd-main .ui-list .ui-surface{background:var(--lvz-sunken)}
+.wd-main .ui-input{background:var(--lvz-sunken);border-color:var(--lvz-line-input);color:var(--lvz-ink)}
+.wd-main .ui-button-secondary{background:transparent;color:var(--lvz-ink);border-color:var(--lvz-line-input)}
+.wd-main .ui-button-quiet,.wd-main .ui-link{color:var(--lvz-accent-strong)}
+.wd-main .ui-empty{padding:var(--lvz-space-6) var(--lvz-space-4);border:1px dashed var(--lvz-line);border-radius:var(--lvz-radius-lg)}
+.wd-main .ui-notice{border:1px solid var(--lvz-line)}
+.wd-issue p{margin:0 0 var(--lvz-space-2)}
+.wd-actions{display:flex;flex-wrap:wrap;gap:var(--lvz-space-2);margin:var(--lvz-space-3) 0}
+.wd-actions .ui-button{flex:1 1 160px}
+.wd-section-head{display:flex;align-items:baseline;justify-content:space-between;gap:var(--lvz-space-3)}
+.wd-subhead{margin:var(--lvz-space-5) 0 var(--lvz-space-2);font-size:var(--lvz-text-md);font-weight:var(--lvz-weight-bold)}
+
+/* My Duties summary tiles and duty cards. */
+.wd-stats{display:grid;grid-template-columns:1fr 1fr;gap:var(--lvz-space-3);margin:var(--lvz-space-5) 0 0}
+.wd-stat{display:grid;gap:2px;padding:var(--lvz-space-4);border:1px solid var(--lvz-line);border-radius:var(--lvz-radius-lg);background:var(--lvz-surface)}
+.wd-stat span,.wd-stat small{font-size:var(--lvz-text-sm);color:var(--lvz-ink-quiet)}
+.wd-stat strong{font-size:var(--lvz-text-3xl);line-height:1.1;font-weight:var(--lvz-weight-bold);color:var(--lvz-accent-strong);font-variant-numeric:tabular-nums}
+.wd-main .wd-cards{display:grid;gap:var(--lvz-space-3);padding:0;background:none;border:0}
+.wd-main .wd-cards>li{padding:var(--lvz-space-4);border:1px solid var(--lvz-line);border-radius:var(--lvz-radius-lg);background:var(--lvz-surface)}
+.wd-main .wd-cards>li:last-child{border-bottom:1px solid var(--lvz-line)}
+
+/* Time first: clock and day in a fixed left column. */
+.wd-entry{align-items:flex-start}
+.wd-time{flex:none;width:76px;display:flex;flex-direction:column;gap:2px;font-variant-numeric:tabular-nums}
+.wd-time strong{font-size:var(--lvz-text-md);font-weight:var(--lvz-weight-strong);color:var(--lvz-accent-strong)}
+.wd-time small{font-size:var(--lvz-text-xs);color:var(--lvz-ink-quiet)}
+.wd-own-duty{display:grid;gap:var(--lvz-space-2);padding-top:var(--lvz-space-2)}
+.wd-own-duty>strong{font-size:var(--lvz-text-xl);letter-spacing:-.02em}
+.wd-own-duty .ui-notice{margin:0}
+.wd-own-duty .ui-button{justify-self:start}
+
+.wd-service-head{display:flex;gap:var(--lvz-space-3);align-items:flex-start;padding:var(--lvz-space-3) var(--lvz-space-4);margin-bottom:var(--lvz-space-3);border:1px solid var(--lvz-line);border-radius:var(--lvz-radius-lg);background:var(--lvz-accent-soft)}
+.wd-service-head div{display:flex;flex-direction:column;gap:2px}
+.wd-service-head small{font-size:var(--lvz-text-sm);color:var(--lvz-ink-quiet)}
+.wd-line{justify-content:space-between;min-height:48px}
+.wd-line span{color:var(--lvz-ink-quiet)}
+.wd-line strong{text-align:right;font-weight:var(--lvz-weight-strong);overflow-wrap:anywhere}
+.wd-line .wd-you{color:var(--lvz-accent-strong)}
+.wd-line .wd-open{color:var(--lvz-ink-quiet);font-weight:var(--lvz-weight-regular)}
+.wd-row-action{flex-wrap:wrap}
+.wd-row-action .ui-row-body{flex:1 1 200px}
+
+/* Editors open inline under their row. */
+.wd-editor{border-bottom:1px solid var(--lvz-line);padding-bottom:var(--lvz-space-2)}
+.wd-editor>.ui-row{border-bottom:0}
+.wd-form{margin:var(--lvz-space-2) 0 var(--lvz-space-4)}
+.wd-form .ui-field:last-child{margin-bottom:0}
+.wd-grid-form{display:grid;gap:0 var(--lvz-space-4)}
+.wd-check,.wd-checks label{display:flex;align-items:center;gap:var(--lvz-space-3);min-height:var(--lvz-tap);font-size:var(--lvz-text-md)}
+.wd-check input,.wd-checks input{width:22px;height:22px;margin:0;accent-color:var(--lvz-accent)}
+.wd-checks{display:grid;padding:0 0 var(--lvz-space-2)}
+.wd-details{border-bottom:1px solid var(--lvz-line)}
+.wd-details summary{display:list-item;min-height:var(--lvz-tap);padding:var(--lvz-space-3) 0;font-weight:var(--lvz-weight-strong);cursor:pointer}
+
+/* Song plan */
+.wd-preparation{padding:var(--lvz-space-3) 0;border-bottom:1px solid var(--lvz-line)}
+.wd-preparation .ui-field{margin-bottom:var(--lvz-space-2)}
+.wd-reorder{display:flex;gap:var(--lvz-space-2)}
+.wd-icon-button{width:48px;padding:0}
+.wd-song-fields{margin:var(--lvz-space-6) 0 0}
+.wd-copy{margin-top:var(--lvz-space-2)}
+
+/* Monthly planner: month grid with service dots, then that day's services. */
+.wd-planner-bar{display:flex;flex-wrap:wrap;align-items:flex-end;gap:var(--lvz-space-3)}
+.wd-planner-bar .ui-field{flex:1 1 200px}
+.wd-planner-bar .ui-button{margin-bottom:var(--lvz-space-4)}
+.wd-month{padding:var(--lvz-space-4);border:1px solid var(--lvz-line);border-radius:var(--lvz-radius-lg);background:var(--lvz-surface)}
+.wd-month-head{display:flex;align-items:center;justify-content:space-between;gap:var(--lvz-space-3);margin-bottom:var(--lvz-space-3)}
+.wd-month-head h3{margin:0;font-size:var(--lvz-text-xl);letter-spacing:-.02em}
+.wd-month-head button{display:grid;place-items:center;width:var(--lvz-tap);height:var(--lvz-tap);border:1px solid var(--lvz-line);border-radius:var(--lvz-radius-round);background:none;color:var(--lvz-ink);font-size:var(--lvz-text-lg);cursor:pointer}
+.wd-month-grid{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:var(--lvz-space-1);text-align:center}
+.wd-month-grid abbr{padding:var(--lvz-space-1) 0;font-size:var(--lvz-text-xs);color:var(--lvz-ink-quiet);text-decoration:none}
+.wd-day{position:relative;display:grid;place-items:center;min-height:var(--lvz-tap);padding:0;border:0;border-radius:var(--lvz-radius-md);background:none;color:var(--lvz-ink);font:inherit;font-variant-numeric:tabular-nums;cursor:pointer}
+.wd-day:disabled{color:var(--lvz-ink-faint);opacity:.55;cursor:default}
+.wd-day[data-services="true"]:after{content:"";position:absolute;bottom:5px;width:5px;height:5px;border-radius:var(--lvz-radius-round);background:var(--lvz-accent)}
+.wd-day[aria-pressed="true"]{background:var(--lvz-accent);color:var(--lvz-on-accent);font-weight:var(--lvz-weight-bold)}
+.wd-day[aria-pressed="true"]:after{background:var(--lvz-on-accent)}
+.wd-day:focus-visible,.wd-month-head button:focus-visible{outline:3px solid var(--lvz-focus);outline-offset:2px}
+.wd-calendar-row{cursor:pointer}
+.wd-calendar-row[aria-pressed="true"]{box-shadow:inset 3px 0 0 var(--lvz-accent);padding-left:var(--lvz-space-3)}
+.wd-batch{margin-top:var(--lvz-space-4)}
+
+@media (min-width:900px){
+ .wd-layout,.wd-side-first{grid-template-columns:minmax(0,1fr) 320px;grid-template-areas:"main side";align-items:start}
+ .wd-col-side{position:sticky;top:calc(var(--frame-top,var(--lvz-header-height)) + var(--lvz-space-4))}
+}
+@media (min-width:640px){
+ .wd-grid-form{grid-template-columns:1fr 1fr}
+ .wd-grid-form>.ui-button,.wd-grid-form>.ui-notice,.wd-grid-form>.wd-check{grid-column:1/-1}
+}

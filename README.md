@@ -37,6 +37,8 @@ Current instructions take precedence over milestone-specific historical installa
 
 ## Development
 
+Worship Duty ([route](https://lvz.app/modules/worship-duty)) stays switched off until its database steps are applied and Anthony approves the release. See [implementation and launch evidence](docs/worship-duty/LAUNCH.md).
+
 Project connectors: `.mcp.json` gives every Claude Code session in this folder a Supabase connector locked to this app's database (`supabase-lvz`) and a Vercel connector locked to this project (`vercel-lvz`). Both sign in through the provider (no keys in the repository). `.claude/settings.json` lets agents read without asking and always asks before database changes, deployments or environment changes.
 
 Use Node 24 and the exact dependency lockfile.
