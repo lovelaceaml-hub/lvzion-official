@@ -59,7 +59,7 @@ The style is registered in `lib/module-styles.ts` (key `gospel-planning`, Atlas 
 | Check | Result |
 | --- | --- |
 | `npm run typecheck` | Passed |
-| `npm run build` (typecheck plus compile since #56; no test suite) | Passed after merging main `9cf2531`. Next.js 16.4.0 also printed a security advisory recommending an upgrade; not acted on. |
+| `npm run build` (typecheck plus compile since #56; no test suite) | Passed on main `8606dad` (Next.js 16.4.3, design repair merged). |
 | `tests/gospel-planning.test.ts` (unit: contract, statuses, dates, theme, route guards) | 11 passed |
 | `tests/gospel-planning-database.test.ts` (PGlite, all migrations + fictional seed + `supabase/tests/gospel_planning.sql`) | 116 SQL assertions passed |
 | `scripts/gospel-planning/test-races.mjs` (real PostgreSQL 16, two connections, local disposable cluster) | 9 passed: overlapping acceptances, answer vs change, stale publish, double report, revoked access, ended leadership, simultaneous first saves, lock-guarded commitments, private tables |
@@ -80,11 +80,10 @@ Screenshots: [phone, member preaching](screenshots/gospel-member-preaching-phone
 ## Ready for release: what Anthony must approve
 
 1. **Policy defaults** above (who publishes sessions and plans, unit leaders reading the group draft, members not writing Member Updates, two or three partners per session, availability up to four weeks ahead). Change any before release.
-2. **Merge** this pull request (after the design repair branch, or rebase onto it).
+2. **Merge** this pull request.
 3. **Hosted migration** `20261024150000_gospel_planning_core` on Supabase `otecqlkqirncotytbfns`: reconcile `docs/HOSTED-MIGRATION-LEDGER.json`, apply only this migration, read back that the module is still draft with zero grants, places and roles. No new database extension is needed.
 4. **First setup** (in order): approve the module (status approved); grant yourself the manager permission; grant access to the first leaders and members; in Manage, add the approved meeting places, assign Publisher to each group leader who should publish, and Overseer for each group. Nothing works for members until places exist and leaders are appointed in Organization.
 5. **Deploy** to https://lvz.app (automatic deploys stay off).
 6. **Live checks**: signed-out API returns 401; a real leader saves and publishes a draft; a real member saves availability, a session goes Proposed → Awaiting partner → Confirmed; one shared result; a member in another group sees none of it; one check on a physical iPhone.
-7. Decide separately whether to act on the Next.js security upgrade advisory (affects the whole app, not this module).
 
 Before activation, the review handoff also lists open questions: confidential history for Member Updates and requests after a leader changes, cross-group sessions, report fields beyond completed/not held, and confirmation cadence.
