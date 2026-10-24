@@ -212,6 +212,23 @@
  --lvz-accent:#aacb9b;--lvz-accent-strong:#c7e0bb;--lvz-accent-soft:#263421;--lvz-on-accent:#13200f;--lvz-focus:#aacb9b;
 }
 
+/* Groups & Gospel Planning: Skyline Grid (Atlas 22), square-edged grid material. */
+[data-lvz-module="gospel-planning"]{
+ --lvz-ground:#eaf0f5;--lvz-surface:#ffffff;--lvz-sunken:#dde6ee;
+ --lvz-ink:#16304b;--lvz-ink-quiet:#526b81;--lvz-ink-faint:#93a6b8;
+ --lvz-line:#bbcedd;--lvz-line-input:#6f8599;
+ --lvz-accent:#1863a3;--lvz-accent-strong:#114a7b;--lvz-accent-soft:#dbe8f4;--lvz-on-accent:#ffffff;--lvz-focus:#1863a3;
+ --lvz-radius-sm:4px;--lvz-radius-md:7px;--lvz-radius-lg:7px;
+ --lvz-shadow-sheet:0 -1px 0 #bbcedd;--lvz-shadow-pop:0 0 0 1px #bbcedd;
+}
+:root[data-lvz-scheme="dark"] [data-lvz-module="gospel-planning"]{
+ --lvz-ground:#0d1621;--lvz-surface:#142130;--lvz-sunken:#1b2a3c;
+ --lvz-ink:#e6eef6;--lvz-ink-quiet:#a3b8cb;--lvz-ink-faint:#5f7487;
+ --lvz-line:#2a3d52;--lvz-line-input:#7891a8;
+ --lvz-accent:#74b3ec;--lvz-accent-strong:#a2cdf4;--lvz-accent-soft:#19324b;--lvz-on-accent:#08192a;--lvz-focus:#74b3ec;
+ --lvz-shadow-sheet:0 -1px 0 #2a3d52;--lvz-shadow-pop:0 0 0 1px #2a3d52;
+}
+
 /* Mother's Love: Rose Quartz (Atlas 08). Ready for the module; no route yet. */
 [data-lvz-module="mothers-love"]{
  --lvz-ground:#fae8e8;--lvz-surface:#fff6f2;--lvz-sunken:#f2d9da;

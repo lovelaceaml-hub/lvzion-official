@@ -51,6 +51,7 @@ Each module style redefines palette tokens only, inside `[data-lvz-module="<key>
 | Contacts | `contacts` | Tidal Teal | teal | deep teal companion |
 | Members and organization | `members` | Graphite & Chrome | graphite | graphite night companion |
 | Continuous Display management | `continuous-display` | Pearl Garden | botanical green | garden night companion |
+| Groups & Gospel Planning | `gospel-planning` | Skyline Grid, square edges, flat header and dock | blue grid | night grid companion |
 | Mother's Love | `mothers-love` | Rose Quartz | rose | rose night companion |
 | Concert | `concert` | Aurora Night | dark by design | same |
 | Song library | `song-library` | Copper Noir | dark by design | same |
@@ -58,7 +59,7 @@ Each module style redefines palette tokens only, inside `[data-lvz-module="<key>
 Notes:
 - Study Rooms keeps its approved Lavender Softform layout and values. Its raised plum Apps square and attached resource tabs are scoped to the `study-rooms` style. Atlas Liquid Opal is the same purple family; no redesign was made.
 - Members: the Profile tab and the Unassigned profile wear the base; the organization and management tabs wear Graphite & Chrome.
-- Groups & Gospel Planning has no Atlas pick yet, so it wears the base until Anthony chooses one.
+- Groups & Gospel Planning wears Skyline Grid (requested by its build session on October 24): square 7px corners and a flat header and dock with no blur or shadow.
 
 ### Palette tokens a style may set
 
@@ -75,7 +76,7 @@ Readability is enforced by `tests/appearance.test.ts`: in every style and scheme
 ## How a module adopts its Atlas style
 
 1. **Register the module** in `lib/module-styles.ts`: `{key:'worship-duty',routes:['/modules/worship-duty'],title:'Worship Duty',icon:'calendar',atlas:'Midnight Sapphire',darkByDesign:true}`. The frame then sets `data-lvz-module` on every page under those routes, including setup and loading screens.
-2. **Use the style block** in `styles/lvz-tokens.css`. Worship Duty, Mother's Love, Concert and Song library blocks are already there. A new module asks the shared-frame owner to add one from its Atlas `tokens.json` (`bg`, `surface`, `ink`, `muted`, `accent`, `onAccent`, `line`), plus a dark companion unless the pick is dark by design. Run `node --experimental-strip-types --test tests/appearance.test.ts` to check contrast.
+2. **Use the style block** in `styles/lvz-tokens.css`. Worship Duty, Groups & Gospel Planning, Mother's Love, Concert and Song library blocks are already there. A new module asks the shared-frame owner to add one from its Atlas `tokens.json` (`bg`, `surface`, `ink`, `muted`, `accent`, `onAccent`, `line`), plus a dark companion unless the pick is dark by design. Run `node --experimental-strip-types --test tests/appearance.test.ts` to check contrast.
 3. **Write module CSS with tokens only**: `var(--lvz-accent)`, `var(--lvz-surface)` and so on. No hex colors, font names or pixel radii in module CSS, so the module follows Light, Dark and its style automatically.
 4. **Use the shared pieces**: `ui-title`, `ui-button`, `ui-field`/`ui-input`, `ui-list`/`ui-row`, `ui-notice`, `ui-empty`, `ui-sheet`. Do not add a module header or bottom bar; register actions with `<FrameControls left={...} right={...} more={[...]}/>`. Pass `module={null}` for a view that should wear the base (as Profile does), and `title` when the view needs a different header title.
 5. **States**: signed out (401) shows a Sign in action; not granted (403) says the app has not been assigned; empty data shows a neutral `ui-empty` line. Never show sample records as fallback.

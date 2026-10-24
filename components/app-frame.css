@@ -92,3 +92,11 @@
 /* Focused fields scroll clear of the fixed header and dock. */
 html{scroll-padding-top:calc(76px + env(safe-area-inset-top,0px));scroll-padding-bottom:calc(112px + env(safe-area-inset-bottom,0px))}
 @media(forced-colors:active){.app-frame-header,.app-frame-nav{border:1px solid CanvasText}}
+
+/* Skyline Grid chrome for Groups & Gospel Planning: flat, square-edged, no blur or shadow. */
+.app-frame[data-lvz-module="gospel-planning"] :is(.app-frame-header,.app-frame-nav){background:var(--lvz-surface);border:1px solid var(--lvz-line);box-shadow:none;-webkit-backdrop-filter:none;backdrop-filter:none}
+.app-frame[data-lvz-module="gospel-planning"] .app-frame-nav{border-radius:var(--lvz-radius-md)}
+.app-frame[data-lvz-module="gospel-planning"] .app-frame-nav .app-frame-apps{border-radius:var(--lvz-radius-md);background:var(--lvz-accent);color:var(--lvz-on-accent);border:0;box-shadow:none}
+.app-frame[data-lvz-module="gospel-planning"] .app-frame-apps:before,.app-frame[data-lvz-module="gospel-planning"] .app-frame-apps:after{display:none}
+.app-frame[data-lvz-module="gospel-planning"] .app-frame-orb svg{fill:none;stroke:currentColor;filter:none}
+.app-frame[data-lvz-module="gospel-planning"] .app-frame-avatar{background:var(--lvz-accent-soft);box-shadow:none}

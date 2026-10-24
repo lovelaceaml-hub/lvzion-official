@@ -58,7 +58,7 @@ Status: **Fixed** on this branch, **Remaining** (with reason), or **By design**.
 | R4 | Contacts and Morning Prayer repeat the header title as the page title. | Module content; left for the module owners. |
 | R5 | Study Rooms' current-time label is partly hidden under the column headings when the time is at the top of the grid. | Existing approved layout; unchanged. |
 | R6 | No physical phone check. | Browser emulation only. |
-| R7 | Groups & Gospel Planning has no Atlas pick. | It wears the base until Anthony chooses one. |
+| R7 | Groups & Gospel Planning style. | Resolved: registered as Skyline Grid at its build session's request. |
 
 ## Verification on this branch
 

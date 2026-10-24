@@ -12,6 +12,7 @@ export const moduleStyles:ModuleStyle[]=[
  {key:'work-mission',routes:['/modules/work-mission-prayer'],title:'Morning Prayer',icon:'sun',atlas:'Linen Editorial'},
  {key:'continuous-display',routes:['/modules/continuous-display','/display-operations-review'],title:'Church Display',icon:'display',atlas:'Pearl Garden'},
  {key:'members',routes:['/members/manage','/member-preview','/roster-preview','/enrollment-preview'],title:'Members',icon:'people',atlas:'Graphite & Chrome'},
+ {key:'gospel-planning',routes:['/modules/gospel-planning'],title:'Gospel Planning',icon:'clipboard',atlas:'Skyline Grid'},
  {key:'worship-duty',routes:['/modules/worship-duty'],title:'Worship Duty',icon:'calendar',atlas:'Midnight Sapphire',darkByDesign:true},
  {key:'mothers-love',routes:['/modules/mothers-love'],title:'Mother’s Love',icon:'heart',atlas:'Rose Quartz'},
  {key:'concert',routes:['/modules/concert'],title:'Concert',icon:'music',atlas:'Aurora Night',darkByDesign:true},
