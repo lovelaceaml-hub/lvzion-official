@@ -50,9 +50,9 @@ Leadership comes from the existing member appointments. Every request rechecks t
 
 ### Design: Skyline Grid
 
-Gospel Planning wears the Theme Atlas style **Skyline Grid** (light blue-grey ground, white surfaces, navy text, blue `#1863a3` actions, square-edged grid look). Why: it is the Atlas style made for schedules and organization, which is what this app is; it is unused by every other app; and it reads clearly at every age with no decorative imagery. A device appearance chosen under More, Appearance always overrides it.
+Gospel Planning wears the Theme Atlas style **Skyline Grid** (light blue-grey ground, white surfaces, navy text, blue `#1863a3` actions, square-edged grid look). Why: it is the Atlas style made for schedules and organization, which is what this app is; it is unused by every other app; and it reads clearly at every age with no decorative imagery. Light, Dark and System appearance all keep it.
 
-To swap styles: change `GOSPEL_PLANNING_THEME` in `lib/gospel-planning/theme.ts` to another Atlas ID. When the shared module-style API from the design repair work (`lib/module-styles.ts`, `data-lvz-module`) lands on `main`, Gospel Planning moves to that registry (requested as key `gospel-planning`, Atlas Skyline Grid) and `theme.ts` plus `app/modules/gospel-planning/layout.tsx` are deleted. The module CSS uses tokens only, so it needs no color changes.
+The style is registered in `lib/module-styles.ts` (key `gospel-planning`, Atlas Skyline Grid) with its light and dark token blocks in `styles/lvz-tokens.css`; the shared frame applies it. To swap styles, change that entry and its token block. Module CSS uses tokens only, so Light, Dark and System appearance work without changes.
 
 ## Verification (October 24, 2026, local only)
 

@@ -3,8 +3,7 @@ import assert from 'node:assert/strict';
 import {readFile} from 'node:fs/promises';
 import {addDays,commandFailure,ContractError,mondayOf,nextAction,parseCommand,rangeDates,sessionStatus,vegasDay,weekKey,
  type Participant,type Session} from '../lib/gospel-planning/contract.ts';
-import {GOSPEL_PLANNING_THEME,moduleTheme,moduleThemeBootstrap} from '../lib/gospel-planning/theme.ts';
-import {appearanceThemes} from '../lib/appearance-themes.ts';
+import {moduleStyleFor} from '../lib/module-styles.ts';
 
 const id=(n:number)=>'44444444-4444-4444-8444-'+String(n).padStart(12,'0');
 const rid='51000000-0000-4000-8000-000000000001';
@@ -127,14 +126,9 @@ test('Las Vegas weeks and dates cross month, year and clock changes',()=>{
  assert.equal(vegasDay(new Date('2026-11-01T08:30:00Z')),'2026-11-01');
 });
 
-test('module style is an unused Atlas theme and a device appearance always wins',async()=>{
- const used=['liquid-opal','midnight-sapphire','linen-editorial','tidal-teal','graphite-chrome','pearl-garden','rose-quartz','aurora-night','copper-noir','lavender-softform'];
- assert.ok(appearanceThemes.some(t=>t.id===GOSPEL_PLANNING_THEME));
- assert.ok(!used.includes(GOSPEL_PLANNING_THEME));
- assert.equal(moduleTheme('default'),GOSPEL_PLANNING_THEME);
- assert.equal(moduleTheme('high-clarity'),'high-clarity');
- assert.equal(moduleTheme('default','frosted-sky'),'frosted-sky');
- assert.match(moduleThemeBootstrap,new RegExp(GOSPEL_PLANNING_THEME));
+test('module wears its registered Atlas style and module CSS uses tokens only',async()=>{
+ assert.equal(moduleStyleFor('/modules/gospel-planning')?.key,'gospel-planning');
+ assert.equal(moduleStyleFor('/modules/gospel-planning')?.atlas,'Skyline Grid');
  const css=await readFile('components/gospel-planning/gospel-planning.css','utf8');
  assert.doesNotMatch(css,/#[0-9a-f]{3,8}\b/i,'module CSS uses tokens, not raw colors');
  assert.doesNotMatch(css,/border-radius:\s*\d+px/,'module CSS uses radius tokens');

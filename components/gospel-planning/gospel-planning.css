@@ -1,5 +1,5 @@
-/* Groups & Gospel Planning. Built only from shared --lvz tokens, so the module's Atlas style
-   (lib/gospel-planning/theme.ts) or any device appearance recolors it without edits here. */
+/* Groups & Gospel Planning. Built only from shared --lvz tokens: the Skyline Grid style
+   (lib/module-styles.ts) and Light/Dark appearance recolor it without edits here. */
 .gp-app{max-width:var(--lvz-reading-max);padding-bottom:calc(120px + env(safe-area-inset-bottom,0px));overflow-x:clip}
 .gp-tabs{margin-top:var(--lvz-space-2)}
 .gp-week{display:grid;grid-template-columns:44px minmax(0,1fr) 44px;align-items:center;gap:var(--lvz-space-2);margin:var(--lvz-space-3) 0;
@@ -68,11 +68,6 @@
 .gp-history{display:grid;gap:var(--lvz-space-3);margin:var(--lvz-space-3) 0;padding:0 0 0 var(--lvz-space-4);border-left:2px solid var(--lvz-line);list-style:none}
 .gp-history p{margin:var(--lvz-space-1) 0;white-space:pre-wrap;overflow-wrap:anywhere}
 .ui-row-body small{overflow-wrap:anywhere}
-
-/* Frame chrome on this module: square-edged grid look of the chosen style, from tokens only. */
-.app-frame[data-route="/modules/gospel-planning"] .app-frame-header{background:var(--lvz-surface);border-bottom:1px solid var(--lvz-line)}
-.app-frame[data-route="/modules/gospel-planning"] .app-frame-nav{background:var(--lvz-surface);border-top:1px solid var(--lvz-line)}
-.app-frame[data-route="/modules/gospel-planning"] .app-frame-nav [aria-current="page"]{color:var(--lvz-accent);font-weight:var(--lvz-weight-strong)}
 
 @media (min-width:900px){
  .gp-app{max-width:calc(var(--lvz-reading-max) + 2 * var(--lvz-gutter))}

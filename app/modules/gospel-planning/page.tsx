@@ -1,5 +1,5 @@
 'use client';
-import {useCallback,useEffect,useLayoutEffect,useMemo,useRef,useState} from 'react';
+import {useCallback,useEffect,useMemo,useRef,useState} from 'react';
 import {FrameControls} from '../../../components/app-frame';
 import Preaching from '../../../components/gospel-planning/preaching';
 import Group from '../../../components/gospel-planning/group';
@@ -7,8 +7,6 @@ import Manage from '../../../components/gospel-planning/manage';
 import {NoticeContext,newRequestId,type Notice,type Send} from '../../../components/gospel-planning/shared';
 import '../../../components/gospel-planning/gospel-planning.css';
 import {addDays,mondayOf,vegasDay,weekLabel,type Action,type Workspace} from '../../../lib/gospel-planning/contract';
-import {applyTheme,currentTheme,readThemePreference,subscribeToTheme} from '../../../lib/appearance';
-import {moduleTheme} from '../../../lib/gospel-planning/theme';
 import {useSwipeTabs} from '../../../lib/use-swipe-tabs';
 
 type Tab='preaching'|'group'|'manage';
@@ -29,12 +27,6 @@ export default function GospelPlanning(){
  const [tab,setTab]=useState<Tab>('preaching'),[busy,setBusy]=useState(false),[notice,setNotice]=useState<Notice>(null);
  const sequence=useRef(0);
 
- // Module Atlas style while the device uses "Current app design"; a chosen device theme always wins.
- useLayoutEffect(()=>{
-  const apply=()=>{const theme=moduleTheme(readThemePreference());if(currentTheme()!==theme)applyTheme(theme);};
-  apply();const stop=subscribeToTheme(apply);
-  return()=>{stop();applyTheme(readThemePreference());};
- },[]);
 
  const load=useCallback(async(target:string)=>{
   const id=++sequence.current;

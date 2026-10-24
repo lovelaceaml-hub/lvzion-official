@@ -266,15 +266,16 @@ test('tabs switch by swipe and the bottom navigation, with the center Apps launc
  await page.locator('.app-frame-nav').getByRole('button',{name:'My Group'}).click();
  await expect(page.getByRole('tab',{name:'My Group'})).toHaveAttribute('aria-selected','true');
  await expect(page.locator('.app-frame-nav .app-frame-apps')).toBeVisible();
- await expect(page.locator('html')).toHaveAttribute('data-lvz-theme','skyline-grid');
+ await expect(page.locator('.app-frame')).toHaveAttribute('data-lvz-module','gospel-planning');
  await gp.close();
 });
 
-test('a chosen device appearance overrides the module style',async({page})=>{
- await page.addInitScript(()=>{try{localStorage.setItem('lvz.appearance.v1','high-clarity');}catch{}});
+test('dark appearance keeps the module style',async({page})=>{
+ await page.addInitScript(()=>{try{localStorage.setItem('lvz.appearance.v1','dark');}catch{}});
  const gp=await openGospel(page,{as:member.gina});
  await expect(page.getByRole('heading',{name:'Your sessions'})).toBeVisible();
- await expect(page.locator('html')).toHaveAttribute('data-lvz-theme','high-clarity');
+ await expect(page.locator('html')).toHaveAttribute('data-lvz-scheme','dark');
+ await expect(page.locator('.app-frame')).toHaveAttribute('data-lvz-module','gospel-planning');
  await gp.close();
 });
 
