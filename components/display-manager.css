@@ -1,59 +1,124 @@
-/* Church Display manager: Day Sheet layout. Tokens and ui- building blocks come from styles/; nothing here sets its own colors or fonts. */
-.cd-manage .ui-main{padding-bottom:var(--lvz-space-12)}
-.cd-screen-picker{max-width:360px;margin-top:var(--lvz-space-4)}
-
-/* Phone: one column with the TV preview first. Desktop: list and forms on the left, a 320px preview column on the right. */
-.cd-layout{display:flex;flex-direction:column;gap:var(--lvz-space-2)}
-.cd-main{min-width:0}
+/*
+ * Church Display management in the shared Liquid Opal material (Atlas display-editor,
+ * display-playlist, display-devices, and display-tv as a framed preview). Built only from
+ * styles/lvz-tokens.css and the shared ui- classes; the garden palette comes from the
+ * continuous-display tokens. The TV player (/display) never loads this file.
+ */
+.cd-manage .ui-heading{margin-bottom:var(--lvz-space-4)}
+.cd-manage .ui-tabs{margin:var(--lvz-space-2) 0 var(--lvz-space-5)}
+.cd-state{margin-top:var(--lvz-space-4)}
 .cd-narrow{max-width:var(--lvz-reading-max)}
-.cd-side{order:-1;min-width:0}
-.cd-side .ui-section-title{margin-top:var(--lvz-space-4)}
-.cd-small-preview{border:1px solid var(--lvz-line);border-radius:var(--lvz-radius-lg)}
+
+/* Display chooser: a glass bar with the screen picker, like the month bar in the siblings. */
+.cd-context{display:flex;align-items:center;gap:var(--lvz-space-3);margin:0 0 var(--lvz-space-2);padding:var(--lvz-space-2) var(--lvz-space-2) var(--lvz-space-2) var(--lvz-space-3);max-width:var(--lvz-reading-max)}
+.cd-context .ui-input{flex:1;min-width:0;border-radius:var(--lvz-radius-round)}
+
+/* Layout: one column on phones; from 900px a sticky preview column sits beside the editor. */
+.cd-layout{display:grid;grid-template-columns:minmax(0,1fr);gap:var(--lvz-space-4);align-items:start}
+.cd-layout>*{min-width:0}
+.cd-layout[data-tab="content"]{grid-template-areas:"strip" "side" "main"}
+.cd-layout[data-tab="publish"]{grid-template-areas:"side" "main"}
+.cd-layout[data-tab="playlist"],.cd-layout[data-tab="screens"]{grid-template-areas:"main"}
+.cd-area-strip{grid-area:strip}
+.cd-side{grid-area:side}
+.cd-area-main{grid-area:main;display:flex;flex-direction:column;gap:var(--lvz-space-4)}
+.cd-area-main>.ui-section-head{margin:var(--lvz-space-2) 0 calc(-1 * var(--lvz-space-1))}
 @media (min-width:900px){
- .cd-layout{display:grid;grid-template-columns:minmax(0,1fr) 320px;gap:var(--lvz-space-12);align-items:start}
- .cd-layout>.cd-narrow{grid-column:1/-1}
- .cd-side{order:0;position:sticky;top:calc(var(--lvz-header-height) + var(--lvz-space-4))}
+ .cd-layout[data-tab="content"]{grid-template-columns:minmax(0,1fr) minmax(320px,420px);grid-template-areas:"strip side" "main side";column-gap:var(--lvz-space-8)}
+ .cd-layout[data-tab="publish"]{grid-template-columns:minmax(0,1fr) minmax(320px,420px);grid-template-areas:"main side";column-gap:var(--lvz-space-8)}
+ .cd-side{position:sticky;top:calc(var(--frame-top,var(--lvz-header-height)) + var(--lvz-space-4))}
 }
 
-.cd-heading{display:flex;align-items:center;justify-content:space-between;gap:var(--lvz-space-3);flex-wrap:wrap}
-.cd-heading .ui-section-title{margin-bottom:var(--lvz-space-3)}
-.cd-count{margin-left:var(--lvz-space-2);font-weight:var(--lvz-weight-regular)}
-.cd-block{margin-top:var(--lvz-space-8)}
-.cd-block>.ui-section-title:first-child{margin-top:0}
-.cd-block .ui-hint,.cd-main>.ui-hint{margin:0 0 var(--lvz-space-4)}
+/* Framed TV preview: the real slide component inside a glass bezel. */
+.cd-frame{margin:0;padding:var(--lvz-space-2);border:var(--lvz-glass-border);border-radius:var(--lvz-radius-xl);background:var(--lvz-glass);box-shadow:var(--lvz-glass-shadow)}
+.cd-frame .cd-stage{border-radius:var(--lvz-radius-lg)}
+.cd-frame-note{margin:var(--lvz-space-3) var(--lvz-space-2) 0;font-size:var(--lvz-text-sm);color:var(--lvz-ink-quiet)}
+.cd-frame-note strong{color:var(--lvz-ink);font-weight:var(--lvz-weight-strong)}
 
-/* Rows: a quiet number on the left, like times on the day sheet. */
-.cd-lead{flex:none;min-width:2.5em;font-weight:var(--lvz-weight-strong);color:var(--lvz-ink-quiet)}
-.cd-slide-row{padding-left:var(--lvz-space-2);padding-right:var(--lvz-space-2)}
-.cd-slide-row[aria-pressed="true"]{background:var(--lvz-accent-soft);box-shadow:inset 3px 0 0 var(--lvz-accent)}
-.cd-slide-row[aria-pressed="true"] .cd-lead{color:var(--lvz-accent)}
-.cd-order .ui-row-body{overflow-wrap:anywhere}
-.cd-icon-button{flex:none;display:grid;place-items:center;width:var(--lvz-tap);height:var(--lvz-tap);padding:0;border:1px solid var(--lvz-line-input);border-radius:var(--lvz-radius-md);background:var(--lvz-surface);color:var(--lvz-accent)}
-.cd-icon-button:hover:not(:disabled){background:var(--lvz-accent-soft)}
-.cd-icon-button:disabled{opacity:.4;cursor:not-allowed}
+/* Slide tiles: rounded square glass tiles; the selected slide is the filled gradient tile. */
+.cd-area-strip .ui-section-head{margin-top:0}
+.cd-strip{display:flex;gap:var(--lvz-space-2);margin:0 calc(-1 * var(--lvz-gutter));padding:var(--lvz-space-1) var(--lvz-gutter) var(--lvz-space-3);list-style:none;overflow-x:auto;scroll-snap-type:x proximity;scroll-padding-inline:var(--lvz-gutter);scrollbar-width:none}
+.cd-strip::-webkit-scrollbar{display:none}
+.cd-strip>li{flex:none;display:flex;scroll-snap-align:start}
+.cd-tile{display:flex;flex-direction:column;align-items:flex-start;gap:2px;width:148px;min-height:104px;padding:var(--lvz-space-3);border:var(--lvz-glass-border);border-radius:var(--lvz-radius-lg);background:var(--lvz-glass);box-shadow:var(--lvz-glass-shadow);color:var(--lvz-ink);text-align:left}
+.cd-tile-top{display:flex;align-items:center;justify-content:space-between;width:100%;margin-bottom:var(--lvz-space-1);color:var(--lvz-accent)}
+.cd-tile-n{font-size:var(--lvz-text-xs);font-weight:var(--lvz-weight-bold);letter-spacing:.08em}
+.cd-tile strong{display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:2;overflow:hidden;font-size:var(--lvz-text-sm);font-weight:var(--lvz-weight-strong);line-height:1.3;overflow-wrap:anywhere}
+.cd-tile small{font-size:var(--lvz-text-xs);color:var(--lvz-ink-quiet)}
+.cd-tile[aria-pressed="true"]{background:var(--lvz-action);border-color:transparent;color:var(--lvz-on-accent);box-shadow:var(--lvz-action-shadow)}
+.cd-tile[aria-pressed="true"] .cd-tile-top,.cd-tile[aria-pressed="true"] small{color:inherit}
+.cd-tile-add{align-items:center;justify-content:center;gap:var(--lvz-space-2);width:112px;color:var(--lvz-accent);text-align:center}
+.cd-tile:disabled{opacity:.55;cursor:not-allowed}
+@media (min-width:900px){.cd-strip{flex-wrap:wrap;margin:0;padding:var(--lvz-space-1) 0 0;overflow:visible}}
 
-/* Forms: label above, two columns once there is room. */
-.cd-editor{margin-top:var(--lvz-space-6)}
-.cd-editor-title{margin:0;font-size:var(--lvz-text-lg);font-weight:var(--lvz-weight-strong)}
-.cd-fields{display:grid;grid-template-columns:minmax(0,1fr);column-gap:var(--lvz-space-4);margin-top:var(--lvz-space-4)}
+/* Glass cards: icon box, title and one line of guidance, then the fields. */
+.cd-card{display:flex;flex-direction:column;gap:var(--lvz-space-2)}
+.cd-card-head{display:flex;align-items:flex-start;gap:var(--lvz-space-3)}
+.cd-card-head>div{flex:1;min-width:0}
+.cd-card-head h2{margin:0;padding-top:2px;font-size:var(--lvz-text-lg);font-weight:var(--lvz-weight-bold);letter-spacing:-.02em;color:var(--lvz-ink);overflow-wrap:anywhere}
+.cd-card-head .ui-hint{margin:2px 0 0}
+.cd-card-head>.ui-button{flex:none;align-self:center}
+.cd-card .cd-fields{margin-top:var(--lvz-space-2)}
+.cd-fields{display:grid;grid-template-columns:minmax(0,1fr);column-gap:var(--lvz-space-4)}
 .cd-fields>*{min-width:0}
 .cd-span{grid-column:1/-1}
 .cd-fields textarea.ui-input{min-height:96px;resize:vertical}
 .cd-row-fields{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,2fr) var(--lvz-tap);gap:var(--lvz-space-2);align-items:center;margin-bottom:var(--lvz-space-2)}
-.cd-row-fields .cd-icon-button{height:48px}
+.cd-add-row{width:100%;margin-top:var(--lvz-space-1)}
 @media (min-width:600px){.cd-fields{grid-template-columns:repeat(2,minmax(0,1fr))}}
-
-.cd-primary-action{margin-top:var(--lvz-space-6)}
-.cd-actions{display:grid;grid-template-columns:minmax(0,1fr);gap:var(--lvz-space-3);margin:var(--lvz-space-4) 0}
+.cd-actions{display:grid;grid-template-columns:minmax(0,1fr);gap:var(--lvz-space-3);margin-top:var(--lvz-space-2)}
 @media (min-width:600px){.cd-actions{grid-template-columns:repeat(2,minmax(0,1fr))}}
 .cd-danger-text{color:var(--lvz-danger)}
 
-/* Versions read like three entries on the sheet: small label, large figure. */
-.cd-versions{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));margin:0 0 var(--lvz-space-4);border-top:1px solid var(--lvz-line);border-bottom:1px solid var(--lvz-line)}
-.cd-versions div{padding:var(--lvz-space-3) 0}
-.cd-versions dt{font-size:var(--lvz-text-sm);color:var(--lvz-ink-quiet)}
-.cd-versions dd{margin:0;font-size:var(--lvz-text-xl);font-weight:var(--lvz-weight-strong)}
+/* Round glass icon buttons (move, remove). */
+.cd-icon-button{flex:none;display:grid;place-items:center;width:var(--lvz-tap);height:var(--lvz-tap);padding:0;border:var(--lvz-glass-border);border-radius:var(--lvz-radius-round);background:var(--lvz-glass-strong);box-shadow:inset 0 1px 2px var(--lvz-glint);color:var(--lvz-accent)}
+.cd-icon-button:hover:not(:disabled){background:var(--lvz-accent-soft)}
+.cd-icon-button:disabled{opacity:.4;cursor:not-allowed}
+.cd-row-fields .cd-icon-button{height:var(--lvz-tap)}
 
-.cd-pair{border-top:1px solid var(--lvz-line)}
-.cd-pair-code{display:grid;gap:var(--lvz-space-2);margin-top:var(--lvz-space-4);overflow-wrap:anywhere}
-.cd-pair-code strong{font-size:var(--lvz-text-2xl);font-weight:var(--lvz-weight-bold);letter-spacing:.08em}
+/* Floating save tray above the dock. */
+.cd-tray{position:sticky;bottom:calc(var(--frame-bottom,var(--lvz-space-12)) + var(--lvz-space-2));z-index:5;margin-top:var(--lvz-space-2)}
+.cd-tray .ui-button{flex:none;padding:0 var(--lvz-space-5)}
+
+/* Playlist rows: kind icon, title, order tag and duration, then the move controls. */
+.cd-order{min-height:76px}
+.cd-order .ui-row-body small{display:flex;flex-wrap:wrap;align-items:center;gap:var(--lvz-space-2)}
+.cd-move{flex:none;display:flex;gap:var(--lvz-space-1)}
+@media (max-width:359px){.cd-order>.ui-icon-box{display:none}}
+
+/* Versions: three compact stat tiles; Published is the filled one. */
+.cd-versions .ui-stats{grid-template-columns:repeat(3,minmax(0,1fr));gap:var(--lvz-space-2)}
+.cd-versions .ui-stat{padding:var(--lvz-space-3) var(--lvz-space-4)}
+.cd-versions .ui-stat>strong{font-size:var(--lvz-text-2xl)}
+@media (max-width:359px){.cd-versions .ui-stat{padding:var(--lvz-space-3)}.cd-versions .ui-stat>strong{font-size:var(--lvz-text-xl)}}
+
+/* Published playlist and history. */
+.cd-group{display:flex;flex-direction:column;gap:var(--lvz-space-2)}
+.cd-group>.ui-section-head{margin:var(--lvz-space-2) 0 0}
+.cd-lead-hint{margin:0 0 var(--lvz-space-1)}
+.cd-version .ui-icon-box{font-variant-numeric:tabular-nums}
+.cd-small-button{flex:none;min-height:var(--lvz-tap);padding:0 var(--lvz-space-4);font-size:var(--lvz-text-sm)}
+
+/* Screens: the display and its TVs as glass rows with status tags. */
+.cd-devices-empty{margin:0;padding:0 0 var(--lvz-space-3)}
+.cd-device .ui-row-body{align-items:flex-start}
+.cd-text-button{min-height:var(--lvz-tap);margin:calc(-1 * var(--lvz-space-2)) 0 calc(-1 * var(--lvz-space-3));padding:0;border:0;background:none;font-size:var(--lvz-text-sm);font-weight:var(--lvz-weight-bold)}
+.cd-text-button:disabled{opacity:.55;cursor:not-allowed}
+
+/* Pairing card: centered eyebrow, the large one-time code and the gradient pill. */
+.cd-pair-card{display:grid;justify-items:center;gap:var(--lvz-space-3);padding:var(--lvz-space-6) var(--lvz-space-5);text-align:center}
+.cd-pair-card h2{margin:0}
+.cd-pair-code{display:grid;gap:var(--lvz-space-2);overflow-wrap:anywhere}
+.cd-pair-code>strong{font-size:clamp(var(--lvz-text-xl),7.4vw,var(--lvz-text-2xl));white-space:nowrap;font-weight:var(--lvz-weight-bold);letter-spacing:.06em;line-height:1.1;color:var(--lvz-ink);font-variant-numeric:tabular-nums}
+.cd-pair-code p{margin:0;max-width:34ch;color:var(--lvz-ink-quiet)}
+.cd-pair-code p strong{color:var(--lvz-ink)}
+.cd-pair-card .ui-button{margin-top:var(--lvz-space-2)}
+
+/* Callout: a check and one reassuring sentence, as in the Atlas. */
+.cd-callout{display:flex;align-items:flex-start;gap:var(--lvz-space-4)}
+.cd-callout-icon{flex:none;padding-top:2px;color:var(--lvz-accent)}
+.cd-callout strong{display:block;font-size:var(--lvz-text-md);font-weight:var(--lvz-weight-bold);color:var(--lvz-ink)}
+.cd-callout p{margin:var(--lvz-space-1) 0 0;font-size:var(--lvz-text-sm);line-height:1.55;color:var(--lvz-ink-quiet)}
+
+/* Development-only fixture banner on /display-operations-review. */
+.cd-review-banner{margin:0;padding:var(--lvz-space-3) var(--lvz-gutter);background:var(--lvz-warning-soft);color:var(--lvz-warning);font-size:var(--lvz-text-xs);font-weight:var(--lvz-weight-bold);letter-spacing:.06em;text-align:center}
