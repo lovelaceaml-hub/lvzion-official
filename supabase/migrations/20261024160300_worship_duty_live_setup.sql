@@ -1,4 +1,4 @@
--- Owner-only operational setup for Worship Duty. Existing Firebase remains authoritative for its own app.
+-- Owner-only operational setup for Worship Duty in LV Zion Official.
 -- Intended for the verified LV Zion Official owner; no member records or services are imported.
 begin;
 create table app_private.worship_service_editor_grants(

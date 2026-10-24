@@ -8,7 +8,11 @@ const owner=createClient('http://127.0.0.1:54321',keys.anon,{auth:{persistSessio
 const login=await owner.auth.signInWithPassword({email:'worship-owner@example.invalid',password:ownerPassword});if(login.error)throw login.error;
 const enroll=await owner.rpc('complete_self_service_enrollment',{p_name:'Fictional Worship Owner'});if(enroll.error)throw enroll.error;
 writeFileSync(dir+'/worship-owner.json',JSON.stringify({email:'worship-owner@example.invalid',password:ownerPassword}),{mode:0o600});
-execFileSync('psql',['-h','/tmp','-p','55436','lvz_auth','-v','ON_ERROR_STOP=1','-f','supabase/seed/fictional_members.sql'],{stdio:'ignore'});
+// Real local Auth has the same columns the seed's hosted-Auth guard looks for, so swap that guard for a stricter
+// one: the fixtures load only into this harness's own disposable cluster on its own port.
+const seed=readFileSync('supabase/seed/fictional_members.sql','utf8'),localGuard="do $local$ begin if current_setting('data_directory') not like '%/lvz-worship-integration/pg' or current_setting('port')<>'55436' then raise exception 'Fictional fixtures only load into the disposable local Worship stack'; end if; end $local$;";
+const localSeed=seed.replace(/do \$guard\$[\s\S]*?end \$guard\$;/,localGuard);if(localSeed===seed)throw new Error('Seed guard changed; review before loading fixtures');
+execFileSync('psql',['-h','/tmp','-p','55436','lvz_auth','-v','ON_ERROR_STOP=1','-f','-'],{input:localSeed,stdio:['pipe','ignore','pipe']});
 const password='Fixture-'+randomBytes(16).toString('hex')+'!';const identities={};
 for(let n=101;n<=108;n++){let user_metadata;
  if(process.env.LVZ_SIGNUP_HOOK_INTEGRATION==='true'){const t=await admin.rpc('issue_signup_ticket',{p_email:`test-${n}@example.invalid`});if(t.error)throw new Error('Local signup ticket unavailable');user_metadata={lvz_signup_ticket:t.data};}

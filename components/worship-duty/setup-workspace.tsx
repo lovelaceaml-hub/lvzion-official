@@ -4,12 +4,18 @@ import {CATALOG,PERIODS} from '../../lib/worship-duty/domain';
 import {parseSetupState,parseSetupCommand} from '../../lib/worship-duty/setup-contract';
 import type {SetupState,SetupService,SetupSong} from '../../lib/worship-duty/setup-contract';
 import {serviceInstant,serviceLabel,serviceLocalTime} from '../../lib/worship-duty/service-time';
-import AppHeader from '../app-header';
+import {FrameControls} from '../app-frame';
+import type {FrameAction} from '../app-frame';
+import {useSwipeTabs} from '../../lib/use-swipe-tabs';
 import ServiceTime from './service-time';
 import './worship-duty.css';
 type Save=(c:Record<string,unknown>)=>Promise<boolean>;
+type Tab='services'|'people'|'songs';
+const TABS:Tab[]=['services','people','songs'];
+const TAB_NAMES:Record<Tab,string>={services:'Services',people:'People',songs:'Songs'};
+const TAB_ICONS={services:'calendar',people:'people',songs:'info'} as const;
 export default function SetupWorkspace(){
- const [data,setData]=useState<SetupState|null>(null),[message,setMessage]=useState(''),[error,setError]=useState(''),[busy,setBusy]=useState(false),[locked,setLocked]=useState(false),[memberId,setMemberId]=useState('');
+ const [data,setData]=useState<SetupState|null>(null),[message,setMessage]=useState(''),[error,setError]=useState(''),[busy,setBusy]=useState(false),[locked,setLocked]=useState(false),[memberId,setMemberId]=useState(''),[tab,setTab]=useState<Tab>('services');
  const alive=useRef(true),write=useRef(false);
  async function request(c?:Record<string,unknown>){
   const r=await fetch('/api/worship-duty/setup',{method:c?'POST':'GET',credentials:'same-origin',cache:'no-store',redirect:'error',signal:AbortSignal.timeout(25000),headers:c?{'Content-Type':'application/json'}:undefined,body:c?JSON.stringify(parseSetupCommand(c)):undefined});
@@ -26,14 +32,18 @@ export default function SetupWorkspace(){
  };
  const m=data?.members.find(m=>m.id===memberId);
  const toggle=(on:boolean,yes:string,no:string)=>on?no:yes;
- return <div className="ui-page wd-page"><AppHeader homeHref="/members"><div className="wd-header-actions"><a className="ui-link" href="/modules/worship-duty">Worship Duty</a><button type="button" className="ui-button ui-button-quiet" disabled={busy} onClick={()=>void load()}>Reload setup</button></div></AppHeader><main className="ui-main ui-narrow wd-main">
+ const swipe=useSwipeTabs(TABS,tab,setTab);
+ const tabAction=(key:Tab):FrameAction=>({label:TAB_NAMES[key],icon:TAB_ICONS[key],onClick:()=>setTab(key),active:tab===key,disabled:!data});
+ return <div className="ui-page wd-page"><FrameControls title="Worship Duty" left={tabAction('services')} right={tabAction('people')} more={[tabAction('songs'),{label:'My Duties',icon:'calendar',href:'/modules/worship-duty'},{label:'Reload setup',icon:'clock',onClick:()=>void load(),disabled:busy}]}/><main className="ui-main ui-narrow wd-main">
   <p className="ui-kicker">Worship Duty</p><h1 className="ui-title">Setup</h1><p className="ui-lede">Services, approved participation and separate department permissions.</p>
+  <div className="wd-header-actions"><a className="ui-link" href="/modules/worship-duty">Worship Duty</a><button type="button" className="ui-button ui-button-quiet" disabled={busy} onClick={()=>void load()}>Reload setup</button></div>
+  {data&&<nav className="ui-tabs" aria-label="Setup sections">{TABS.map(key=><button type="button" className="ui-tab" key={key} aria-current={tab===key?'page':undefined} onClick={()=>setTab(key)}>{TAB_NAMES[key]}</button>)}</nav>}
   {message&&<p role="status" className="ui-notice" data-tone={message==='Saved and verified.'?'success':'warning'}>{message}</p>}{error&&<p role="alert" className="ui-notice" data-tone="danger">{error}</p>}
   {!data&&!error&&<p className="ui-empty" role="status">Loading authorized setup…</p>}
-  {data&&<fieldset className="wd-controls" disabled={busy||locked}>
-   <h2 className="ui-section-title">Create service</h2><p className="ui-hint">Times are always Las Vegas time. New services start as drafts.</p><ServiceForm save={save}/>
-   <h2 className="ui-section-title">Services</h2>{data.servicesHasMore&&<p className="ui-notice" data-tone="warning">Only the first 120 services in the coming year are shown.</p>}{!data.services.length&&<p className="ui-empty">No services have been created.</p>}<ul className="ui-list">{data.services.map(s=><ServiceRow key={`${s.id}:${s.version}`} s={s} save={save}/>)}</ul>
-   <h2 className="ui-section-title">Approved personnel</h2><p className="ui-hint">Members must first be verified and placed through <a className="ui-link" href="/members/manage">member administration</a>. The Unassigned owner can configure this module without being scheduled for a duty.</p>
+  {data&&<fieldset className="wd-controls" disabled={busy||locked} {...swipe}>
+   {tab==='services'&&<><h2 className="ui-section-title">Create service</h2><p className="ui-hint">Times are always Las Vegas time. New services start as drafts.</p><ServiceForm save={save}/>
+   <h2 className="ui-section-title">Services</h2>{data.servicesHasMore&&<p className="ui-notice" data-tone="warning">Only the first 120 services in the coming year are shown.</p>}{!data.services.length&&<p className="ui-empty">No services have been created.</p>}<ul className="ui-list">{data.services.map(s=><ServiceRow key={`${s.id}:${s.version}`} s={s} save={save}/>)}</ul></>}
+   {tab==='people'&&<><h2 className="ui-section-title">Approved personnel</h2><p className="ui-hint">Members must first be verified and placed through <a className="ui-link" href="/members/manage">member administration</a>. The Unassigned owner can configure this module without being scheduled for a duty.</p>
     {data.membersHasMore&&<p className="ui-notice" data-tone="warning">The first 200 active members are shown. An omitted member is not confirmed ineligible.</p>}
     <label className="ui-field">Member<select className="ui-input" value={memberId} onChange={e=>setMemberId(e.target.value)}><option value="">Choose a verified member</option>{data.members.map(x=><option key={x.id} value={x.id}>{x.name}</option>)}</select></label>
     {m&&<div className="ui-surface wd-form" key={`${m.id}:${data.version}`}><h3 className="wd-subhead">{m.name}</h3><p className="ui-hint">Approve a serving department, then module access, then individual qualifications.</p>
@@ -46,7 +56,8 @@ export default function SetupWorkspace(){
      <h3 className="wd-subhead">Service availability</h3><p className="ui-hint">A service exception overrides the member's day or weekly setting. Existing assignments stay in place and show a conflict.</p>
      {data.services.filter(s=>s.status!=='cancelled'&&Date.parse(s.startsAt)>Date.now()).map(s=>{const a=m.serviceAvailability.find(a=>a.serviceId===s.id);return <label className="ui-field" key={s.id}>{s.worship} · {serviceLabel(s.startsAt)}<select className="ui-input" value={a===undefined?'':a.available?'true':'false'} onChange={e=>void save({op:'service_availability',memberId:m.id,serviceId:s.id,available:e.target.value==='true',expectedAvailabilityVersion:m.availabilityVersion,expectedVersion:data.version})}><option value="" disabled>Use member's normal availability</option><option value="true">Available for this service</option><option value="false">Unavailable for this service</option></select></label>;})}
     </div>}
-   <h2 className="ui-section-title">Approved song catalog</h2><SongForm version={data.version} save={save}/>{data.songsHasMore&&<p className="ui-notice" data-tone="warning">Only the first 500 catalog entries are shown.</p>}<ul className="ui-list">{data.songs.map(s=><li key={`${s.id}:${data.version}`}><details className="wd-details"><summary>{s.code} | {s.title}{s.active?'':' (archived)'}</summary><SongForm song={s} version={data.version} save={save}/></details></li>)}</ul><p className="ui-hint">Used song details remain historical. Add a new catalog revision to change a used song. Archiving keeps saved plans.</p>
+   </>}
+   {tab==='songs'&&<><h2 className="ui-section-title">Approved song catalog</h2><SongForm version={data.version} save={save}/>{data.songsHasMore&&<p className="ui-notice" data-tone="warning">Only the first 500 catalog entries are shown.</p>}<ul className="ui-list">{data.songs.map(s=><li key={`${s.id}:${data.version}`}><details className="wd-details"><summary>{s.code} | {s.title}{s.active?'':' (archived)'}</summary><SongForm song={s} version={data.version} save={save}/></details></li>)}</ul><p className="ui-hint">Used song details remain historical. Add a new catalog revision to change a used song. Archiving keeps saved plans.</p></>}
   </fieldset>}
  </main></div>;
 }

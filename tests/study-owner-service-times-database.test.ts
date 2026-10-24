@@ -4,7 +4,7 @@ import{readFile,readdir}from'node:fs/promises';import{PGlite}from'@electric-sql/
 test('owner service times are added once, audited, and never stack',async()=>{
  const db=new PGlite();
  try{
-  const migrations=(await readdir('supabase/migrations')).filter(p=>p.endsWith('.sql')&&!['20261014224708_contacts_private_owner_pilot_v1.sql','20261014224325_worship_duty_live_activation.sql','20261014224327_worship_duty_live_setup.sql','20261014230756_worship_duty_operations.sql'].includes(p)).sort().map(p=>'supabase/migrations/'+p);
+  const migrations=(await readdir('supabase/migrations')).filter(p=>p.endsWith('.sql')&&!['20261014224708_contacts_private_owner_pilot_v1.sql','20261024160200_worship_duty_live_activation.sql','20261024160300_worship_duty_live_setup.sql','20261024160400_worship_duty_operations.sql'].includes(p)).sort().map(p=>'supabase/migrations/'+p);
   for(const path of ['supabase/tests/bootstrap.sql',...migrations])await db.exec(await readFile(path,'utf8'));
   const step=await readFile('supabase/owner-data/20261016_study_rooms_service_times.sql','utf8');
   const blocks=async()=>(await db.query<{weekday:number;start_min:number;end_min:number;label:string}>('select weekday,start_min,end_min,label from app_private.study_service_blocks order by weekday,start_min')).rows;

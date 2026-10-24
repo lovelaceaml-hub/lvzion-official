@@ -14,7 +14,7 @@ const song='ffffffff-ffff-4fff-8fff-000000000001';
 test('worship PostgreSQL boundary, invariants and projections',async t=>{
  const db=new PGlite();
  try {
-  for(const path of ['supabase/tests/bootstrap.sql','supabase/migrations/20261014020617_member_system_foundation.sql','supabase/migrations/20261014043055_member_command_hardening.sql','supabase/migrations/20261014045521_member_onboarding.sql','supabase/migrations/20261014074214_module_runtime_foundation.sql','supabase/migrations/20261014103007_worship_duty_review.sql','supabase/seed/fictional_members.sql'])await db.exec(await readFile(path,'utf8'));
+  for(const path of ['supabase/tests/bootstrap.sql','supabase/migrations/20261014020617_member_system_foundation.sql','supabase/migrations/20261014043055_member_command_hardening.sql','supabase/migrations/20261014045521_member_onboarding.sql','supabase/migrations/20261014074214_module_runtime_foundation.sql','supabase/migrations/20261024160000_worship_duty_review.sql','supabase/seed/fictional_members.sql'])await db.exec(await readFile(path,'utf8'));
   await db.exec(`
    insert into auth.users(id,email,email_confirmed_at) select ('99999999-9999-4999-8999-'||lpad(n::text,12,'0'))::uuid,'demo-'||n||'@example.invalid',now() from generate_series(101,109) n;
    insert into auth.sessions(id,user_id,created_at) select ('aaaaaaaa-aaaa-4aaa-8aaa-'||lpad(n::text,12,'0'))::uuid,('99999999-9999-4999-8999-'||lpad(n::text,12,'0'))::uuid,now()-interval '1 hour' from generate_series(101,109) n;

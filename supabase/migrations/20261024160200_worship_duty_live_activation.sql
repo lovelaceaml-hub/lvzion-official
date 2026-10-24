@@ -1,5 +1,5 @@
 -- LV Zion Official: activate Worship Duty for the already verified application owner only.
--- Does not import, mutate or contact the old Firebase Worship Duty application.
+-- Registers the module and grants initial access only to that owner. No records are imported.
 begin;
 do $activation$
 declare v_owner uuid; v_module uuid; v_count integer; v_department text;
@@ -21,7 +21,7 @@ begin
  end loop;
  if exists(select 1 from app_private.worship_departments where department_id is null) then raise exception 'Missing Worship department mapping';end if;
  insert into app_private.app_modules(module_key,display_name,short_name,description,accent,route_path,status,approved_at,approved_by)
- values('worship-duty','Worship Duty','Duties','View and coordinate authorized worship-service duties.','#3d7464','/modules/worship-duty','approved',clock_timestamp(),v_owner)
+ values('worship-duty','Worship Duty','Duties','View and coordinate authorized worship-service duties.','#3184ff','/modules/worship-duty','approved',clock_timestamp(),v_owner)
  returning id into v_module;
  insert into app_private.module_access_grants(member_id,module_id,permission,reason,granted_by)
  values(v_owner,v_module,'manager','Explicit owner-only Worship Duty setup access',v_owner);

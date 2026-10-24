@@ -28,7 +28,7 @@ test('an explicit empty weekly calendar is accepted but missing or malformed blo
  for(const blocks of [undefined,null,{},'[]',42])assert.throws(()=>parseStudyOperation({...common,blocks}));
 });
 // Owner activation migrations (and those built on them) need a verified owner; their own bootstrap-owner suites cover them.
-const ownerActivation=new Set(['20261014224708_contacts_private_owner_pilot_v1.sql','20261014224325_worship_duty_live_activation.sql','20261014224327_worship_duty_live_setup.sql','20261014230756_worship_duty_operations.sql']);
+const ownerActivation=new Set(['20261014224708_contacts_private_owner_pilot_v1.sql','20261024160200_worship_duty_live_activation.sql','20261024160300_worship_duty_live_setup.sql','20261024160400_worship_duty_operations.sql']);
 async function migrate(db:PGlite,includeCorrection:boolean){
  await db.exec(await readFile('supabase/tests/bootstrap.sql','utf8'));
  const paths=(await readdir('supabase/migrations')).filter(p=>p.endsWith('.sql')&&!ownerActivation.has(p)&&(includeCorrection||p!==correction)).sort();

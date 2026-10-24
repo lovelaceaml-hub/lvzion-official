@@ -1,6 +1,6 @@
--- UNAPPLIED REVIEW MIGRATION. Generated with Supabase CLI in a disposable workspace.
--- Requires member foundation + module runtime. No real people, module approval or grants seeded.
--- Never apply to the old application. Hosted LV Zion Official activation is a separate release gate.
+-- Worship Duty schema for LV Zion Official. Requires member foundation + module runtime.
+-- No real people, module approval or grants seeded. Services start empty and are created in this app.
+-- Module activation is a separate, explicitly approved release step.
 begin;
 create table app_private.worship_departments (
  department_key text primary key,

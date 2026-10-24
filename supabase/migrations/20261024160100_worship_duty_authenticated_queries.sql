@@ -1,5 +1,5 @@
--- UNAPPLIED. Created with `supabase migration new worship_duty_authenticated_queries`.
--- Extends Worship R1 only. No identities, roles, departments or production activation seeded.
+-- Worship Duty query layer. Extends the Worship schema only.
+-- No identities, roles, departments or production activation seeded.
 begin;
 
 create function app_private.worship_workspace_v2()

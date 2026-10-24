@@ -1,4 +1,4 @@
--- Additive operations for the independent, official module. No legacy records imported.
+-- Additive operations for the Worship Duty module. No records imported.
 begin;
 create table app_private.worship_setup_versions (
  singleton boolean primary key default true check(singleton), version integer not null default 0 check(version>=0)

@@ -16,7 +16,7 @@ let passes=0;const pass=label=>{passes++;console.log('PASS: '+label);};
 const {email,password}=JSON.parse(readFileSync(root+'/worship-owner.json','utf8'));
 await ok(owner.auth.signInWithPassword({email,password}));
 await ok(owner.rpc('complete_self_service_enrollment',{p_name:'Fictional Worship Owner'}));
-if(sql("select to_regprocedure('public.worship_batch(jsonb)') is null")==='t')for(const p of ['20261014224325_worship_duty_live_activation.sql','20261014224327_worship_duty_live_setup.sql','20261014230756_worship_duty_operations.sql'])execFileSync('psql',['-h','/tmp','-p','55436','lvz_auth','-v','ON_ERROR_STOP=1','-f','supabase/migrations/'+p],{stdio:'ignore'});
+if(sql("select to_regprocedure('public.worship_batch(jsonb)') is null")==='t')for(const p of ['20261024160200_worship_duty_live_activation.sql','20261024160300_worship_duty_live_setup.sql','20261024160400_worship_duty_operations.sql'])execFileSync('psql',['-h','/tmp','-p','55436','lvz_auth','-v','ON_ERROR_STOP=1','-f','supabase/migrations/'+p],{stdio:'ignore'});
 sql("notify pgrst,'reload schema'");
 for(let attempt=0;attempt<20;attempt++){const r=await owner.rpc('worship_setup_workspace');if(!r.error)break;if(r.error.code!=='PGRST202')throw new Error('Local workspace unavailable');await new Promise(r=>setTimeout(r,100));}
 const home=async()=>ok(owner.rpc('worship_setup_workspace'));

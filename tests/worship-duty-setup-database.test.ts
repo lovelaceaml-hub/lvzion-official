@@ -1,19 +1,24 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {readFile} from 'node:fs/promises';
+import {readFile,readdir} from 'node:fs/promises';
 import {PGlite} from '@electric-sql/pglite';
 const owner='bbbbbbbb-bbbb-4bbb-8bbb-000000000001',other='bbbbbbbb-bbbb-4bbb-8bbb-000000000002';
 const session='aaaaaaaa-aaaa-4aaa-8aaa-000000000001';
 test('production Worship owner setup, lifecycle, permissions and persistence',async t=>{
  const db=new PGlite();
  try{
-  for(const p of ['supabase/tests/bootstrap.sql','supabase/migrations/20261014020617_member_system_foundation.sql','supabase/migrations/20261014043055_member_command_hardening.sql','supabase/migrations/20261014045521_member_onboarding.sql','supabase/migrations/20261014074214_module_runtime_foundation.sql','supabase/migrations/20261014155148_self_service_unassigned_enrollment.sql','supabase/migrations/20261014190128_production_owner_setup.sql','supabase/migrations/20261014103007_worship_duty_review.sql','supabase/migrations/20261014112521_worship_duty_authenticated_queries.sql'])await db.exec(await readFile(p,'utf8'));
+  // Every current migration in hosted order, so Worship is audited against the real foundation it will run on.
+  const ownerActivation=/contacts_private_owner_pilot_v1|worship_duty_(live_activation|live_setup|operations)/;
+  const migrations=(await readdir('supabase/migrations')).filter(p=>p.endsWith('.sql')&&!ownerActivation.test(p)).sort();
+  for(const p of ['supabase/tests/bootstrap.sql',...migrations.map(p=>'supabase/migrations/'+p)]){
+   try{await db.exec(await readFile(p,'utf8'));}catch(e){throw new Error(p+': '+(e instanceof Error?e.message:String(e)));}
+  }
   await db.exec(`insert into auth.users(id,email,email_confirmed_at) values('${owner}','owner@example.invalid',now()),('${other}','other@example.invalid',now());
    insert into auth.sessions(id,user_id) values('${session}','${owner}'),('aaaaaaaa-aaaa-4aaa-8aaa-000000000002','${other}');
    update app_private.enrollment_settings set enabled=true,allowed_email_domains=array['example.invalid'],owner_email='owner@example.invalid';`);
   const as=async(id=owner,role='authenticated')=>{await db.exec('reset role');await db.query("select set_config('request.jwt.claim.sub',$1,false),set_config('request.jwt.claims',$2,false)",[id,JSON.stringify({sub:id,session_id:id===owner?session:'aaaaaaaa-aaaa-4aaa-8aaa-000000000002'})]);await db.exec(`set role ${role}`);};
   await as();await db.query("select public.complete_self_service_enrollment('Owner Example')");await db.exec('reset role');
-  for(const p of ['20261014224325_worship_duty_live_activation.sql','20261014224327_worship_duty_live_setup.sql','20261014230756_worship_duty_operations.sql'])await db.exec(await readFile('supabase/migrations/'+p,'utf8'));
+  for(const p of ['20261024160200_worship_duty_live_activation.sql','20261024160300_worship_duty_live_setup.sql','20261024160400_worship_duty_operations.sql'])await db.exec(await readFile('supabase/migrations/'+p,'utf8'));
   const home=async()=>(await db.query<{v:any}>('select public.worship_setup_workspace() v')).rows[0].v;
   const call=async(c:Record<string,unknown>)=>db.query('select public.worship_setup_command($1::jsonb)',[JSON.stringify(c)]);
   const deny=async(f:()=>Promise<unknown>,code:string)=>assert.rejects(f,(e:any)=>e.code===code,code);

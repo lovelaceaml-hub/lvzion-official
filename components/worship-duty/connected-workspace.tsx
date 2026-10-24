@@ -7,7 +7,8 @@ import type {CandidateList,Command,ProgramItem,ProgramView,RequestView,ServiceVi
 import {createHttpTransport} from '../../lib/worship-duty/client-transport';
 import type {WorshipTransport} from '../../lib/worship-duty/client-transport';
 import {serviceDay,serviceLabel,vegasDate} from '../../lib/worship-duty/service-time';
-import AppHeader from '../app-header';
+import {FrameControls} from '../app-frame';
+import type {FrameAction} from '../app-frame';
 import {ArrowDown,ArrowUp} from '../home-icons';
 import {useSwipeTabs} from '../../lib/use-swipe-tabs';
 import {useUnsavedPlan} from './use-unsaved-plan';
@@ -19,6 +20,8 @@ const label=(s:ServiceView)=>serviceLabel(s.startsAt);
 type Tab='mine'|'presider'|'manage';
 type Act=(command:Command)=>Promise<boolean>;
 const TAB_NAMES:Record<Tab,string>={mine:'My Duties',presider:'Presider',manage:'Manage'};
+const TAB_ICONS={mine:'calendar',presider:'info',manage:'people'} as const;
+const WEEK=7*24*60*60*1000;
 const asError=(error:unknown)=>error instanceof WorshipError?error:new WorshipError('The workspace could not be loaded. Reload to verify your access.',503,'unavailable');
 
 export default function ConnectedWorkspace({canSetup=false}:{canSetup?:boolean}){
@@ -65,14 +68,20 @@ export default function ConnectedWorkspace({canSetup=false}:{canSetup?:boolean})
  const swipe=useSwipeTabs(tabs,safeTab,changeTab);
  const reload=()=>{if(permitNavigation()){setMessage('');void load(true);}};
  const pendingRequests=data?.requests.filter(r=>r.status==='pending'&&data.manageDepartments.includes(departmentOf(r.dutyId)))??[];
+ const tabAction=(key:Tab):FrameAction=>({label:TAB_NAMES[key],icon:TAB_ICONS[key],onClick:()=>changeTab(key),active:safeTab===key,disabled:!data||pending||loading});
+ const openSetup=()=>{if(permitNavigation())window.location.assign('/modules/worship-duty/setup');};
+ // The bottom bar keeps My Duties on the left and the member's main working view on the right; everything else is under More.
+ const right=canManage?'manage':canPreside?'presider':null;
+ const more:FrameAction[]=[...tabs.filter(key=>key!=='mine'&&key!==right).map(tabAction),...(canSetup?[{label:'Setup',icon:'more' as const,onClick:openSetup}]:[]),{label:'Reload',icon:'clock',onClick:reload,disabled:loading||pending}];
+ const thisWeek=data?upcoming.filter(s=>Date.parse(s.startsAt)-Date.parse(data.now)<WEEK).length:0;
  return <div className="ui-page wd-page">
-  <AppHeader onHome={()=>{if(permitNavigation())window.location.assign('/members');}}>
-   <div className="wd-header-actions">{canSetup&&<a className="ui-link" href="/modules/worship-duty/setup" onClick={e=>{if(!permitNavigation())e.preventDefault();}}>Setup</a>}<button type="button" className="ui-button ui-button-quiet" disabled={loading||pending} onClick={reload}>Reload</button></div>
-  </AppHeader>
+  <FrameControls title="Worship Duty" left={tabAction('mine')} right={right?tabAction(right):{label:'Profile',icon:'user',href:'/members/manage?tab=profile'}} more={more} onHome={()=>{if(permitNavigation())window.location.assign('/members');}}/>
   <main className="ui-main wd-main" aria-busy={loading||pending}>
    <p className="ui-kicker">Worship Duty</p>
    <h1 className="ui-title">{TAB_NAMES[safeTab]}</h1>
    <p className="ui-lede">Your authorized services and assignments, in Las Vegas time.</p>
+   <div className="wd-header-actions">{canSetup&&<a className="ui-link" href="/modules/worship-duty/setup" onClick={e=>{if(!permitNavigation())e.preventDefault();}}>Setup</a>}<button type="button" className="ui-button ui-button-quiet" disabled={loading||pending} onClick={reload}>Reload</button></div>
+   {data&&safeTab==='mine'&&<div className="wd-stats"><p className="wd-stat"><span>Upcoming</span><strong>{upcoming.length}</strong><small>{upcoming.length===1?'Published service':'Published services'}</small></p><p className="wd-stat"><span>Next 7 days</span><strong>{thisWeek}</strong><small>{thisWeek===1?'Service to prepare':'Services to prepare'}</small></p></div>}
    {data&&tabs.length>1&&<nav className="ui-tabs" aria-label="Worship workspace sections">{tabs.map(key=><button type="button" className="ui-tab" disabled={pending||loading} key={key} aria-current={safeTab===key?'page':undefined} onClick={()=>changeTab(key)}>{TAB_NAMES[key]}</button>)}</nav>}
    {message&&<p className="ui-notice" data-tone={message==='Saved.'?'success':'warning'} role="status">{message}</p>}
    {issue&&<div className="ui-notice wd-issue" data-tone="danger" role="alert"><p>{issue.message}</p>{(issue.status===401||issue.status===403)?<a className="ui-link" href="/sign-in">Sign in</a>:<button type="button" className="ui-button ui-button-secondary" disabled={pending||loading} onClick={reload}>Reload workspace</button>}</div>}
@@ -83,7 +92,7 @@ export default function ConnectedWorkspace({canSetup=false}:{canSetup?:boolean})
     {safeTab!=='presider'&&<div className={safeTab==='manage'?'wd-layout wd-side-first':'wd-layout'}><div className="wd-col-main">
     {safeTab==='mine'&&<>
      <h2 className="ui-section-title">Coming up for you</h2>
-     {upcoming.length?<ul className="ui-list">{upcoming.map(s=><li className="ui-row wd-entry" key={s.id}><ServiceTime startsAt={s.startsAt}/><div className="ui-row-body">
+     {upcoming.length?<ul className="ui-list wd-cards">{upcoming.map(s=><li className="ui-row wd-entry" key={s.id}><ServiceTime startsAt={s.startsAt}/><div className="ui-row-body">
       <small>{s.worship} · {s.period}</small>
       {s.assignments.filter(a=>a.isMine).map(a=>{const r=data.requests.find(r=>r.serviceId===s.id&&r.dutyId===a.dutyId&&r.isMine&&r.status==='pending');return <div className="wd-own-duty" key={a.dutyId}>
        <strong>{title(a.dutyId)}</strong>
@@ -187,7 +196,7 @@ function ProgramEditor({service,program,api,act,onError,onDirty,now}:{service:Se
     <div className="wd-song-fields">{choose('glory',1,'Glory song')}{hasThanks(service)&&choose('thanks',1,'Thanks song')}{hasChoir(service.worship)&&choose('choir',1,'Choir song')}</div>
     <div className="wd-actions"><button type="button" className="ui-button" onClick={()=>void save('draft')}>Save plan</button><button type="button" className="ui-button ui-button-secondary" onClick={()=>void save('confirmed')}>Confirm plan</button></div>
    </fieldset>
-   <button type="button" className="ui-button ui-button-quiet wd-copy" onClick={()=>void copy()}>Copy plan for Signal</button>
+   <button type="button" className="ui-button ui-button-quiet wd-copy" onClick={()=>void copy()}>Copy song plan</button>
    {share&&<label className="ui-field">Share preview<textarea className="ui-input" aria-label="Share preview" readOnly rows={9} value={share}/></label>}
   </>}
  </section>;
