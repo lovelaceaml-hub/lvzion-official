@@ -55,4 +55,4 @@ There is no external connector, synchronization, import or PIN authentication. L
 
 The historical `/worship-duty-preview` routes (Focus cards and a compact agenda layout, with a fictional role switcher) existed only in PR #5. They were a design/testing control, never an authentication mechanism, and reset on reload.
 
-**Current integration (PR #25):** `/modules/worship-duty` and `/api/worship-duty` are implemented behind the actual member session and explicit server-side module flag; they remain unmerged and not activated. No production toggle or role selector is exposed in the browser. See [production release checklist](PRODUCTION-RELEASE-CHECKLIST.md).
+**Current integration (PR #48, which contains PR #25):** `/modules/worship-duty` and `/api/worship-duty` are implemented behind the actual member session and explicit server-side module flag; they remain unmerged and not activated. No production toggle or role selector is exposed in the browser. See [production release checklist](PRODUCTION-RELEASE-CHECKLIST.md).

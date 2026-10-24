@@ -1,5 +1,8 @@
 # Worship Duty: verification plan and evidence integrity
 
+> **October 24, 2026:** current-branch evidence is in [LAUNCH.md](LAUNCH.md#verification-observed-so-far) (typecheck, compile, 69 focused Node tests, 9 native integration and 44 native browser checks on PR #48). The text below is the October 14 snapshot.
+
+
 ## What has *not* been verified on the live branch
 
 As of October 14, 2026, PR #25 is **draft and unmerged**. There is no verified owner setup screen/API, no applied Worship SQL, no production module flag and no real Worship Duty account-to-database end-to-end test. **No current-branch TypeScript, Next build, SQL integration or Playwright pass is claimed in this handoff.**

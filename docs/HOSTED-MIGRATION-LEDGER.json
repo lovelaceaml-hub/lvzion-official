@@ -222,7 +222,38 @@
   "hosted": "Remove whitespace from each stored statement; these stored statements already omit comments and outer transaction wrappers.",
   "purpose": "Comparison of known migration definitions, not cryptographic attestation or a full semantic/security review."
  },
- "unapplied_repository_migrations": [],
+ "unapplied_repository_migrations": [
+  {
+   "repository_version": "20261024160000",
+   "name": "worship_duty_review",
+   "apply_order": 1,
+   "status": "unapplied; awaiting Anthony approval"
+  },
+  {
+   "repository_version": "20261024160100",
+   "name": "worship_duty_authenticated_queries",
+   "apply_order": 2,
+   "status": "unapplied; awaiting Anthony approval"
+  },
+  {
+   "repository_version": "20261024160200",
+   "name": "worship_duty_live_activation",
+   "apply_order": 3,
+   "status": "unapplied; awaiting Anthony approval"
+  },
+  {
+   "repository_version": "20261024160300",
+   "name": "worship_duty_live_setup",
+   "apply_order": 4,
+   "status": "unapplied; awaiting Anthony approval"
+  },
+  {
+   "repository_version": "20261024160400",
+   "name": "worship_duty_operations",
+   "apply_order": 5,
+   "status": "unapplied; awaiting Anthony approval"
+  }
+ ],
  "warning": "Hosted versions differ from repository filenames. Never replay applied migrations or use blind db push. Re-read current hosted metadata before release, including concurrent module work. The fresh calendar correction is applied: Study Room booking is enabled for existing grants and weekly restrictions are empty. Do not reinstate superseded defaults.",
  "metadata_reconciled_at": "2026-10-15T01:02:00Z",
  "metadata_reconciliation": "Historical full reconciliation observed 20 applied versions. October 16 adds the verified fresh-calendar mapping; it is not a new exhaustive reconciliation of unrelated concurrent module migrations.",
@@ -235,5 +266,20 @@
    "approved_by": "Anthony (owner), 2026-10-16",
    "verification": "Readback: four weekly restrictions (Tue 19:30-20:30; Sat 10:00-11:00, 14:30-15:30, 19:30-20:30), calendar version 3, one audit event study_rooms.owner_service_times, bookings open unchanged."
   }
- ]
+ ],
+ "worship_duty_audit": {
+  "audited_on": "2026-10-24",
+  "source": "draft PR #48, branch claude/refactor-worship-duty-3b2f97",
+  "renumbered_from": [
+   "20261014103007",
+   "20261014112521",
+   "20261014224325",
+   "20261014224327",
+   "20261014230756"
+  ],
+  "reason": "Sort after the latest applied migration 20261016200000 so repository order matches the order they will be applied.",
+  "foundation_check": "Disposable PGlite and local PostgreSQL 16 runs apply every current migration first, then the Worship files; all Worship database, integration and browser checks pass.",
+  "hosted_check": "Not performed on 2026-10-24: the supabase-lvz connector needed authorization. Last hosted evidence (2026-10-14): zero Worship modules, tables, RPCs and grants. Whether the interrupted 2026-10-14 apply attempt left anything is unverified; run the read-only queries in docs/worship-duty/MIGRATION-STATUS.md first.",
+  "details": "docs/worship-duty/MIGRATION-STATUS.md"
+ }
 }

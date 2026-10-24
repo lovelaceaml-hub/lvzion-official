@@ -1,8 +1,8 @@
 # Worship Duty: implementation status and feature boundaries
 
-**Snapshot: October 14, 2026.** The production integration is **draft PR #25**. Check GitHub `main`, the PR head, Vercel and Supabase again before acting; concurrent teams continue to change them. This is a documentation update, not new proof of an operational release.
+**Updated October 24, 2026.** The production integration is **draft [PR #48](https://github.com/lovelaceaml-hub/lvzion-official/pull/48)**, which contains the older PR #25. Check GitHub `main`, the PR head, Vercel and Supabase again before acting. Release approvals: [README.md](README.md#ready-for-release-what-anthony-must-approve).
 
-## Real integration files in PR #25
+## Integration files on PR #48
 
 | Area | Source | State |
 | --- | --- | --- |
@@ -11,11 +11,11 @@
 | Core member interface | `components/worship-duty/connected-workspace.tsx` | My Duties, Presider, Manage; real runtime path wired to the existing RPC client; unmerged |
 | Shared transport and validation | `lib/worship-duty/{client-transport,http-handler,api-contract,activation}.ts` | Whitelisted commands/results and fail-closed access; no browser role/actor authority |
 | Duty catalog and rules | `lib/worship-duty/domain.ts` | 27 slots / eight departments, service applicability and conflict guards |
-| Historical R1/R2 backend | `20261014103007_worship_duty_review.sql`, `20261014112521_worship_duty_authenticated_queries.sql` | Four public wrappers in total: `worship_workspace`, `worship_command`, `worship_workspace_v2`, `worship_lookup`; **unapplied** |
-| Registration and access | `20261014224325_worship_duty_live_activation.sql` | Maps department labels and gives only the verified existing owner initial module manager/song editor access; **unapplied/unverified** |
-| Owner setup backend | `20261014224327_worship_duty_live_setup.sql` | Draft service-editor grants, owner projection and audited commands; **unapplied/untested** |
-| Owner setup front end | `/modules/worship-duty/setup` + `/api/worship-duty/setup` | **Missing from PR #25**: implement, validate, test before allowing the new backend |
-| Historical month planner | old [draft PR #5](https://github.com/lovelaceaml-hub/lvzion-official/pull/5) | **Fictional in-memory only, not merged/ported to PR #25** |
+| R1/R2 backend | `20261024160000_worship_duty_review.sql`, `20261024160100_worship_duty_authenticated_queries.sql` | Four public wrappers in total: `worship_workspace`, `worship_command`, `worship_workspace_v2`, `worship_lookup`; **unapplied** |
+| Registration and access | `20261024160200_worship_duty_live_activation.sql` | Maps department labels and gives only the verified existing owner initial module manager/song editor access; **unapplied**, tested locally |
+| Owner setup backend | `20261024160300_worship_duty_live_setup.sql`, `20261024160400_worship_duty_operations.sql` | Service-editor grants, owner projection, audited commands, personnel, availability, batches and songs; **unapplied**, tested locally |
+| Owner setup front end | `/modules/worship-duty/setup` + `/api/worship-duty/setup`, `components/worship-duty/setup-workspace.tsx` | Services, People and Songs tabs; validated contract; covered by the native browser script |
+| Monthly planner | `components/worship-duty/monthly-planner.tsx` | List and month calendar; staged changes saved as one reviewed, versioned `worship_batch`; covered by the native browser script. The old PR #5 in-memory planner is not used |
 
 The current production app remains authoritative for login, member IDs, age/group/unit hierarchy, existing administrative grants, My Week/Apps and in-app activity/notice framework. New Worship code must not duplicate those foundations.
 

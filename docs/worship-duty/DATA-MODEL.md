@@ -1,8 +1,11 @@
 # Worship Duty: data model
 
+> **October 24, 2026:** the integration now lives on draft [PR #48](https://github.com/lovelaceaml-hub/lvzion-official/pull/48), which contains PR #25. Migration order: [MIGRATION-STATUS.md](MIGRATION-STATUS.md).
+
+
 > **Source migration review, not an installed schema.** This R1 model now forms the base of the real [draft integration PR #25](https://github.com/lovelaceaml-hub/lvzion-official/pull/25), which also contains R2 query, proposed owner-registration and unfinished owner-setup migrations. The real LV Zion **member + module runtime is already live**, but there were **zero Worship tables/RPCs** in hosted Supabase at the October 14, 2026 inspection. Read [MIGRATION-STATUS.md](MIGRATION-STATUS.md) for current intended order and [README.md](README.md) for launch status. Historical lines below describe R1 only unless qualified.
 
-Status: **unapplied review migration**. Created with `supabase migration new worship_duty_review` in a disposable workspace; filename `20261014103007_worship_duty_review.sql`. The hosted project `otecqlkqirncotytbfns` was read only for its migration ledger. No hosted migration, branch database, test Auth account or production member was created by this work.
+Status: **unapplied review migration**. Created with `supabase migration new worship_duty_review` in a disposable workspace; filename `20261024160000_worship_duty_review.sql` (renamed October 24 from `20261014103007`). The hosted project `otecqlkqirncotytbfns` was read only for its migration ledger. No hosted migration, branch database, test Auth account or production member was created by this work.
 
 ## Dependencies and isolation
 

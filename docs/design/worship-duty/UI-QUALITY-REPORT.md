@@ -1,42 +1,34 @@
 # Worship Duty interface quality record
 
-Direction: **A. Day Sheet**, locked by Anthony on 2026-10-14 in [LVZ-DESIGN-CONTRACT.md](../LVZ-DESIGN-CONTRACT.md). This module adopts that contract; it adds no palette, font, external asset or dependency. Every color, size, radius and duration in `components/worship-duty/worship-duty.css` is a `var(--lvz-...)` token, and the screens use the shared `ui-` blocks, `AppHeader` and `useSwipeTabs`.
+Direction: **shared base + Theme Atlas 03 "Midnight Sapphire"**, chosen by Anthony on October 24, 2026 (per-app Atlas styles on one shared frame). This supersedes the October 14 Day Sheet treatment recorded in earlier versions of this file. Atlas references: screens `worship-duties`, `worship-calendar`, `worship-presider`, `worship-manage`, `worship-service`.
 
-## What changed on screen
+## How it is built
 
-- Shared header: tapping the LV Zion wordmark goes home (still asks first when a song plan has unsaved changes). Setup and Reload sit on the right.
-- Serif page title (My Duties, Presider, Manage, Setup) with a plain kicker; no letter-spaced capitals.
-- Underlined tabs below the title. Swiping left or right on the tab content switches tabs with the contract's rule (60px, 1.5 times more across than down, under 600ms, no wrap). The tab buttons remain the main control.
-- Lists, not cards: upcoming duties, the service schedule, requests, duty editors and setup services are hairline rows. Only forms (assignment, planner, batch review, setup forms) sit on a white surface.
-- Time first: every scheduled row starts with the Las Vegas clock and day in tabular figures.
-- Desktop (900px and wider): white header bar, a reading-width heading, the list column, and a 320px side column holding "Your availability" (My Duties) or "Requests waiting" (Manage). On phones the requests come first, availability after the schedule.
-- Song order uses arrow icon buttons from the shared icon set, each with a spoken label ("Move song 1 up").
-- Status notices use the shared tones: success for "Saved.", warning for uncertain saves and conflicts, danger for errors.
+- **Shared frame:** the module registers its views with `FrameControls`; the root `AppFrame` owns the header (title, avatar) and the bottom bar. Bottom bar: Home, My Duties, center Apps, Manage (or Presider for a presider who does not schedule), More. More holds the remaining section, Setup for the owner and Reload. Home and section changes still ask before discarding an unsaved song plan.
+- **Tokens only:** the palette is a token block on `.app-frame[data-route^="/modules/worship-duty"]` in `components/worship-duty/worship-duty.css`, the same pattern Study Rooms uses. Every rule below it reads `var(--lvz-…)`. A device appearance chosen by the member still overrides it. When the shared module-token API from the design session lands, the block moves there unchanged.
+- **Look:** deep blue ground, framed dark panels with fine sapphire rules, 20px radius, bright blue primary actions, spaced uppercase kickers, bold sans titles, a segmented section control, and a squared illuminated Apps launcher.
+- **Screens:** My Duties has Upcoming / Next 7 days tiles and one card per duty. Manage has a Sunday-first month grid (only days with services can be chosen; a dot marks them), that day's services, the staged batch review and single-service editors. Setup has Services, People and Songs tabs. Swiping on the content switches tabs; the tab buttons stay the main control.
+- **No church imagery, emoji or invented content.** Empty states are neutral.
 
-## Evidence (fictional fixture data only)
+## Evidence (fictional local fixture data only)
 
-Screenshots in this folder were taken from the real components rendered by a local, uncommitted harness page, with the Worship API answered by fictional records (names such as "Sam Rivera" and "Chris Park" are invented). They are not evidence that any real service, member or song was entered.
+Taken by `scripts/test-worship-browser.mjs` on October 24 against the native local stack (real local Auth, PostgREST and PostgreSQL), viewport captures as a member sees them. Names such as "Ben Example" and song codes such as `FIXTURE-01` are fixtures, not real records.
 
 | Screen | Phone (390px) | Desktop (1280px) |
 | --- | --- | --- |
-| My Duties | [my-duties-phone.png](my-duties-phone.png) | [my-duties-desktop.png](my-duties-desktop.png) |
+| My Duties (assigned member) | [my-duties-phone.png](my-duties-phone.png) | [my-duties-desktop.png](my-duties-desktop.png) |
+| Manage, month calendar | [manage-phone.png](manage-phone.png) | [manage-desktop.png](manage-desktop.png) |
 | Presider song plan | [presider-phone.png](presider-phone.png) | [presider-desktop.png](presider-desktop.png) |
-| Manage (planner, staged batch, open editor) | [manage-phone.png](manage-phone.png) | [manage-desktop.png](manage-desktop.png) |
-| Setup (member open) | [setup-phone.png](setup-phone.png) | [setup-desktop.png](setup-desktop.png) |
+| Setup, Services tab | [setup-phone.png](setup-phone.png) | [setup-desktop.png](setup-desktop.png) |
 
-Checks run on 2026-10-14:
-
-- No sideways scrolling at 320, 390 and 1280px on all four screens.
-- Keyboard: Tab order reaches the wordmark, Setup, Reload, then the tabs; the focused tab shows the 3px focus ring.
-- A simulated touch swipe on the My Duties content moved to Presider.
-- Every input keeps its visible label; all accessible names used by the native Worship browser script are unchanged (for example "Planner service", "Glory song", "Apply reviewed assignments", "Add approved song").
+Automated checks in the same run: no sideways scrolling at 320, 390, 430, 768 and 1280px on all three setup tabs and the planner; the frame shows Home, My Duties, Apps, Manage and More; the route resolves `--lvz-accent` to `#3184ff`.
 
 ## Not done
 
-- The native Worship browser script (real local Auth and database) was not rerun: another agent's Worship test stack occupies its fixed directory and ports.
-- No automated accessibility scan, physical-phone check or first-time-user test was run. No fidelity percentage is claimed.
+- No automated accessibility scan, screen-reader pass, physical-phone check or first-time-user test.
+- Contrast was reviewed by eye and against the Atlas tokens, not measured for every state.
 
-## Requests for the shared core
+## Requests for the shared frame (owned by the design session)
 
-- `ui-header` could switch to the solid white bar by itself at 900px; this module does it with one local rule.
-- A shared bottom tab bar class, if the contract wants one on phones; this module uses the underlined `ui-tabs` at the top.
+- `routeDetails` in `components/app-frame.tsx` has no Worship entry, so the header icon is the generic Apps grid. Suggested: `if(path.startsWith('/modules/worship-duty'))return{title:'Worship Duty',icon:'calendar'};`.
+- Move the Worship token block into the shared module-token contract when it exists.

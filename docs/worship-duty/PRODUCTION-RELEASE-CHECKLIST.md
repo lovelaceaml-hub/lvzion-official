@@ -1,5 +1,8 @@
 # Worship Duty: production release checklist
 
+> **October 24, 2026:** the work is on draft [PR #48](https://github.com/lovelaceaml-hub/lvzion-official/pull/48) (it contains PR #25). Sections A, B and the local parts of C and D are done and verified locally; the hosted, flag, deploy and live-domain items are not. The short approval list is in [README.md](README.md#ready-for-release-what-anthony-must-approve).
+
+
 **Target:** `https://lvz.app/modules/worship-duty` inside the existing authenticated LV Zion Official app. **Current result: NOT RELEASED.** Do not check an item merely because a SQL file or UI component exists.
 
 For current workstreams and evidence, start at [README.md](README.md) and [WORK-HANDOFF.md](WORK-HANDOFF.md). The integration branch is [draft PR #25](https://github.com/lovelaceaml-hub/lvzion-official/pull/25), not the historical PR #5.

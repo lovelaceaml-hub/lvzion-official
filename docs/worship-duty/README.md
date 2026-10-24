@@ -1,40 +1,55 @@
 # Worship Duty: LV Zion Official module
 
-**Status as inspected October 14, 2026 (Las Vegas): IN DEVELOPMENT; NOT DEPLOYED OR ENABLED.**
+**Status, October 24, 2026: built and verified locally; NOT RELEASED.** The migrations are unapplied, `LVZ_WORSHIP_DUTY_ENABLED` is off and no member has a Worship grant.
 
-Worship Duty is a module of the [lvz.app](https://lvz.app) member platform, using its shared Supabase project, sign-in and member records. The intended route is **[/modules/worship-duty](https://lvz.app/modules/worship-duty)**, but do not treat that link as operational until the launch checklist is complete.
+Worship Duty is a module of [lvz.app](https://lvz.app), using its Supabase project, sign-in and member records. Its route is `/modules/worship-duty`; do not treat that link as working until the steps below are done.
 
-Under the October 16, 2026 fresh-start boundary in the root `AGENTS.md`, this module has no knowledge of any separate application. Services, assignments, qualifications and songs start empty and come only from records deliberately configured in this app. An empty schedule is a valid state.
+Under the October 16, 2026 fresh-start boundary in the root `AGENTS.md`, the module has no knowledge of any separate application. Services, assignments, qualifications and songs start empty and are created inside lvz.app. An empty schedule is a valid state.
+
+## What is built
+
+- **My Duties:** your published duties as cards, summary counts, request a change or withdraw it, the full schedule of a chosen service and your day availability.
+- **Presider:** the song plan for an exact service (preparation songs in order, Glory, Thanks and Choir where they apply), save, confirm, and a copy-only text preview. Nothing is sent anywhere.
+- **Manage:** a monthly planner (list or month calendar) that stages up to 40 changes for one reviewed, all-or-nothing save; single-service editing; change requests waiting for a decision.
+- **Setup (owner only):** Services (create, edit, publish, cancel), People (department participation, module access, qualifications, scheduling and song-editor grants, per-service availability) and Songs (approved catalog).
+- **Look:** the shared app frame (header, bottom bar with center Apps) and the Theme Atlas "Midnight Sapphire" style, scoped to this module. Screenshots and notes: [UI-QUALITY-REPORT.md](../design/worship-duty/UI-QUALITY-REPORT.md).
+
+## Ready for release: what Anthony must approve
+
+Each step needs its own yes. Nothing here has been done.
+
+1. **Merge draft [PR #48](https://github.com/lovelaceaml-hub/lvzion-official/pull/48) into `main`.**
+2. **Read-only hosted check, then apply the five Worship migrations** to Supabase `otecqlkqirncotytbfns`, one at a time, in this order (details and the exact check queries in [MIGRATION-STATUS.md](MIGRATION-STATUS.md)):
+   1. `20261024160000_worship_duty_review`
+   2. `20261024160100_worship_duty_authenticated_queries`
+   3. `20261024160200_worship_duty_live_activation` (registers the module, gives only the verified owner access, and adds any of the eight Worship departments missing from the department list)
+   4. `20261024160300_worship_duty_live_setup`
+   5. `20261024160400_worship_duty_operations`
+3. **Turn on `LVZ_WORSHIP_DUTY_ENABLED=true`** for Production in Vercel project `lvzion-official`. No other setting changes.
+4. **Deploy** the merged `main` to production deliberately (automatic Git deploys stay off), keeping the current deployment as the rollback target.
+5. **First owner setup, done by Anthony in the app:** open Apps, then Worship Duty, then Setup. Add songs, create the first services (they start as drafts), approve the people who serve and their qualifications, grant department scheduling, then publish.
+6. **Live checks after deploy:** the owner sees Worship Duty in Apps and can save and reload a setup change; an ordinary member without a grant is refused; signed-out requests to `/api/worship-duty` and `/api/worship-duty/setup` return 401; Study Rooms, Contacts, Morning Prayer, Church Display and signup still work.
+
+Rollback: turn the flag off and restore the previous deployment. The Worship tables stay; no data is deleted.
+
+## Read next
+
+- [MIGRATION-STATUS.md](MIGRATION-STATUS.md): migration order, October 24 audit, hosted check queries.
+- [LAUNCH.md](LAUNCH.md): verification commands and the build log.
+- [IMPLEMENTATION-STATUS.md](IMPLEMENTATION-STATUS.md): code map, permissions and privacy rules.
+- [PRODUCTION-RELEASE-CHECKLIST.md](PRODUCTION-RELEASE-CHECKLIST.md): full acceptance list and rollback.
+- [REFERENCE-AUDIT.md](REFERENCE-AUDIT.md): the approved 27-duty catalog, pairing rules and service applicability.
+- [DATA-MODEL.md](DATA-MODEL.md), [VERIFICATION-PLAN.md](VERIFICATION-PLAN.md), [WORK-HANDOFF.md](WORK-HANDOFF.md), [STATUS-EVIDENCE.json](STATUS-EVIDENCE.json).
 
 ## Source of truth
 
 | Item | Reference |
 | --- | --- |
-| Current development | [Draft production-integration PR #25](https://github.com/lovelaceaml-hub/lvzion-official/pull/25), branch `feature/worship-duty-live`; refactor and redesign in draft PR #48 |
-| Live app repository | `lovelaceaml-hub/lvzion-official`, `main`; changes in concurrent workstreams must be preserved |
-| Vercel | `lvzion` team / `lvzion-official` project; production domain `lvz.app` |
-| Supabase | Las Vegas Zion organization; project `otecqlkqirncotytbfns` |
-| Historical Worship development | [PR #5](https://github.com/lovelaceaml-hub/lvzion-official/pull/5), a draft stacked on an outdated member-foundation branch; **do not merge it directly** |
-
-### Current production evidence, not a release claim
-
-Read-only hosted inspection during the October 14 documentation update found **zero** registered Worship modules, Worship private tables, public Worship RPCs, or active Worship module grants. The real site is deployed with member signup, organization administration and other modules, but the Worship integration has **not** been merged, migrated, activated or released. Other modules' schema and deployments are outside this workstream.
-
-The integration branch contains the scoped module UI/API and **five unapplied Worship-specific SQL files** (see [MIGRATION-STATUS.md](MIGRATION-STATUS.md)). Historical R3 month planner and Fill suggestions used fictional in-memory state and **are not production functionality**. There is no verified hosted Worship Duty session/write test.
-
-## Read next
-
-- [Work-mode continuation handoff](WORK-HANDOFF.md): continuation instructions, exact projects, pending work, and safe release sequence.
-- [Current implementation and feature inventory](IMPLEMENTATION-STATUS.md): code map, identity model, feature boundaries.
-- [Production release gates](PRODUCTION-RELEASE-CHECKLIST.md): verifiable acceptance criteria and rollback.
-- [Pending migrations and environment gating](MIGRATION-STATUS.md): intended order and never blindly replaying migrations.
-- [Test and verification plan](VERIFICATION-PLAN.md): mandatory checks and the difference between fictional tests and real service verification.
-- [Machine-readable snapshot](STATUS-EVIDENCE.json): a **point-in-time** evidence record, not live telemetry.
-- [Duty rules reference](REFERENCE-AUDIT.md): the approved 27-duty catalog, pairing rules and service applicability.
-- [Data model audit](DATA-MODEL.md): R1 schema and R2 authenticated query intent.
+| Current work | Draft [PR #48](https://github.com/lovelaceaml-hub/lvzion-official/pull/48), branch `claude/refactor-worship-duty-3b2f97`. It contains all of the older draft PR #25 (`feature/worship-duty-live`) |
+| Superseded | PR #25 (contained in PR #48); PR #5 (closed, historical prototype) |
+| Live app | `lovelaceaml-hub/lvzion-official` `main`; Vercel `lvzion-official`; domain `lvz.app` |
+| Supabase | Project `otecqlkqirncotytbfns` |
 
 ## Non-negotiable boundaries
 
-No alternate authentication, separate member table, external data source, automatic import, fabricated hierarchy, unapproved notifications, or new spending. Schedules start empty. New member accounts start Unassigned until authorized placement; department memberships and appointments are independent of group/unit placement. Module grants and approved status are checked server-side.
-
-**Pushing this documentation does not deploy, enable or approve Worship Duty.** The feature branch remains for review and eventual verified integration.
+No alternate sign-in, separate member table, outside data source, import, invented placement, outgoing messages or new spending. New accounts start Unassigned; department membership and appointments are separate from group and unit placement. Module grants and approved status are checked on the server.

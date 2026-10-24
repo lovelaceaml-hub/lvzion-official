@@ -1,45 +1,52 @@
 {
-  "snapshot_date": "2026-10-14",
+  "snapshot_date": "2026-10-24",
   "scope": "lvzion_official_worship_duty_integrated_module",
-  "status": "not_launched",
+  "status": "verified_locally_not_released",
   "production_domain": "https://lvz.app",
   "module_route": "/modules/worship-duty",
   "source_repository": "lovelaceaml-hub/lvzion-official",
-  "workstream_branch": "feature/worship-duty-live",
-  "workstream_pr": 25,
+  "workstream_branch": "claude/refactor-worship-duty-3b2f97",
+  "workstream_pr": 48,
   "pr_draft": true,
-  "production_deployment_observed": "dpl_FFquRhvQkTW1xv1gRVz1SuKBg66S",
-  "production_commit_observed": "de5dcdede5fc740873fddfa36467d9d47f318fd6",
+  "superseded_prs": [25, 5],
   "supabase_project": "otecqlkqirncotytbfns",
   "hosted_inspection": {
+    "last_performed": "2026-10-14",
     "worship_module_count": 0,
     "worship_tables": 0,
     "worship_public_rpcs": 0,
     "worship_access_grants": 0,
-    "hosted_migrations_total_at_inspection": 16
+    "rechecked_2026_10_24": false,
+    "recheck_blocker": "supabase-lvz connector needed authorization in the 2026-10-24 session"
   },
-  "pending_migrations": [
-    "20261014103007_worship_duty_review.sql",
-    "20261014112521_worship_duty_authenticated_queries.sql",
-    "20261014224325_worship_duty_live_activation.sql",
-    "20261014224327_worship_duty_live_setup.sql"
+  "pending_migrations_in_order": [
+    "20261024160000_worship_duty_review.sql",
+    "20261024160100_worship_duty_authenticated_queries.sql",
+    "20261024160200_worship_duty_live_activation.sql",
+    "20261024160300_worship_duty_live_setup.sql",
+    "20261024160400_worship_duty_operations.sql"
   ],
-  "last_migration_is_draft": true,
-  "owner_setup_ui_implemented": false,
-  "owner_setup_api_implemented": false,
+  "owner_setup_ui_implemented": true,
+  "owner_setup_api_implemented": true,
+  "monthly_planner_persistent": true,
+  "shared_app_frame": true,
+  "design": "Theme Atlas 03 Midnight Sapphire, route-scoped tokens",
   "production_worship_flag_enabled": false,
-  "verified_real_worship_auth_db_roundtrip": false,
-  "current_branch_tests_run_as_part_of_documentation_update": false,
-  "known_historical_test_results": "PR #5 old R1/R2/R3 development; not a production verification result",
-  "historical_r3_month_planner_persistent": false,
+  "verified_real_worship_auth_db_roundtrip": "local only (real local Auth, PostgREST, PostgreSQL 16); no hosted session",
+  "tests_run_2026_10_24": {
+    "typecheck": "pass",
+    "next_build_compile": "pass",
+    "node_tests": "69 of 69 (Worship unit and database suites plus the four suites that list the renamed files)",
+    "native_integration": "9 of 9",
+    "native_browser": "44 of 44",
+    "full_suite": "not run (requires Anthony's explicit approval)"
+  },
   "other_production_modules_changed_by_this_workstream": false,
-  "action_taken": "documentation-only branch update; no migration, external messaging, production merge or deployment",
+  "separate_application_dependencies": "none; schedules start empty (fresh-start boundary, 2026-10-16)",
   "references": [
-    "docs/worship-duty/WORK-HANDOFF.md",
-    "docs/worship-duty/IMPLEMENTATION-STATUS.md",
+    "docs/worship-duty/README.md",
     "docs/worship-duty/MIGRATION-STATUS.md",
-    "docs/worship-duty/PRODUCTION-RELEASE-CHECKLIST.md",
-    "docs/worship-duty/VERIFICATION-PLAN.md"
-  ],
-  "separate_application_dependencies": "none; schedules start empty (fresh-start boundary, 2026-10-16)"
+    "docs/worship-duty/LAUNCH.md",
+    "docs/design/worship-duty/UI-QUALITY-REPORT.md"
+  ]
 }
