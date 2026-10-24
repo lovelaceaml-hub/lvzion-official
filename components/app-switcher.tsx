@@ -3,6 +3,7 @@ import {useEffect,useRef,useState} from 'react';
 import {ChevronRight,X} from './home-icons';
 import {parseModuleFeed} from '../lib/app-runtime';
 import type {AuthorizedModule} from '../lib/app-runtime';
+import ModuleIcon from './module-icon';
 import './app-switcher.css';
 
 /** Uses the same authenticated, permission-filtered module feed as Member Home. */
@@ -37,7 +38,7 @@ export default function AppSwitcher({open,onClose}:{open:boolean;onClose:()=>voi
    {!error&&modules===null&&<p role="status" className="ui-hint">Loading your apps…</p>}
    {!error&&modules?.length===0&&<p className="ui-empty">No applications have been assigned to your account yet.</p>}
    {!error&&modules&&modules.length>0&&<ul className="lvz-switcher-list">{modules.map(module=><li key={module.id}>
-    <a href={module.route}><span className="lvz-switcher-symbol" aria-hidden="true">{module.shortName}</span><span className="lvz-switcher-name">{module.name}</span><ChevronRight size={18}/></a>
+    <a href={module.route}><span className="lvz-switcher-symbol" aria-hidden="true"><ModuleIcon route={module.route}/></span><span className="lvz-switcher-name">{module.name}</span><ChevronRight size={18}/></a>
    </li>)}</ul>}
   </div>
  </dialog>;

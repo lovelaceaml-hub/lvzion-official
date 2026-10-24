@@ -1,6 +1,5 @@
 'use client';
 import {useCallback,useEffect,useState} from 'react';
-import AppHeader from '../../../../components/app-header';
 import '../../../../components/study-rooms/group-access.css';
 import {accessState,type GroupAccessData,type GroupAccessMember} from '../../../../lib/study-rooms/group-access';
 
@@ -27,11 +26,11 @@ function MemberRow({member,busy,toggle}:{member:GroupAccessMember;busy:boolean;t
 }
 
 export default function GroupAccess(){
- const [data,setData]=useState<GroupAccessData|null>(null),[error,setError]=useState(''),[denied,setDenied]=useState(false);
+ const [data,setData]=useState<GroupAccessData|null>(null),[error,setError]=useState(''),[denied,setDenied]=useState<0|401|403>(0);
  const [busy,setBusy]=useState(''),[message,setMessage]=useState('');
  const load=useCallback(async()=>{
   try{setData(await call());setError('');}
-  catch(e){const status=(e as {status?:number}).status;if(status===401||status===403)setDenied(true);setError((e as Error).message);}
+  catch(e){const status=(e as {status?:number}).status;if(status===401||status===403)setDenied(status);setError((e as Error).message);}
  },[]);
  useEffect(()=>{void load();},[load]);
 
@@ -45,13 +44,13 @@ export default function GroupAccess(){
  }
 
  return <div className="ui-page">
-  <AppHeader homeHref="/members"><a className="ui-link" href="/modules/study-rooms">Study Rooms</a></AppHeader>
   <main className="ui-main ui-narrow">
-   <p className="ui-kicker">Study rooms</p>
+   <a className="ui-link sr-access-back" href="/modules/study-rooms">Back to Study Rooms</a>
    <h1 className="ui-title">Who can book</h1>
    <p className="ui-lede">Leaders can always book. Turn booking on for members of your group.</p>
    {message&&<p role="status" className="ui-notice" data-tone="success">{message}</p>}
-   {error&&<p role="alert" className="ui-notice" data-tone={denied?'warning':'danger'}>{denied?'Only group leaders can change who books in their group.':error}</p>}
+   {error&&<p role="alert" className="ui-notice" data-tone={denied?'warning':'danger'}>{denied===401?'Sign in to manage who can book.':denied===403?'Only group leaders can change who books in their group.':error}</p>}
+   {denied===401&&<a className="ui-button" href="/sign-in">Sign in</a>}
    {!data&&!error&&<p className="ui-empty">Loading your group…</p>}
    {data?.groups.map(g=><section key={g.id} aria-labelledby={'group-'+g.id}>
     <h2 className="ui-section-title" id={'group-'+g.id}>{g.name}</h2>

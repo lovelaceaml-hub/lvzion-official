@@ -5,7 +5,7 @@
 .members-app{min-height:100dvh;max-width:calc(var(--lvz-reading-max) + 2 * var(--lvz-gutter));margin:0 auto;padding:0 var(--lvz-gutter) var(--lvz-space-12);background:var(--lvz-ground);color:var(--lvz-ink);font-size:var(--lvz-text-md);line-height:var(--lvz-leading-body)}
 .members-app .ui-header{margin:0 calc(-1 * var(--lvz-gutter));padding-left:var(--lvz-gutter);padding-right:var(--lvz-gutter)}
 .members-app h1,.members-app h2,.members-app h3{line-height:var(--lvz-leading-tight);font-weight:var(--lvz-weight-bold);margin:0 0 var(--lvz-space-2)}
-.members-app h1{font:var(--lvz-weight-regular) var(--lvz-text-2xl)/var(--lvz-leading-tight) var(--lvz-font-serif);letter-spacing:-.01em;margin:var(--lvz-space-1) 0 var(--lvz-space-2);text-wrap:balance}
+.members-app h1{font:var(--lvz-display-weight) var(--lvz-text-2xl)/var(--lvz-leading-tight) var(--lvz-font-display);letter-spacing:var(--lvz-display-tracking);margin:var(--lvz-space-1) 0 var(--lvz-space-2);text-wrap:balance}
 .members-app h2{font-size:var(--lvz-text-lg)}
 .members-app h3{font-size:var(--lvz-text-md)}
 .members-app p{color:var(--lvz-ink-quiet);margin:0 0 var(--lvz-space-3)}
@@ -64,7 +64,7 @@
 /* Member dialog: bottom sheet on phones */
 .member-dialog{width:100%;max-width:560px;max-height:88dvh;margin:auto auto 0;padding:var(--lvz-space-5) var(--lvz-gutter) calc(var(--lvz-space-6) + env(safe-area-inset-bottom,0px));overflow:auto;border:0;border-radius:var(--lvz-radius-lg) var(--lvz-radius-lg) 0 0;background:var(--lvz-surface);color:var(--lvz-ink);box-shadow:var(--lvz-shadow-sheet)}
 .member-dialog::backdrop{background:rgb(19 46 40 / 35%)}
-.member-dialog h2{font:var(--lvz-weight-regular) var(--lvz-text-xl)/var(--lvz-leading-tight) var(--lvz-font-serif)}
+.member-dialog h2{font:var(--lvz-display-weight) var(--lvz-text-xl)/var(--lvz-leading-tight) var(--lvz-font-display)}
 @media (min-width:700px){.member-dialog{margin:auto;border-radius:var(--lvz-radius-lg)}}
 
 /* Example-only helpers on the fictional preview routes */
@@ -103,10 +103,8 @@
 .members-app .organization-add>summary{min-height:var(--lvz-tap)}
 
 /* Account pages (sign in, sign up, confirm, recovery, activation, access request, loading) */
-.auth-box{width:100%;max-width:calc(420px + 2 * var(--lvz-gutter));min-height:100dvh;margin:0 auto;padding:calc(var(--lvz-space-4) + env(safe-area-inset-top,0px)) var(--lvz-gutter) var(--lvz-space-12);color:var(--lvz-ink);font-size:var(--lvz-text-md);line-height:var(--lvz-leading-body)}
-.auth-box .auth-mark{margin-bottom:var(--lvz-space-8);color:var(--lvz-ink)}
-.auth-box .auth-mark:hover{text-decoration:none}
-.auth-box h1{margin:0 0 var(--lvz-space-2);font:var(--lvz-weight-regular) var(--lvz-text-2xl)/var(--lvz-leading-tight) var(--lvz-font-serif);letter-spacing:-.01em;text-wrap:balance}
+.auth-box{width:100%;max-width:calc(440px + 2 * var(--lvz-gutter));margin:0 auto;padding:var(--lvz-space-8) var(--lvz-gutter) var(--lvz-space-12);color:var(--lvz-ink);font-size:var(--lvz-text-md);line-height:var(--lvz-leading-body)}
+.auth-box h1{margin:0 0 var(--lvz-space-2);font:var(--lvz-display-weight) var(--lvz-text-2xl)/var(--lvz-leading-tight) var(--lvz-font-display);letter-spacing:var(--lvz-display-tracking);text-wrap:balance}
 .auth-box p{margin:0 0 var(--lvz-space-4);color:var(--lvz-ink-quiet)}
 .auth-box label{display:block;margin:0 0 var(--lvz-space-4);font-size:var(--lvz-text-sm);font-weight:var(--lvz-weight-strong)}
 .auth-box input{display:block;width:100%;max-width:100%;min-height:48px;margin-top:6px;padding:10px 12px;border:1px solid var(--lvz-line-input);border-radius:var(--lvz-radius-md);background:var(--lvz-surface);color:var(--lvz-ink);font:var(--lvz-weight-regular) var(--lvz-text-md) var(--lvz-font-sans)}
@@ -131,3 +129,8 @@
 @media (min-width:700px){
  .auth-box{min-height:0;margin:var(--lvz-space-12) auto;padding:var(--lvz-space-8) var(--lvz-space-10);border:1px solid var(--lvz-line);border-radius:var(--lvz-radius-lg);background:var(--lvz-surface)}
 }
+
+/* Auth forms sit on one raised surface, as on the Atlas main sign-in screen. */
+.auth-box form{margin:var(--lvz-space-6) 0 var(--lvz-space-4);padding:var(--lvz-space-5);background:var(--lvz-surface);border:1px solid var(--lvz-line);border-radius:var(--lvz-radius-lg)}
+.auth-box form button:last-child{margin-bottom:0}
+.auth-box details form{margin-top:var(--lvz-space-3)}

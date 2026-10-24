@@ -26,7 +26,7 @@
 /* Greeting */
 .lvz-hero{padding:var(--lvz-space-3) 0 var(--lvz-space-1)}
 .lvz-hero-date,.lvz-placement{font-size:var(--lvz-text-sm);color:var(--lvz-ink-quiet)}
-.lvz-hero h1{margin:var(--lvz-space-1) 0 var(--lvz-space-2);font:var(--lvz-weight-regular) var(--lvz-text-2xl)/var(--lvz-leading-tight) var(--lvz-font-serif);letter-spacing:-.01em;text-wrap:balance}
+.lvz-hero h1{margin:var(--lvz-space-1) 0 var(--lvz-space-2);font:var(--lvz-display-weight) var(--lvz-text-2xl)/var(--lvz-leading-tight) var(--lvz-font-display);letter-spacing:var(--lvz-display-tracking);text-wrap:balance}
 
 /* Manage entry for leaders */
 .lvz-home-mode{display:flex;align-items:center;gap:var(--lvz-space-3);width:100%;min-height:52px;margin-top:var(--lvz-space-5);padding:var(--lvz-space-3) var(--lvz-space-4);border-radius:var(--lvz-radius-md);background:var(--lvz-accent-soft);color:var(--lvz-accent);text-align:left}
@@ -107,7 +107,7 @@
 
 /* Manage and Notifications views */
 .lvz-management,.lvz-notifications{max-width:var(--lvz-reading-max);padding-top:var(--lvz-space-2)}
-.lvz-management h1,.lvz-notifications h1{margin:var(--lvz-space-2) 0 var(--lvz-space-2);font:var(--lvz-weight-regular) var(--lvz-text-2xl)/var(--lvz-leading-tight) var(--lvz-font-serif);letter-spacing:-.01em;text-wrap:balance}
+.lvz-management h1,.lvz-notifications h1{margin:var(--lvz-space-2) 0 var(--lvz-space-2);font:var(--lvz-display-weight) var(--lvz-text-2xl)/var(--lvz-leading-tight) var(--lvz-font-display);letter-spacing:var(--lvz-display-tracking);text-wrap:balance}
 .lvz-lede{color:var(--lvz-ink-quiet);font-size:var(--lvz-text-sm)}
 .lvz-back-link{display:inline-flex;align-items:center;gap:6px;min-height:var(--lvz-tap);font-size:var(--lvz-text-sm);font-weight:var(--lvz-weight-strong);color:var(--lvz-accent)}
 .lvz-manage-summary{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));margin:var(--lvz-space-6) 0 var(--lvz-space-2);border-top:1px solid var(--lvz-line);border-bottom:1px solid var(--lvz-line)}
@@ -136,7 +136,7 @@
 /* Sheets (native dialog; frame from .ui-sheet) */
 .lvz-apps-dialog,.lvz-detail-dialog{padding:var(--lvz-space-5) var(--lvz-gutter) calc(var(--lvz-space-6) + env(safe-area-inset-bottom,0px));overflow-y:auto}
 .lvz-sheet-heading{display:flex;align-items:flex-start;justify-content:space-between;gap:var(--lvz-space-3);margin-bottom:var(--lvz-space-2)}
-.lvz-sheet-heading h2{font:var(--lvz-weight-regular) var(--lvz-text-xl)/var(--lvz-leading-tight) var(--lvz-font-serif)}
+.lvz-sheet-heading h2{font:var(--lvz-display-weight) var(--lvz-text-xl)/var(--lvz-leading-tight) var(--lvz-font-display)}
 .lvz-sheet-kicker{font-size:var(--lvz-text-sm);color:var(--lvz-ink-quiet)}
 .lvz-sheet-close{width:var(--lvz-tap);height:var(--lvz-tap);display:grid;place-items:center;flex:none;border-radius:var(--lvz-radius-round);background:var(--lvz-sunken)}
 .lvz-sheet-description{font-size:var(--lvz-text-sm);color:var(--lvz-ink-quiet)}

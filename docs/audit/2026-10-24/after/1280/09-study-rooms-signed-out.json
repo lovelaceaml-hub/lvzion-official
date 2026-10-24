@@ -1,0 +1,22 @@
+{
+ "url": "/modules/study-rooms",
+ "title": "LV Zion Official",
+ "theme": null,
+ "h1": [
+  "Study Room Reservation"
+ ],
+ "header": "Study RoomsSign in",
+ "dockVisible": false,
+ "brandMentions": 0,
+ "overflowX": false,
+ "coveredByDock": [],
+ "waiting": null,
+ "ground": "rgb(245, 246, 242)",
+ "frameGround": "#eee8fa",
+ "accent": "#7041a8",
+ "errors": [
+  "Failed to load resource: the server responded with a status of 401 (Unauthorized)",
+  "Failed to load resource: the server responded with a status of 401 (Unauthorized)",
+  "Failed to load resource: the server responded with a status of 401 (Unauthorized)"
+ ]
+}

@@ -2,7 +2,7 @@
 .lvz-install{max-width:calc(var(--lvz-reading-max) + 2 * var(--lvz-gutter));min-height:100dvh;margin:0 auto;padding:0 var(--lvz-gutter) var(--lvz-space-12);color:var(--lvz-ink)}
 .lvz-install .ui-header{margin:0 calc(-1 * var(--lvz-gutter))}
 .lvz-install-kicker{font-size:var(--lvz-text-sm);color:var(--lvz-ink-quiet)}
-.lvz-install h1{margin:var(--lvz-space-3) 0 var(--lvz-space-3);font:var(--lvz-weight-regular) var(--lvz-text-2xl)/var(--lvz-leading-tight) var(--lvz-font-serif);letter-spacing:-.01em}
+.lvz-install h1{margin:var(--lvz-space-3) 0 var(--lvz-space-3);font:var(--lvz-display-weight) var(--lvz-text-2xl)/var(--lvz-leading-tight) var(--lvz-font-display);letter-spacing:var(--lvz-display-tracking)}
 .lvz-install>p{margin:0;color:var(--lvz-ink-quiet)}
 .lvz-install section{padding:var(--lvz-space-6) 0;border-bottom:1px solid var(--lvz-line)}
 .lvz-install h2{margin:0 0 var(--lvz-space-2);font-size:var(--lvz-text-lg)}

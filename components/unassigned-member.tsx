@@ -1,12 +1,15 @@
 'use client';
 import {useState} from 'react';
+import {usePathname} from 'next/navigation';
 import type {Workspace} from '../lib/contracts';
 import './members.css';
 import AppHeader from './app-header';
+import {FrameControls} from './app-frame';
 import {postJson} from '../lib/post-json';
 export default function UnassignedMember({data:w,demo=false}:{data:Workspace;demo?:boolean}){
  const [message,setMessage]=useState('');
- return <main className="members-app unassigned-profile"><AppHeader homeHref="/members"><span className="badge">Unassigned</span></AppHeader>
+ const onProfile=usePathname()!=='/members';
+ return <main className="members-app unassigned-profile"><FrameControls module={null} title={onProfile?'Profile':undefined} left={{label:'My Week',icon:'calendar',href:'/members'}} right={{label:'Profile',icon:'user',href:'/members/manage?tab=profile',active:onProfile}}/><AppHeader homeHref="/members"><span className="badge">Unassigned</span></AppHeader>
  {demo&&<p className="demo-note">Fictional preview. No account, email, or database changes.</p>}
  <section className="member-welcome"><span className="overline">Email confirmed</span><h1>Welcome, {w.self.firstName??w.self.name.split(' ')[0]}.</h1><p>Your account is ready. An authorized leader will verify your membership and choose your placement.</p></section>
  <section className="member-card"><h2>My placement</h2><dl className="unassigned-placement"><div><dt>Age category</dt><dd>Unassigned</dd></div><div><dt>Group</dt><dd>Unassigned</dd></div><div><dt>Unit</dt><dd>Unassigned</dd></div></dl><p>Group directories, schedules, apps, and leadership tools become available only when you have the required access.</p></section>

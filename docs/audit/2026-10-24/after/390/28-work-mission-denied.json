@@ -1,0 +1,20 @@
+{
+ "url": "/modules/work-mission-prayer",
+ "title": "LV Zion Official",
+ "theme": null,
+ "h1": [
+  "Morning Prayer"
+ ],
+ "header": "Morning PrayerGE",
+ "dockVisible": true,
+ "brandMentions": 0,
+ "overflowX": false,
+ "coveredByDock": [],
+ "waiting": null,
+ "ground": "rgb(245, 246, 242)",
+ "frameGround": "#f4eee3",
+ "accent": "#6d5436",
+ "errors": [
+  "Failed to load resource: the server responded with a status of 403 (Forbidden)"
+ ]
+}

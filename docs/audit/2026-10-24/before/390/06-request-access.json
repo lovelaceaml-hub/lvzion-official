@@ -1,0 +1,18 @@
+{
+ "url": "/request-access",
+ "title": "LV Zion Official",
+ "theme": null,
+ "h1": [
+  "Request account access"
+ ],
+ "header": "LV Zion",
+ "dockVisible": true,
+ "brandMentions": 2,
+ "overflowX": false,
+ "coveredByDock": [],
+ "waiting": null,
+ "ground": "rgb(242, 244, 241)",
+ "frameGround": "#f2f4f1",
+ "accent": "#1f5c4d",
+ "errors": []
+}

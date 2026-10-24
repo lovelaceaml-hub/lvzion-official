@@ -1,0 +1,23 @@
+/**
+ * Which Atlas style each module wears. The shared AppFrame sets
+ * data-lvz-module from the first matching route prefix; the palette for each
+ * key lives in styles/lvz-tokens.css. Add a module here (and its token block
+ * there) to give it its own style. See docs/design/LVZ-DESIGN-CONTRACT.md.
+ */
+export type ModuleIconName='room'|'people'|'sun'|'display'|'calendar'|'heart'|'music'|'clipboard'|'apps';
+export type ModuleStyle={key:string;routes:string[];title:string;icon:ModuleIconName;atlas:string;darkByDesign?:boolean};
+export const moduleStyles:ModuleStyle[]=[
+ {key:'study-rooms',routes:['/modules/study-rooms'],title:'Study Rooms',icon:'room',atlas:'Lavender Softform'},
+ {key:'contacts',routes:['/modules/contacts'],title:'Contacts',icon:'people',atlas:'Tidal Teal'},
+ {key:'work-mission',routes:['/modules/work-mission-prayer'],title:'Morning Prayer',icon:'sun',atlas:'Linen Editorial'},
+ {key:'continuous-display',routes:['/modules/continuous-display','/display-operations-review'],title:'Church Display',icon:'display',atlas:'Pearl Garden'},
+ {key:'members',routes:['/members/manage','/member-preview','/roster-preview','/enrollment-preview'],title:'Members',icon:'people',atlas:'Graphite & Chrome'},
+ {key:'worship-duty',routes:['/modules/worship-duty'],title:'Worship Duty',icon:'calendar',atlas:'Midnight Sapphire',darkByDesign:true},
+ {key:'mothers-love',routes:['/modules/mothers-love'],title:'Mother’s Love',icon:'heart',atlas:'Rose Quartz'},
+ {key:'concert',routes:['/modules/concert'],title:'Concert',icon:'music',atlas:'Aurora Night',darkByDesign:true},
+ {key:'song-library',routes:['/modules/song-library'],title:'Song library',icon:'music',atlas:'Copper Noir',darkByDesign:true},
+];
+const matches=(path:string,route:string)=>path===route||path.startsWith(route+'/');
+export function moduleStyleFor(path:string):ModuleStyle|null{
+ return moduleStyles.find(m=>m.routes.some(r=>matches(path,r)))??null;
+}

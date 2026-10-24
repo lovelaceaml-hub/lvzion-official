@@ -8,3 +8,4 @@
 .sr-switch:disabled{cursor:not-allowed;opacity:.55}
 .sr-switch:focus-visible{outline:2px solid var(--lvz-focus);outline-offset:2px;border-radius:var(--lvz-radius-round)}
 @media (prefers-reduced-motion:reduce){.sr-switch span,.sr-switch span::after{transition:none}}
+.sr-access-back{display:inline-flex;align-items:center;min-height:var(--lvz-tap);margin-top:var(--lvz-space-2)}
