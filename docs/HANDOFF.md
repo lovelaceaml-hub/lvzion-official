@@ -12,6 +12,10 @@ Keep compact module headers and the prominent center Apps launcher. The launcher
 
 Anthony's October 24 decision replaces the competing Day Sheet, glass and 24-theme layers with one shared base (Atlas Layered Tabs) and an Atlas style per app, plus a System, Light or Dark appearance choice. Branch `claude/lvz-repair-design-31a05d` also fixes the signed-out frame, header Home link, duplicate wordmarks and several module states. Read the [design contract](design/LVZ-DESIGN-CONTRACT.md) and the [audit](audit/2026-10-24/README.md). Not merged or deployed; release needs Anthony's approval.
 
+## Groups & Gospel Planning — draft, October 24, 2026
+
+My Preaching (availability, proposed sessions, partner confirmation, one shared result) and My Group (Member Updates, Gospel Review, Gospel Plan, Request for Overseer) are built on the member foundation with migration `20261024150000_gospel_planning_core.sql`, unapplied. Draft module, no grants. Atlas style Skyline Grid. Tested locally with fictional data only. [Status and the approval list](gospel-planning/README.md).
+
 ## Device appearance — released October 19, 2026
 
 **More → Appearance** now offers 24 optional device themes on the [real app](https://lvz.app/appearance). **Current app design** restores the existing module defaults, including Study Rooms’ Lavender Softform. Source `0197e83f1ee5fd28ceaaea3cc339b1a9ab800580`, deployment `dpl_HVSBqrSGcvVaTQupPhwaAkU7FDVk`, READY with both production aliases verified. Type checking, 9 selected unit checks, 13 selected browser checks, optimized compilation and 7 compiled-app browser checks passed. Live theme persistence/reset and anonymous denials were verified; no full suite or real hosted booking was run. See [scope and verification](design/APPEARANCE.md) and the [release receipt](design/APPEARANCE-RELEASE.json).

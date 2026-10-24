@@ -21,6 +21,7 @@ Start with [lvz.app](https://lvz.app), `AGENTS.md` and the [current handoff](HAN
 |---|---|---|
 | Study Rooms | [Current operations](study-rooms/README.md) | Existing explicit grants; booking enabled; optional, explicitly configured restrictions; private history and conflict protection. |
 | Contacts | [Scope](contacts/README.md), [owner guide](contacts/USER-GUIDE.md), [operations](contacts/OPERATIONS.md), [verification](contacts/VERIFICATION.md) | Private owner workspace; sharing, export and communications remain separately controlled. |
+| Groups & Gospel Planning | [Status and approvals](gospel-planning/README.md) | Draft module, not released: My Preaching and My Group, tested locally with fictional data; migration unapplied, no grants. |
 | Continuous Display | [Operations](continuous-display/OPERATIONS-R2.md) | Reviewed publications, explicit device pairing and separate physical-TV acceptance. |
 | Work Mission Prayer | [Completion](morning-prayer/COMPLETION-R5.md), [interface guide](morning-prayer/SIMPLER-R6.md) | Owner-supplied dates/materials/links; explicit host/member access and controlled distribution. |
 
