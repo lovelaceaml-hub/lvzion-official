@@ -21,7 +21,7 @@ The organization workflow provides four owner-requested age categories, two grou
 | [Continuous Display](https://lvz.app/modules/continuous-display) | Authorized management, reviewed publication and explicitly paired devices. Physical TV acceptance remains separate. [Operations](docs/continuous-display/OPERATIONS-R2.md). |
 | [Work Mission Prayer](https://lvz.app/modules/work-mission-prayer) | Explicit scheduling, host/material management and protected meeting access. No invented dates, meeting credentials or lesson content. Distribution remains separately controlled. [Guide](docs/morning-prayer/COMPLETION-R5.md). |
 
-Since Anthony's October 24, 2026 decision, every approved app is open to every signed-in member (including Unassigned members) for ordinary use; managing needs an explicit manager grant, and the owner manages every app. Members can be placed in a group without a unit, and leaders can lead groups or units outside their own placement. See the [handoff](docs/HANDOFF.md#access-and-placement-decisions--october-24-2026-draft-not-applied). Migration `20261024170000_open_access_group_placement.sql` is not yet applied to the hosted database.
+Since Anthony's October 24, 2026 decision, every approved app is open to every signed-in member (including Unassigned members) for ordinary use; managing needs an explicit manager grant, and the owner manages every app. Members can be placed in a group without a unit, and leaders can lead groups or units outside their own placement. See the [handoff](docs/HANDOFF.md#access-and-placement-decisions--october-24-2026-applied). Migration `20261024170000_open_access_group_placement.sql` was applied to the hosted database on October 24, 2026.
 
 ## Documentation
 

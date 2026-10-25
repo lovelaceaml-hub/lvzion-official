@@ -1,6 +1,6 @@
 # LV Zion Official — current handoff
 
-Updated October 24, 2026. This handoff and `AGENTS.md` describe the application to build and operate now. Milestone-specific release records are evidence, not additional product requirements.
+Updated October 25, 2026. This handoff and `AGENTS.md` describe the application to build and operate now. Milestone-specific release records are evidence, not additional product requirements.
 
 ## Authoritative requirements
 
@@ -8,9 +8,9 @@ LV Zion Official is a self-contained, phone-first application at https://lvz.app
 
 Keep compact module headers and the prominent center Apps launcher. The launcher shows only server-authorized modules (after the October 24 decisions: every approved module for every signed-in member). Continue the approved [Day Sheet design contract](design/LVZ-DESIGN-CONTRACT.md), shared tokens, accessible controls and phone-first layouts.
 
-## Access and placement decisions — October 24, 2026 (draft, not applied)
+## Access and placement decisions — October 24, 2026 (applied)
 
-Anthony decided on 2026-10-24, superseding "module access only by explicit grant" and "leadership follows the leader's placement". One migration, `supabase/migrations/20261024170000_open_access_group_placement.sql`, implements all of it; it is on a draft PR and is **not applied** to the hosted database, and production env is unchanged.
+Anthony decided on 2026-10-24, superseding "module access only by explicit grant" and "leadership follows the leader's placement". One migration, `supabase/migrations/20261024170000_open_access_group_placement.sql`, implements all of it. It was merged in #71, applied to the hosted database on October 24 (hosted version `20261024170000`) and deployed with main `d6a5a2c`; pre-checks and readback are in the [ledger](HOSTED-MIGRATION-LEDGER.json).
 
 1. **Every approved app is open to every signed-in member** (confirmed account, enabled account link, active or Unassigned). Use access is automatic; managing still needs an explicit `manager` grant. Implemented centrally: `app_private.current_member_id()` now means the signed-in member (the former meaning is `organization_member_id()`, still used by member administration), `module_allowed` (use), `module_manager` (manage) and `member_module_home` (the Apps list).
    - Contacts: each member gets a private workspace of their own records and can create in it; nobody, including the owner, reads another member's records. Production also needs `LVZ_CONTACTS_OWNER_PILOT=true` (the page and API are off without it).
@@ -18,20 +18,22 @@ Anthony decided on 2026-10-24, superseding "module access only by explicit grant
    - Study Rooms: members book under the existing rules; holds, administration and other members' details stay with managers. "Who can book" now shows everyone with an account as on automatically.
    - Work Mission Prayer: member view only (schedule, materials, joining a gathering); hosting, reviewing and management still need explicit capabilities.
    - Worship Duty: My Duties for members; Manage (department manager plus manager grant), Presider/song planning and Setup stay role-gated. Setup's switch is now the explicit "participation grant" needed before department scheduling.
-   - Groups & Gospel Planning: approved by the migration (recorded against the bootstrap owner). Members open it; Unassigned members see the neutral unplaced view and cannot write.
+   - Groups & Gospel Planning: approved by the migration (recorded against the bootstrap owner). Members open it; Unassigned members see the neutral unplaced view and cannot write. No places or Gospel roles are configured yet.
 2. **The owner manages every approved app automatically**, including future ones, with no grant rows: `app_private.is_owner()` = bootstrap receipt + usable account + a current member, technical or department administrator appointment.
 3. **Group-only placement.** `member_placements.unit_id` (and transfer destinations) may be null; the (unit, group) foreign key still applies when a unit is given. Commands accept `groupId` with an optional `unitId`. Group leaders see and place group-only members; unit leaders see only their unit.
 4. **Leadership is independent of placement** (added the same day). `actor_has` no longer requires a leader to be placed in the group or unit they lead, and appointments name any active group or unit. Gospel Planning lets a leader open any group they lead (group switcher, optional `groupId`); in their own group they act only per their own roles there.
 
-Tests: `tests/open-access-group-placement-database.test.ts` (111 SQL assertions in the hosted order) plus updated module DB tests. Before applying, run the read-only checks listed in the PR.
+Tests: `tests/open-access-group-placement-database.test.ts` (111 SQL assertions in the hosted order) plus updated module DB tests.
 
-## Design repair: one base, a style per app (October 24, 2026, draft, not released)
+The same day the owner-supplied organization was imported (not in Git): 18 groups, 3 units and 75 active members, 72 of them group-only, with 17 group leaders, 2 unit leaders and 4 pastoral staff. The original placeholder groups were deactivated, not deleted. See `organization_import` in the ledger.
 
-Anthony's October 24 decision replaces the competing Day Sheet, glass and 24-theme layers with one shared base (Atlas Layered Tabs) and an Atlas style per app, plus a System, Light or Dark appearance choice. Branch `claude/lvz-repair-design-31a05d` also fixes the signed-out frame, header Home link, duplicate wordmarks and several module states. Read the [design contract](design/LVZ-DESIGN-CONTRACT.md) and the [audit](audit/2026-10-24/README.md). Not merged or deployed; release needs Anthony's approval.
+## Design repair: one base, a style per app (released October 24, 2026)
 
-## Groups & Gospel Planning — draft, October 24, 2026
+Anthony's October 24 decision replaces the competing Day Sheet, glass and 24-theme layers with one shared base (Atlas Layered Tabs) and an Atlas style per app, plus a System, Light or Dark appearance choice. Branch `claude/lvz-repair-design-31a05d` also fixes the signed-out frame, header Home link, duplicate wordmarks and several module states. Read the [design contract](design/LVZ-DESIGN-CONTRACT.md) and the [audit](audit/2026-10-24/README.md). Merged in #67 and released October 24; the Liquid Opal release below has since replaced its visual layer.
 
-My Preaching (availability, proposed sessions, partner confirmation, one shared result) and My Group (Member Updates, Gospel Review, Gospel Plan, Request for Overseer) are built on the member foundation with migration `20261024150000_gospel_planning_core.sql`, unapplied. Draft module, no grants. Atlas style Skyline Grid. Tested locally with fictional data only. [Status and the approval list](gospel-planning/README.md).
+## Groups & Gospel Planning — October 24, 2026
+
+My Preaching (availability, proposed sessions, partner confirmation, one shared result) and My Group (Member Updates, Gospel Review, Gospel Plan, Request for Overseer) are built on the member foundation with migration `20261024150000_gospel_planning_core.sql`, applied October 24. The open-access migration then approved the module, so every signed-in member can open it; no places or Gospel roles are configured yet. Tested locally with fictional data only; no signed-in live check yet. [Status and the approval list](gospel-planning/README.md).
 
 ## Liquid Opal design — released October 24, 2026
 
@@ -44,7 +46,7 @@ Anthony approved and released four changes, deployed from clean checkouts with t
 - **Security (#69):** Next.js 16.4.3 and nodemailer 10.2.1 close critical Next.js advisories (remote code execution, Server Actions denial of service) and the nodemailer address-parsing advisories.
 - **Design and function repair (#67):** one shared base (Atlas Layered Tabs) and an Atlas style per app; Appearance is System, Light or Dark; signed-out pages no longer show the member dock on sign-in and sign-up; clearer access and empty states; a Page not found page. [Audit](audit/2026-10-24/README.md), [design contract](design/LVZ-DESIGN-CONTRACT.md).
 - **Worship Duty (#48):** live for the owner only (`LVZ_WORSHIP_DUTY_ENABLED=true`). Its database objects were already applied on October 15 and verified identical; nothing was reapplied. See [migration status](worship-duty/MIGRATION-STATUS.md) and the [owner setup steps](worship-duty/README.md).
-- **Groups & Gospel Planning (#68):** migration `20261024150000_gospel_planning_core` applied; module registered as **draft with no grants**. It stays closed until Anthony approves the module, grants access and adds places and roles. See [Gospel Planning](gospel-planning/README.md).
+- **Groups & Gospel Planning (#68):** migration `20261024150000_gospel_planning_core` applied; module registered as **draft with no grants**. Later that day the open-access migration (#71) approved it and opened it to signed-in members; places and roles are still to be added. See [Gospel Planning](gospel-planning/README.md).
 
 Verified live, signed out: sign-in, sign-up, Appearance, Study Rooms and Gospel Planning render; other modules redirect to sign-in; every module API returns 401; `www` redirects to `lvz.app`. Focused checks only, no full suite. Not yet verified: any signed-in screen, a real owner Worship setup, physical phones and the TV.
 
@@ -102,11 +104,11 @@ Read [Study Rooms operations](study-rooms/README.md) and [the correction record]
 
 Self-service signup collects first and last names separately, requires confirmation and uses the owner-approved six-character password minimum. New accounts remain Unassigned to age category, group and unit until independent verification and authorized placement. Organizational, department and technical permissions are independent. Member placement and leadership appointments retain history; technical status does not imply module access.
 
-The owner-requested organization has four age categories, two groups per category and two units per group. Existing verified organization workflows and signup safeguards are unchanged by the calendar correction. See [member instructions](USER-MANUAL.md), [organization workflow](ORGANIZATION-WORKFLOW.md) and the authentication-specific setup records for implementation details.
+The organization was replaced on October 24 by the owner-supplied import: Brothers/Sisters, Student Brothers, Student Sisters and Pastoral Staff categories, 18 leader-named groups and 3 units (the earlier placeholder groups were deactivated, not deleted). Existing verified organization workflows and signup safeguards are unchanged by the calendar correction. See [member instructions](USER-MANUAL.md), [organization workflow](ORGANIZATION-WORKFLOW.md) and the authentication-specific setup records for implementation details.
 
 ## Other module boundaries
 
-Contacts is an explicitly granted private owner workspace until the October 24 migration is applied; then every signed-in member has a private workspace of their own records. Preserve forced RLS, author-only notes, do-not-contact and audit controls. Sharing, export and communications remain separately controlled. [Owner guide](contacts/USER-GUIDE.md), [operations](contacts/OPERATIONS.md), [verification](contacts/VERIFICATION.md).
+Since the October 24 open-access migration, every signed-in member has a private workspace of their own Contacts records (the page and API also need `LVZ_CONTACTS_OWNER_PILOT=true` in Production). Preserve forced RLS, author-only notes, do-not-contact and audit controls. Sharing, export and communications remain separately controlled. [Owner guide](contacts/USER-GUIDE.md), [operations](contacts/OPERATIONS.md), [verification](contacts/VERIFICATION.md).
 
 Continuous Display uses approved publications and explicitly paired devices. Do not confuse a browser test with physical TV acceptance. [Operations](continuous-display/OPERATIONS-R2.md).
 
