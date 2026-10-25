@@ -33,6 +33,10 @@ Anthony's October 24 decision replaces the competing Day Sheet, glass and 24-the
 
 My Preaching (availability, proposed sessions, partner confirmation, one shared result) and My Group (Member Updates, Gospel Review, Gospel Plan, Request for Overseer) are built on the member foundation with migration `20261024150000_gospel_planning_core.sql`, unapplied. Draft module, no grants. Atlas style Skyline Grid. Tested locally with fictional data only. [Status and the approval list](gospel-planning/README.md).
 
+## Liquid Opal design — released October 24, 2026
+
+Every app now uses the Liquid Opal design language (Anthony's Study Rooms Atlas reference) with its own palette: shared kit `components/ui-kit.tsx` and `styles/lvz-ui.css`, frosted header with app tile, floating dock with an unlabelled round Apps button (accessible name "Open apps"). Light scheme is about 99% white with white surfaces; colour is used for accents. Contract: [design/LVZ-DESIGN-CONTRACT.md](design/LVZ-DESIGN-CONTRACT.md); gallery: [design/atlas-build/README.md](design/atlas-build/README.md). Focused checks only (build, design-token tests, frame spec); no full suite.
+
 ## October 24, 2026 release
 
 Anthony approved and released four changes, deployed from clean checkouts with the Vercel CLI (automatic Git deploys stay off):
@@ -63,8 +67,8 @@ Read-only live GET checks of Study Rooms availability and administration returne
 - Repository: `lovelaceaml-hub/lvzion-official`.
 - Vercel: `lvzion-official`, project `prj_4icc6S1jw8OVKWD9AOI1oiB5fwYe`, team `lvzion`.
 - Supabase: `otecqlkqirncotytbfns`, Las Vegas Zion organization.
-- Production source: `26c0916` (main after #69, #67, #48 and #68).
-- Production deployment: `dpl_Dk1iD3B8JfNQGhFkCTtKMggfHTLv`, READY on `lvz.app` and `www.lvz.app`. Rollback: `dpl_HvC39eN73t1HQfut8BKi2LZS2xbX` (design repair, without the Worship flag) or `dpl_HVSBqrSGcvVaTQupPhwaAkU7FDVk` (October 19).
+- Production source: `a366893` (main after #73, the Liquid Opal redesign).
+- Production deployment: `dpl_9wXhdto85MgFf13vJjMZeHn2icCJ`, READY on `lvz.app` and `www.lvz.app`. Rollback: `dpl_44xMWbaPe2D4RyyhuBAbYir87Wwu` (open access, previous design).
 - Fresh calendar correction: repository migration `20261016180000_study_rooms_fresh_calendar.sql`, applied hosted version `20261016173939`.
 
 Documentation-only commits after the runtime source do not require another deployment. Read current provider state rather than assuming a recorded snapshot cannot change. Automatic Git deployments remain disabled; no unrequested previews are authorized.
