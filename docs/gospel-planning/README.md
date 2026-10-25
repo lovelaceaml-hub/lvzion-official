@@ -1,8 +1,8 @@
 # Groups & Gospel Planning
 
-**October 24, 2026 update (draft, not applied):** migration `20261024170000_open_access_group_placement.sql` approves the module (recorded against the bootstrap owner) and opens it to every signed-in member. The owner manages it with no grant row. Group-only members take part in their group; unit-scoped Member Updates do not apply to them. Leaders can open any group they lead by appointment (group switcher, optional `groupId` on group actions) even when placed elsewhere; in their own group they act per their own roles there.
+**October 24, 2026 update (applied):** migration `20261024170000_open_access_group_placement.sql` approves the module (recorded against the bootstrap owner) and opens it to every signed-in member. The owner manages it with no grant row. Group-only members take part in their group; unit-scoped Member Updates do not apply to them. Leaders can open any group they lead by appointment (group switcher, optional `groupId` on group actions) even when placed elsewhere; in their own group they act per their own roles there.
 
-Updated October 24, 2026. Status: **deployed on https://lvz.app, closed.** Migration `20261024150000_gospel_planning_core` was applied on October 24, 2026 and the code is live, but the module is still a draft with no grants, places or roles, so nobody can use it yet. Steps 2, 3 and 5 of the release list below are done; step 4 (first setup) and step 6 (signed-in live checks) remain.
+Updated October 25, 2026. Status: **deployed on https://lvz.app, approved and open to signed-in members.** Migration `20261024150000_gospel_planning_core` was applied on October 24, 2026, and the open-access migration applied the same day approved the module. No places or Gospel roles are configured yet. Steps 2, 3 and 5 of the release list below are done; step 4 (first setup) and step 6 (signed-in live checks) remain.
 
 This supersedes the R1 fictional preview and R2 review SQL in draft PR #11 (`feature/gospel-planning-r1`). That branch was not merged; its useful parts were rebuilt on current `main`.
 

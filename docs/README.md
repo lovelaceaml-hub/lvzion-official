@@ -21,7 +21,7 @@ Start with [lvz.app](https://lvz.app), `AGENTS.md` and the [current handoff](HAN
 |---|---|---|
 | Study Rooms | [Current operations](study-rooms/README.md) | Open to every signed-in member after the October 24 migration; booking enabled; optional, explicitly configured restrictions; private history and conflict protection. |
 | Contacts | [Scope](contacts/README.md), [owner guide](contacts/USER-GUIDE.md), [operations](contacts/OPERATIONS.md), [verification](contacts/VERIFICATION.md) | Private owner workspace; sharing, export and communications remain separately controlled. |
-| Groups & Gospel Planning | [Status and approvals](gospel-planning/README.md) | Live but closed (draft) until migration `20261024170000_open_access_group_placement` approves it and opens it to signed-in members. |
+| Groups & Gospel Planning | [Status and approvals](gospel-planning/README.md) | Live and approved for signed-in members since migration `20261024170000_open_access_group_placement` (October 24); places and Gospel roles still to be set up. |
 | Continuous Display | [Operations](continuous-display/OPERATIONS-R2.md) | Reviewed publications, explicit device pairing and separate physical-TV acceptance. |
 | Work Mission Prayer | [Completion](morning-prayer/COMPLETION-R5.md), [interface guide](morning-prayer/SIMPLER-R6.md) | Owner-supplied dates/materials/links; explicit host/member access and controlled distribution. |
 
