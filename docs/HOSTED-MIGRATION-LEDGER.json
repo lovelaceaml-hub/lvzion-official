@@ -285,6 +285,17 @@
    "verified_on": "2026-10-24",
    "applied_via": "Supabase CLI db push --linked from an isolated workdir with placeholders for all 28 hosted versions; dry run listed only this migration",
    "verification": "Pre-checks: latest hosted 20261024150000, one bootstrap owner with 3 admin roles, gospel-planning draft, no null-unit placements, 5 active grants. Readback: gospel-planning approved, member_placements.unit_id nullable, 6 approved modules, owner module_allowed on gospel-planning true, active grants unchanged at 5. Deployed with main d6a5a2c as dpl_44xMWbaPe2D4RyyhuBAbYir87Wwu; signed-out module APIs return 401."
+  },
+  {
+   "name": "guidance_teachers",
+   "hosted_version": "20261031155741",
+   "repository_version": "20261031155741",
+   "source": "supabase/migrations/20261031155741_guidance_teachers.sql",
+   "source_blob_sha": "51ceab9808d69da939f74bf9bcb0c0e3449535b8",
+   "status": "applied",
+   "verified_on": "2026-10-31",
+   "applied_via": "Supabase MCP apply_migration, after 13 focused domain/HTTP/database tests and the production TypeScript/Next build passed",
+   "verification": "Hosted readback: new module approved, owner_can_manage true, four private tables with RLS and no anonymous/authenticated direct SELECT, three public SECURITY INVOKER RPC wrappers with anonymous execution denied; zero services, slots, audit rows and explicit new grants. Production dpl_FYf8yWy8KubKWWUP629zveGWQREA READY from 0f1405d6fcff70de275979bbfb10b81464daac0c; lvz.app aliases verified. Signed-out page reaches sign-in; API fetch body unverified due connector handling of 401. No real signed-in hosted transaction or phone acceptance claimed. See docs/guidance-teachers/RELEASE-2026-10-31.md."
   }
  ],
  "normalization": {
