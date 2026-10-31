@@ -11,7 +11,7 @@ test('open access, owner everywhere and group-only placement across modules',asy
   catch(e){const err=e as Error&{code?:string};throw Error(path+': '+err.message+' ['+err.code+'] after '+passed+' passes');}
  };
  try{
-  const earlier=(await readdir('supabase/migrations')).filter(p=>p.endsWith('.sql')&&p!==latest&&!ownerActivated.test(p)).sort();
+  const earlier=(await readdir('supabase/migrations')).filter(p=>p.endsWith('.sql')&&p<latest&&!ownerActivated.test(p)).sort();
   for(const p of ['supabase/tests/bootstrap.sql',...earlier.map(p=>'supabase/migrations/'+p)])await run(p);
   // A fictional verified owner signs up and is initialized, exactly as production was.
   await db.exec(`insert into auth.users(id,email,email_confirmed_at) values('99999999-9999-4999-8999-000000000900','owner@example.invalid',now()-interval '2 days');
