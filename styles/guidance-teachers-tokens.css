@@ -1,0 +1,21 @@
+/* Approved white/lavender Guidance Teachers palette; all rules are module scoped. */
+[data-lvz-module="guidance-teachers"]{
+ --lvz-ground:#fbfaff;--lvz-surface:#ffffff;--lvz-sunken:#f3f0fc;
+ --lvz-ink:#282044;--lvz-ink-quiet:#675d80;--lvz-ink-faint:#817790;
+ --lvz-line:#e6dff2;--lvz-line-input:#a298b6;
+ --lvz-accent:#7753c2;--lvz-accent-strong:#56338f;--lvz-accent-soft:#eee5ff;
+ --lvz-on-accent:#ffffff;--lvz-focus:#7046b9;--lvz-accent-2:#9873d5;
+ --lvz-tint-1:#f7f4fe;--lvz-tint-2:#f4efff;
+ --gt-shadow:0 6px 22px rgb(62 36 103 / 5%);--gt-own-shadow:0 0 0 1px #e0d0fa,0 5px 22px rgb(119 83 194 / 9%);
+ --gt-panel:linear-gradient(145deg,#faf8ff,#f3effb);--gt-card:linear-gradient(145deg,#ffffff,#fdfcff);
+}
+:root[data-lvz-scheme="dark"] [data-lvz-module="guidance-teachers"]{
+ --lvz-ground:#181421;--lvz-surface:#241e31;--lvz-sunken:#2c243a;
+ --lvz-ink:#f3edfc;--lvz-ink-quiet:#c4b7d9;--lvz-ink-faint:#ac9cbe;
+ --lvz-line:#423451;--lvz-line-input:#9985ae;
+ --lvz-accent:#c5a3f5;--lvz-accent-strong:#e3cfff;--lvz-accent-soft:#3a2950;
+ --lvz-on-accent:#241137;--lvz-focus:#d5b6ff;--lvz-accent-2:#a88cd4;
+ --lvz-tint-1:#241d35;--lvz-tint-2:#31223f;
+ --gt-shadow:0 6px 22px rgb(0 0 0 / 12%);--gt-own-shadow:0 0 0 1px #76569c,0 5px 22px rgb(0 0 0 / 12%);
+ --gt-panel:linear-gradient(145deg,#2d253b,#30263f);--gt-card:linear-gradient(145deg,#261f33,#231c30);
+}
