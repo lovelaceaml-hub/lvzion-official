@@ -23,13 +23,19 @@ test('Guidance Teachers database: permissions, four slots, receipts, conflicts a
   const earlier=(await readdir('supabase/migrations')).filter(p=>p.endsWith('.sql')&&p<boundary&&!ownerActivated.test(p)).sort();
   for(const p of earlier)await run('supabase/migrations/'+p);
   await db.exec("update app_private.enrollment_settings set enabled=true,allowed_email_domains=array['example.invalid'],owner_email='owner@example.invalid'");
+  const category=await db.query<{id:string}>("insert into public.age_categories(name) values('Guidance Test Category') returning id");
+  const group=await db.query<{id:string}>('insert into public.church_groups(age_category_id,name) values($1::uuid,$2) returning id',[category.rows[0].id,'Guidance Test Group']);
+  const unit=await db.query<{id:string}>('insert into public.church_units(group_id,name) values($1::uuid,$2) returning id',[group.rows[0].id,'Guidance Test Unit']);
   const memberIds:string[]=[];
   for(let i=0;i<3;i++){
    await db.query("insert into auth.users(id,email,email_confirmed_at) values($1::uuid,$2,now()-interval '2 days')",[auths[i],i===0?'owner@example.invalid':`teacher${i}@example.invalid`]);
    await db.query("insert into auth.sessions(id,user_id,created_at) values($1::uuid,$2::uuid,now()-interval '1 hour')",[sessions[i],auths[i]]);
    await claim(i);await db.query('select public.complete_self_service_enrollment($1)',[i===0?'Owner Example':`Teacher ${i} Example`]);
    const r=await db.query<{id:string}>('select app_private.own_account_member_id() as id');memberIds.push(r.rows[0].id);
-   await db.query("update public.members set status='active' where id=$1::uuid",[memberIds[i]]);
+   await db.transaction(async tx=>{
+    await tx.query("update public.members set status='active' where id=$1::uuid",[memberIds[i]]);
+    await tx.query('insert into public.member_placements(member_id,group_id,unit_id) values($1::uuid,$2::uuid,$3::uuid)',[memberIds[i],group.rows[0].id,unit.rows[0].id]);
+   });
   }
   await db.exec("select set_config('request.jwt.claim.sub','',false),set_config('request.jwt.claims','',false)");
   for(const p of ['20261014224708_contacts_private_owner_pilot_v1.sql','20261024160200_worship_duty_live_activation.sql','20261024160300_worship_duty_live_setup.sql','20261024160400_worship_duty_operations.sql',boundary])await run('supabase/migrations/'+p);
