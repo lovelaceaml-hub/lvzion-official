@@ -5,6 +5,7 @@ import type {ContactsWorkspace,ContactDetail,ContactSummary,PreferredMethod} fro
 import {contactCounts,contactFilters,dueTag,findLoadedContacts} from '../../lib/contacts/presentation';
 import type {ContactFilter} from '../../lib/contacts/presentation';
 import {FrameControls} from '../app-frame';
+import {initialsOf} from '../ui-kit';
 import {useSwipeTabs} from '../../lib/use-swipe-tabs';
 import {CalendarDays,Check,ChevronLeft,ChevronRight,Clock3,FileText,Plus,Search,ShieldCheck,UsersRound} from '../home-icons';
 import './contacts.css';
@@ -38,7 +39,6 @@ const segments:readonly [ContactFilter,string][]=[['open','Open'],['closed','Clo
 const filterNames=Object.fromEntries(contactFilters.map(f=>[f.value,f.label])) as Record<ContactFilter,string>;
 const tabs:readonly View[]=['mine','followup','overview'];
 const isAbort=(e:unknown)=>e instanceof DOMException&&e.name==='AbortError';
-const initialsOf=(name:string)=>name.trim().split(/\s+/).filter(Boolean).map(s=>s[0]).slice(0,2).join('').toUpperCase();
 const plural=(n:number,one:string,many=one+'s')=>n+' '+(n===1?one:many);
 
 /** Date and time in Las Vegas time, in tabular figures. */

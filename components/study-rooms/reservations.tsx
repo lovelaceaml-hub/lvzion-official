@@ -23,11 +23,6 @@ const stateLabel=(b:Booking)=>b.state==='cancelled'?'Cancelled':b.state==='ended
 const stateTone=(b:Booking)=>b.state==='confirmed'?(b.hold?'warning':undefined):'muted';
 const kinds=[['room','Rooms'],['whiteboard','Whiteboards'],['tv','TVs']] as const;
 
-/** Time first: start over end on the left, in tabular figures, like the Home day line. */
-export function TimeColumn({start,end}:{start:number;end:number}){
- return <div className="sr-time"><span>{clock(start)}</span><span className="ui-visually-hidden"> to </span><small>{clock(end)}</small></div>;
-}
-
 export default function Reservations({schedule:s,changeDay,submit,refresh,loadDay,admin,saveAdmin,loadHistory,operations,status}:Props){
  const [kind,setKind]=useState<Kind>('room'),[view,setView]=useState<View>('schedule');
  const [extras,setExtras]=useState<string[]>([]);
