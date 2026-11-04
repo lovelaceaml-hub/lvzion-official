@@ -38,7 +38,7 @@ Anthony requires a genuine fresh start. This applies to every module and superse
 
 ## Access and placement decisions — October 24, 2026
 
-Anthony's 2026-10-24 decisions supersede the earlier "module access only by explicit grant" rule and the rule that leadership follows the leader's own placement. Migration `20261024170000_open_access_group_placement.sql` implements them (draft PR, not applied to the hosted database).
+Anthony's 2026-10-24 decisions supersede the earlier "module access only by explicit grant" rule and the rule that leadership follows the leader's own placement. Migration `20261024170000_open_access_group_placement.sql` implements them; it was applied to the hosted database on 2026-10-24 (see docs/HOSTED-MIGRATION-LEDGER.json).
 
 - **Open apps.** Every approved app is open to every signed-in member: a confirmed account with an enabled account link, including Unassigned (intake) members. They get ordinary use ("viewer") access. Managing still needs an explicit `manager` grant. Each module's own privacy rules still apply: members see only their own private records (contacts, bookings, duties) and what their group or role allows. Use `app_private.module_allowed` for use and `app_private.module_manager` for management in every module, including new ones.
 - **Owner everywhere.** The bootstrap owner (`bootstrap_receipts` plus a current member/technical/department administrator appointment) is manager on every approved app, including future ones, with no grant rows.

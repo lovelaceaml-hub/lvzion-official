@@ -49,6 +49,6 @@ npm run build
 npm run test:browser
 ```
 
-Build checks types, application behavior and disposable PostgreSQL permissions. Browser fixtures must never become production fallback data. Fictional development routes redirect in production. AGENTS.md contains isolated Auth/SMTP integration commands.
+`npm run build` runs the type check (`next typegen && tsc --noEmit`) and the Next.js production build. Behaviour and disposable PostgreSQL permission tests are separate (`npm test`, `npm run test:db`) and, as full suites, need Anthony's explicit approval (2026-10-17 rule). Browser fixtures must never become production fallback data. Fictional development routes redirect in production. AGENTS.md contains isolated Auth/SMTP integration commands.
 
 Use only the approved production project and https://lvz.app origin. Keep credentials in Keychain or provider stores, never Git. Preserve confirmed-email signup, signup abuse protection, strict server authorization, private records and auditing. Apply only pending tested schema changes; never blindly replay the hosted ledger.

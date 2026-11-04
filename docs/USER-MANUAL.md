@@ -52,7 +52,7 @@ Keep the form unchanged and retry after a connection failure. Organization chang
 
 ## Study Room Reservation owner setup
 
-Open [Study Rooms](https://lvz.app/modules/study-rooms) while signed in to your LV Zion member account. The app appears in **Apps** only for members with an active explicit Study Room grant. Technical, department, pastoral and group positions do not grant access automatically.
+Open [Study Rooms](https://lvz.app/modules/study-rooms) while signed in to your LV Zion member account. Since the October 24 open-access decision, Study Rooms appears in **Apps** for every signed-in member; setting up rooms and schedules needs a Study Room manager grant. Technical, department, pastoral and group positions do not grant management automatically.
 
 **Current status:** Booking is enabled for the existing authorized audience. Weekly and special-date restrictions start empty. The October 16 correction did not add access grants or delete reservations.
 

@@ -48,7 +48,7 @@ For the real-service suite, use a disposable **Linux x64**, non-root environment
 
 ```sh
 node tests/integration/start-stack.mjs
-LVZ_INTEGRATION_DIR=/tmp/lvz-integration npm run test:auth
+LVZ_INTEGRATION_DIR=/tmp/lvz-integration node scripts/test-signup-integration.mjs
 node tests/integration/stop-stack.mjs
 ```
 

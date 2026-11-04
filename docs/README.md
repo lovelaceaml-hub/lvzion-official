@@ -11,7 +11,7 @@ Start with [lvz.app](https://lvz.app), `AGENTS.md` and the [current handoff](HAN
 - [Hosted migration ledger](HOSTED-MIGRATION-LEDGER.json)
 - [Organization workflow](ORGANIZATION-WORKFLOW.md)
 - [Product decisions](PRODUCT-DECISIONS.md)
-- [Day Sheet design contract](design/LVZ-DESIGN-CONTRACT.md)
+- [Design contract (Liquid Opal, October 24)](design/LVZ-DESIGN-CONTRACT.md)
 - [Device appearance choices and focused verification](design/APPEARANCE.md)
 - [Authentication and domain setup](DOMAIN-SETUP.md)
 
@@ -20,13 +20,17 @@ Start with [lvz.app](https://lvz.app), `AGENTS.md` and the [current handoff](HAN
 | Module | Guides | Boundary |
 |---|---|---|
 | Study Rooms | [Current operations](study-rooms/README.md) | Open to every signed-in member after the October 24 migration; booking enabled; optional, explicitly configured restrictions; private history and conflict protection. |
-| Contacts | [Scope](contacts/README.md), [owner guide](contacts/USER-GUIDE.md), [operations](contacts/OPERATIONS.md), [verification](contacts/VERIFICATION.md) | Private owner workspace; sharing, export and communications remain separately controlled. |
+| Contacts | [Scope](contacts/README.md), [owner guide](contacts/USER-GUIDE.md), [operations](contacts/OPERATIONS.md), [verification](contacts/VERIFICATION.md) | Private workspace for each signed-in member since the October 24 migration; sharing, export and communications remain separately controlled. |
 | Groups & Gospel Planning | [Status and approvals](gospel-planning/README.md) | Live and approved for signed-in members since migration `20261024170000_open_access_group_placement` (October 24); places and Gospel roles still to be set up. |
 | Continuous Display | [Operations](continuous-display/OPERATIONS-R2.md) | Reviewed publications, explicit device pairing and separate physical-TV acceptance. |
 | Work Mission Prayer | [Completion](morning-prayer/COMPLETION-R5.md), [interface guide](morning-prayer/SIMPLER-R6.md) | Owner-supplied dates/materials/links; explicit host/member access and controlled distribution. |
+| Worship Duty | [Status](worship-duty/README.md), [launch steps](worship-duty/LAUNCH.md) | Release status under reconciliation: the module README says not released, while the hosted ledger lists its five migrations as applied. |
+| Guidance Teachers | [Overview](guidance-teachers/README.md), [release record](guidance-teachers/RELEASE-2026-10-31.md) | Separate app released October 31, 2026; independent services, assignments, permissions and audit history. |
 
 ## Evidence and historical milestones
 
 Milestone-specific test counts, schema reviews and screenshots describe the version named in that record. They are not current product requirements and must not override AGENTS.md, the current handoff or the October 16 fresh-start correction. Documentation commits alone do not redeploy runtime code.
+
+Code review notes: [2026-11-03 review](reviews/2026-11-03-review.md).
 
 Authentication and organization evidence remains in [actual-app setup](ACTUAL-APP-SETUP.md), [organization run index](runs/organization-workflow/INDEX.md), [signup run index](runs/self-service-signup/INDEX.md) and module-specific release records. Review SQL files are references, never instructions to replay completed migrations or widen permissions. Fixtures and screenshots containing fictional data must never be used as live schedules or member records.

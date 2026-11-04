@@ -23,7 +23,7 @@ An additional regression covers publishing an older still-open PWP draft after a
 ## Reproduce
 
 - `npm run build`: original foundation typecheck, Node and database checks followed by Next.js build. No package/lockfile or Actions changes.
-- `MPG_PREVIEW_URL=<verified preview origin> node scripts/verify-morning-prayer.mjs`.
+- `MPG_PREVIEW_URL=<verified preview origin> node scripts/verify-morning-prayer.mjs` (historical: this script is no longer in the repository).
 - A Vercel-authenticated temporary review URL may be supplied through `MPG_AUTH_URL`; never commit it or save browser authentication state. The script writes only fictional screenshots and a redacted check report to `.artifacts/morning-prayer` (or `MPG_EVIDENCE_DIR`).
 
 ## What these results do not establish
