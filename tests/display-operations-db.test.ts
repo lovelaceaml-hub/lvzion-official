@@ -26,7 +26,7 @@ test('display operations R2: owner-scoped multi-screen, hours, restore and appro
    create table app_private.bootstrap_receipts(auth_user_id uuid primary key);
    create table app_private.account_links(member_id uuid,auth_user_id uuid,enabled boolean,technical_enabled boolean);
    create function app_private.current_member_id() returns uuid language sql stable as $$select nullif(current_setting('display.actor',true),'')::uuid$$;`);
-  await db.exec(await readFile(new URL('../docs/continuous-display/live-schema-review.sql',import.meta.url),'utf8'));
+  await db.exec(await readFile(new URL('../supabase/migrations/20261014223341_continuous_display_live_schema.sql',import.meta.url),'utf8'));
   await db.exec(await readFile(new URL('../supabase/migrations/20261014230147_continuous_display_operations.sql',import.meta.url),'utf8'));
   await db.query('insert into public.members(id) values($1),($2)',[owner,deputy]);
   await db.query("insert into display_private.screens(id,label) values($1,'Lobby Display')",[lobby]);

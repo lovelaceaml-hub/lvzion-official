@@ -8,7 +8,7 @@ test('display live SQL review: isolated authorization and revocable, approved TV
  const denied=async(query:string,params:unknown[]=[])=>{await assert.rejects(db.query(query,params));};
  try{
   await db.exec("create role anon;create role authenticated;create role service_role;create schema app_private;create table public.members(id uuid primary key,status text default 'active');create table app_private.app_modules(id uuid primary key,module_key text,status text,approved_at timestamptz);create table app_private.module_access_grants(module_id uuid,member_id uuid,permission text,ended_at timestamptz,granted_at timestamptz default now());create function app_private.current_member_id() returns uuid language sql stable as $$select nullif(current_setting('display.actor',true),'')::uuid$$;");
-  await db.exec(await readFile(new URL('../docs/continuous-display/live-schema-review.sql',import.meta.url),'utf8'));
+  await db.exec(await readFile(new URL('../supabase/migrations/20261014223341_continuous_display_live_schema.sql',import.meta.url),'utf8'));
   await db.query("insert into public.members(id) values($1),($2)",[actor,other]);
   await db.query("insert into display_private.screens(id,label) values($1,'Lobby TV')",[screen]);
   await db.query("select set_config('display.actor',$1,false)",[actor]);
