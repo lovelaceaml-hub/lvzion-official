@@ -1,5 +1,4 @@
-import {redirect} from 'next/navigation';
-import {requireMember} from '../../../lib/server/supabase';
+import {requireMemberOrRedirect} from '../../../lib/server/supabase';
 import {worshipOperationalEnabled} from '../../../lib/worship-duty/activation';
 import {parseModuleFeed} from '../../../lib/app-runtime';
 import ConnectedWorkspace from '../../../components/worship-duty/connected-workspace';
@@ -12,8 +11,7 @@ function Notice({children}:{children:string}){
  return <div className="ui-page wd-page"><main className="ui-main ui-narrow wd-main"><PageHeading eyebrow="Prepare to serve" title="Worship Duty"/><Glass className="wd-state"><EmptyState icon={<CalendarDays/>} title="Worship Duty is not available" action={<a className="ui-button ui-button-secondary" href="/members">Back to My Week</a>}>{children}</EmptyState></Glass></main></div>;
 }
 export default async function Page(){
- let client;
- try{client=await requireMember();}catch{redirect('/sign-in');}
+ const client=await requireMemberOrRedirect();
  if(!worshipOperationalEnabled(process.env))return <Notice>Worship Duty is not activated. Your existing assignments are unchanged.</Notice>;
  const {data,error}=await client.rpc('member_module_home');
  if(error)return <Notice>Unable to verify module access. Please sign in again.</Notice>;

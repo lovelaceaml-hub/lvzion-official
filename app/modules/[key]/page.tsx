@@ -1,12 +1,11 @@
-import{notFound,redirect}from'next/navigation';
-import{requireMember}from'../../../lib/server/supabase';
+import{notFound}from'next/navigation';
+import{requireMemberOrRedirect}from'../../../lib/server/supabase';
 import{parseModuleFeed}from'../../../lib/app-runtime';
 import AppHeader from'../../../components/app-header';
 export const dynamic='force-dynamic';
 export default async function AuthorizedModuleLanding({params}:{params:Promise<{key:string}>}){
  const{key}=await params;if(!/^[a-z][a-z0-9-]{2,48}$/.test(key))notFound();
- let client;
- try{client=await requireMember();}catch{redirect('/sign-in');}
+ const client=await requireMemberOrRedirect();
  const{data,error}=await client.rpc('member_module_home');
  if(error)notFound();
  let feed;
