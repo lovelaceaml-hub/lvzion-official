@@ -1,5 +1,7 @@
 # Worship Duty: LV Zion Official module
 
+> **Status conflict, recorded 2026-11-03:** [HANDOFF](../HANDOFF.md) says Worship Duty is live for the owner only, and the [hosted migration ledger](../HOSTED-MIGRATION-LEDGER.json) lists all five `worship_duty_*` migrations as applied. The October 24 status below predates both. Anthony to confirm and then update this page.
+
 **Status, October 24, 2026: built and verified locally; NOT RELEASED.** The migrations are unapplied, `LVZ_WORSHIP_DUTY_ENABLED` is off and no member has a Worship grant.
 
 Worship Duty is a module of [lvz.app](https://lvz.app), using its Supabase project, sign-in and member records. Its route is `/modules/worship-duty`; do not treat that link as working until the steps below are done.

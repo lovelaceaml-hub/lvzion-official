@@ -22,7 +22,7 @@ An application-local pause may stop new reservations and holds for maintenance w
 
 ## Contacts
 
-Until migration `20261024170000_open_access_group_placement` is applied, the workspace is restricted to its explicitly granted owner account; afterwards every signed-in member has a private workspace of their own records. Preserve the production-only release switch (`LVZ_CONTACTS_OWNER_PILOT`), current session/member checks, module grants, forced private-table RLS, ownership, do-not-contact restrictions, auditing and idempotency. Organization or technical leadership does not confer contact access.
+Since migration `20261024170000_open_access_group_placement` was applied on 2026-10-24, every signed-in member has a private workspace of their own records. Preserve the production-only release switch (`LVZ_CONTACTS_OWNER_PILOT`), current session/member checks, module grants, forced private-table RLS, ownership, do-not-contact restrictions, auditing and idempotency. Organization or technical leadership does not confer contact access.
 
 Sharing, reassignment, confidential oversight, exports and outgoing communications require separately approved and tested audiences, consent, field/history visibility and retention. A passing frontend build does not authorize broader grants. [Verification and owner acceptance](contacts/VERIFICATION.md) remain the reference.
 

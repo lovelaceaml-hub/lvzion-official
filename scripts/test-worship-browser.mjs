@@ -19,12 +19,12 @@ try{
  const owner=await browser.newContext({viewport:{width:390,height:844}});await login(owner,f.email,f.password);const page=await owner.newPage();
  const sections=page.getByRole('navigation',{name:'Worship workspace sections'}),setupTabs=page.getByRole('navigation',{name:'Setup sections'});
  await page.goto(base+'/members');await page.getByRole('button',{name:'Open apps',exact:true}).waitFor();await page.waitForLoadState('networkidle');await page.getByRole('button',{name:'Open apps',exact:true}).click();
- await page.locator('dialog[open] button.lvz-app-row-main').filter({hasText:'Worship Duty'}).click();
+ await page.locator('dialog[open] button.lvz-app-open').filter({hasText:'Worship Duty'}).click();
  await page.getByRole('heading',{name:'My Duties',exact:true}).waitFor();check('real Unassigned owner opens Worship through existing Apps',true);
  const nav=page.getByRole('navigation',{name:'Main navigation'});
  await nav.getByRole('button',{name:'Manage'}).waitFor();
  check('shared frame shows Home, My Duties, Apps, Manage and More',await nav.getByRole('button',{name:'My Duties'}).isVisible()&&await nav.getByRole('button',{name:'Manage'}).isVisible()&&await nav.getByRole('button',{name:'Open apps'}).isVisible()&&await nav.getByRole('button',{name:'Home'}).isVisible()&&await nav.getByRole('button',{name:'More'}).isVisible());
- const palette=e=>({module:e.dataset.lvzModule,ground:getComputedStyle(e).getPropertyValue('--lvz-ground').trim().toLowerCase(),accent:getComputedStyle(e).getPropertyValue('--lvz-accent').trim().toLowerCase(),title:e.querySelector('.app-frame-heading')?.textContent});
+ const palette=e=>({module:e.dataset.lvzModule,ground:getComputedStyle(e).getPropertyValue('--lvz-ground').trim().toLowerCase(),accent:getComputedStyle(e).getPropertyValue('--lvz-accent').trim().toLowerCase(),title:e.querySelector('.app-frame-heading .app-frame-name strong')?.textContent});
  const light=await page.locator('.app-frame').evaluate(palette);
  check('shared registry applies the Liquid Opal sapphire palette to Worship',light.module==='worship-duty'&&light.ground==='#eaf0ff'&&light.title==='Worship Duty');
  await nav.getByRole('button',{name:'Manage'}).click();await page.getByRole('heading',{name:'Manage',exact:true}).waitFor();check('bottom bar switches the Worship section',true);

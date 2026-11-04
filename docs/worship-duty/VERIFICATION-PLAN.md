@@ -1,5 +1,7 @@
 # Worship Duty: verification plan and evidence integrity
 
+> **Testing rule (2026-10-17):** full suites listed here (`npm test`, `npm run test:db`, `npm run test:browser`, module browser/race suites) run only with Anthony's explicit approval for that run. Use focused checks otherwise.
+
 > **October 24, 2026:** current-branch evidence is in [LAUNCH.md](LAUNCH.md#verification-observed-so-far) (typecheck, compile, 69 focused Node tests, 9 native integration and 44 native browser checks on PR #48). The text below is the October 14 snapshot.
 
 

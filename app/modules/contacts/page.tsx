@@ -1,11 +1,11 @@
-import {notFound,redirect} from 'next/navigation';
-import {requireMember} from '../../../lib/server/supabase';
+import {notFound} from 'next/navigation';
+import {requireMemberOrRedirect} from '../../../lib/server/supabase';
 import {contactsReleaseEnabled} from '../../../lib/server/contacts';
 import ContactsLiveWorkspace from '../../../components/contacts/live-workspace';
 export const dynamic='force-dynamic';
 export const metadata={title:'Contacts | LV Zion Official',robots:{index:false,follow:false}};
 export default async function Page(){
- try{await requireMember();}catch{redirect('/sign-in');}
+ await requireMemberOrRedirect();
  if(!contactsReleaseEnabled())notFound();
  return <ContactsLiveWorkspace/>;
 }

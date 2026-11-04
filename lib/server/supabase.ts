@@ -2,6 +2,7 @@ import 'server-only';
 import { createServerClient } from '@supabase/ssr';
 import { createClient } from '@supabase/supabase-js';
 import { cookies } from 'next/headers';
+import { redirect } from 'next/navigation';
 import { settings } from './config';
 export async function userClient() {
  const c=settings(); const jar=await cookies();
@@ -23,4 +24,8 @@ export async function requireMember() {
  const member=await client.rpc('my_membership_id');
  if (member.error || !member.data) throw new Error('Membership access unavailable.');
  return client;
+}
+/** Page guard: the signed-in member's client, or a redirect to sign-in. */
+export async function requireMemberOrRedirect() {
+ try { return await requireMember(); } catch { redirect('/sign-in'); }
 }

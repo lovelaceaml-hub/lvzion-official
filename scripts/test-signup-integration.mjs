@@ -41,7 +41,7 @@ try{
  const mid=w.data.self.id;check('Unassigned cannot enumerate groups or member directory',w.data.groups.length===0&&w.data.directory.length===0&&w.data.unassignedMembers.length===0);
  check('Unassigned owns only their verified contact',w.data.contacts.email===signup.email);
  check('real Auth session cookies are HttpOnly',(await c.storageState()).cookies.every(x=>x.httpOnly));
- const modules=await c.get('/api/members/experience');check('Unassigned module feed denied',!modules.ok());
+ const modules=await c.get('/api/members/experience');const feed=modules.ok()?await modules.json():null;check('Unassigned may use approved apps but manages none (October 24 open access)',modules.ok()&&Array.isArray(feed?.modules)&&feed.modules.every(m=>m.canManage===false));
  const replay=await post(c,'/api/auth/confirm',otp);check('signup token cannot be consumed twice',replay.status!==200);
  await post(c,'/api/auth/sign-out',{});result=await post(c,'/api/auth/sign-in',{identifier:signup.email,password:signup.password});check('Unassigned can sign in again by email',result.status===200);
  const duplicate=await post(c,'/api/auth/sign-up',signup);check('duplicate email receives same generic signup message',duplicate.status===200&&duplicate.data.message===resultGeneric());

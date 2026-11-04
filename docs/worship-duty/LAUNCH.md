@@ -1,5 +1,7 @@
 # Worship Duty production integration
 
+> **Testing rule (2026-10-17):** full suites listed here (`npm test`, `npm run test:db`, `npm run test:browser`, module browser/race suites) run only with Anthony's explicit approval for that run. Use focused checks otherwise.
+
 Target: https://lvz.app/modules/worship-duty, within the existing official member application. Schedules start empty and come only from records configured in this app.
 
 ## Release status

@@ -1,5 +1,7 @@
 # LV Zion Official — Phone-first Home and My Week
 
+> **Testing rule (2026-10-17):** full suites listed here (`npm test`, `npm run test:db`, `npm run test:browser`, module browser/race suites) run only with Anthony's explicit approval for that run. Use focused checks otherwise.
+
 > Historical milestone record. Test counts, preview links and pending gates below describe that milestone. For the actual app and current release boundaries, read the [handoff](HANDOFF.md) and [documentation index](README.md). This record does not authorize a new preview.
 
 Development-only implementation. Matches the recorded mobile decisions in docs/PRODUCT-DECISIONS.md and does **not** approve any individual application module.

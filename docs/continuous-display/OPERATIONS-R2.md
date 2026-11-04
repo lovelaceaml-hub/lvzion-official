@@ -1,5 +1,7 @@
 # Continuous Church Display R2 — operations, publication and release
 
+> **Superseded in part (October 24, 2026):** every signed-in member can now use this app; managing it needs a manager grant. Owner-only wording below is historical. See [HANDOFF](../HANDOFF.md).
+
 **Product:** real LV Zion Official module at `https://lvz.app/modules/continuous-display` with the independent full-screen player at `https://lvz.app/display`.
 
 **Scope:** one usable screen plus the ability for the verified original owner to create up to eight independent, disabled, unpaired screens. Every new screen receives explicit owner-specific edit, approve, publish and device permissions. No group leader or technical administrator inherits broadcast power. Mother’s Love and original Study Room lobby displays are untouched.

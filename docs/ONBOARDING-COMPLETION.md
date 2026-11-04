@@ -1,5 +1,7 @@
 # Member onboarding completion — October 13, 2026 Pacific
 
+> **Testing rule (2026-10-17):** full suites listed here (`npm test`, `npm run test:db`, `npm run test:browser`, module browser/race suites) run only with Anthony's explicit approval for that run. Use focused checks otherwise.
+
 > Historical milestone record. Test counts, preview links and pending gates below describe that milestone. For the actual app and current release boundaries, read the [handoff](HANDOFF.md) and [documentation index](README.md). This record does not authorize a new preview.
 
 ## Implemented in this review branch
@@ -48,7 +50,7 @@ For the real-service suite, use a disposable **Linux x64**, non-root environment
 
 ```sh
 node tests/integration/start-stack.mjs
-LVZ_INTEGRATION_DIR=/tmp/lvz-integration npm run test:auth
+LVZ_INTEGRATION_DIR=/tmp/lvz-integration node scripts/test-signup-integration.mjs
 node tests/integration/stop-stack.mjs
 ```
 

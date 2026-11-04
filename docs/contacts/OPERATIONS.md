@@ -1,5 +1,7 @@
 # Contacts — operations and security runbook
 
+> **Superseded in part (October 24, 2026):** every signed-in member can now use this app; managing it needs a manager grant. Owner-only wording below is historical. See [HANDOFF](../HANDOFF.md).
+
 **Production target:** `https://lvz.app/modules/contacts` in Vercel project `lvzion-official`, team `lvzion`. **Hosted database:** Supabase project `otecqlkqirncotytbfns`. Original LV Zion systems are separate; never connect their databases or import their contacts by default.
 
 ## Current release and configuration
