@@ -17,3 +17,8 @@ supabase/.branches/
 
 # Claude Code session worktrees
 .claude/worktrees/
+
+# Local test credentials and other test output
+credentials.json
+coverage/
+blob-report/
