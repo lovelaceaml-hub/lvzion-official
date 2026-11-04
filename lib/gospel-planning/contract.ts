@@ -189,9 +189,6 @@ export function vegasTime24(iso:string):string{
 export function dayLabel(day:string,style:'short'|'long'='short'):string{
  return new Intl.DateTimeFormat('en-US',{timeZone:'UTC',weekday:style,month:style==='long'?'long':'short',day:'numeric'}).format(new Date(dayKey(day)+'T12:00:00Z'));
 }
-export function weekLabel(week:string):string{
- return dayLabel(week)+' to '+dayLabel(addDays(week,6));
-}
 export function sessionDay(session:Pick<Session,'start'>):string{return vegasDay(new Date(session.start));}
 export function timeRange(start:string,end:string):string{return vegasClock(start)+' to '+vegasClock(end);}
 export function clockLabel(value:string):string{

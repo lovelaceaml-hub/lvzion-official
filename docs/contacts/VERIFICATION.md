@@ -1,5 +1,7 @@
 # Contacts — verification and acceptance ledger
 
+> **Superseded in part (October 24, 2026):** every signed-in member can now use this app; managing it needs a manager grant. Owner-only wording below is historical. See [HANDOFF](../HANDOFF.md).
+
 **Verified Contacts R5 snapshot: October 14, 2026 (Pacific).** This document distinguishes observed results from unexecuted acceptance. The R5 application artifact is `dpl_35kWj2cAcYYNjHq2fhc5XpAcofrv`; subsequent READY production deployment `dpl_FFquRhvQkTW1xv1gRVz1SuKBg66S` includes it. This is not a claim that the entire Shared Contact Tracker has launched.
 
 ## Current owner-only production evidence

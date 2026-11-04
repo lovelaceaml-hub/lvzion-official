@@ -1,5 +1,7 @@
 # Using Contacts in LV Zion Official
 
+> **Superseded in part (October 24, 2026):** every signed-in member can now use this app; managing it needs a manager grant. Owner-only wording below is historical. See [HANDOFF](../HANDOFF.md).
+
 **Web app:** [lvz.app/modules/contacts](https://lvz.app/modules/contacts). Sign in with your normal LV Zion Official account. The initial Contacts module is available only to the account with its explicit owner grant; general signup and church membership do not create access.
 
 ## Find a record

@@ -1,0 +1,36 @@
+name: Full suite (manual, approval required)
+# Runs only when started by hand with full_suite_approved=true for a run Anthony approved
+# (AGENTS.md, 2026-10-17 rule). Never triggered by pushes, PRs, merges or schedules.
+on:
+  workflow_dispatch:
+    inputs:
+      full_suite_approved:
+        description: Anthony explicitly approved this exact full-suite run
+        type: boolean
+        default: false
+      suite:
+        description: Which suite to run
+        type: choice
+        options: [unit, browser]
+        default: unit
+permissions:
+  contents: read
+jobs:
+  full-suite:
+    if: ${{ inputs.full_suite_approved }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci --ignore-scripts
+      - if: ${{ inputs.suite == 'unit' }}
+        run: npm test
+      - if: ${{ inputs.suite == 'browser' }}
+        run: |
+          npx playwright install --with-deps chromium
+          npm run build
+          npm run test:browser

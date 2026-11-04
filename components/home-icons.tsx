@@ -9,7 +9,6 @@ function make(paths:ReactNode){
 }
 export const ArrowDown=make(<><path d="M12 4v16M5 13l7 7 7-7"/></>);
 export const ArrowUp=make(<><path d="M12 20V4M5 11l7-7 7 7"/></>);
-export const ArrowLeft=make(<><path d="m12 19-7-7 7-7M5 12h14"/></>);
 export const ArrowRight=make(<><path d="M5 12h14m-7-7 7 7-7 7"/></>);
 export const ChevronLeft=make(<path d="m15 18-6-6 6-6"/>);
 export const ChevronRight=make(<path d="m9 18 6-6-6-6"/>);

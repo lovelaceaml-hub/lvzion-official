@@ -37,7 +37,7 @@ Current instructions take precedence over milestone-specific historical installa
 
 ## Development
 
-Worship Duty ([route](https://lvz.app/modules/worship-duty)) stays switched off until its database steps are applied and Anthony approves the release. See [implementation and launch evidence](docs/worship-duty/LAUNCH.md).
+Worship Duty ([route](https://lvz.app/modules/worship-duty)) stays switched off until its database steps are applied and Anthony approves the release. (Status under reconciliation: [HANDOFF](docs/HANDOFF.md) says it is live for the owner only, and the hosted ledger lists its migrations as applied.) See [implementation and launch evidence](docs/worship-duty/LAUNCH.md).
 
 Project connectors: `.mcp.json` gives every Claude Code session in this folder a Supabase connector locked to this app's database (`supabase-lvz`) and a Vercel connector locked to this project (`vercel-lvz`). Both sign in through the provider (no keys in the repository). `.claude/settings.json` lets agents read without asking and always asks before database changes, deployments or environment changes.
 
@@ -48,6 +48,8 @@ npm ci --ignore-scripts
 npm run build
 npm run test:browser
 ```
+
+`npm run test:browser` is a full suite: run it only with Anthony's explicit approval (2026-10-17 rule).
 
 `npm run build` runs the type check (`next typegen && tsc --noEmit`) and the Next.js production build. Behaviour and disposable PostgreSQL permission tests are separate (`npm test`, `npm run test:db`) and, as full suites, need Anthony's explicit approval (2026-10-17 rule). Browser fixtures must never become production fallback data. Fictional development routes redirect in production. AGENTS.md contains isolated Auth/SMTP integration commands.
 

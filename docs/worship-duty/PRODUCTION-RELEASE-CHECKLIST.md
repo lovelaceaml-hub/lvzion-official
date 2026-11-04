@@ -1,5 +1,7 @@
 # Worship Duty: production release checklist
 
+> **Testing rule (2026-10-17):** full suites listed here (`npm test`, `npm run test:db`, `npm run test:browser`, module browser/race suites) run only with Anthony's explicit approval for that run. Use focused checks otherwise.
+
 > **October 24, 2026:** the work is on draft [PR #48](https://github.com/lovelaceaml-hub/lvzion-official/pull/48) (it contains PR #25). Sections A, B and the local parts of C and D are done and verified locally; the hosted, flag, deploy and live-domain items are not. The short approval list is in [README.md](README.md#ready-for-release-what-anthony-must-approve).
 
 

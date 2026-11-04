@@ -2,6 +2,8 @@
 
 # Work Mission Morning Prayer — live LV Zion integration
 
+> **Superseded in part (October 24, 2026):** every signed-in member can now use this app; managing it needs a manager grant. Owner-only wording below is historical. See [HANDOFF](../HANDOFF.md).
+
 > Live setup contract. The [current handoff](../HANDOFF.md) confirms the applied schema, approved module, one active module grant and enabled series with no occurrences or published materials. Historical R2 verification is separate; broader member activation remains gated.
 
 ## Production target
