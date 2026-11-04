@@ -95,7 +95,12 @@ for(const screen of screens)test(screen.name,async({page},info)=>{
   const nav=document.querySelector('.app-frame-nav');
   const navBox=nav&&visible(nav)?nav.getBoundingClientRect():null;
   window.scrollTo(0,document.documentElement.scrollHeight);
-  const covered=navBox?[...document.querySelectorAll('main input:not([type=hidden]),main select,main textarea,main button')].filter(el=>{if(!visible(el))return false;const r=el.getBoundingClientRect(),n=document.querySelector('.app-frame-nav')!.getBoundingClientRect();return r.bottom>n.top+2&&r.top<n.bottom;}).map(el=>(el.getAttribute('name')||el.getAttribute('aria-label')||el.textContent||el.tagName).trim().slice(0,40)):[];
+  // The part of an element actually on screen: its box clipped by every scrolling or clipping ancestor.
+  // Cells scrolled out of view inside an inner scroll box are clipped, not covered.
+  const shown=(el:Element)=>{let r=el.getBoundingClientRect(),top=r.top,bottom=r.bottom;for(let a=el.parentElement;a&&a!==document.body;a=a.parentElement){const o=getComputedStyle(a);if(o.overflowY!=='visible'||o.overflowX!=='visible'){const c=a.getBoundingClientRect();top=Math.max(top,c.top);bottom=Math.min(bottom,c.bottom);}}return bottom>top?{top,bottom}:null;};
+  const covered=navBox?[...document.querySelectorAll('main input:not([type=hidden]),main select,main textarea,main button')].filter(el=>{if(!visible(el))return false;const r=shown(el),n=document.querySelector('.app-frame-nav')!.getBoundingClientRect();return r!==null&&r.bottom>n.top+2&&r.top<n.bottom;}).map(el=>(el.getAttribute('name')||el.getAttribute('aria-label')||el.textContent||el.tagName).trim().slice(0,40)):[];
+  // An inner scroll box whose own visible bottom sits under the dock would keep its last items hidden at the end of its scroll.
+  const scrollBoxesUnderDock=navBox?[...document.querySelectorAll('main *')].filter(el=>{const o=getComputedStyle(el);if(!/(auto|scroll)/.test(o.overflowY)||el.scrollHeight<=el.clientHeight+1||!visible(el))return false;const r=shown(el),n=document.querySelector('.app-frame-nav')!.getBoundingClientRect();return r!==null&&r.bottom>n.top+2;}).map(el=>(el.className||el.tagName).toString().slice(0,40)):[];
   window.scrollTo(0,0);
   const text=document.body.innerText;
   return {
@@ -108,6 +113,7 @@ for(const screen of screens)test(screen.name,async({page},info)=>{
    brandMentions:(text.match(/LV\s*Zion/g)??[]).length,
    overflowX:document.documentElement.scrollWidth>innerWidth+1,
    coveredByDock:covered,
+   scrollBoxesUnderDock,
    waiting:/Checking|Loading/i.test(text)?text.split('\n').find(l=>/Checking|Loading/i.test(l))?.slice(0,80):null,
    ground:getComputedStyle(document.body).backgroundColor,
    frameGround:document.querySelector('.app-frame')?getComputedStyle(document.querySelector('.app-frame')!).getPropertyValue('--lvz-ground').trim():null,
