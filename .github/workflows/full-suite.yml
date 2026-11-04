@@ -11,7 +11,7 @@ on:
       suite:
         description: Which suite to run
         type: choice
-        options: [unit, browser]
+        options: [unit, db, browser]
         default: unit
 permissions:
   contents: read
@@ -22,6 +22,8 @@ jobs:
     timeout-minutes: 30
     steps:
       - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
       - uses: actions/setup-node@v4
         with:
           node-version: 24
@@ -29,6 +31,8 @@ jobs:
       - run: npm ci --ignore-scripts
       - if: ${{ inputs.suite == 'unit' }}
         run: npm test
+      - if: ${{ inputs.suite == 'db' }}
+        run: npm run test:db
       - if: ${{ inputs.suite == 'browser' }}
         run: |
           npx playwright install --with-deps chromium
