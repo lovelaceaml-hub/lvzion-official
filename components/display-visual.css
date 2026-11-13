@@ -135,4 +135,7 @@
 .cd-sound{position:fixed;left:max(16px,2vw);bottom:max(16px,2vw);z-index:20;min-height:48px;padding:0 20px;border:0;border-radius:var(--lvz-radius-round);background:var(--lvz-accent);color:var(--lvz-on-accent);font:var(--lvz-weight-strong) 16px/1 var(--lvz-font-sans);cursor:pointer}
 /* Full screen on a phone held upright that cannot rotate itself: turn the display sideways to fill the screen. */
 .cd-rotated .cd-stage{position:fixed;top:50%;left:50%;width:min(100dvh,177.77778dvw);max-height:none;transform:translate(-50%,-50%) rotate(90deg)}
-.cd-rotated .cd-fullscreen{left:max(16px,2vw);right:auto;top:max(16px,2vw);bottom:auto;transform:rotate(90deg);transform-origin:center}
+/* Turned with the display: buttons sit along the display's bottom edge (the phone's left side), reading the same way. */
+.cd-rotated .cd-fullscreen,.cd-rotated .cd-sound{left:16px;right:auto;bottom:auto;transform-origin:top left;transform:rotate(90deg) translate(-50%,-100%)}
+.cd-rotated .cd-fullscreen{top:78%}
+.cd-rotated .cd-sound{top:22%}
