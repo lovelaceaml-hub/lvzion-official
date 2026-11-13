@@ -1,0 +1,52 @@
+/* Healing Concert: Aurora Night palette (styles/lvz-tokens.css). Tokens only. */
+.cc-page{display:flex;flex-direction:column;gap:var(--lvz-space-4);color:var(--lvz-ink);font-family:var(--lvz-font-sans);padding-bottom:var(--lvz-space-10)}
+.cc-page h1,.cc-page h2{margin:0;line-height:var(--lvz-leading-tight);font-weight:var(--lvz-weight-strong)}
+.cc-page h1{font-size:var(--lvz-text-2xl)}.cc-page h2{font-size:var(--lvz-text-xl)}
+.cc-event,.cc-invite{display:flex;flex-direction:column;gap:var(--lvz-space-2)}
+.cc-meta{display:flex;gap:var(--lvz-space-2);align-items:flex-start;margin:0;color:var(--lvz-ink-quiet);font-size:var(--lvz-text-md)}
+.cc-meta svg{flex:none;margin-top:2px;color:var(--lvz-accent)}
+.cc-details{margin:0;white-space:pre-line;font-size:var(--lvz-text-md);line-height:var(--lvz-leading-body)}
+.cc-hint{margin:0;color:var(--lvz-ink-quiet);font-size:var(--lvz-text-sm);line-height:var(--lvz-leading-body)}
+.cc-center{text-align:center}
+.cc-note{margin:0;padding:var(--lvz-space-3) var(--lvz-space-4);border-radius:var(--lvz-radius-md);background:var(--lvz-success-soft);color:var(--lvz-success);font-size:var(--lvz-text-sm)}
+.cc-error{margin:0;padding:var(--lvz-space-3) var(--lvz-space-4);border-radius:var(--lvz-radius-md);background:var(--lvz-danger-soft);color:var(--lvz-danger);font-size:var(--lvz-text-sm)}
+.cc-form{display:flex;flex-direction:column;gap:var(--lvz-space-3)}
+.cc-form select.ui-input{appearance:auto}
+.cc-two{display:grid;grid-template-columns:1fr 1fr;gap:var(--lvz-space-3)}
+.cc-check{display:flex;gap:var(--lvz-space-3);align-items:center;min-height:var(--lvz-tap);font-size:var(--lvz-text-md)}
+.cc-check input{width:22px;height:22px;accent-color:var(--lvz-accent)}
+.cc-actions{display:flex;flex-wrap:wrap;gap:var(--lvz-space-3)}
+.cc-actions>*{flex:1 1 160px;text-align:center}
+.cc-link{margin:0;padding:var(--lvz-space-3);border-radius:var(--lvz-radius-md);background:var(--lvz-sunken);font-size:var(--lvz-text-sm);word-break:break-all;user-select:all}
+
+/* The ticket: one bright card with the QR code on white for reliable scanning. */
+.cc-ticket{display:flex;flex-direction:column;align-items:center;gap:var(--lvz-space-2);padding:var(--lvz-space-6) var(--lvz-space-5);text-align:center;border-radius:var(--lvz-radius-xl);
+ background:linear-gradient(160deg,var(--lvz-tint-1),var(--lvz-tint-2));border:1px solid var(--lvz-glass-edge);box-shadow:var(--lvz-glass-shadow)}
+.cc-ticket-when{margin:0;font-size:var(--lvz-text-md)}
+.cc-ticket-name{margin:var(--lvz-space-2) 0 0;font-size:var(--lvz-text-lg);font-weight:var(--lvz-weight-strong)}
+.cc-qr{width:min(72vw,260px);aspect-ratio:1;margin:var(--lvz-space-3) 0;padding:var(--lvz-space-3);border-radius:var(--lvz-radius-lg);background:var(--lvz-ink)}
+.cc-qr svg{display:block;width:100%;height:100%}
+
+.cc-guests .ui-row{align-items:flex-start}
+.cc-row-actions{display:flex;flex-direction:column;gap:var(--lvz-space-1);align-items:stretch}
+.cc-row-actions .ui-button{min-height:var(--lvz-tap);padding-inline:var(--lvz-space-3);font-size:var(--lvz-text-sm)}
+
+.cc-public{padding-top:var(--lvz-space-6)}
+.cc-public-head{display:flex;flex-direction:column;gap:var(--lvz-space-2)}
+.cc-public-when{margin:0;font-size:var(--lvz-text-md);font-weight:var(--lvz-weight-strong)}
+
+/* Door scanner */
+.cc-scan{display:flex;flex-direction:column;gap:var(--lvz-space-3);padding:var(--lvz-space-3) var(--lvz-gutter) var(--lvz-space-10);color:var(--lvz-ink)}
+.cc-scan-frame{position:relative;overflow:hidden;aspect-ratio:3/4;max-height:68dvh;width:100%;margin:0 auto;border-radius:var(--lvz-radius-xl);background:var(--lvz-sunken)}
+.cc-scan-video{width:100%;height:100%;object-fit:cover;display:block}
+.cc-scan-target{position:absolute;inset:18%;border:3px solid var(--lvz-accent);border-radius:var(--lvz-radius-lg);box-shadow:0 0 0 999px var(--lvz-scrim);pointer-events:none}
+.cc-scan-status{position:absolute;inset:auto var(--lvz-space-4) var(--lvz-space-4);margin:0;padding:var(--lvz-space-3);border-radius:var(--lvz-radius-md);background:var(--lvz-surface);font-size:var(--lvz-text-sm);text-align:center}
+.cc-result{position:absolute;inset:auto var(--lvz-space-3) var(--lvz-space-3);display:flex;flex-direction:column;gap:var(--lvz-space-1);padding:var(--lvz-space-4) var(--lvz-space-5);border-radius:var(--lvz-radius-lg);box-shadow:var(--lvz-shadow-pop)}
+.cc-result strong{font-size:var(--lvz-text-xl)}.cc-result span{font-size:var(--lvz-text-md)}
+.cc-result[data-tone="ok"]{background:var(--lvz-success-soft);color:var(--lvz-success);border:2px solid var(--lvz-success)}
+.cc-result[data-tone="warn"]{background:var(--lvz-warning-soft);color:var(--lvz-warning);border:2px solid var(--lvz-warning)}
+.cc-result[data-tone="bad"]{background:var(--lvz-danger-soft);color:var(--lvz-danger);border:2px solid var(--lvz-danger)}
+.cc-scan-foot{display:flex;flex-direction:column;gap:var(--lvz-space-3);align-items:stretch;text-align:center}
+.cc-photo{position:relative;overflow:hidden}
+.cc-photo input{position:absolute;inset:0;opacity:0;cursor:pointer}
+@media (prefers-reduced-motion:reduce){.cc-page *,.cc-scan *{transition:none!important;animation:none!important}}

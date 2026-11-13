@@ -24,7 +24,7 @@ export function FrameControls(props:Controls){
  return null;
 }
 /** Pages anyone may open. They never show member navigation or the profile circle. */
-const publicRoutes=['/sign-in','/sign-up','/signup','/reset-password','/request-access','/activate','/auth','/install'];
+const publicRoutes=['/sign-in','/sign-up','/signup','/reset-password','/request-access','/activate','/auth','/install','/concert'];
 export const isPublicRoute=(path:string)=>path==='/'||publicRoutes.some(r=>path===r||path.startsWith(r+'/'));
 function routeDetails(path:string):{title:string;icon:IconName}{
  if(path==='/appearance')return{title:'Appearance',icon:'contrast'};
