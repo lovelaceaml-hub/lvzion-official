@@ -307,6 +307,17 @@
    "verified_on": "2026-11-12",
    "applied_via": "Supabase CLI db query (Management API) from main dc520a4, after 45 SQL assertions, 6 unit tests, 3 browser tests, TypeScript and the production build passed; schema_migrations row recorded by hand",
    "verification": "Hosted readback: four concert tables with RLS and no direct SELECT for anon, authenticated or service_role; six member RPC wrappers executable by authenticated only; guest RSVP, invite view and ticket view executable by service_role only; module registered draft, then approved by the bootstrap owner after deployment. No events, tickets or grants created. Production dpl_4kDkqdkxAN5sxMc29eg4HYMu7b4V READY from dc520a4 on lvz.app."
+  },
+  {
+   "name": "concert_program",
+   "hosted_version": "20261112210000",
+   "repository_version": "20261112210000",
+   "source": "supabase/migrations/20261112210000_concert_program.sql",
+   "source_blob_sha": "637b95ac6f93e8ec661f0c3a6eaab81e09715447",
+   "status": "applied",
+   "verified_on": "2026-11-12",
+   "applied_via": "Supabase CLI db query (Management API) from main b6ff470, after 56 SQL assertions, 7 unit tests, 3 browser tests, TypeScript and the production build passed; schema_migrations row recorded by hand",
+   "verification": "Hosted readback: program table with RLS and no direct SELECT for authenticated; two manager RPC wrappers executable by authenticated only, not anon. Anthony's 11-song program entered for the open concert (audited); the public event view shows order, title and performers only. Production dpl_3JbMGy63YUKfwSsK3zKBwEqcgFtB READY from b6ff470 on lvz.app."
   }
  ],
  "normalization": {
@@ -314,9 +325,7 @@
   "hosted": "Remove whitespace from each stored statement; these stored statements already omit comments and outer transaction wrappers.",
   "purpose": "Comparison of known migration definitions, not cryptographic attestation or a full semantic/security review."
  },
- "unapplied_repository_migrations": [
-  "supabase/migrations/20261112210000_concert_program.sql"
- ],
+ "unapplied_repository_migrations": [],
  "warning": "Hosted versions differ from repository filenames. Never replay applied migrations or use blind db push. Re-read current hosted metadata before release, including concurrent module work. The fresh calendar correction is applied: Study Room booking is enabled for existing grants and weekly restrictions are empty. Do not reinstate superseded defaults.",
  "metadata_reconciled_at": "2026-10-24T19:00:00Z",
  "metadata_reconciliation": "2026-10-24 full listing of hosted schema_migrations: 28 versions. The five Worship migrations were found already applied on 2026-10-15 and are now mapped; gospel_planning_core applied 2026-10-24. Every repository migration is applied.",

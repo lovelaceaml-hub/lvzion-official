@@ -12,6 +12,8 @@ Keep compact module headers and the prominent center Apps launcher. The launcher
 
 Live on lvz.app (Apps, Healing Concert). Members RSVP and get a QR ticket on screen and by email, share a personal invite link so guests without an account can RSVP, and concert managers scan tickets at the door. No participation score (Anthony's choice). Migration `20261112180000_healing_concert` applied and the app approved; `LVZ_CONCERT_TOKEN_SECRET` added to Vercel production (never rotate after tickets go out). Deployment `dpl_4kDkqdkxAN5sxMc29eg4HYMu7b4V` from `dc520a4`. Signed-out live checks passed; no concert is set up yet, so a signed-in RSVP, email delivery and a phone scan are still unverified. [Guide, checks and next steps](concert/README.md).
 
+Concert details and program entered on 2026-11-12 from Anthony's flyer and song sheet: The Words of Mother's Love Healing Concert, Sunday December 6, 2026, 4:30 PM, World Mission Society Church of God, 6720 W Sahara Ave; no seat limit; 11-song program. The program shows everywhere with order, title and performers (migration `20261112210000_concert_program`, deployment `dpl_3JbMGy63YUKfwSsK3zKBwEqcgFtB`). A signed-in RSVP, email delivery and a phone scan are still unverified.
+
 ## Access and placement decisions — October 24, 2026 (applied)
 
 Anthony decided on 2026-10-24, superseding "module access only by explicit grant" and "leadership follows the leader's placement". One migration, `supabase/migrations/20261024170000_open_access_group_placement.sql`, implements all of it. It was merged in #71, applied to the hosted database on October 24 (hosted version `20261024170000`) and deployed with main `d6a5a2c`; pre-checks and readback are in the [ledger](HOSTED-MIGRATION-LEDGER.json).
