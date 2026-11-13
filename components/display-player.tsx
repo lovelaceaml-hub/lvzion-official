@@ -23,6 +23,10 @@ export default function DisplayPlayer(){
  // Pairing is optional now: the form shows only at lvz.app/display?pair=1.
  const [pairMode,setPairMode]=useState(false);
  const [isFull,setIsFull]=useState(false);
+ // Phones that cannot rotate on their own (iPhone) get the display turned sideways instead.
+ const [rotated,setRotated]=useState(false);
+ const [soundBlocked,setSoundBlocked]=useState(false);
+ const portrait=()=>window.innerHeight>window.innerWidth;
  const [controls,setControls]=useState(true);
  const hideControls=useRef<ReturnType<typeof setTimeout>|null>(null);
  const wakeLock=useRef<{release:()=>Promise<void>}|null>(null);
@@ -31,11 +35,31 @@ export default function DisplayPlayer(){
   try{const nav=navigator as Navigator&{wakeLock?:{request:(t:'screen')=>Promise<{release:()=>Promise<void>}>}};
    if(nav.wakeLock&&!wakeLock.current&&!document.hidden)wakeLock.current=await nav.wakeLock.request('screen');}catch{}
  };
+ // Any tap counts as permission for sound, so later videos play with sound.
+ const enableSound=()=>{
+  if(!soundBlocked)return;
+  setSoundBlocked(false);
+  const v=document.querySelector<HTMLVideoElement>('.cd-screen video');
+  if(v){v.muted=false;void v.play().catch(()=>{});}
+ };
  const toggleFullscreen=async()=>{
-  try{
-   if(document.fullscreenElement)await document.exitFullscreen();
-   else await document.documentElement.requestFullscreen({navigationUI:'hide'});
-  }catch{}
+  enableSound();
+  const leaving=isFull||rotated||!!document.fullscreenElement;
+  if(leaving){
+   setRotated(false);
+   try{(screen.orientation as ScreenOrientation&{unlock?:()=>void}).unlock?.();}catch{}
+   try{if(document.fullscreenElement)await document.exitFullscreen();}catch{}
+   setIsFull(false);return;
+  }
+  let full=false;
+  try{if(document.documentElement.requestFullscreen){await document.documentElement.requestFullscreen({navigationUI:'hide'});full=true;}}catch{}
+  // Turn phones and tablets to landscape; where that is not possible, rotate the display on screen.
+  let locked=false;
+  try{const o=screen.orientation as ScreenOrientation&{lock?:(o:string)=>Promise<void>};if(o?.lock){await o.lock('landscape');locked=true;}}catch{}
+  // Some devices accept the request but stay upright; check, and rotate the display on screen if so.
+  if(locked)await new Promise(r=>setTimeout(r,700));
+  if(portrait())setRotated(true);
+  setIsFull(true);
   void keepAwake();
  };
  const current=useRef<Verified|null>(null),pending=useRef<Verified|null>(null);
@@ -88,7 +112,10 @@ export default function DisplayPlayer(){
   alive.current=true;
   setPairMode(new URLSearchParams(window.location.search).get('pair')==='1');
   showControls();void keepAwake();
-  const onFull=()=>setIsFull(!!document.fullscreenElement);
+  const onFull=()=>{if(!document.fullscreenElement){setIsFull(false);setRotated(false);}else setIsFull(true);};
+  // A phone turned to landscape by hand no longer needs the on-screen rotation.
+  const onResize=()=>{if(!portrait())setRotated(false);};
+  window.addEventListener('resize',onResize);
   const onKey=(e:KeyboardEvent)=>{if(e.key==='f'||e.key==='F')void toggleFullscreen();};
   document.addEventListener('fullscreenchange',onFull);document.addEventListener('keydown',onKey);
   void refresh();
@@ -134,7 +161,7 @@ export default function DisplayPlayer(){
   return()=>{alive.current=false;requestSequence.current++;inFlight.current?.abort();
    clearInterval(poll);clearInterval(advance);window.removeEventListener('online',onOnline);
    document.removeEventListener('visibilitychange',onVisibility);
-   document.removeEventListener('fullscreenchange',onFull);document.removeEventListener('keydown',onKey);
+   document.removeEventListener('fullscreenchange',onFull);window.removeEventListener('resize',onResize);document.removeEventListener('keydown',onKey);
    if(hideControls.current)clearTimeout(hideControls.current);
    void wakeLock.current?.release().catch(()=>{});wakeLock.current=null;
    current.current=null;pending.current=null;overrideActive.current=false;};
@@ -150,8 +177,8 @@ export default function DisplayPlayer(){
   }catch(e){setError(e instanceof Error?e.message:'Pairing unavailable.');}
   finally{setPairing(false);}
  }
- return <main className="cd-screen" aria-label="LV Zion Official Continuous Church Display" data-controls={controls||undefined}
-  onPointerMove={showControls} onPointerDown={showControls} onDoubleClick={()=>void toggleFullscreen()}>
+ return <main className={'cd-screen'+(rotated?' cd-rotated':'')} aria-label="LV Zion Official Continuous Church Display" data-controls={controls||undefined}
+  onPointerMove={showControls} onPointerDown={()=>{showControls();enableSound();}} onKeyDown={enableSound} onDoubleClick={()=>void toggleFullscreen()}>
   <div className={'cd-stage cd-motion-'+motionMode}>
    {mode==='unpaired'&&pairMode?<section className="cd-device-pair">
     <p className="cd-mark">LV<span>Zion</span></p>
@@ -162,11 +189,12 @@ export default function DisplayPlayer(){
      <button disabled={pairing||code.replace(/[–\s-]/g,'').length!==12}>{pairing?'Pairing…':'Connect'}</button>
     </form>
     {error&&<p role="alert" className="cd-pair-error">{error}</p>}
-   </section>:<DisplayVisual key={(slide?.id??'welcome')+(slide?.kind==='video'?':'+playCount:'')} slide={slide} rooms={rooms} nowClock={nowClock}
+   </section>:<DisplayVisual key={(slide?.id??'welcome')+(slide?.kind==='video'?':'+playCount:'')} slide={slide} rooms={rooms} nowClock={nowClock} sound onSoundBlocked={()=>setSoundBlocked(true)}
      mediaSrc={name=>'/api/display/media/'+encodeURIComponent(name)}
      onMediaEnd={()=>{if(slide)mediaEnded.current=slide.id;}}/>}
   </div>
   {!(mode==='unpaired'&&pairMode)&&<button type="button" className="cd-fullscreen" onClick={()=>void toggleFullscreen()}
    aria-label={isFull?'Exit full screen':'Full screen'} data-hidden={!controls||undefined}>{isFull?'Exit full screen':'Full screen'}</button>}
+  {soundBlocked&&<button type="button" className="cd-sound" onClick={enableSound}>Tap for sound</button>}
  </main>;
 }

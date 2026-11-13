@@ -131,3 +131,8 @@
 .cd-fullscreen[data-hidden]{opacity:0;pointer-events:none}
 .cd-fullscreen:focus-visible{opacity:1;pointer-events:auto;outline:3px solid #fff;outline-offset:2px}
 .cd-screen:not([data-controls]){cursor:none}
+/* Sound: browsers only allow it after a tap, so a clear button shows until then. */
+.cd-sound{position:fixed;left:max(16px,2vw);bottom:max(16px,2vw);z-index:20;min-height:48px;padding:0 20px;border:0;border-radius:var(--lvz-radius-round);background:var(--lvz-accent);color:var(--lvz-on-accent);font:var(--lvz-weight-strong) 16px/1 var(--lvz-font-sans);cursor:pointer}
+/* Full screen on a phone held upright that cannot rotate itself: turn the display sideways to fill the screen. */
+.cd-rotated .cd-stage{position:fixed;top:50%;left:50%;width:min(100dvh,177.77778dvw);max-height:none;transform:translate(-50%,-50%) rotate(90deg)}
+.cd-rotated .cd-fullscreen{left:max(16px,2vw);right:auto;top:max(16px,2vw);bottom:auto;transform:rotate(90deg);transform-origin:center}

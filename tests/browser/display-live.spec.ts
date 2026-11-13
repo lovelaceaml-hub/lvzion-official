@@ -71,3 +71,38 @@ test('full screen button enters full screen and hides itself after a few seconds
  await page.mouse.move(200,200);
  await expect(page.locator('.cd-fullscreen')).not.toHaveAttribute('data-hidden','true');
 });
+const videoPacket=()=>{const now=Date.now();return JSON.stringify({paired:true,screen:'Lobby Display',version:9,serverTime:new Date(now).toISOString(),leaseUntil:new Date(now+30000).toISOString(),
+ operatingHours:[],overrideSlideId:null,overrideUntil:null,motionMode:'standard',
+ slides:[{id:'promo-1',kind:'video',style:'editorial',title:'Fictional promo',media:'0123456789abcdef0123456789abcdef.mp4',duration:60}]});};
+test('videos try sound first; when the browser blocks it they play silently until one tap turns sound on',async({page})=>{
+ await page.setViewportSize({width:1920,height:1080});
+ // Act like a browser that refuses sound before the first tap.
+ await page.addInitScript(()=>{
+  let tapped=false;addEventListener('pointerdown',()=>{tapped=true;},true);
+  HTMLMediaElement.prototype.play=function(){return !this.muted&&!tapped?Promise.reject(new DOMException('blocked','NotAllowedError')):Promise.resolve();};
+ });
+ await page.route('**/api/display/media/**',()=>{/* keep the fictional file loading */});
+ await page.route('**/api/display/device',route=>route.fulfill({status:200,contentType:'application/json',body:videoPacket()}));
+ await page.goto('/display');
+ const sound=page.getByRole('button',{name:'Tap for sound'});
+ await expect(sound).toBeVisible();
+ expect(await page.locator('video').evaluate(v=>(v as HTMLVideoElement).muted)).toBe(true);
+ await sound.click();
+ await expect(sound).toHaveCount(0);
+ expect(await page.locator('video').evaluate(v=>(v as HTMLVideoElement).muted)).toBe(false);
+});
+test('full screen on an upright phone turns the display to landscape',async({page})=>{
+ await page.setViewportSize({width:390,height:844});
+ await page.route('**/api/display/device',route=>route.fulfill({status:200,contentType:'application/json',body:videoPacket()}));
+ await page.route('**/api/display/media/**',()=>{});
+ await page.goto('/display');
+ await page.getByRole('button',{name:'Full screen'}).click();
+ // This test browser cannot lock orientation, so the display is turned sideways on screen.
+ await expect(page.locator('.cd-screen')).toHaveClass(/cd-rotated/);
+ const box=await page.locator('.cd-stage').boundingBox();
+ expect(box&&box.height>box.width).toBe(true);
+ // Turned sideways, the 16:9 display spans the full width of the upright phone.
+ expect(box&&box.width>=385&&box.width<=391).toBe(true);
+ await page.getByRole('button',{name:'Exit full screen'}).click();
+ await expect(page.locator('.cd-screen')).not.toHaveClass(/cd-rotated/);
+});

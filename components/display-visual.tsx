@@ -1,3 +1,5 @@
+'use client';
+import {useEffect,useRef} from 'react';
 import type{DisplayKind,DisplayRooms,DisplaySlide} from '../lib/continuous-display/live-contract';
 type Props={
  slide?:DisplaySlide|null;preview?:boolean;
@@ -9,6 +11,10 @@ type Props={
  nowClock?:string;
  /** Called when a video finishes or cannot play, so the TV moves on. */
  onMediaEnd?:()=>void;
+ /** Play videos with sound (the TV). Previews stay silent. */
+ sound?:boolean;
+ /** Called when the browser refuses sound before anyone has touched the page; the video then plays silently. */
+ onSoundBlocked?:()=>void;
 };
 const eyebrows:Record<DisplayKind,string>={announcement:'Announcement',schedule:'Schedule',event:'Upcoming event',campaign:'Campaign',image:'Picture',video:'Video',rooms:'Study rooms'};
 function dateParts(value?:string){
@@ -51,22 +57,32 @@ function RoomsBoard({slide,rooms,nowClock,preview}:{slide:DisplaySlide;rooms?:Di
   {preview&&<span className="cd-preview-mark">Preview, not on the TV</span>}
  </section>;
 }
-function MediaSlide({slide,preview,mediaSrc,onMediaEnd}:{slide:DisplaySlide;preview:boolean;mediaSrc?:(name:string)=>string;onMediaEnd?:()=>void}){
+function MediaSlide({slide,preview,mediaSrc,onMediaEnd,sound,onSoundBlocked}:{slide:DisplaySlide;preview:boolean;mediaSrc?:(name:string)=>string;onMediaEnd?:()=>void;sound?:boolean;onSoundBlocked?:()=>void}){
  const src=slide.media&&mediaSrc?mediaSrc(slide.media):null;
+ const video=useRef<HTMLVideoElement>(null);
+ const withSound=!!sound&&!preview;
+ // Start with sound when allowed; if the browser blocks it, keep playing silently and say so.
+ useEffect(()=>{
+  const v=video.current;if(!v)return;
+  v.muted=!withSound;
+  v.play().catch(()=>{
+   if(!v.muted){v.muted=true;onSoundBlocked?.();void v.play().catch(()=>{});}
+  });
+ // eslint-disable-next-line react-hooks/exhaustive-deps
+ },[src,withSound]);
  const fit=slide.fit??'contain';
  return <section className={`cd-slide cd-kind-media cd-fit-${fit}`} aria-label={slide.title}>
   {src&&slide.kind==='image'&&<img className="cd-media" src={src} alt={slide.title} decoding="async"/>}
-  {/* TVs play without sound, so videos are always muted. */}
-  {src&&slide.kind==='video'&&<video className="cd-media" src={src} muted playsInline autoPlay preload="auto"
+  {src&&slide.kind==='video'&&<video ref={video} className="cd-media" src={src} muted={!withSound} playsInline preload="auto"
    loop={preview} aria-label={slide.title} onEnded={onMediaEnd} onError={onMediaEnd}/>}
   {!src&&<p className="cd-rooms-empty cd-media-missing">{slide.kind==='video'?'Upload a video for this slide.':'Upload a picture for this slide.'}</p>}
   {slide.body&&<p className="cd-media-caption">{slide.body}</p>}
   {preview&&<span className="cd-preview-mark">Preview, not on the TV</span>}
  </section>;
 }
-export default function DisplayVisual({slide,preview=false,mediaSrc,rooms,nowClock,onMediaEnd}:Props){
+export default function DisplayVisual({slide,preview=false,mediaSrc,rooms,nowClock,onMediaEnd,sound,onSoundBlocked}:Props){
  if(!slide)return <section className="cd-slide cd-fallback"><div className="cd-art" aria-hidden="true"><i/><i/><i/></div><div className="cd-copy"><p className="cd-eyebrow">LV Zion</p><h1>Welcome.</h1><p className="cd-body">The display is taking a quiet moment.</p></div></section>;
- if(slide.kind==='image'||slide.kind==='video')return <MediaSlide slide={slide} preview={preview} mediaSrc={mediaSrc} onMediaEnd={onMediaEnd}/>;
+ if(slide.kind==='image'||slide.kind==='video')return <MediaSlide slide={slide} preview={preview} mediaSrc={mediaSrc} onMediaEnd={onMediaEnd} sound={sound} onSoundBlocked={onSoundBlocked}/>;
  if(slide.kind==='rooms')return <RoomsBoard slide={slide} rooms={rooms} nowClock={nowClock} preview={preview}/>;
  const date=dateParts(slide.date);
  return <section className={`cd-slide cd-style-${slide.style} cd-kind-${slide.kind}`} aria-label={slide.title}>
