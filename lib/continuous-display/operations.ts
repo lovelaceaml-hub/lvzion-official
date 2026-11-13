@@ -1,4 +1,4 @@
-import {CHURCH_TIME_ZONE,isInt,isRecord,parseDisplaySnapshot,slideEligible,type DisplaySnapshot,type DisplayScreen,type DisplaySlide} from './live-contract.ts';
+import {CHURCH_TIME_ZONE,isInt,isRecord,parseDisplayRooms,parseDisplaySnapshot,slideEligible,type DisplayRooms,type DisplaySnapshot,type DisplayScreen,type DisplaySlide} from './live-contract.ts';
 
 export type OperatingDay={day:number;enabled:boolean;start:number;end:number};
 export type OperatingHours=OperatingDay[];
@@ -15,6 +15,8 @@ export type DisplayScreenR2=DisplayScreen&{
 };
 export type DisplaySnapshotR2=DisplaySnapshot&{
  operatingHours:OperatingHours;motionMode:DisplayMotionMode;overrideSlideId:string|null;overrideUntil:string|null;
+ /** Present only when a published slide is a rooms slide. */
+ rooms:DisplayRooms|null;
 };
 const weekday=['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
 
@@ -59,7 +61,7 @@ export function minuteValue(value:string):number {
 
 export function parseDisplaySnapshotR2(raw:unknown):DisplaySnapshotR2 {
  if(!isRecord(raw)||Object.keys(raw).some(k=>!
- ['paired','screen','version','serverTime','leaseUntil','slides','operatingHours','overrideSlideId','overrideUntil','motionMode'].includes(k)))
+ ['paired','screen','version','serverTime','leaseUntil','slides','operatingHours','overrideSlideId','overrideUntil','motionMode','rooms'].includes(k)))
   throw Error('Unexpected private screen metadata.');
  const base=parseDisplaySnapshot(raw);
  const hours=parseOperatingHours(raw.operatingHours??[]);
@@ -74,7 +76,7 @@ export function parseDisplaySnapshotR2(raw:unknown):DisplaySnapshotR2 {
    throw Error('Expired or unauthorized temporary notice.');
  }
  return {...base,operatingHours:hours,motionMode,overrideSlideId:overrideId as string|null,
-  overrideUntil:overrideUntil as string|null};
+  overrideUntil:overrideUntil as string|null,rooms:parseDisplayRooms(raw.rooms)};
 }
 export function overrideForDisplay(snapshot:DisplaySnapshotR2,nowMs:number):DisplaySlide|null {
  if(!withinOperatingHours(snapshot.operatingHours,nowMs)||!snapshot.overrideSlideId||!snapshot.overrideUntil||

@@ -1,9 +1,9 @@
 'use client';
 import {useEffect,useRef,useState} from 'react';
 import type{FormEvent}from'react';
-import type{DisplaySlide}from'../lib/continuous-display/live-contract';
+import type{DisplayRooms,DisplaySlide}from'../lib/continuous-display/live-contract';
 import type{DisplaySnapshotR2}from'../lib/continuous-display/operations';
-import {activeDisplaySlides}from '../lib/continuous-display/live-contract';
+import {activeDisplaySlides,churchLocal}from '../lib/continuous-display/live-contract';
 import {parseDisplaySnapshotR2,overrideForDisplay,withinOperatingHours,type DisplayMotionMode}from '../lib/continuous-display/operations';
 import DisplayVisual from './display-visual';
 type Verified={packet:DisplaySnapshotR2;serverEpoch:number;verifiedAt:number};
@@ -12,6 +12,12 @@ export default function DisplayPlayer(){
  const [mode,setMode]=useState<ScreenMode>('loading');
  const [motionMode,setMotionMode]=useState<DisplayMotionMode>('standard');
  const [slide,setSlide]=useState<DisplaySlide|null>(null);
+ // A new play count each time a slide comes on, so a video starts again even when it is the only slide.
+ const [playCount,setPlayCount]=useState(0);
+ const [rooms,setRooms]=useState<DisplayRooms|null>(null);
+ const [nowClock,setNowClock]=useState('');
+ const mediaEnded=useRef<string|null>(null);
+ const show=(next:DisplaySlide)=>{shown.current=next.id;shownAt.current=performance.now();mediaEnded.current=null;setPlayCount(n=>n+1);setSlide(next);};
  const [code,setCode]=useState('');const [pairing,setPairing]=useState(false);
  const [error,setError]=useState('');
  const current=useRef<Verified|null>(null),pending=useRef<Verified|null>(null);
@@ -23,7 +29,7 @@ export default function DisplayPlayer(){
  // Show the neutral welcome and forget which slide or temporary notice was on screen.
  const blank=()=>{shown.current=null;overrideActive.current=false;setSlide(null);};
  const apply=(verified:Verified)=>{
-  setMotionMode(verified.packet.motionMode);
+  setMotionMode(verified.packet.motionMode);setRooms(verified.packet.rooms);
   current.current=verified;pending.current=null;shown.current=null;shownAt.current=performance.now();generation.current++;
   overrideActive.current=false;setMode('paired');setSlide(null);
  };
@@ -49,7 +55,7 @@ export default function DisplayPlayer(){
     // Only a specifically authorized active override can interrupt the regular safe-transition handoff.
     if(packet.overrideSlideId)apply(checked);
     else pending.current=checked;
-   }else {current.current={...checked};setMotionMode(checked.packet.motionMode);}
+   }else {current.current={...checked};setMotionMode(checked.packet.motionMode);setRooms(checked.packet.rooms);}
    setMode('paired');setError('');
   }catch{
    if(!alive.current||sequence!==requestSequence.current)return;
@@ -68,6 +74,7 @@ export default function DisplayPlayer(){
    const v=current.current;if(!v)return;
    const now=v.serverEpoch+(performance.now()-v.verifiedAt);
    const isExpired=now>=Date.parse(v.packet.leaseUntil);
+   const clock=churchLocal(new Date(now).toISOString()).slice(11,16);setNowClock(c=>c===clock?c:clock);
    if(isExpired){
     if(pending.current){
      const pv=pending.current,pNow=pv.serverEpoch+(performance.now()-pv.verifiedAt);
@@ -82,7 +89,7 @@ export default function DisplayPlayer(){
    const forced=overrideForDisplay(v.packet,now);
    if(forced){
     if(!overrideActive.current||shown.current!==forced.id){
-     shown.current=forced.id;shownAt.current=performance.now();setSlide(forced);
+     show(forced);
     }
     overrideActive.current=true;return;
    }
@@ -90,10 +97,12 @@ export default function DisplayPlayer(){
    const index=shown.current===null?-1:items.findIndex(s=>s.id===shown.current);
    const existing=index>=0?items[index]:null;
    const duration=existing?existing.duration*1000:0;
-   if(!existing||performance.now()-shownAt.current>=duration){
+   // A video moves on when it finishes, or at its set time if that comes first.
+   const finished=!!existing&&existing.kind==='video'&&mediaEnded.current===existing.id;
+   if(!existing||finished||performance.now()-shownAt.current>=duration){
     if(pending.current&&performance.now()-pending.current.verifiedAt<=30000){apply(pending.current);return;}
     const next=items[index<0?0:(index+1)%items.length];
-    shown.current=next.id;shownAt.current=performance.now();setSlide(next);
+    show(next);
    }
   },250);
   const onVisibility=()=>{if(!document.hidden)void refresh();};
@@ -126,7 +135,9 @@ export default function DisplayPlayer(){
      <button disabled={pairing||code.replace(/[–\s-]/g,'').length!==12}>{pairing?'Pairing…':'Connect'}</button>
     </form>
     {error&&<p role="alert" className="cd-pair-error">{error}</p>}
-   </section>:<DisplayVisual slide={slide}/>}
+   </section>:<DisplayVisual key={(slide?.id??'welcome')+(slide?.kind==='video'?':'+playCount:'')} slide={slide} rooms={rooms} nowClock={nowClock}
+     mediaSrc={name=>'/api/display/media/'+encodeURIComponent(name)}
+     onMediaEnd={()=>{if(slide)mediaEnded.current=slide.id;}}/>}
   </div>
  </main>;
 }

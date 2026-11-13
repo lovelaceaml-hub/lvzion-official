@@ -1,9 +1,9 @@
 'use client';
 import {useEffect,useState,type ReactNode} from 'react';
-import {CalendarDays,Clock3,FileText,Heart,MapPin,Plus,Settings,Sun} from './home-icons';
+import {CalendarDays,Clock3,DoorOpen,FileText,Film,Heart,ImageIcon,MapPin,Plus,Settings,Sun} from './home-icons';
 import {EmptyState,Glass,IconBox,SectionHeader,Tag} from './ui-kit';
 import type {ChurchOffset,DisplayKind,DisplaySlide} from '../lib/continuous-display/live-contract';
-import {CHURCH_TIME_ZONE,churchDateTime,churchLocal,churchTimeToUtc,offsetForChurchTime,slideEligible} from '../lib/continuous-display/live-contract';
+import {CHURCH_TIME_ZONE,KIND_LABELS,churchDateTime,churchLocal,churchTimeToUtc,offsetForChurchTime,slideEligible} from '../lib/continuous-display/live-contract';
 import type {DisplayMotionMode,DisplayScreenR2,OperatingDay,OperatingHours} from '../lib/continuous-display/operations';
 import {minuteValue,parseDisplayMotionMode,parseOperatingHours,standardOperatingHours,timeValue} from '../lib/continuous-display/operations';
 export type Command=(action:string,extra?:Record<string,unknown>)=>Promise<void>;
@@ -12,6 +12,9 @@ export function KindIcon({kind,size=22}:{kind:DisplayKind;size?:number}){
  if(kind==='schedule')return <CalendarDays size={size}/>;
  if(kind==='event')return <MapPin size={size}/>;
  if(kind==='campaign')return <Heart size={size}/>;
+ if(kind==='image')return <ImageIcon size={size}/>;
+ if(kind==='video')return <Film size={size}/>;
+ if(kind==='rooms')return <DoorOpen size={size}/>;
  return <FileText size={size}/>;
 }
 /** Glass disclosure card: icon box, title and a short note; the chevron comes from CSS. */
@@ -111,7 +114,7 @@ export function PublicationControls({screen,busy,command,draftDirty}:{
    <SectionHeader id="cd-override-title" title="On the TV now" note={screen.publishedItems?.length?`Published v${screen.publishedVersion}`:undefined}/>
    <p className="ui-hint cd-lead-hint">The published playlist, not your unsaved draft. Each TV moves through it on its own, so this page cannot show the exact slide on screen.</p>
    {screen.publishedItems?.length?<Glass tight as="div"><ol className="ui-list">{screen.publishedItems.map((s,i)=><li key={s.id} className="ui-row">
-    <IconBox><KindIcon kind={s.kind}/></IconBox><span className="ui-row-body"><strong>{s.title}</strong><small>{s.duration}s · {s.kind.slice(0,1).toUpperCase()+s.kind.slice(1)}</small></span>
+    <IconBox><KindIcon kind={s.kind}/></IconBox><span className="ui-row-body"><strong>{s.title}</strong><small>{s.duration}s · {KIND_LABELS[s.kind]}</small></span>
     {overrideActive&&screen.overrideSlideId===s.id?<Tag tone="success">Featured</Tag>:<Tag>{String(i+1).padStart(2,'0')}</Tag>}</li>)}</ol></Glass>
    :<Glass as="div" className="cd-state"><EmptyState icon={<FileText/>} title="Nothing is published yet">Approve and publish a draft to put it on paired TVs.</EmptyState></Glass>}
   </section>

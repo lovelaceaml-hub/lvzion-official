@@ -122,3 +122,7 @@
 
 /* Development-only fixture banner on /display-operations-review. */
 .cd-review-banner{margin:0;padding:var(--lvz-space-3) var(--lvz-gutter);background:var(--lvz-warning-soft);color:var(--lvz-warning);font-size:var(--lvz-text-xs);font-weight:var(--lvz-weight-bold);letter-spacing:.06em;text-align:center}
+/* Picture and video upload, and the one-tap add buttons. */
+.cd-media-picker{display:flex;flex-wrap:wrap;align-items:center;gap:var(--lvz-space-3)}
+.cd-media-picker .ui-hint{margin:0;flex:1 1 220px}
+.cd-add-row-buttons{display:flex;flex-wrap:wrap;justify-content:center;gap:var(--lvz-space-2)}

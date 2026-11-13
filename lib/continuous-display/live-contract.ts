@@ -1,14 +1,35 @@
 // Shared, data-minimized contract for the LV Zion Official screen player and manager.
-export type DisplayKind='announcement'|'schedule'|'event'|'campaign';
+export type DisplayKind='announcement'|'schedule'|'event'|'campaign'|'image'|'video'|'rooms';
+/** Picture, video and room-booking slides; the original four are text slides. */
+export type DisplayMediaKind='image'|'video';
+export type DisplayFit='cover'|'contain';
 export type DisplayStyle='editorial'|'schedule'|'event'|'campaign';
 export type DisplayRow={time:string;label:string};
-export type DisplaySlide={id:string;kind:DisplayKind;style:DisplayStyle;title:string;body:string;duration:number;date?:string;time?:string;location?:string;rows?:DisplayRow[];startsAt?:string;endsAt?:string};
+export type DisplaySlide={id:string;kind:DisplayKind;style:DisplayStyle;title:string;body?:string;duration:number;date?:string;time?:string;location?:string;rows?:DisplayRow[];startsAt?:string;endsAt?:string;media?:string;fit?:DisplayFit};
+/** Today's study-room bookings for a rooms slide: room and time only, never who booked. */
+export type DisplayRoomBooking={room:string;start:string;end:string};
+export type DisplayRooms={date:string;bookings:DisplayRoomBooking[]};
 export type DisplayDevice={id:string;lastSeen:string|null;pairedAt:string;revoked:boolean};
 export type DisplayScreen={id:string;label:string;enabled:boolean;draftVersion:number;items:DisplaySlide[];startsAt:string|null;endsAt:string|null;approvedVersion:number|null;publishedVersion:number;publishedAt:string|null;publishedUntil:string|null;devices:DisplayDevice[];history:{id:string;generation:number;publishedAt:string;until:string}[]};
 export type DisplaySnapshot={paired:true;screen:string;version:number;serverTime:string;leaseUntil:string;slides:DisplaySlide[]};
 export type ChurchOffset='-07:00'|'-08:00';
 export const CHURCH_TIME_ZONE='America/Los_Angeles';
-const kinds=new Set(['announcement','schedule','event','campaign']);
+const kinds=new Set(['announcement','schedule','event','campaign','image','video','rooms']);
+const textKinds=new Set(['announcement','schedule','event','campaign']);
+export const isTextKind=(kind:DisplayKind)=>textKinds.has(kind);
+export const KIND_LABELS:Record<DisplayKind,string>={announcement:'Announcement',schedule:'Schedule',event:'Event',campaign:'Campaign',image:'Picture',video:'Video',rooms:'Study rooms'};
+/** Seconds a slide may stay on screen, by kind. A video also moves on when it ends. */
+export const DISPLAY_DURATION:Record<DisplayKind,{min:number;max:number}>={
+ announcement:{min:8,max:60},schedule:{min:8,max:60},event:{min:8,max:60},campaign:{min:8,max:60},
+ image:{min:5,max:300},video:{min:5,max:900},rooms:{min:8,max:120}
+};
+/** Uploaded picture and video files, named by the server: a random id and an allowed extension. */
+const mediaName=/^[a-f0-9]{32}\.(jpg|png|webp|mp4|webm)$/;
+export const DISPLAY_IMAGE_TYPES:Record<string,string>={'image/jpeg':'jpg','image/png':'png','image/webp':'webp'};
+export const DISPLAY_VIDEO_TYPES:Record<string,string>={'video/mp4':'mp4','video/webm':'webm'};
+export const DISPLAY_MEDIA_MAX_BYTES=50*1024*1024;
+export function isMediaName(value:unknown):value is string{return typeof value==='string'&&mediaName.test(value);}
+export function mediaKindOf(name:string):DisplayMediaKind{return /\.(mp4|webm)$/.test(name)?'video':'image';}
 const styles=new Set(['editorial','schedule','event','campaign']);
 const uuid=/^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 const instant=/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d{1,6})?(?:Z|[+-]\d{2}:\d{2})$/;
@@ -26,10 +47,18 @@ export function parseDisplaySlides(value:unknown):DisplaySlide[]{
  if(!Array.isArray(value)||value.length>MAX_DISPLAY_SLIDES)throw Error('Limit to sixteen short TV slides.');
  const seen=new Set<string>();
  return value.map(raw=>{
-  if(!isRecord(raw)||!strict(raw,['id','kind','style','title','body','duration','date','time','location','rows','startsAt','endsAt']))throw Error('Unknown or private display field.');
+  if(!isRecord(raw)||!strict(raw,['id','kind','style','title','body','duration','date','time','location','rows','startsAt','endsAt','media','fit']))throw Error('Unknown or private display field.');
   if(!isSlideId(raw.id)||seen.has(raw.id))throw Error('Slide identifiers must be unique.');
   seen.add(raw.id);
-  if(!kinds.has(String(raw.kind))||!styles.has(String(raw.style))||!text(raw.title,74)||!text(raw.body,160)||!isInt(raw.duration,8,60))throw Error('Use concise, readable TV content.');
+  if(!kinds.has(String(raw.kind))||!styles.has(String(raw.style))||!text(raw.title,74))throw Error('Use concise, readable TV content.');
+  const kind=raw.kind as DisplayKind,limits=DISPLAY_DURATION[kind];
+  if(!isInt(raw.duration,limits.min,limits.max))throw Error(`Show this slide for ${limits.min} to ${limits.max} seconds.`);
+  if(textKinds.has(kind)?!text(raw.body,160):raw.body!==undefined&&!text(raw.body,160))throw Error('Use concise, readable TV content.');
+  if(kind==='image'||kind==='video'){
+   if(!isMediaName(raw.media)||mediaKindOf(raw.media)!==kind)throw Error(kind==='image'?'Upload a picture for this slide.':'Upload a video for this slide.');
+   if(raw.fit!==undefined&&raw.fit!=='cover'&&raw.fit!=='contain')throw Error('Choose how the picture fills the screen.');
+  }else if(raw.media!==undefined||raw.fit!==undefined)throw Error('Only picture and video slides have a file.');
+  if(!textKinds.has(kind)&&(raw.date!==undefined||raw.time!==undefined||raw.location!==undefined||raw.rows!==undefined))throw Error('Unknown or private display field.');
   for(const name of ['date','time','location'])if(raw[name]!==undefined&&!text(raw[name],72))throw Error('An optional detail is invalid.');
   if(raw.kind==='schedule'&&(!raw.date||!Array.isArray(raw.rows)||raw.rows.length<1))throw Error('Schedules need a date and at least one activity.');
   if(raw.kind==='event'&&(!raw.date||!raw.time||!raw.location))throw Error('Events need a date, time, and location.');
@@ -41,6 +70,19 @@ export function parseDisplaySlides(value:unknown):DisplaySlide[]{
   if(raw.startsAt!==undefined&&(!safeInstant(raw.startsAt)||!safeInstant(raw.endsAt)||Date.parse(raw.startsAt)>=Date.parse(raw.endsAt as string)))throw Error('Invalid slide eligibility window.');
   return raw as unknown as DisplaySlide;
  });
+}
+const clock=/^([01]\d|2[0-3]):[0-5]\d$/;
+/** Room bookings reach the TV only as a room label and a start and end time. */
+export function parseDisplayRooms(value:unknown):DisplayRooms|null{
+ if(value===null||value===undefined)return null;
+ if(!isRecord(value)||!strict(value,['date','bookings'])||typeof value.date!=='string'||!/^\d{4}-\d{2}-\d{2}$/.test(value.date)
+  ||!Array.isArray(value.bookings)||value.bookings.length>60)throw Error('Invalid room schedule.');
+ const bookings=value.bookings.map(b=>{
+  if(!isRecord(b)||!strict(b,['room','start','end'])||!text(b.room,40)||typeof b.start!=='string'||typeof b.end!=='string'
+   ||!clock.test(b.start)||!clock.test(b.end))throw Error('Invalid room booking.');
+  return{room:b.room,start:b.start,end:b.end};
+ });
+ return{date:value.date,bookings};
 }
 export function parseDisplaySnapshot(value:unknown):DisplaySnapshot{
  if(!isRecord(value)||value.paired!==true||!text(value.screen,80)||!isInt(value.version,0,10000000)||!safeInstant(value.serverTime)||!safeInstant(value.leaseUntil))throw Error('Invalid screen response.');

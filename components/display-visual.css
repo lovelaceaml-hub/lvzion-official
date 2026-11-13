@@ -102,3 +102,26 @@
   animation:none!important;transition:none!important;will-change:auto!important
  }
 }
+
+/* Picture and video slides fill the stage edge to edge. "contain" keeps the whole picture on a dark field; "cover" fills and trims. */
+.cd-kind-media{background:#000;justify-content:center}
+.cd-media{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;display:block}
+.cd-fit-cover .cd-media{object-fit:cover}
+.cd-media-caption{position:absolute;left:4cqw;right:4cqw;bottom:3.4cqw;z-index:2;margin:0;padding:1.4cqw 2.2cqw;border-radius:var(--lvz-radius-md);background:color-mix(in srgb,#000 62%,transparent);color:#fff;font-size:2.4cqw;line-height:1.35;text-align:center;overflow-wrap:anywhere}
+.cd-media-missing{position:relative;z-index:2;color:#fff;text-align:center}
+
+/* Study rooms: today's bookings, room then time, the one in use marked. */
+.cd-rooms-copy{width:100%;padding:0 6cqw}
+.cd-rooms-copy h1{font:var(--lvz-weight-bold) 4.6cqw/1.08 var(--lvz-font-sans);letter-spacing:-.01em;max-width:none;margin-bottom:1.6cqw}
+.cd-rooms-copy .cd-body{max-width:60ch;font-size:2.1cqw;margin-bottom:1.6cqw;color:var(--lvz-ink-quiet)}
+.cd-rooms{display:flex;flex-direction:column;max-width:78cqw}
+.cd-room-row{display:grid;grid-template-columns:22cqw 34cqw auto;gap:2.4cqw;align-items:baseline;padding:1.2cqw 0;border-top:max(1px,.12cqw) solid var(--lvz-line)}
+.cd-room-row strong{font-size:2.6cqw;font-weight:var(--lvz-weight-bold)}
+.cd-room-row span{font-size:2.6cqw;font-variant-numeric:tabular-nums}
+.cd-room-row em{justify-self:start;font-style:normal;font-size:1.8cqw;font-weight:var(--lvz-weight-strong);color:var(--lvz-on-accent);background:var(--lvz-accent);padding:.4cqw 1.2cqw;border-radius:var(--lvz-radius-round)}
+.cd-room-row[data-now] strong{color:var(--lvz-accent)}
+.cd-rooms-more{margin:1.4cqw 0 0;font-size:2cqw;color:var(--lvz-ink-quiet)}
+.cd-rooms-empty{margin:1cqw 0 0;font-size:2.8cqw;line-height:1.4;color:var(--lvz-ink-quiet)}
+.cd-kind-rooms .cd-art i{width:12%}
+.cd-kind-rooms .cd-art::before{display:none}
+.cd-kind-rooms .cd-mark{left:auto;right:4cqw}

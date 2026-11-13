@@ -8,6 +8,12 @@ LV Zion Official is a self-contained, phone-first application at https://lvz.app
 
 Keep compact module headers and the prominent center Apps launcher. The launcher shows only server-authorized modules (after the October 24 decisions: every approved module for every signed-in member). Continue the approved [Day Sheet design contract](design/LVZ-DESIGN-CONTRACT.md), shared tokens, accessible controls and phone-first layouts.
 
+## Church Display: pictures, videos and study rooms (built November 13, 2026, not live)
+
+The Church Display TV (lvz.app/display) can now play four kinds of slide: text (as before), pictures, videos and a live "Study rooms today" board. Each slide is added with one tap, removed with one tap, and can have its own show-from and stop-showing dates inside the playlist's dates. Videos play without sound and move on when they end. The rooms board reads lvrooms.web.app's public lobby feed (Anthony's approved exception, 2026-11-13) and shows room and time only. Uploads go to a new private `display-media` bucket (50 MB per file).
+
+Waiting for Anthony: apply migration `20261113220000_display_media_rooms` (not applied to the hosted database), merge, deploy, then upload "Shake Nevada 60s (cinematic, widescreen, smaller file).mp4" from Drive. Focused checks only: display unit and database tests, display browser tests, build. No full suite, no live upload, no real TV. Details: [docs/continuous-display/MEDIA-ROOMS.md](continuous-display/MEDIA-ROOMS.md).
+
 ## Healing Concert tickets: released November 12, 2026
 
 Live on lvz.app (Apps, Healing Concert). Members RSVP and get a QR ticket on screen and by email, share a personal invite link so guests without an account can RSVP, and concert managers scan tickets at the door. No participation score (Anthony's choice). Migration `20261112180000_healing_concert` applied and the app approved; `LVZ_CONCERT_TOKEN_SECRET` added to Vercel production (never rotate after tickets go out). Deployment `dpl_4kDkqdkxAN5sxMc29eg4HYMu7b4V` from `dc520a4`. Signed-out live checks passed; no concert is set up yet, so a signed-in RSVP, email delivery and a phone scan are still unverified. [Guide, checks and next steps](concert/README.md).
