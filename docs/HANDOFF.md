@@ -8,9 +8,9 @@ LV Zion Official is a self-contained, phone-first application at https://lvz.app
 
 Keep compact module headers and the prominent center Apps launcher. The launcher shows only server-authorized modules (after the October 24 decisions: every approved module for every signed-in member). Continue the approved [Day Sheet design contract](design/LVZ-DESIGN-CONTRACT.md), shared tokens, accessible controls and phone-first layouts.
 
-## Healing Concert tickets: built November 12, 2026 (not released)
+## Healing Concert tickets: released November 12, 2026
 
-Branch `claude/healing-concert`. A new `concert` app: members RSVP and get a QR ticket on screen and by email, share a personal invite link so guests without an account can RSVP, and door staff (concert managers) scan tickets to record attendance. No participation score (Anthony's choice). Migration `20261112180000_healing_concert.sql` is unapplied and registers the module as draft. Focused checks passed (45 SQL assertions, 6 unit tests, 3 browser tests, TypeScript, production build); no full suite. Release needs Anthony's go-ahead and a new `LVZ_CONCERT_TOKEN_SECRET`. [Guide, checks and release steps](concert/README.md).
+Live on lvz.app (Apps, Healing Concert). Members RSVP and get a QR ticket on screen and by email, share a personal invite link so guests without an account can RSVP, and concert managers scan tickets at the door. No participation score (Anthony's choice). Migration `20261112180000_healing_concert` applied and the app approved; `LVZ_CONCERT_TOKEN_SECRET` added to Vercel production (never rotate after tickets go out). Deployment `dpl_4kDkqdkxAN5sxMc29eg4HYMu7b4V` from `dc520a4`. Signed-out live checks passed; no concert is set up yet, so a signed-in RSVP, email delivery and a phone scan are still unverified. [Guide, checks and next steps](concert/README.md).
 
 ## Access and placement decisions — October 24, 2026 (applied)
 

@@ -296,6 +296,17 @@
    "verified_on": "2026-10-31",
    "applied_via": "Supabase MCP apply_migration, after 13 focused domain/HTTP/database tests and the production TypeScript/Next build passed",
    "verification": "Hosted readback: new module approved, owner_can_manage true, four private tables with RLS and no anonymous/authenticated direct SELECT, three public SECURITY INVOKER RPC wrappers with anonymous execution denied; zero services, slots, audit rows and explicit new grants. Production dpl_FYf8yWy8KubKWWUP629zveGWQREA READY from 0f1405d6fcff70de275979bbfb10b81464daac0c; lvz.app aliases verified. Signed-out page reaches sign-in; API fetch body unverified due connector handling of 401. No real signed-in hosted transaction or phone acceptance claimed. See docs/guidance-teachers/RELEASE-2026-10-31.md."
+  },
+  {
+   "name": "healing_concert",
+   "hosted_version": "20261112180000",
+   "repository_version": "20261112180000",
+   "source": "supabase/migrations/20261112180000_healing_concert.sql",
+   "source_blob_sha": "0539126c379dcfd7fd6eb2a76c81751f48655eef",
+   "status": "applied",
+   "verified_on": "2026-11-12",
+   "applied_via": "Supabase CLI db query (Management API) from main dc520a4, after 45 SQL assertions, 6 unit tests, 3 browser tests, TypeScript and the production build passed; schema_migrations row recorded by hand",
+   "verification": "Hosted readback: four concert tables with RLS and no direct SELECT for anon, authenticated or service_role; six member RPC wrappers executable by authenticated only; guest RSVP, invite view and ticket view executable by service_role only; module registered draft, then approved by the bootstrap owner after deployment. No events, tickets or grants created. Production dpl_4kDkqdkxAN5sxMc29eg4HYMu7b4V READY from dc520a4 on lvz.app."
   }
  ],
  "normalization": {
@@ -303,9 +314,7 @@
   "hosted": "Remove whitespace from each stored statement; these stored statements already omit comments and outer transaction wrappers.",
   "purpose": "Comparison of known migration definitions, not cryptographic attestation or a full semantic/security review."
  },
- "unapplied_repository_migrations": [
-  "supabase/migrations/20261112180000_healing_concert.sql"
- ],
+ "unapplied_repository_migrations": [],
  "warning": "Hosted versions differ from repository filenames. Never replay applied migrations or use blind db push. Re-read current hosted metadata before release, including concurrent module work. The fresh calendar correction is applied: Study Room booking is enabled for existing grants and weekly restrictions are empty. Do not reinstate superseded defaults.",
  "metadata_reconciled_at": "2026-10-24T19:00:00Z",
  "metadata_reconciliation": "2026-10-24 full listing of hosted schema_migrations: 28 versions. The five Worship migrations were found already applied on 2026-10-15 and are now mapped; gospel_planning_core applied 2026-10-24. Every repository migration is applied.",
