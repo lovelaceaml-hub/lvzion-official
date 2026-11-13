@@ -17,7 +17,17 @@ export default function DisplayPlayer(){
  const [rooms,setRooms]=useState<DisplayRooms|null>(null);
  const [nowClock,setNowClock]=useState('');
  const mediaEnded=useRef<string|null>(null);
- const show=(next:DisplaySlide)=>{shown.current=next.id;shownAt.current=performance.now();mediaEnded.current=null;setPlayCount(n=>n+1);setSlide(next);};
+ // Mother's Love: the newest recognition seen so far (undefined until the first answer), and one waiting to be welcomed.
+ const mlSeen=useRef<string|null|undefined>(undefined);
+ const mlJump=useRef<string|null>(null);
+ const [welcomeId,setWelcomeId]=useState<string|null>(null);
+ const noteMothersLove=(packet:DisplaySnapshotR2)=>{
+  const latest=packet.mothersLove?.latestId??null;
+  if(!packet.mothersLove)return;
+  if(mlSeen.current===undefined){mlSeen.current=latest;return;}
+  if(latest&&latest!==mlSeen.current){mlSeen.current=latest;mlJump.current=latest;}
+ };
+ const show=(next:DisplaySlide,welcome:string|null=null)=>{shown.current=next.id;shownAt.current=performance.now();mediaEnded.current=null;setWelcomeId(welcome);setPlayCount(n=>n+1);setSlide(next);};
  const [code,setCode]=useState('');const [pairing,setPairing]=useState(false);
  const [error,setError]=useState('');
  // Pairing is optional now: the form shows only at lvz.app/display?pair=1.
@@ -71,7 +81,7 @@ export default function DisplayPlayer(){
  // Show the neutral welcome and forget which slide or temporary notice was on screen.
  const blank=()=>{shown.current=null;overrideActive.current=false;setSlide(null);};
  const apply=(verified:Verified)=>{
-  setMotionMode(verified.packet.motionMode);setRooms(verified.packet.rooms);
+  setMotionMode(verified.packet.motionMode);setRooms(verified.packet.rooms);noteMothersLove(verified.packet);
   current.current=verified;pending.current=null;shown.current=null;shownAt.current=performance.now();generation.current++;
   overrideActive.current=false;setMode('paired');setSlide(null);
  };
@@ -97,7 +107,7 @@ export default function DisplayPlayer(){
     // Only a specifically authorized active override can interrupt the regular safe-transition handoff.
     if(packet.overrideSlideId)apply(checked);
     else pending.current=checked;
-   }else {current.current={...checked};setMotionMode(checked.packet.motionMode);setRooms(checked.packet.rooms);}
+   }else {current.current={...checked};setMotionMode(checked.packet.motionMode);setRooms(checked.packet.rooms);noteMothersLove(checked.packet);}
    setMode('paired');setError('');
   }catch{
    if(!alive.current||sequence!==requestSequence.current)return;
@@ -144,6 +154,12 @@ export default function DisplayPlayer(){
     overrideActive.current=true;return;
    }
    if(overrideActive.current){overrideActive.current=false;shown.current=null;}
+   // A new Mother's Love recognition: show the Mother's Love turn now, whatever is on screen, with its arrival.
+   if(mlJump.current){
+    const ml=items.find(s=>s.kind==='mothers-love');
+    const welcome=mlJump.current;mlJump.current=null;
+    if(ml){show(ml,welcome);return;}
+   }
    const index=shown.current===null?-1:items.findIndex(s=>s.id===shown.current);
    const existing=index>=0?items[index]:null;
    const duration=existing?existing.duration*1000:0;
@@ -189,7 +205,7 @@ export default function DisplayPlayer(){
      <button disabled={pairing||code.replace(/[–\s-]/g,'').length!==12}>{pairing?'Pairing…':'Connect'}</button>
     </form>
     {error&&<p role="alert" className="cd-pair-error">{error}</p>}
-   </section>:<DisplayVisual key={(slide?.id??'welcome')+(slide?.kind==='video'?':'+playCount:'')} slide={slide} rooms={rooms} nowClock={nowClock} sound onSoundBlocked={()=>setSoundBlocked(true)}
+   </section>:<DisplayVisual key={(slide?.id??'welcome')+(slide?.kind==='video'||slide?.kind==='mothers-love'?':'+playCount:'')} slide={slide} rooms={rooms} nowClock={nowClock} welcomeId={welcomeId} sound onSoundBlocked={()=>setSoundBlocked(true)}
      mediaSrc={name=>'/api/display/media/'+encodeURIComponent(name)}
      onMediaEnd={()=>{if(slide)mediaEnded.current=slide.id;}}/>}
   </div>

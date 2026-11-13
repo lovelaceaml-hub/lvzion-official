@@ -139,3 +139,8 @@
 .cd-rotated .cd-fullscreen,.cd-rotated .cd-sound{left:16px;right:auto;bottom:auto;transform-origin:top left;transform:rotate(90deg) translate(-50%,-100%)}
 .cd-rotated .cd-fullscreen{top:78%}
 .cd-rotated .cd-sound{top:22%}
+/* The Words of Mother's Love: its own TV fills the stage during its turn. */
+.cd-kind-ml{background:#fff9ed}
+.cd-ml-frame{position:absolute;inset:0;width:100%;height:100%;border:0;display:block}
+/* A picture shown whole (a portrait flyer on a wide TV) sits on a soft, dimmed copy of itself instead of black bars. */
+.cd-media-blur{position:absolute;inset:-6%;width:112%;height:112%;object-fit:cover;filter:blur(40px) brightness(.55) saturate(1.2);display:block}

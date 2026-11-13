@@ -80,7 +80,7 @@ test('phone editor adds a picture and a rooms board in one tap each and saves th
  await page.locator('input[type=file]').setInputFiles({name:'flyer.png',mimeType:'image/png',buffer:png});
  await expect(page.getByText('The picture is uploaded.')).toBeVisible();
  expect(uploaded).toEqual({type:'image/png',bytes:png.length});
- await expect(page.locator('.cd-frame img')).toHaveAttribute('src',`/api/display/media/${media}.png?screen=${screenId}`);
+ await expect(page.locator('.cd-frame img.cd-media')).toHaveAttribute('src',`/api/display/media/${media}.png?screen=${screenId}`);
  await page.getByRole('button',{name:'Add study rooms'}).click();
  await expect(page.getByText('Today’s study-room bookings appear here on the TV: room and time only.')).toBeVisible();
  await page.getByRole('button',{name:'Save draft'}).click();

@@ -106,3 +106,27 @@ test('full screen on an upright phone turns the display to landscape',async({pag
  await page.getByRole('button',{name:'Exit full screen'}).click();
  await expect(page.locator('.cd-screen')).not.toHaveClass(/cd-rotated/);
 });
+test('a new Mother\'s Love recognition switches the TV to the Mother\'s Love turn and welcomes it',async({page})=>{
+ await page.setViewportSize({width:1920,height:1080});
+ const instant=Date.parse('2026-11-14T12:00:00-08:00');
+ await page.clock.install({time:new Date(instant)});
+ let latest='00000000-0000-4000-8000-000000000001';
+ const mlRequests:string[]=[];
+ await page.route('https://mothers-love.vercel.app/**',route=>{mlRequests.push(route.request().url());return route.fulfill({status:200,contentType:'text/html',body:'<!doctype html><title>Fictional Mother\'s Love TV</title>'});});
+ await page.route('**/api/display/device',route=>route.fulfill({status:200,contentType:'application/json',body:JSON.stringify({
+  paired:true,screen:'Lobby Display',version:11,serverTime:new Date(instant).toISOString(),leaseUntil:new Date(instant+30000).toISOString(),
+  operatingHours:[],overrideSlideId:null,overrideUntil:null,motionMode:'standard',
+  slides:[{id:'welcome-1',kind:'announcement',style:'editorial',title:'Fictional welcome',body:'Illustrative content only.',duration:60},
+   {id:'ml-1',kind:'mothers-love',style:'editorial',title:"The Words of Mother's Love",duration:120}],
+  mothersLove:{latestId:latest,latestAt:new Date(instant-60000).toISOString()}})}));
+ await page.goto('/display');
+ // First load only remembers the newest recognition; it does not jump.
+ await expect(page.locator('.cd-style-editorial')).toBeVisible();
+ await page.clock.runFor(13000);
+ await expect(page.locator('.cd-ml-frame')).toHaveCount(0);
+ // A recognition is published: the next check switches straight to Mother's Love and welcomes it.
+ latest='00000000-0000-4000-8000-000000000002';
+ await page.clock.runFor(13000);
+ await expect(page.locator('.cd-ml-frame')).toHaveAttribute('src','https://mothers-love.vercel.app/display?welcome='+latest);
+ await expect(page.locator('.cd-ml-frame')).toHaveAttribute('allow',/autoplay/);
+});
