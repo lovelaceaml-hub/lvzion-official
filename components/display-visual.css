@@ -125,3 +125,9 @@
 .cd-kind-rooms .cd-art i{width:12%}
 .cd-kind-rooms .cd-art::before{display:none}
 .cd-kind-rooms .cd-mark{left:auto;right:4cqw}
+
+/* Full screen button on the open display link: shows on load, mouse move or tap, then fades away. */
+.cd-fullscreen{position:fixed;right:max(16px,2vw);bottom:max(16px,2vw);z-index:20;min-height:48px;padding:0 20px;border:0;border-radius:var(--lvz-radius-round);background:color-mix(in srgb,#000 66%,transparent);color:#fff;font:var(--lvz-weight-strong) 16px/1 var(--lvz-font-sans);cursor:pointer;transition:opacity .4s ease}
+.cd-fullscreen[data-hidden]{opacity:0;pointer-events:none}
+.cd-fullscreen:focus-visible{opacity:1;pointer-events:auto;outline:3px solid #fff;outline-offset:2px}
+.cd-screen:not([data-controls]){cursor:none}

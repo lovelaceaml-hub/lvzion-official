@@ -8,11 +8,11 @@ LV Zion Official is a self-contained, phone-first application at https://lvz.app
 
 Keep compact module headers and the prominent center Apps launcher. The launcher shows only server-authorized modules (after the October 24 decisions: every approved module for every signed-in member). Continue the approved [Day Sheet design contract](design/LVZ-DESIGN-CONTRACT.md), shared tokens, accessible controls and phone-first layouts.
 
-## Church Display: pictures, videos and study rooms (built November 13, 2026, not live)
+## Church Display: pictures, videos and study rooms (released November 13, 2026)
 
 The Church Display TV (lvz.app/display) can now play four kinds of slide: text (as before), pictures, videos and a live "Study rooms today" board. Each slide is added with one tap, removed with one tap, and can have its own show-from and stop-showing dates inside the playlist's dates. Videos play without sound and move on when they end. The rooms board reads lvrooms.web.app's public lobby feed (Anthony's approved exception, 2026-11-13) and shows room and time only. Uploads go to a new private `display-media` bucket (50 MB per file).
 
-Migration `20261113220000_display_media_rooms` applied 2026-11-13 (see the ledger). Still to do: deploy, then upload "Shake Nevada 60s (cinematic, widescreen, smaller file).mp4" from Drive. Focused checks only: display unit and database tests, display browser tests, build. No full suite, no live upload, no real TV. Details: [docs/continuous-display/MEDIA-ROOMS.md](continuous-display/MEDIA-ROOMS.md).
+Migration `20261113220000_display_media_rooms` applied 2026-11-13 (see the ledger). Merged in #83 and deployed: production `dpl_82tboxaBzGMdaCX2WSXfiDQad2iZ` from main `16497d1`, READY on lvz.app. Signed-out live checks passed (/display loads, device API unpaired, manage API 401, media route 404). Content published 2026-11-13 at Anthony's request: the Lobby Display playlist (published v1, 2026-11-13 to 2027-02-10) is the Shake Nevada 60 s video ("cinematic, widescreen, smaller file", stored as `display-media/125fa529d2c08504fc327c037f7f2ace.mp4`) then the Study rooms board (20 s). Saved, approved and published by the agent through the database with the same checks and audit rows as the app, under the owner's account. Uploads use the lvz.app Supabase secret key saved as a network secret on the "lvzion-official" cloud environment (never in Git). No TV is paired yet, so the screen is still off; pairing switches it on. Focused checks only: display unit and database tests, display browser tests, build. No full suite, no live upload, no real TV. Details: [docs/continuous-display/MEDIA-ROOMS.md](continuous-display/MEDIA-ROOMS.md).
 
 ## Healing Concert tickets: released November 12, 2026
 

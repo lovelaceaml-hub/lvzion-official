@@ -20,6 +20,24 @@ export default function DisplayPlayer(){
  const show=(next:DisplaySlide)=>{shown.current=next.id;shownAt.current=performance.now();mediaEnded.current=null;setPlayCount(n=>n+1);setSlide(next);};
  const [code,setCode]=useState('');const [pairing,setPairing]=useState(false);
  const [error,setError]=useState('');
+ // Pairing is optional now: the form shows only at lvz.app/display?pair=1.
+ const [pairMode,setPairMode]=useState(false);
+ const [isFull,setIsFull]=useState(false);
+ const [controls,setControls]=useState(true);
+ const hideControls=useRef<ReturnType<typeof setTimeout>|null>(null);
+ const wakeLock=useRef<{release:()=>Promise<void>}|null>(null);
+ const showControls=()=>{setControls(true);if(hideControls.current)clearTimeout(hideControls.current);hideControls.current=setTimeout(()=>setControls(false),4000);};
+ const keepAwake=async()=>{
+  try{const nav=navigator as Navigator&{wakeLock?:{request:(t:'screen')=>Promise<{release:()=>Promise<void>}>}};
+   if(nav.wakeLock&&!wakeLock.current&&!document.hidden)wakeLock.current=await nav.wakeLock.request('screen');}catch{}
+ };
+ const toggleFullscreen=async()=>{
+  try{
+   if(document.fullscreenElement)await document.exitFullscreen();
+   else await document.documentElement.requestFullscreen({navigationUI:'hide'});
+  }catch{}
+  void keepAwake();
+ };
  const current=useRef<Verified|null>(null),pending=useRef<Verified|null>(null);
  const shown=useRef<string|null>(null),shownAt=useRef(0),generation=useRef(0);
  const alive=useRef(false);
@@ -68,6 +86,11 @@ export default function DisplayPlayer(){
  };
  useEffect(()=>{
   alive.current=true;
+  setPairMode(new URLSearchParams(window.location.search).get('pair')==='1');
+  showControls();void keepAwake();
+  const onFull=()=>setIsFull(!!document.fullscreenElement);
+  const onKey=(e:KeyboardEvent)=>{if(e.key==='f'||e.key==='F')void toggleFullscreen();};
+  document.addEventListener('fullscreenchange',onFull);document.addEventListener('keydown',onKey);
   void refresh();
   const poll=setInterval(()=>{if(alive.current)void refresh();},12000);
   const advance=setInterval(()=>{
@@ -105,12 +128,15 @@ export default function DisplayPlayer(){
     show(next);
    }
   },250);
-  const onVisibility=()=>{if(!document.hidden)void refresh();};
+  const onVisibility=()=>{if(!document.hidden){wakeLock.current=null;void keepAwake();void refresh();}};
   const onOnline=()=>{void refresh();};
   window.addEventListener('online',onOnline);document.addEventListener('visibilitychange',onVisibility);
   return()=>{alive.current=false;requestSequence.current++;inFlight.current?.abort();
    clearInterval(poll);clearInterval(advance);window.removeEventListener('online',onOnline);
    document.removeEventListener('visibilitychange',onVisibility);
+   document.removeEventListener('fullscreenchange',onFull);document.removeEventListener('keydown',onKey);
+   if(hideControls.current)clearTimeout(hideControls.current);
+   void wakeLock.current?.release().catch(()=>{});wakeLock.current=null;
    current.current=null;pending.current=null;overrideActive.current=false;};
  // The player intentionally creates one polling coordinator for its lifetime.
  // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -124,9 +150,10 @@ export default function DisplayPlayer(){
   }catch(e){setError(e instanceof Error?e.message:'Pairing unavailable.');}
   finally{setPairing(false);}
  }
- return <main className="cd-screen" aria-label="LV Zion Official Continuous Church Display">
+ return <main className="cd-screen" aria-label="LV Zion Official Continuous Church Display" data-controls={controls||undefined}
+  onPointerMove={showControls} onPointerDown={showControls} onDoubleClick={()=>void toggleFullscreen()}>
   <div className={'cd-stage cd-motion-'+motionMode}>
-   {mode==='unpaired'?<section className="cd-device-pair">
+   {mode==='unpaired'&&pairMode?<section className="cd-device-pair">
     <p className="cd-mark">LV<span>Zion</span></p>
     <h1>Pair this display</h1>
     <p>On a phone or computer, open Church Display in LV Zion, choose Screens, then create a one-time pairing code and type it here.</p>
@@ -139,5 +166,7 @@ export default function DisplayPlayer(){
      mediaSrc={name=>'/api/display/media/'+encodeURIComponent(name)}
      onMediaEnd={()=>{if(slide)mediaEnded.current=slide.id;}}/>}
   </div>
+  {!(mode==='unpaired'&&pairMode)&&<button type="button" className="cd-fullscreen" onClick={()=>void toggleFullscreen()}
+   aria-label={isFull?'Exit full screen':'Full screen'} data-hidden={!controls||undefined}>{isFull?'Exit full screen':'Full screen'}</button>}
  </main>;
 }

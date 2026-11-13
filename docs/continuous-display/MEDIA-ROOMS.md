@@ -1,6 +1,6 @@
 # Church Display: pictures, videos and study rooms
 
-Built 2026-11-13 on Anthony's request: one official church TV that shows more than text, with slides that are easy to add, remove and schedule. Not live until the steps at the end are done.
+Built 2026-11-13 on Anthony's request: one official church TV that shows more than text, with slides that are easy to add, remove and schedule. Released 2026-11-13: migration applied, merged in #83, production deployment `dpl_82tboxaBzGMdaCX2WSXfiDQad2iZ` on lvz.app. Content is not added yet.
 
 ## What a manager can do
 
@@ -11,6 +11,10 @@ In Apps, Church Display, Content:
 - **Video**: choose an MP4 or WebM (up to 50 MB). The slide's time is filled in from the video's length. The TV plays it without sound and moves on when it ends.
 - **Study rooms**: today's bookings from lvrooms.web.app, room and time only. The booking in progress is marked "In use now"; finished ones drop off; up to seven rows, then "and N more later today". If the feed is down the slide says "Room bookings are not available right now."
 - **Timing**: every slide keeps its own Duration and the optional "Show only during specific dates and times" window, inside the playlist's overall dates. Save, approve and publish work exactly as before.
+
+## Open link and full screen (Anthony, 2026-11-13)
+
+"just have the link able to show this and be able to be full screen mode". lvz.app/display now plays the main display's published playlist for anyone who opens it, with no pairing. The main display is the oldest screen (Lobby Display). A Full screen button shows on load, mouse move or tap and hides after 4 seconds; double-click or the F key also toggles it, and the screen is kept awake where the browser allows. Pairing is optional, at lvz.app/display?pair=1. Server side this uses `display_public_snapshot()` (migration `20261113233000_display_public_link.sql`, service role only), which returns only published, in-window slides, never drafts or devices.
 
 ## How it is built
 
@@ -29,9 +33,9 @@ Focused only, no full suite:
 
 Not verified: a real upload to the hosted bucket, a signed-in manager on lvz.app, the live lvrooms feed through lvz.app, and a physical TV.
 
-## To make it live (needs Anthony's approval for each)
+## Release steps
 
-1. Apply `supabase/migrations/20261113220000_display_media_rooms.sql` to project `otecqlkqirncotytbfns` and record it in `docs/HOSTED-MIGRATION-LEDGER.json`.
-2. Merge the pull request and deploy lvz.app (automatic Git deploys stay off).
+1. Done 2026-11-13. Apply `supabase/migrations/20261113220000_display_media_rooms.sql` to project `otecqlkqirncotytbfns` and record it in `docs/HOSTED-MIGRATION-LEDGER.json`.
+2. Done 2026-11-13. Merge the pull request and deploy lvz.app (automatic Git deploys stay off).
 3. In Church Display, add a Video slide and upload "Shake Nevada 60s (cinematic, widescreen, smaller file).mp4" (22 MB, in Drive). The 61 MB widescreen version is over the 50 MB limit.
 4. Add a Study rooms slide, save, approve, publish, and check the paired TV.

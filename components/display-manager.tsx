@@ -32,7 +32,7 @@ const headings:Record<Tab,{title:string;lede:string}>={
  content:{title:'Shape the message.',lede:'Edit a slide and check it on the TV preview.'},
  playlist:{title:'Plan the playlist.',lede:'Slides play top to bottom, then start again.'},
  publish:{title:'Review and publish.',lede:'Check every slide, date, name and word as it will read in a shared room.'},
- screens:{title:'Your displays',lede:'Only explicitly paired TVs receive publications.'}
+ screens:{title:'Your displays',lede:'Open lvz.app/display on any TV to show the published playlist. Pairing is optional.'}
 };
 const notices:Record<string,string>={
  save:'Draft saved. Approval is still required.',
@@ -287,15 +287,15 @@ export default function DisplayManager(){
        <span className="ui-row-body"><strong>TV {i+1}</strong><small>Last seen: {d.lastSeen?churchDateTime(d.lastSeen):'Not yet checked in'}</small>
         {!d.revoked&&<button type="button" className="cd-text-button cd-danger-text" aria-label={`Revoke TV ${i+1}`} disabled={busy} onClick={()=>{if(window.confirm('Revoke this screen immediately when it next checks in?'))void command('revoke',{deviceId:d.id});}}>Revoke</button>}</span>
        <Tag tone={d.revoked?'danger':live?'success':undefined}>{d.revoked?'Revoked':live?'Online':'Offline'}</Tag></li>;})}
-    </ul>{devices.length===0&&<p className="ui-hint cd-devices-empty">No TV is paired. An unpaired TV cannot receive approved content.</p>}</Glass>
+    </ul>{devices.length===0&&<p className="ui-hint cd-devices-empty">No TV is paired. That is fine: lvz.app/display shows the main display's published playlist without pairing.</p>}</Glass>
     <Glass className="cd-pair-card" aria-labelledby="cd-pair-title">
      <h2 id="cd-pair-title" className="ui-eyebrow">{pairCode?'One-time pairing code':'Pair a TV'}</h2>
-     <div className="cd-pair-code" aria-live="polite">{pairCode?<><strong>{pairCode}</strong><p>Type this on lvz.app/display. It expires in five minutes.</p></>
-      :<p>A TV never signs in with a member account. Open <strong>lvz.app/display</strong> on the TV, then type the one-time code created here.</p>}</div>
+     <div className="cd-pair-code" aria-live="polite">{pairCode?<><strong>{pairCode}</strong><p>Type this on lvz.app/display?pair=1. It expires in five minutes.</p></>
+      :<p>Optional. Open <strong>lvz.app/display?pair=1</strong> on a TV and type the code to give that TV its own display.</p>}</div>
      <button type="button" className="ui-button ui-button-block" disabled={busy} onClick={()=>command('pair')}>Create one-time pairing code</button>
     </Glass>
-    <Glass className="cd-callout" as="div"><span className="cd-callout-icon" aria-hidden="true"><Check size={22}/></span><div><strong>Pairing and publishing are separate</strong>
-     <p>A TV plays no sound. If the network drops or the publication ends, it falls back to a quiet welcome. Revoking takes effect at its next check-in.</p></div></Glass>
+    <Glass className="cd-callout" as="div"><span className="cd-callout-icon" aria-hidden="true"><Check size={22}/></span><div><strong>How the TV plays</strong>
+     <p>The TV plays without sound. Tap Full screen on the TV. If the network drops or the publication ends, it shows a quiet welcome.</p></div></Glass>
     <SectionHeader title="Display settings"/>
     <DisplayMotionEditor key={'motion-'+screen.id} screen={screen} busy={busy} command={command}/>
     <OperatingHoursEditor key={screen.id} screen={screen} busy={busy} command={command}/>
