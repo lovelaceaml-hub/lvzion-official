@@ -9,10 +9,12 @@ export const runtime='nodejs';
 export const dynamic='force-dynamic';
 export async function GET(request:NextRequest){
  const token=request.cookies.get(DEVICE_COOKIE)?.value;
- if(!token||token.length>128)return reply({paired:false});
  try{
   const admin=authAdminClient();
-  const {data,error}=await admin.rpc('display_device_snapshot_r2',{p_token_digest:deviceDigest(token)});
+  // A paired TV gets its own screen. Anyone else opening lvz.app/display gets the main screen's
+  // published playlist (Anthony, 2026-11-13: the link alone shows it, no pairing).
+  const paired=token&&token.length<=128?await admin.rpc('display_device_snapshot_r2',{p_token_digest:deviceDigest(token)}):null;
+  const {data,error}=paired&&!paired.error&&paired.data?paired:await admin.rpc('display_public_snapshot');
   if(error||!data)return reply({paired:false});
   const snapshot=parseDisplaySnapshotR2(data);
   // Room bookings are read only when a published slide shows them.

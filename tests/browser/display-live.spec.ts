@@ -1,6 +1,13 @@
 import {test,expect}from '@playwright/test';
-test('unpaired real TV shows a neutral pairing screen without member login',async({page})=>{
+test('open link with no content shows a quiet welcome and a full screen button, not a pairing form',async({page})=>{
  await page.goto('/display');
+ await expect(page.getByRole('heading',{name:'Welcome.'})).toBeVisible();
+ await expect(page.getByRole('button',{name:'Full screen'})).toBeVisible();
+ await expect(page.getByRole('heading',{name:'Pair this display'})).toHaveCount(0);
+ await expect(page.locator('a[href*="members"]')).toHaveCount(0);
+});
+test('optional pairing form stays available at ?pair=1 without member login',async({page})=>{
+ await page.goto('/display?pair=1');
  await expect(page.getByRole('heading',{name:'Pair this display'})).toBeVisible();
  await expect(page.locator('input[aria-label="Pairing code"]')).toBeVisible();
  await expect(page.locator('a[href*="members"]')).toHaveCount(0);
@@ -38,7 +45,7 @@ test('real TV rotation uses only a valid, mocked approved screen projection',asy
  await expect(page.locator('.cd-style-event')).toBeVisible();
  expect(await page.locator('.cd-slide').count()).toBe(1);
  revoked=true;await page.clock.runFor(12500);
- await expect(page.getByRole('heading',{name:'Pair this display'})).toBeVisible();
+ await expect(page.getByRole('heading',{name:'Welcome.'})).toBeVisible();
 });
 test('system reduced motion disables active television effects',async({page})=>{
  await page.setViewportSize({width:1920,height:1080});
@@ -51,4 +58,16 @@ test('system reduced motion disables active television effects',async({page})=>{
  await page.goto('/display');
  await expect(page.locator('.cd-style-editorial')).toBeVisible();
  expect(await page.locator('.cd-art i').first().evaluate(el=>getComputedStyle(el).animationName)).toBe('none');
+});
+test('full screen button enters full screen and hides itself after a few seconds',async({page})=>{
+ await page.setViewportSize({width:1920,height:1080});
+ await page.clock.install({time:new Date('2026-11-14T12:00:00-08:00')});
+ await page.goto('/display');
+ await page.getByRole('button',{name:'Full screen'}).click();
+ await expect.poll(()=>page.evaluate(()=>!!document.fullscreenElement)).toBe(true);
+ await expect(page.getByRole('button',{name:'Exit full screen'})).toBeAttached();
+ await page.clock.runFor(4500);
+ await expect(page.locator('.cd-fullscreen')).toHaveAttribute('data-hidden','true');
+ await page.mouse.move(200,200);
+ await expect(page.locator('.cd-fullscreen')).not.toHaveAttribute('data-hidden','true');
 });

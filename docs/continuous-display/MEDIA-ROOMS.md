@@ -12,6 +12,10 @@ In Apps, Church Display, Content:
 - **Study rooms**: today's bookings from lvrooms.web.app, room and time only. The booking in progress is marked "In use now"; finished ones drop off; up to seven rows, then "and N more later today". If the feed is down the slide says "Room bookings are not available right now."
 - **Timing**: every slide keeps its own Duration and the optional "Show only during specific dates and times" window, inside the playlist's overall dates. Save, approve and publish work exactly as before.
 
+## Open link and full screen (Anthony, 2026-11-13)
+
+"just have the link able to show this and be able to be full screen mode". lvz.app/display now plays the main display's published playlist for anyone who opens it, with no pairing. The main display is the oldest screen (Lobby Display). A Full screen button shows on load, mouse move or tap and hides after 4 seconds; double-click or the F key also toggles it, and the screen is kept awake where the browser allows. Pairing is optional, at lvz.app/display?pair=1. Server side this uses `display_public_snapshot()` (migration `20261113233000_display_public_link.sql`, service role only), which returns only published, in-window slides, never drafts or devices.
+
 ## How it is built
 
 - Slide rules: `lib/continuous-display/live-contract.ts` (app) and `display_private.valid_items` in migration `20261113220000_display_media_rooms.sql` (database). Durations: text 8 to 60 s, picture 5 to 300 s, video 5 to 900 s, rooms 8 to 120 s.
