@@ -5,6 +5,8 @@ import {test,expect,type Page} from '@playwright/test';
 import QRCode from 'qrcode';
 import {member,openConcert} from './concert-route-fixture';
 
+// Building the disposable database replays every migration, which can be slow on a busy machine.
+test.describe.configure({timeout:120000});
 const shots=process.env.LVZ_SCREENSHOT_DIR;
 async function capture(page:Page,name:string){if(shots)await page.screenshot({path:`${shots}/${name}.png`,fullPage:true});}
 async function scanPhoto(page:Page,url:string){
@@ -78,6 +80,28 @@ test('manager sets up the concert; signed-out visitors are asked to sign in',asy
  await page.getByRole('button',{name:'Create concert'}).click();
  await expect(page.getByText('The concert is open for RSVPs.')).toBeVisible();
  await expect(page.getByRole('button',{name:'RSVP and get my ticket'})).toBeVisible();
+ await page.getByRole('button',{name:'More'}).click();
+ await page.getByRole('button',{name:'Concert settings'}).click();
+ await page.getByRole('button',{name:'Add a song'}).click();
+ await page.getByRole('button',{name:'Add a song'}).click();
+ const songs=page.getByRole('group',{name:/^Song /});
+ await songs.nth(0).getByLabel('No.').fill('121');
+ await songs.nth(0).getByLabel('Song 1 title').fill('Fictional Opening Song');
+ await songs.nth(0).getByLabel('Time').fill('3:08');
+ await songs.nth(0).getByLabel('Performers').fill('Brass ensemble');
+ await songs.nth(1).getByLabel('Song 2 title').fill('Fictional Second Song');
+ await songs.nth(1).getByLabel('Performers').fill('Choir + Orchestra');
+ await page.getByRole('button',{name:'Move song 2 up'}).click();
+ await page.getByRole('button',{name:'Save program'}).click();
+ await expect(page.getByText('Program saved.')).toBeVisible();
+ await capture(page,'concert-program-editor');
+ await page.getByRole('button',{name:'My ticket'}).click();
+ const program=page.getByRole('region',{name:'Program'});
+ await expect(program.locator('li strong')).toHaveText(['Fictional Second Song','Fictional Opening Song']);
+ await expect(program).toContainText('Brass ensemble');
+ await expect(program).not.toContainText('3:08');
+ await expect(program).not.toContainText('121');
+ await capture(page,'concert-program-public');
  fx.as(null);
  await page.goto('/modules/concert');
  await expect(page.getByRole('link',{name:'Sign in'}).last()).toBeVisible();

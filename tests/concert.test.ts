@@ -1,5 +1,5 @@
 import test from 'node:test';import assert from 'node:assert/strict';
-import {attendanceCsv,parseGuestRsvp,parseMemberCommand,parseScan,tokenFromScan,whenLine,databaseError} from '../lib/concert/domain.ts';
+import {attendanceCsv,parseProgram,parseProgramEntries,parseGuestRsvp,parseMemberCommand,parseScan,tokenFromScan,whenLine,databaseError} from '../lib/concert/domain.ts';
 import {ticketHtml,ticketText,ticketSubject} from '../lib/concert/email.ts';
 const token='A'.repeat(21)+'b-_'+'9'.repeat(19);
 
@@ -43,7 +43,7 @@ test('scan results are checked before display',()=>{
 });
 
 test('ticket email carries the link, details and escapes names',()=>{
- const m={name:'Gail <b>Guest</b>',partySize:2,ticketUrl:'https://lvz.app/concert/ticket/'+token,event:{title:'Healing Concert',date:'2026-12-06',startTime:'18:00',doorsTime:'17:30',venue:'Main Hall',details:''}};
+ const m={name:'Gail <b>Guest</b>',partySize:2,ticketUrl:'https://lvz.app/concert/ticket/'+token,event:{title:'Healing Concert',date:'2026-12-06',startTime:'18:00',doorsTime:'17:30',venue:'Main Hall',details:'',program:[]}};
  assert.equal(ticketSubject(m),'Your ticket: Healing Concert');
  const text=ticketText(m);
  assert.match(text,/Sunday, December 6, 2026/);assert.match(text,/Doors open 5:30 PM\. Starts 6:00 PM\./);assert.ok(text.includes(m.ticketUrl));assert.match(text,/Party of 2/);
@@ -55,4 +55,14 @@ test('ticket email carries the link, details and escapes names',()=>{
 test('attendance CSV neutralizes spreadsheet formulas',()=>{
  const csv=attendanceCsv({event:null,tickets:[{id:'1',name:'=HYPERLINK("x")',email:'a@b.co',phone:null,partySize:1,member:false,invitedBy:'Ava, Example',createdAt:'',checkedInAt:null,checkedInBy:null}]});
  assert.match(csv,/^Name,Email/);assert.ok(csv.includes(`"'=HYPERLINK(""x"")"`));assert.ok(csv.includes('"Ava, Example"'));
+});
+
+test('program entries are validated and the public program keeps order',()=>{
+ assert.deepEqual(parseProgramEntries([{songNumber:' App 33 ',title:' I Reminisce About Your Love ',duration:'5:13',performers:'Choir + Orchestra'},{songNumber:'',title:'The Rose',duration:null,performers:''}]),
+  [{songNumber:'App 33',title:'I Reminisce About Your Love',duration:'5:13',performers:'Choir + Orchestra'},{songNumber:null,title:'The Rose',duration:null,performers:null}]);
+ assert.throws(()=>parseProgramEntries([{songNumber:null,title:'',duration:null,performers:null}]),/needs a title/);
+ assert.throws(()=>parseProgramEntries([{songNumber:null,title:'X',duration:'5 min',performers:null}]),/like 3:08/);
+ assert.throws(()=>parseProgramEntries(Array.from({length:41},()=>({songNumber:null,title:'X',duration:null,performers:null}))),/40 songs/);
+ assert.deepEqual(parseProgram([{position:1,title:'A',performers:null}]),[{position:1,title:'A',performers:null}]);
+ assert.throws(()=>parseProgram([{position:2,title:'A',performers:null}]));
 });

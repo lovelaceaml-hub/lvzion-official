@@ -1,4 +1,4 @@
-import {parseEvent,parseMemberCommand,ConcertError,object,identifier,type Workspace} from '../../../lib/concert/domain';
+import {parseEvent,parseMemberCommand,parseProgramEntries,ConcertError,object,identifier,type Workspace} from '../../../lib/concert/domain';
 import {body} from '../../../lib/server/http';
 import {digest,inviteTokenFor,inviteUrl,newTicket,qrSvg,ticketTokenFor,ticketUrl} from '../../../lib/concert/server';
 import {call,failure,json,member,sendTicket} from '../../../lib/concert/routes';
@@ -16,8 +16,15 @@ async function workspace(client:Awaited<ReturnType<typeof member>>):Promise<Work
  const user=await client.auth.getUser();
  return {viewerId:me,name:String(p.name??''),canManage:p.canManage,event:p.event?parseEvent(p.event):null,myTicket,invitedCount:p.invitedCount as number,inviteUrl:inviteUrl(invite),email:user.data.user?.email??''};
 }
-export async function GET(){
- try{return json(await workspace(await member()));}catch(e){return failure(e);}
+export async function GET(request:Request){
+ try{
+  const client=await member();
+  if(new URL(request.url).searchParams.get('program')==='full'){
+   const p=object(await call(client,'concert_program_full'));
+   return json({items:parseProgramEntries(p.items)});
+  }
+  return json(await workspace(client));
+ }catch(e){return failure(e);}
 }
 export async function POST(request:Request){
  try{
@@ -36,6 +43,11 @@ export async function POST(request:Request){
    const emailed=await sendTicket(command.ticketId);
    if(!emailed)throw new ConcertError('The email could not be sent right now. The ticket on screen still works.',503,'mail');
    return json({ok:true,emailed});
+  }
+  if(command.op==='program'){
+   const r=object(await call(client,'concert_program_save',{p_items:command.items}));
+   if(r.ok!==true)throw new ConcertError('The save could not be confirmed.',503,'unavailable');
+   return json({ok:true});
   }
   const r=object(await call(client,'concert_command',{p_command:command}));
   if(r.ok!==true)throw new ConcertError('The save could not be confirmed.',503,'unavailable');

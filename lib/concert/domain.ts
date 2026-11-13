@@ -1,13 +1,15 @@
 /** Healing Concert: shared parsing and formatting. Dates and times are Las Vegas civil time. */
 export const TIME_ZONE='America/Los_Angeles';
 export const MAX_PARTY=10;
-export type ConcertEvent={id:string;title:string;date:string;startTime:string;doorsTime:string|null;venue:string;details:string;capacity:number|null;rsvpOpen:boolean;version:number;seatsTaken:number};
+export type ProgramItem={position:number;title:string;performers:string|null};
+export type ProgramEntry={songNumber:string|null;title:string;duration:string|null;performers:string|null};
+export type ConcertEvent={id:string;title:string;date:string;startTime:string;doorsTime:string|null;venue:string;details:string;capacity:number|null;rsvpOpen:boolean;version:number;seatsTaken:number;program:ProgramItem[]};
 export type MyTicket={id:string;name:string;email:string;partySize:number;checkedInAt:string|null;url:string;qrSvg:string};
 export type Workspace={viewerId:string;name:string;canManage:boolean;event:ConcertEvent|null;myTicket:MyTicket|null;invitedCount:number;inviteUrl:string};
 export type AttendanceTicket={id:string;name:string;email:string;phone:string|null;partySize:number;member:boolean;invitedBy:string|null;createdAt:string;checkedInAt:string|null;checkedInBy:string|null};
 export type Attendance={event:ConcertEvent|null;tickets:AttendanceTicket[]};
 export type ScanResult={result:'ok'|'already'|'invalid'|'cancelled'|'other_event';name?:string;partySize?:number;checkedInAt?:string};
-export type PublicEvent={title:string;date:string;startTime:string;doorsTime:string|null;venue:string;details:string};
+export type PublicEvent={title:string;date:string;startTime:string;doorsTime:string|null;venue:string;details:string;program:ProgramItem[]};
 
 export class ConcertError extends Error{
  status:number;code:string;
@@ -35,7 +37,8 @@ export type MemberCommand=
  |{op:'create';title:string;date:string;startTime:string;doorsTime:string|null;venue:string;details:string;capacity:number|null;rsvpOpen:boolean}
  |{op:'edit';eventId:string;expectedVersion:number;title:string;date:string;startTime:string;doorsTime:string|null;venue:string;details:string;capacity:number|null;rsvpOpen:boolean}
  |{op:'archive';eventId:string;expectedVersion:number}
- |{op:'checkin'|'undo'|'cancel';ticketId:string};
+ |{op:'checkin'|'undo'|'cancel';ticketId:string}
+ |{op:'program';items:ProgramEntry[]};
 function eventFields(p:Record<string,unknown>){
  const title=text(p.title,80).trim(),venue=text(p.venue,120).trim(),details=text(p.details,600).trim();
  if(title.length<2||control.test(title))throw new ConcertError('Enter a concert name of 2 to 80 characters.');
@@ -57,6 +60,7 @@ export function parseMemberCommand(value:unknown):MemberCommand{
   case 'edit':fields(p,['op','eventId','expectedVersion','title','date','startTime','doorsTime','venue','details','capacity','rsvpOpen']);return {op:'edit',eventId:identifier(p.eventId),expectedVersion:version(p.expectedVersion),...eventFields(p)};
   case 'archive':fields(p,['op','eventId','expectedVersion']);return {op:'archive',eventId:identifier(p.eventId),expectedVersion:version(p.expectedVersion)};
   case 'checkin':case 'undo':case 'cancel':fields(p,['op','ticketId']);return {op:p.op,ticketId:identifier(p.ticketId)};
+  case 'program':fields(p,['op','items']);return {op:'program',items:parseProgramEntries(p.items)};
  }
  throw new ConcertError('Unknown action.');
 }
@@ -74,17 +78,30 @@ export function tokenFromScan(raw:unknown):string|null{
  if(m)return m[1];return /^[A-Za-z0-9_-]{43}$/.test(s)?s:null;
 }
 
+function optionalLine(v:unknown,max:number,label:string):string|null{if(v===null||v===undefined)return null;const t=text(v,max).trim();if(!t)return null;if(control.test(t))throw new ConcertError(label);return t;}
+export function parseProgram(value:unknown):ProgramItem[]{
+ if(value===undefined)return [];
+ if(!Array.isArray(value)||value.length>40)throw new ConcertError('Program could not be verified.',503,'unavailable');
+ return value.map((raw,i)=>{const p=object(raw);if(p.position!==i+1)throw new ConcertError('Program could not be verified.',503,'unavailable');return {position:i+1,title:text(p.title,120),performers:p.performers===null?null:text(p.performers,120)};});
+}
+export function parseProgramEntries(value:unknown):ProgramEntry[]{
+ if(!Array.isArray(value)||value.length>40)throw new ConcertError('The program can have up to 40 songs.');
+ return value.map((raw,i)=>{const p=object(raw);fields(p,['songNumber','title','duration','performers']);
+  const title=text(p.title,120).trim();if(!title||control.test(title))throw new ConcertError(`Song ${i+1} needs a title.`);
+  const duration=optionalLine(p.duration,5,'Invalid time.');if(duration&&!/^\d{1,2}:[0-5]\d$/.test(duration))throw new ConcertError(`Song ${i+1}: write the time like 3:08.`);
+  return {songNumber:optionalLine(p.songNumber,12,`Song ${i+1}: invalid song number.`),title,duration,performers:optionalLine(p.performers,120,`Song ${i+1}: invalid performers.`)};});
+}
 export function parseEvent(value:unknown):ConcertEvent{
  const e=object(value);
  const capacity=e.capacity===null?null:e.capacity;
  if(capacity!==null&&!Number.isInteger(capacity))throw new ConcertError('Concert could not be verified.',503,'unavailable');
  if(typeof e.rsvpOpen!=='boolean'||!Number.isInteger(e.seatsTaken))throw new ConcertError('Concert could not be verified.',503,'unavailable');
  return {id:identifier(e.id),title:text(e.title,80),date:dateValue(e.date),startTime:clockValue(e.startTime),doorsTime:e.doorsTime===null?null:clockValue(e.doorsTime),
-  venue:text(e.venue,120),details:text(e.details,600),capacity:capacity as number|null,rsvpOpen:e.rsvpOpen,version:version(e.version),seatsTaken:e.seatsTaken as number};
+  venue:text(e.venue,120),details:text(e.details,600),capacity:capacity as number|null,rsvpOpen:e.rsvpOpen,version:version(e.version),seatsTaken:e.seatsTaken as number,program:parseProgram(e.program)};
 }
 export function parsePublicEvent(value:unknown):PublicEvent{
  const e=object(value);
- return {title:text(e.title,80),date:dateValue(e.date),startTime:clockValue(e.startTime),doorsTime:e.doorsTime===null?null:clockValue(e.doorsTime),venue:text(e.venue,120),details:text(e.details,600)};
+ return {title:text(e.title,80),date:dateValue(e.date),startTime:clockValue(e.startTime),doorsTime:e.doorsTime===null?null:clockValue(e.doorsTime),venue:text(e.venue,120),details:text(e.details,600),program:parseProgram(e.program)};
 }
 export function parseAttendance(value:unknown):Attendance{
  const p=object(value);if(!Array.isArray(p.tickets)||p.tickets.length>5000)throw new ConcertError('Attendance could not be verified.',503,'unavailable');

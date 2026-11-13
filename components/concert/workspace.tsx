@@ -3,7 +3,8 @@ import {useCallback,useEffect,useMemo,useState,type FormEvent} from 'react';
 import {FrameControls} from '../app-frame';
 import {EmptyState,Glass,IconBox,Row,SearchField,SectionHeader,StatGrid,StatTile,Tag} from '../ui-kit';
 import {CalendarDays,Check,MapPin,Music,UsersRound} from '../home-icons';
-import {MAX_PARTY,formatStamp,parseAttendance,seatsLeft,whenLine,type Attendance,type ConcertEvent,type Workspace} from '../../lib/concert/domain';
+import {MAX_PARTY,formatStamp,parseAttendance,parseProgramEntries,seatsLeft,whenLine,type Attendance,type ConcertEvent,type ProgramEntry,type Workspace} from '../../lib/concert/domain';
+import Program from './program';
 import './concert.css';
 
 type View='ticket'|'invite'|'guests'|'settings';
@@ -52,6 +53,7 @@ function TicketView({data,reload}:{data:Data;reload:()=>Promise<void>}){
    <a className="ui-button ui-button-quiet" href={ticket.url}>Open ticket page</a>
   </div>
   {note?<p className="cc-note" role="status">{note}</p>:null}{error?<p className="cc-error" role="alert">{error}</p>:null}
+  <Program items={event.program}/>
  </>;
  return <>
   <EventCard event={event}/>
@@ -63,6 +65,7 @@ function TicketView({data,reload}:{data:Data;reload:()=>Promise<void>}){
    {error?<p className="cc-error" role="alert">{error}</p>:null}
   </form>:<p className="cc-hint">{event.rsvpOpen?'The concert is full.':'RSVP is closed.'}</p>}
   {note?<p className="cc-note" role="status">{note}</p>:null}
+  <Program items={event.program}/>
  </>;
 }
 
@@ -148,6 +151,37 @@ function SettingsView({data,reload,onCreated}:{data:Data;reload:()=>Promise<void
  </form>;
 }
 
+
+const blank=():ProgramEntry=>({songNumber:null,title:'',duration:null,performers:null});
+function ProgramEditor({reload}:{reload:()=>Promise<void>}){
+ const [items,setItems]=useState<ProgramEntry[]|null>(null),[busy,setBusy]=useState(false),[error,setError]=useState(''),[note,setNote]=useState('');
+ useEffect(()=>{void(async()=>{try{const d=await readJSON(await fetch('/api/concert?program=full',{cache:'no-store'})) as {items:unknown};setItems(parseProgramEntries(d.items));}catch(x){setError(x instanceof Error?x.message:'Unable to load the program.');}})();},[]);
+ const update=(i:number,k:keyof ProgramEntry,v:string)=>setItems(list=>list!.map((it,n)=>n===i?{...it,[k]:k==='title'?v:(v||null)}:it));
+ const move=(i:number,d:number)=>setItems(list=>{const l=[...list!];const j=i+d;if(j<0||j>=l.length)return l;[l[i],l[j]]=[l[j],l[i]];return l;});
+ async function save(e:FormEvent){e.preventDefault();setBusy(true);setError('');setNote('');
+  try{await post({op:'program',items:(items??[]).filter(it=>it.title.trim()||it.songNumber||it.duration||it.performers)});await reload();setNote('Program saved.');}
+  catch(x){setError(x instanceof Error?x.message:'Save could not be confirmed.');}finally{setBusy(false);}}
+ if(!items)return error?<p className="cc-error" role="alert">{error}</p>:<p className="cc-hint" role="status">Loading the program…</p>;
+ return <form className="cc-form cc-program-edit" onSubmit={save} aria-label="Program">
+  <SectionHeader title="Program"/>
+  <p className="cc-hint">Everyone sees the order, title and performers. Song numbers and times are only shown here.</p>
+  {items.map((it,i)=><fieldset className="cc-program-row" key={i} aria-label={`Song ${i+1}`}>
+   <label className="ui-field"><span>No.</span><input className="ui-input" maxLength={12} value={it.songNumber??''} onChange={e=>update(i,'songNumber',e.target.value)}/></label>
+   <label className="ui-field"><span>Song {i+1} title</span><input className="ui-input" maxLength={120} value={it.title} onChange={e=>update(i,'title',e.target.value)}/></label>
+   <label className="ui-field"><span>Time</span><input className="ui-input" maxLength={5} placeholder="3:08" inputMode="numeric" value={it.duration??''} onChange={e=>update(i,'duration',e.target.value)}/></label>
+   <label className="ui-field"><span>Performers</span><input className="ui-input" maxLength={120} value={it.performers??''} onChange={e=>update(i,'performers',e.target.value)}/></label>
+   <span className="cc-row-tools">
+    <button type="button" className="ui-button ui-button-quiet" disabled={i===0} onClick={()=>move(i,-1)} aria-label={`Move song ${i+1} up`}>Up</button>
+    <button type="button" className="ui-button ui-button-quiet" disabled={i===items.length-1} onClick={()=>move(i,1)} aria-label={`Move song ${i+1} down`}>Down</button>
+    <button type="button" className="ui-button ui-button-quiet" onClick={()=>setItems(l=>l!.filter((_,n)=>n!==i))} aria-label={`Remove song ${i+1}`}>Remove</button>
+   </span>
+  </fieldset>)}
+  <button type="button" className="ui-button ui-button-secondary" disabled={items.length>=40} onClick={()=>setItems(l=>[...l!,blank()])}>Add a song</button>
+  <button className="ui-button ui-button-block" disabled={busy}>{busy?'Saving…':'Save program'}</button>
+  {note?<p className="cc-note" role="status">{note}</p>:null}{error?<p className="cc-error" role="alert">{error}</p>:null}
+ </form>;
+}
+
 export default function ConcertWorkspace(){
  const [data,setData]=useState<Data|null>(null),[error,setError]=useState(''),[signedOut,setSignedOut]=useState(false),[notice,setNotice]=useState(''),[view,setView]=useState<View>('ticket');
  const load=useCallback(async()=>{try{setData(await readJSON(await fetch('/api/concert',{cache:'no-store'})) as Data);setError('');}catch(x){setSignedOut(x instanceof SessionError);setError(x instanceof Error?x.message:'Unable to load the concert.');}},[]);
@@ -168,5 +202,6 @@ export default function ConcertWorkspace(){
   {data&&data.event&&view==='invite'?<InviteView data={data}/>:null}
   {data&&manage&&view==='guests'?<GuestsView data={data}/>:null}
   {data&&manage&&view==='settings'?<SettingsView data={data} reload={load} onCreated={()=>{setView('ticket');setNotice('The concert is open for RSVPs.');}}/>:null}
+  {data&&manage&&view==='settings'&&data.event?<ProgramEditor key={data.event.id} reload={load}/>:null}
  </main>;
 }

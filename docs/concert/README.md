@@ -13,11 +13,13 @@ Status: **live on lvz.app since 2026-11-12** (Anthony: "Yes, release it"). Deplo
 | A guest with no account | The member's invite link (`/concert/i/…`) | RSVP with name, email, optional phone and party size; the ticket opens right away and is emailed |
 | Anyone with a ticket | `/concert/ticket/…` (in the email) | Show the QR code at the door; a quiet link to create an LV Zion account |
 | Door staff (concert managers) | More → Scan tickets (`/modules/concert/scan`) | Scan with the phone camera (or from a photo); green Welcome, amber Already checked in, red Not valid |
-| Concert managers | More → Guest list, Concert settings | Live counts, search, manual check-in and undo, resend a ticket, remove a ticket, download the list (CSV), set the date/time/venue/seats, open or close RSVP, close the concert |
+| Concert managers | More → Guest list, Concert settings | Edit the program (song number, title, time, performers; only order, title and performers are public), live counts, search, manual check-in and undo, resend a ticket, remove a ticket, download the list (CSV), set the date/time/venue/seats, open or close RSVP, close the concert |
 
 The owner manages it automatically. Give door volunteers a `manager` grant on the `concert` app.
 
 ## How it works
+
+- The program (song list) shows on the invite page, every ticket page and in the member app, with order, title and performers only. Song numbers and times are visible only in Concert settings (Anthony, 2026-11-12). Migration `20261112210000_concert_program`.
 
 - One open concert at a time (`app_private.concert_events`). Closing it keeps the guest list; its tickets then scan as "another event".
 - Each member has one stable invite link. Guests who RSVP through it are recorded with who invited them.

@@ -41,7 +41,10 @@ export async function openConcert(page:Page,{as,event=true}:{as:number|null;even
  const signedOut={status:401,json:{error:'Sign in to your LV Zion account.',code:'session'}};
  if(event){actor=member.devin;await call(`select public.concert_command($1::jsonb) as value`,[JSON.stringify({op:'create',title:'Healing Concert',date:'2030-12-06',startTime:'18:00',doorsTime:'17:30',venue:'Fictional Main Hall',details:'Free entry. Fictional test event.',capacity:120,rsvpOpen:true})]);actor=as;}
 
- await page.route('**/api/concert',async route=>{
+ await page.route(url=>url.pathname==='/api/concert'&&url.searchParams.get('program')==='full',async route=>{
+  try{await route.fulfill({json:await call('select public.concert_program_full() as value')});}catch(e){await route.fulfill(fail(e));}
+ });
+ await page.route(url=>url.pathname==='/api/concert'&&!url.searchParams.has('program'),async route=>{
   if(actor===null){await route.fulfill(signedOut);return;}
   try{
    if(route.request().method()==='GET'){
@@ -54,6 +57,7 @@ export async function openConcert(page:Page,{as,event=true}:{as:number|null;even
    const c=parseMemberCommand(route.request().postDataJSON());
    if(c.op==='rsvp'){const id=randomUUID();const r=await call('select public.concert_member_rsvp($1,$2,$3,$4) as value',[id,digest(ticketToken(id)),c.email,c.partySize]) as {created:boolean};await route.fulfill({json:{ok:true,created:r.created,emailed:false}});return;}
    if(c.op==='resend'){await call('select public.concert_ticket_owner_email($1) as value',[c.ticketId]);await route.fulfill({json:{ok:true,emailed:true}});return;}
+   if(c.op==='program'){await call('select public.concert_program_save($1::jsonb) as value',[JSON.stringify(c.items)]);await route.fulfill({json:{ok:true}});return;}
    await call('select public.concert_command($1::jsonb) as value',[JSON.stringify(c)]);await route.fulfill({json:{ok:true}});
   }catch(e){await route.fulfill(fail(e));}
  });
