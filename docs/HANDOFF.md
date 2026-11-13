@@ -12,7 +12,7 @@ Keep compact module headers and the prominent center Apps launcher. The launcher
 
 The Church Display TV (lvz.app/display) can now play four kinds of slide: text (as before), pictures, videos and a live "Study rooms today" board. Each slide is added with one tap, removed with one tap, and can have its own show-from and stop-showing dates inside the playlist's dates. Videos play without sound and move on when they end. The rooms board reads lvrooms.web.app's public lobby feed (Anthony's approved exception, 2026-11-13) and shows room and time only. Uploads go to a new private `display-media` bucket (50 MB per file).
 
-Waiting for Anthony: apply migration `20261113220000_display_media_rooms` (not applied to the hosted database), merge, deploy, then upload "Shake Nevada 60s (cinematic, widescreen, smaller file).mp4" from Drive. Focused checks only: display unit and database tests, display browser tests, build. No full suite, no live upload, no real TV. Details: [docs/continuous-display/MEDIA-ROOMS.md](continuous-display/MEDIA-ROOMS.md).
+Migration `20261113220000_display_media_rooms` applied 2026-11-13 (see the ledger). Still to do: deploy, then upload "Shake Nevada 60s (cinematic, widescreen, smaller file).mp4" from Drive. Focused checks only: display unit and database tests, display browser tests, build. No full suite, no live upload, no real TV. Details: [docs/continuous-display/MEDIA-ROOMS.md](continuous-display/MEDIA-ROOMS.md).
 
 ## Healing Concert tickets: released November 12, 2026
 

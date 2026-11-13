@@ -318,6 +318,17 @@
    "verified_on": "2026-11-12",
    "applied_via": "Supabase CLI db query (Management API) from main b6ff470, after 56 SQL assertions, 7 unit tests, 3 browser tests, TypeScript and the production build passed; schema_migrations row recorded by hand",
    "verification": "Hosted readback: program table with RLS and no direct SELECT for authenticated; two manager RPC wrappers executable by authenticated only, not anon. Anthony's 11-song program entered for the open concert (audited); the public event view shows order, title and performers only. Production dpl_3JbMGy63YUKfwSsK3zKBwEqcgFtB READY from b6ff470 on lvz.app."
+  },
+  {
+   "name": "display_media_rooms",
+   "hosted_version": "20261113220000",
+   "repository_version": "20261113220000",
+   "source": "supabase/migrations/20261113220000_display_media_rooms.sql",
+   "source_blob_sha": "7a219dd6dd234bace21b809369d06173abf712e4",
+   "status": "applied",
+   "verified_on": "2026-11-13",
+   "applied_via": "Supabase MCP execute_sql in one transaction from branch claude/sleepy-wozniak-jutvtb (PR #83), after the display unit, PGlite database and browser tests and the production build passed; schema_migrations row recorded by hand. Anthony: \"approve the migration, merge and release it\".",
+   "verification": "Pre-check: latest hosted version 20261112210000, no display-media bucket, no display_media_authorize, one screen with an empty draft, zero approvals and publications. Readback: bucket display-media private, 50 MB limit, image/jpeg, image/png, image/webp, video/mp4, video/webm, zero objects and zero storage policies; display_media_authorize executable by authenticated, not anon; valid_items accepts a video slide, rejects a text slide without a message and a rooms slide with an extra field; existing draft still valid. display_private.require_manager on the host already uses app_private.module_manager, so the new check follows the October 24 access rules."
   }
  ],
  "normalization": {
