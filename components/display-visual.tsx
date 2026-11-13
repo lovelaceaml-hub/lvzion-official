@@ -1,6 +1,7 @@
 'use client';
 import {useEffect,useRef} from 'react';
 import type{DisplayKind,DisplayRooms,DisplaySlide} from '../lib/continuous-display/live-contract';
+import {MOTHERS_LOVE_TV} from '../lib/continuous-display/live-contract';
 type Props={
  slide?:DisplaySlide|null;preview?:boolean;
  /** Where a picture or video file is opened from; the TV and manager previews use different checks. */
@@ -15,8 +16,10 @@ type Props={
  sound?:boolean;
  /** Called when the browser refuses sound before anyone has touched the page; the video then plays silently. */
  onSoundBlocked?:()=>void;
+ /** A just-published Mother's Love recognition to welcome with its arrival. */
+ welcomeId?:string|null;
 };
-const eyebrows:Record<DisplayKind,string>={announcement:'Announcement',schedule:'Schedule',event:'Upcoming event',campaign:'Campaign',image:'Picture',video:'Video',rooms:'Study rooms'};
+const eyebrows:Record<DisplayKind,string>={announcement:'Announcement',schedule:'Schedule',event:'Upcoming event',campaign:'Campaign',image:'Picture',video:'Video',rooms:'Study rooms','mothers-love':"The Words of Mother's Love"};
 function dateParts(value?:string){
  if(!value||!/^\d{4}-\d{2}-\d{2}$/.test(value))return null;
  const d=new Date(value+'T12:00:00Z');if(!Number.isFinite(d.getTime()))return null;
@@ -72,6 +75,7 @@ function MediaSlide({slide,preview,mediaSrc,onMediaEnd,sound,onSoundBlocked}:{sl
  },[src,withSound]);
  const fit=slide.fit??'contain';
  return <section className={`cd-slide cd-kind-media cd-fit-${fit}`} aria-label={slide.title}>
+  {src&&slide.kind==='image'&&fit==='contain'&&<img className="cd-media-blur" src={src} alt="" aria-hidden="true" decoding="async"/>}
   {src&&slide.kind==='image'&&<img className="cd-media" src={src} alt={slide.title} decoding="async"/>}
   {src&&slide.kind==='video'&&<video ref={video} className="cd-media" src={src} muted={!withSound} playsInline preload="auto"
    loop={preview} aria-label={slide.title} onEnded={onMediaEnd} onError={onMediaEnd}/>}
@@ -80,9 +84,22 @@ function MediaSlide({slide,preview,mediaSrc,onMediaEnd,sound,onSoundBlocked}:{sl
   {preview&&<span className="cd-preview-mark">Preview, not on the TV</span>}
  </section>;
 }
-export default function DisplayVisual({slide,preview=false,mediaSrc,rooms,nowClock,onMediaEnd,sound,onSoundBlocked}:Props){
+/** The real Mother's Love TV, loaded only during its turn so its song plays only then. */
+function MothersLoveSlide({slide,preview,welcomeId}:{slide:DisplaySlide;preview:boolean;welcomeId?:string|null}){
+ if(preview)return <section className="cd-slide cd-fallback cd-kind-ml" aria-label={slide.title}>
+  <div className="cd-copy"><p className="cd-eyebrow">{eyebrows['mothers-love']}</p><h1>{slide.title}</h1>
+   <p className="cd-body">The live Mother's Love TV plays here on the TV, and comes on by itself when a new recognition is published.</p></div>
+  <span className="cd-preview-mark">Preview, not on the TV</span>
+ </section>;
+ const src=MOTHERS_LOVE_TV+(welcomeId?'?welcome='+encodeURIComponent(welcomeId):'');
+ return <section className="cd-slide cd-kind-ml" aria-label={slide.title}>
+  <iframe className="cd-ml-frame" src={src} title={slide.title} allow="autoplay; fullscreen" referrerPolicy="no-referrer"/>
+ </section>;
+}
+export default function DisplayVisual({slide,preview=false,mediaSrc,rooms,nowClock,onMediaEnd,sound,onSoundBlocked,welcomeId}:Props){
  if(!slide)return <section className="cd-slide cd-fallback"><div className="cd-art" aria-hidden="true"><i/><i/><i/></div><div className="cd-copy"><p className="cd-eyebrow">LV Zion</p><h1>Welcome.</h1><p className="cd-body">The display is taking a quiet moment.</p></div></section>;
  if(slide.kind==='image'||slide.kind==='video')return <MediaSlide slide={slide} preview={preview} mediaSrc={mediaSrc} onMediaEnd={onMediaEnd} sound={sound} onSoundBlocked={onSoundBlocked}/>;
+ if(slide.kind==='mothers-love')return <MothersLoveSlide slide={slide} preview={preview} welcomeId={welcomeId}/>;
  if(slide.kind==='rooms')return <RoomsBoard slide={slide} rooms={rooms} nowClock={nowClock} preview={preview}/>;
  const date=dateParts(slide.date);
  return <section className={`cd-slide cd-style-${slide.style} cd-kind-${slide.kind}`} aria-label={slide.title}>

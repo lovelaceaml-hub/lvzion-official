@@ -22,7 +22,7 @@ const tabs=['content','playlist','publish','screens'] as const;
 type Tab=typeof tabs[number];
 type Tone='info'|'success'|'warning'|'danger';
 const styles:DisplayStyle[]=['editorial','schedule','event','campaign'];
-const kinds:DisplayKind[]=['announcement','schedule','event','campaign','image','video','rooms'];
+const kinds:DisplayKind[]=['announcement','schedule','event','campaign','image','video','rooms','mothers-love'];
 const capital=(s:string)=>s.slice(0,1).toUpperCase()+s.slice(1);
 const two=(n:number)=>String(n).padStart(2,'0');
 const defaultWall=(days=0)=>churchLocal(new Date(Date.now()+days*86400000).toISOString());
@@ -55,10 +55,10 @@ function Card({id,icon,title,hint,children,className}:{id:string;icon:ReactNode;
   {children}
  </Glass>;
 }
-const defaultTitles:Partial<Record<DisplayKind,string>>={image:'New picture',video:'New video',rooms:'Study rooms today'};
+const defaultTitles:Partial<Record<DisplayKind,string>>={image:'New picture',video:'New video',rooms:'Study rooms today','mothers-love':"The Words of Mother's Love"};
 function newSlide(kind:DisplayKind):DisplaySlide{
  const date=churchLocal(new Date().toISOString()).slice(0,10);
- if(!isTextKind(kind))return{id:'slide-'+crypto.randomUUID().slice(0,12),kind,style:'editorial',title:defaultTitles[kind]!,duration:kind==='video'?60:kind==='rooms'?20:15};
+ if(!isTextKind(kind))return{id:'slide-'+crypto.randomUUID().slice(0,12),kind,style:'editorial',title:defaultTitles[kind]!,duration:kind==='video'?60:kind==='rooms'?20:kind==='mothers-love'?120:15};
  return{id:'slide-'+crypto.randomUUID().slice(0,12),kind,style:kind==='announcement'?'editorial':kind as DisplayStyle,
   title:'New '+kind,body:'Add approved details before publication.',duration:kind==='schedule'?20:15,
   ...(kind==='schedule'?{date,rows:[{time:'',label:''}]}:{}),
@@ -156,7 +156,7 @@ export default function DisplayManager(){
  const onlineCount=paired.filter(d=>online(d.lastSeen)).length;
  const loop=slides.reduce((sum,s)=>sum+(Number.isFinite(s.duration)?s.duration:0),0);
  const addSlide=(kind:DisplayKind='announcement')=>{update(a=>[...a,newSlide(kind)]);setSelected(slides.length);};
- const quickAdd:{kind:DisplayKind;label:string}[]=[{kind:'announcement',label:'Text'},{kind:'image',label:'Picture'},{kind:'video',label:'Video'},{kind:'rooms',label:'Study rooms'}];
+ const quickAdd:{kind:DisplayKind;label:string}[]=[{kind:'announcement',label:'Text'},{kind:'image',label:'Picture'},{kind:'video',label:'Video'},{kind:'rooms',label:'Study rooms'},{kind:'mothers-love',label:"Mother's Love"}];
  const addButtons=(className:string)=>quickAdd.map(q=><button key={q.kind} type="button" className={className} disabled={busy||slides.length>=MAX_DISPLAY_SLIDES} onClick={()=>addSlide(q.kind)}><Plus size={18}/>{q.label}</button>);
  const updateRow=(index:number,s:DisplaySlide,row:number,patch:Partial<{time:string;label:string}>)=>
   change(index,{rows:(s.rows??[]).map((v,j)=>j===row?{...v,...patch}:v)});
@@ -172,6 +172,7 @@ export default function DisplayManager(){
   :<label className="ui-field cd-span">{s.kind==='rooms'?'Note under the heading (optional)':'Caption on the TV (optional)'}<textarea className="ui-input" value={s.body??''} maxLength={160} rows={2} onChange={e=>change(index,{body:e.target.value.trim()?e.target.value:undefined})}/></label>}
   <label className="ui-field">Duration (seconds)<input className="ui-input" type="number" min={DISPLAY_DURATION[s.kind].min} max={DISPLAY_DURATION[s.kind].max} value={s.duration} onChange={e=>change(index,{duration:Number(e.target.value)})}/></label>
   {s.kind==='video'&&<p className="ui-hint cd-span">The TV plays videos with sound and moves on when the video ends, or at this time if that comes first.</p>}
+  {s.kind==='mothers-love'&&<p className="ui-hint cd-span">Plays the live Mother's Love TV for this long, with its song. When a new recognition is published, the TV switches to it right away and shows the new recognition.</p>}
   {s.kind==='rooms'&&<p className="ui-hint cd-span">Shows today’s study-room bookings from lvrooms.web.app: the room and the time only, never who booked. Finished bookings drop off through the day.</p>}
   {(s.kind==='schedule'||s.kind==='event')&&<label className="ui-field">Date<input className="ui-input" type="date" value={s.date||''} onChange={e=>change(index,{date:e.target.value})}/></label>}
   {s.kind==='event'&&<><label className="ui-field">Event time<input className="ui-input" value={s.time||''} maxLength={72} onChange={e=>change(index,{time:e.target.value})}/></label><label className="ui-field">Location<input className="ui-input" value={s.location||''} maxLength={72} onChange={e=>change(index,{location:e.target.value})}/></label></>}

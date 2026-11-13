@@ -20,6 +20,12 @@ In Apps, Church Display, Content:
 
 "Sound needs to play and full screen needs to auto landscape." Videos start with sound. Browsers refuse sound before the first tap on a page, so if a TV blocks it the video plays silently and a "Tap for sound" button shows; one tap anywhere (or on Full screen) turns sound on for every later video. Full screen asks the device to turn to landscape; if it cannot (iPhone) or stays upright, the display is turned sideways on screen. Exit full screen undoes both.
 
+## The Words of Mother's Love (Anthony, 2026-11-13)
+
+"real mother's love. and when a new submission happens it auto shows that even if on another screen display". A Mother's Love slide (20 to 900 seconds, default 2 minutes) plays the real Mother's Love TV (https://mothers-love.vercel.app/display) during its turn, with its song. The server checks the public Mother's Love feed every 10 seconds for the newest recognition's id and time only. When a newer one appears, the TV switches to the Mother's Love turn at once, whatever is showing, and opens it with `?welcome=<id>` so that recognition plays its arrival (Mother's Love side: the renderer welcomes it on first load if published within 15 minutes). Needs the Mother's Love change that allows lvz.app to frame its renderer (mothers-love PR #57). Migration `20261113235000_display_mothers_love.sql` lets the database accept the slide.
+
+Pictures shown whole (portrait flyers on a wide TV) sit on a blurred, dimmed copy of themselves instead of black bars.
+
 ## How it is built
 
 - Slide rules: `lib/continuous-display/live-contract.ts` (app) and `display_private.valid_items` in migration `20261113220000_display_media_rooms.sql` (database). Durations: text 8 to 60 s, picture 5 to 300 s, video 5 to 900 s, rooms 8 to 120 s.

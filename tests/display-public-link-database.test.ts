@@ -8,8 +8,13 @@ test('open display link: only the main screen\'s published, in-window slides, no
  const owner=id(1),moduleId=id(2),main=id(3),other=id(4);
  try{
   await db.exec("create role anon;create role authenticated;create role service_role;create schema app_private;create schema storage;create table storage.buckets(id text primary key,name text,public boolean,file_size_limit bigint,allowed_mime_types text[]);create table public.members(id uuid primary key,status text default 'active');create table app_private.app_modules(id uuid primary key,module_key text,status text,approved_at timestamptz);create table app_private.module_access_grants(module_id uuid,member_id uuid,permission text,ended_at timestamptz,granted_at timestamptz default now());create function app_private.current_member_id() returns uuid language sql stable as 'select nullif(current_setting(''display.actor'',true),'''')::uuid';");
-  for(const path of ['20261014223341_continuous_display_live_schema.sql','20261014230147_continuous_display_operations.sql','20261015004620_continuous_display_motion_r4.sql','20261113220000_display_media_rooms.sql','20261113233000_display_public_link.sql'])
+  for(const path of ['20261014223341_continuous_display_live_schema.sql','20261014230147_continuous_display_operations.sql','20261015004620_continuous_display_motion_r4.sql','20261113220000_display_media_rooms.sql','20261113233000_display_public_link.sql','20261113235000_display_mothers_love.sql'])
    await db.exec(await readFile(new URL('../supabase/migrations/'+path,import.meta.url),'utf8'));
+  const valid=async(items:unknown)=>(await db.query<{v:boolean}>('select display_private.valid_items($1::jsonb) v',[JSON.stringify(items)])).rows[0].v;
+  assert.equal(await valid([{id:'ml-1',kind:'mothers-love',style:'editorial',title:'ML',duration:120}]),true);
+  assert.equal(await valid([{id:'ml-1',kind:'mothers-love',style:'editorial',title:'ML',duration:19}]),false);
+  assert.equal(await valid([{id:'ml-1',kind:'mothers-love',style:'editorial',title:'ML',duration:120,media:'0123456789abcdef0123456789abcdef.mp4'}]),false);
+  assert.equal(await valid([{id:'v-1',kind:'video',style:'editorial',title:'V',duration:60,media:'0123456789abcdef0123456789abcdef.mp4'}]),true);
   const snap=async()=>(await db.query<{v:any}>('select public.display_public_snapshot() v')).rows[0].v;
   assert.equal(await snap(),null);
   await db.query('insert into public.members(id) values($1)',[owner]);

@@ -29,16 +29,16 @@ Self-contained, phone-first Next.js application at https://lvz.app, with its own
 Anthony requires a genuine fresh start. This applies to every module and supersedes conflicting historical documents, handoffs, tests and implementation assumptions.
 
 - Implement only requirements explicitly approved for LV Zion Official. A design reference approves appearance or interaction only, not data, schedules, operational policies or dependencies.
-- The product must have no knowledge of a separate application. Do not add references, links, imports, synchronization, fallback endpoints, migration prerequisites or handover gates involving another application. One exception is approved: see "Church Display: one approved outside source" below.
+- The product must have no knowledge of a separate application. Do not add references, links, imports, synchronization, fallback endpoints, migration prerequisites or handover gates involving another application. Two exceptions are approved: see "Church Display: approved outside sources" below.
 - Production schedules, service restrictions, assignments and events come only from records deliberately configured for this application. Start empty. Do not infer recurring schedules from conversation history or populate them from examples.
 - Empty schedules and configuration are valid. Show useful neutral empty states. Test fixtures remain isolated from production handlers and must never become fallback data.
 - Application rollout depends only on this application's own configuration, authorization, data integrity and verification. Do not require changes to another system before a module can function.
 - Preserve existing accounts, permissions, member history and intentionally entered records. Remove only positively identified unapproved defaults; audit any production correction.
 - Retain compact module headers and a prominent center Apps launcher in module bottom navigation.
 
-## Church Display: one approved outside source (Anthony, 2026-11-13)
+## Church Display: approved outside sources (Anthony, 2026-11-13)
 
-Anthony approved one exception to the no-other-app boundary: the Church Display TV may read the public study-room lobby feed at https://lvrooms.web.app/api/lobby-schedule, read only, server side, to show today's bookings as room and time. Who booked a room never reaches the TV or the browser. No other link, import, sync or dependency on another app is approved; if the feed is down, the rooms slide shows a neutral "not available" line and nothing else changes. Display pictures and videos live in the private `display-media` bucket on this app's own Supabase project. See docs/continuous-display/MEDIA-ROOMS.md.
+Anthony approved exceptions to the no-other-app boundary. First: the Church Display TV may read the public study-room lobby feed at https://lvrooms.web.app/api/lobby-schedule, read only, server side, to show today's bookings as room and time. Who booked a room never reaches the TV or the browser. No other link, import, sync or dependency on another app is approved beyond the two sources here; if a feed is down, the rooms slide shows a neutral "not available" line and nothing else changes. Second approved source (Anthony, 2026-11-13: "real mother's love. and when a new submission happens it auto shows that even if on another screen display"): a Mother's Love slide plays the public TV at https://mothers-love.vercel.app/display during its turn, and the server reads https://mothers-love.vercel.app/api/display/color-polish only for the newest recognition's id and time, to jump to that slide when one is published. Display pictures and videos live in the private `display-media` bucket on this app's own Supabase project. See docs/continuous-display/MEDIA-ROOMS.md.
 
 ## Access and placement decisions — October 24, 2026
 

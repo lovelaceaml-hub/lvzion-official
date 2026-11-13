@@ -45,3 +45,20 @@ test('TV snapshot accepts room data and still rejects unknown fields',()=>{
  assert.equal(withRooms.rooms?.bookings.length,1);
  assert.throws(()=>parseDisplaySnapshotR2({...base,bookedBy:'x'}),/Unexpected private/);
 });
+test('Mother\'s Love: slide rules, and only the newest recognition id and time leave the feed',async()=>{
+ const {latestRecognition}=await import('../lib/continuous-display/mothers-love.ts');
+ const {parseDisplayMothersLove}=await import('../lib/continuous-display/live-contract.ts');
+ assert.equal(parseDisplaySlides([{id:'ml-1',kind:'mothers-love',style:'editorial',title:"The Words of Mother's Love",duration:120}]).length,1);
+ assert.throws(()=>parseDisplaySlides([{id:'ml-1',kind:'mothers-love',style:'editorial',title:'T',duration:10}]),/20 to 900 seconds/);
+ assert.throws(()=>parseDisplaySlides([{id:'ml-1',kind:'mothers-love',style:'editorial',title:'T',duration:120,media:media+'.jpg'}]),/Only picture and video/);
+ const feed={recognitions:[
+  {id:'00000000-0000-4000-8000-000000000001',recipient:'Private Name',message:'Private message',status:'published',firstPublishedAt:'2026-11-13T20:00:00Z'},
+  {id:'00000000-0000-4000-8000-000000000002',recipient:'Private Name',message:'Private message',status:'published',firstPublishedAt:'2026-11-13T21:00:00Z'},
+  {id:'00000000-0000-4000-8000-000000000003',recipient:'Held',message:'Held',status:'held',firstPublishedAt:'2026-11-13T22:00:00Z'}]};
+ const latest=latestRecognition(feed);
+ assert.deepEqual(latest,{latestId:'00000000-0000-4000-8000-000000000002',latestAt:'2026-11-13T21:00:00.000Z'});
+ assert.ok(!JSON.stringify(latest).includes('Private'));
+ assert.deepEqual(latestRecognition({recognitions:[]}),{latestId:null,latestAt:null});
+ assert.equal(parseDisplayMothersLove(null),null);
+ assert.throws(()=>parseDisplayMothersLove({latestId:'x',latestAt:'2026-11-13T21:00:00Z',name:'Someone'}),/Invalid/);
+});

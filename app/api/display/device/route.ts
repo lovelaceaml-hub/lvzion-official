@@ -5,6 +5,7 @@ import {parseDisplaySnapshotR2} from '../../../../lib/continuous-display/operati
 import {createDeviceSecret,DEVICE_COOKIE,deviceDigest,normalizePairCode} from '../../../../lib/server/display';
 import {settings} from '../../../../lib/server/config';
 import {todaysRooms} from '../../../../lib/server/rooms-feed';
+import {latestMothersLove} from '../../../../lib/server/mothers-love-feed';
 export const runtime='nodejs';
 export const dynamic='force-dynamic';
 export async function GET(request:NextRequest){
@@ -19,6 +20,7 @@ export async function GET(request:NextRequest){
   const snapshot=parseDisplaySnapshotR2(data);
   // Room bookings are read only when a published slide shows them.
   if(snapshot.slides.some(s=>s.kind==='rooms'))snapshot.rooms=await todaysRooms();
+  if(snapshot.slides.some(s=>s.kind==='mothers-love'))snapshot.mothersLove=await latestMothersLove();
   return reply(snapshot);
  }catch{return reply({paired:false});}
 }

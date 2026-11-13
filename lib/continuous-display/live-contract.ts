@@ -1,5 +1,5 @@
 // Shared, data-minimized contract for the LV Zion Official screen player and manager.
-export type DisplayKind='announcement'|'schedule'|'event'|'campaign'|'image'|'video'|'rooms';
+export type DisplayKind='announcement'|'schedule'|'event'|'campaign'|'image'|'video'|'rooms'|'mothers-love';
 /** Picture, video and room-booking slides; the original four are text slides. */
 export type DisplayMediaKind='image'|'video';
 export type DisplayFit='cover'|'contain';
@@ -9,19 +9,30 @@ export type DisplaySlide={id:string;kind:DisplayKind;style:DisplayStyle;title:st
 /** Today's study-room bookings for a rooms slide: room and time only, never who booked. */
 export type DisplayRoomBooking={room:string;start:string;end:string};
 export type DisplayRooms={date:string;bookings:DisplayRoomBooking[]};
+/** The Words of Mother's Love: only the newest published recognition's id and time, never a name or message. */
+export type DisplayMothersLove={latestId:string|null;latestAt:string|null};
+export const MOTHERS_LOVE_TV='https://mothers-love.vercel.app/display';
+const recognitionId=/^[A-Za-z0-9-]{8,128}$/;
+export function parseDisplayMothersLove(value:unknown):DisplayMothersLove|null{
+ if(value===null||value===undefined)return null;
+ if(!isRecord(value)||Object.keys(value).some(k=>k!=='latestId'&&k!=='latestAt'))throw Error('Invalid Mother\'s Love update.');
+ const latestId=value.latestId??null,latestAt=value.latestAt??null;
+ if((latestId===null)!==(latestAt===null)||(latestId!==null&&(typeof latestId!=='string'||!recognitionId.test(latestId)||!safeInstant(latestAt))))throw Error('Invalid Mother\'s Love update.');
+ return{latestId:latestId as string|null,latestAt:latestAt as string|null};
+}
 export type DisplayDevice={id:string;lastSeen:string|null;pairedAt:string;revoked:boolean};
 export type DisplayScreen={id:string;label:string;enabled:boolean;draftVersion:number;items:DisplaySlide[];startsAt:string|null;endsAt:string|null;approvedVersion:number|null;publishedVersion:number;publishedAt:string|null;publishedUntil:string|null;devices:DisplayDevice[];history:{id:string;generation:number;publishedAt:string;until:string}[]};
 export type DisplaySnapshot={paired:true;screen:string;version:number;serverTime:string;leaseUntil:string;slides:DisplaySlide[]};
 export type ChurchOffset='-07:00'|'-08:00';
 export const CHURCH_TIME_ZONE='America/Los_Angeles';
-const kinds=new Set(['announcement','schedule','event','campaign','image','video','rooms']);
+const kinds=new Set(['announcement','schedule','event','campaign','image','video','rooms','mothers-love']);
 const textKinds=new Set(['announcement','schedule','event','campaign']);
 export const isTextKind=(kind:DisplayKind)=>textKinds.has(kind);
-export const KIND_LABELS:Record<DisplayKind,string>={announcement:'Announcement',schedule:'Schedule',event:'Event',campaign:'Campaign',image:'Picture',video:'Video',rooms:'Study rooms'};
+export const KIND_LABELS:Record<DisplayKind,string>={announcement:'Announcement',schedule:'Schedule',event:'Event',campaign:'Campaign',image:'Picture',video:'Video',rooms:'Study rooms','mothers-love':"Mother's Love"};
 /** Seconds a slide may stay on screen, by kind. A video also moves on when it ends. */
 export const DISPLAY_DURATION:Record<DisplayKind,{min:number;max:number}>={
  announcement:{min:8,max:60},schedule:{min:8,max:60},event:{min:8,max:60},campaign:{min:8,max:60},
- image:{min:5,max:300},video:{min:5,max:900},rooms:{min:8,max:120}
+ image:{min:5,max:300},video:{min:5,max:900},rooms:{min:8,max:120},'mothers-love':{min:20,max:900}
 };
 /** Uploaded picture and video files, named by the server: a random id and an allowed extension. */
 const mediaName=/^[a-f0-9]{32}\.(jpg|png|webp|mp4|webm)$/;
