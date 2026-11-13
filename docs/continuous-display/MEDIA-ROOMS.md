@@ -1,6 +1,6 @@
 # Church Display: pictures, videos and study rooms
 
-Built 2026-11-13 on Anthony's request: one official church TV that shows more than text, with slides that are easy to add, remove and schedule. Not live until the steps at the end are done.
+Built 2026-11-13 on Anthony's request: one official church TV that shows more than text, with slides that are easy to add, remove and schedule. Released 2026-11-13: migration applied, merged in #83, production deployment `dpl_82tboxaBzGMdaCX2WSXfiDQad2iZ` on lvz.app. Content is not added yet.
 
 ## What a manager can do
 
@@ -29,9 +29,9 @@ Focused only, no full suite:
 
 Not verified: a real upload to the hosted bucket, a signed-in manager on lvz.app, the live lvrooms feed through lvz.app, and a physical TV.
 
-## To make it live (needs Anthony's approval for each)
+## Release steps
 
-1. Apply `supabase/migrations/20261113220000_display_media_rooms.sql` to project `otecqlkqirncotytbfns` and record it in `docs/HOSTED-MIGRATION-LEDGER.json`.
-2. Merge the pull request and deploy lvz.app (automatic Git deploys stay off).
+1. Done 2026-11-13. Apply `supabase/migrations/20261113220000_display_media_rooms.sql` to project `otecqlkqirncotytbfns` and record it in `docs/HOSTED-MIGRATION-LEDGER.json`.
+2. Done 2026-11-13. Merge the pull request and deploy lvz.app (automatic Git deploys stay off).
 3. In Church Display, add a Video slide and upload "Shake Nevada 60s (cinematic, widescreen, smaller file).mp4" (22 MB, in Drive). The 61 MB widescreen version is over the 50 MB limit.
 4. Add a Study rooms slide, save, approve, publish, and check the paired TV.
