@@ -171,7 +171,7 @@ export default function DisplayManager(){
   {isTextKind(s.kind)?<label className="ui-field cd-span">Supporting message<textarea className="ui-input" value={s.body??''} maxLength={160} rows={3} onChange={e=>change(index,{body:e.target.value})}/></label>
   :<label className="ui-field cd-span">{s.kind==='rooms'?'Note under the heading (optional)':'Caption on the TV (optional)'}<textarea className="ui-input" value={s.body??''} maxLength={160} rows={2} onChange={e=>change(index,{body:e.target.value.trim()?e.target.value:undefined})}/></label>}
   <label className="ui-field">Duration (seconds)<input className="ui-input" type="number" min={DISPLAY_DURATION[s.kind].min} max={DISPLAY_DURATION[s.kind].max} value={s.duration} onChange={e=>change(index,{duration:Number(e.target.value)})}/></label>
-  {s.kind==='video'&&<p className="ui-hint cd-span">The TV plays videos without sound and moves on when the video ends, or at this time if that comes first.</p>}
+  {s.kind==='video'&&<p className="ui-hint cd-span">The TV plays videos with sound and moves on when the video ends, or at this time if that comes first.</p>}
   {s.kind==='rooms'&&<p className="ui-hint cd-span">Shows today’s study-room bookings from lvrooms.web.app: the room and the time only, never who booked. Finished bookings drop off through the day.</p>}
   {(s.kind==='schedule'||s.kind==='event')&&<label className="ui-field">Date<input className="ui-input" type="date" value={s.date||''} onChange={e=>change(index,{date:e.target.value})}/></label>}
   {s.kind==='event'&&<><label className="ui-field">Event time<input className="ui-input" value={s.time||''} maxLength={72} onChange={e=>change(index,{time:e.target.value})}/></label><label className="ui-field">Location<input className="ui-input" value={s.location||''} maxLength={72} onChange={e=>change(index,{location:e.target.value})}/></label></>}
@@ -295,7 +295,7 @@ export default function DisplayManager(){
      <button type="button" className="ui-button ui-button-block" disabled={busy} onClick={()=>command('pair')}>Create one-time pairing code</button>
     </Glass>
     <Glass className="cd-callout" as="div"><span className="cd-callout-icon" aria-hidden="true"><Check size={22}/></span><div><strong>How the TV plays</strong>
-     <p>The TV plays without sound. Tap Full screen on the TV. If the network drops or the publication ends, it shows a quiet welcome.</p></div></Glass>
+     <p>Videos play with sound once someone taps the TV screen once (browsers require it). Tap Full screen on the TV. If the network drops or the publication ends, it shows a quiet welcome.</p></div></Glass>
     <SectionHeader title="Display settings"/>
     <DisplayMotionEditor key={'motion-'+screen.id} screen={screen} busy={busy} command={command}/>
     <OperatingHoursEditor key={screen.id} screen={screen} busy={busy} command={command}/>

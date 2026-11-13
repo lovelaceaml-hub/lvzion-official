@@ -8,13 +8,17 @@ In Apps, Church Display, Content:
 
 - **Add a slide with one tap**: Text, Picture, Video or Study rooms. Remove any slide with Remove slide. Change a slide's type from its Content type menu.
 - **Picture**: choose a JPG, PNG or WebP (up to 50 MB). Pick "Show the whole picture" or "Fill the screen". Optional caption.
-- **Video**: choose an MP4 or WebM (up to 50 MB). The slide's time is filled in from the video's length. The TV plays it without sound and moves on when it ends.
+- **Video**: choose an MP4 or WebM (up to 50 MB). The slide's time is filled in from the video's length. The TV plays it with sound (after one tap on the TV) and moves on when it ends.
 - **Study rooms**: today's bookings from lvrooms.web.app, room and time only. The booking in progress is marked "In use now"; finished ones drop off; up to seven rows, then "and N more later today". If the feed is down the slide says "Room bookings are not available right now."
 - **Timing**: every slide keeps its own Duration and the optional "Show only during specific dates and times" window, inside the playlist's overall dates. Save, approve and publish work exactly as before.
 
 ## Open link and full screen (Anthony, 2026-11-13)
 
 "just have the link able to show this and be able to be full screen mode". lvz.app/display now plays the main display's published playlist for anyone who opens it, with no pairing. The main display is the oldest screen (Lobby Display). A Full screen button shows on load, mouse move or tap and hides after 4 seconds; double-click or the F key also toggles it, and the screen is kept awake where the browser allows. Pairing is optional, at lvz.app/display?pair=1. Server side this uses `display_public_snapshot()` (migration `20261113233000_display_public_link.sql`, service role only), which returns only published, in-window slides, never drafts or devices.
+
+## Sound and landscape (Anthony, 2026-11-13)
+
+"Sound needs to play and full screen needs to auto landscape." Videos start with sound. Browsers refuse sound before the first tap on a page, so if a TV blocks it the video plays silently and a "Tap for sound" button shows; one tap anywhere (or on Full screen) turns sound on for every later video. Full screen asks the device to turn to landscape; if it cannot (iPhone) or stays upright, the display is turned sideways on screen. Exit full screen undoes both.
 
 ## How it is built
 
