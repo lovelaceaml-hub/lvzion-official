@@ -3,8 +3,7 @@
 RSVP tickets with QR codes and door check-in, inside lvz.app. Built 2026-11-12 from Anthony's plan
 (inside lvz.app; members and their guests; attendance only, no participation score; ticket on screen and by email).
 
-Status: **built and tested on branch `claude/healing-concert`, not released.** The module is registered as
-`draft` and stays closed until Anthony approves it at release.
+Status: **live on lvz.app since 2026-11-12** (Anthony: "Yes, release it"). Deployment `dpl_4kDkqdkxAN5sxMc29eg4HYMu7b4V` from main `dc520a4`; migration applied and the app approved. No concert is set up yet: a manager enters the real date, times, venue and seats in Concert settings.
 
 ## What people see
 
@@ -38,9 +37,11 @@ Code: `supabase/migrations/20261112180000_healing_concert.sql`, `lib/concert/`, 
 - `tests/browser/concert.spec.ts`: 3 phone-size browser tests on the real pages against a disposable database (member RSVP and ticket, invite link, door scan of a generated QR photo, guest list check-in, manager setup, signed-out prompt, invalid invite page).
 - TypeScript and the production Next.js build.
 
-Not yet verified: the public RSVP and ticket pages against the hosted database, real email delivery, a real phone camera scan, and BotID in production.
+Live checks on 2026-11-12, signed out: `/modules/concert` and `/modules/concert/scan` load; `/api/concert` and `/api/concert/scan` return 401; unknown invite and ticket links reach the database and show "not valid"; a scripted guest RSVP is refused by BotID (403).
 
-## Release steps (each needs Anthony's go-ahead)
+Not yet verified: a signed-in RSVP, real email delivery, and a real phone camera scan. These need the real concert details first (no test event was created in production).
+
+## Release steps (done 2026-11-12 except steps 5 and 6)
 
 1. Set `LVZ_CONCERT_TOKEN_SECRET` (random, 32+ characters) in the Vercel production environment. Never change it after tickets go out.
 2. Apply `20261112180000_healing_concert.sql` to project `otecqlkqirncotytbfns` and update `docs/HOSTED-MIGRATION-LEDGER.json`.
