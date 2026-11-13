@@ -8,6 +8,10 @@ LV Zion Official is a self-contained, phone-first application at https://lvz.app
 
 Keep compact module headers and the prominent center Apps launcher. The launcher shows only server-authorized modules (after the October 24 decisions: every approved module for every signed-in member). Continue the approved [Day Sheet design contract](design/LVZ-DESIGN-CONTRACT.md), shared tokens, accessible controls and phone-first layouts.
 
+## Healing Concert tickets: built November 12, 2026 (not released)
+
+Branch `claude/healing-concert`. A new `concert` app: members RSVP and get a QR ticket on screen and by email, share a personal invite link so guests without an account can RSVP, and door staff (concert managers) scan tickets to record attendance. No participation score (Anthony's choice). Migration `20261112180000_healing_concert.sql` is unapplied and registers the module as draft. Focused checks passed (45 SQL assertions, 6 unit tests, 3 browser tests, TypeScript, production build); no full suite. Release needs Anthony's go-ahead and a new `LVZ_CONCERT_TOKEN_SECRET`. [Guide, checks and release steps](concert/README.md).
+
 ## Access and placement decisions — October 24, 2026 (applied)
 
 Anthony decided on 2026-10-24, superseding "module access only by explicit grant" and "leadership follows the leader's placement". One migration, `supabase/migrations/20261024170000_open_access_group_placement.sql`, implements all of it. It was merged in #71, applied to the hosted database on October 24 (hosted version `20261024170000`) and deployed with main `d6a5a2c`; pre-checks and readback are in the [ledger](HOSTED-MIGRATION-LEDGER.json).
