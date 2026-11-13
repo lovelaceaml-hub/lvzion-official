@@ -41,7 +41,9 @@ Code: `supabase/migrations/20261112180000_healing_concert.sql`, `lib/concert/`, 
 
 Live checks on 2026-11-12, signed out: `/modules/concert` and `/modules/concert/scan` load; `/api/concert` and `/api/concert/scan` return 401; unknown invite and ticket links reach the database and show "not valid"; a scripted guest RSVP is refused by BotID (403).
 
-Not yet verified: a signed-in RSVP, real email delivery, and a real phone camera scan. These need the real concert details first (no test event was created in production).
+Live test on 2026-11-13: Anthony's own signed-in RSVP (party of 1) showed the QR ticket and the 11-song program, and the ticket email arrived in his Gmail inbox (Updates tab, not spam).
+
+Not yet verified: a real phone camera scan at the door, and a guest RSVP through an invite link on a phone.
 
 ## Release steps (done 2026-11-12 except steps 5 and 6)
 
