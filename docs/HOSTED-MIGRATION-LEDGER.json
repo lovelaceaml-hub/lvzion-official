@@ -329,6 +329,17 @@
    "verified_on": "2026-11-13",
    "applied_via": "Supabase MCP execute_sql in one transaction from branch claude/sleepy-wozniak-jutvtb (PR #83), after the display unit, PGlite database and browser tests and the production build passed; schema_migrations row recorded by hand. Anthony: \"approve the migration, merge and release it\".",
    "verification": "Pre-check: latest hosted version 20261112210000, no display-media bucket, no display_media_authorize, one screen with an empty draft, zero approvals and publications. Readback: bucket display-media private, 50 MB limit, image/jpeg, image/png, image/webp, video/mp4, video/webm, zero objects and zero storage policies; display_media_authorize executable by authenticated, not anon; valid_items accepts a video slide, rejects a text slide without a message and a rooms slide with an extra field; existing draft still valid. display_private.require_manager on the host already uses app_private.module_manager, so the new check follows the October 24 access rules."
+  },
+  {
+   "name": "display_public_link",
+   "hosted_version": "20261113233000",
+   "repository_version": "20261113233000",
+   "source": "supabase/migrations/20261113233000_display_public_link.sql",
+   "source_blob_sha": "cd5c7975cf227442b3710e41d99901ae576fe8e2",
+   "status": "applied",
+   "verified_on": "2026-11-13",
+   "applied_via": "Supabase MCP execute_sql in one transaction from branch claude/sleepy-wozniak-jutvtb (PR #84) after the display unit, PGlite database (60 tests) and browser tests (14) and the production build passed; schema_migrations row recorded by hand. Anthony: \"just have the link able to show this and be able to be full screen mode\".",
+   "verification": "Readback: display_public_snapshot() returns screen Lobby Display with its 2 published slides; not executable by anon or authenticated (service_role only)."
   }
  ],
  "normalization": {
