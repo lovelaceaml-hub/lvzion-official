@@ -1,6 +1,7 @@
 import {qrSvg,ticketUrl} from '../../../../lib/concert/server';
 import {ticketByToken} from '../../../../lib/concert/routes';
 import {formatStamp,ticketToken,whenLine} from '../../../../lib/concert/domain';
+import Program from '../../../../components/concert/program';
 import '../../../../components/concert/concert.css';
 export const dynamic='force-dynamic';
 export const metadata={title:'Your ticket · LV Zion',robots:{index:false,follow:false},referrer:'no-referrer'};
@@ -26,6 +27,7 @@ export default async function Page({params}:{params:Promise<{token:string}>}){
    <p className="cc-hint">Party of {t.partySize}</p>
    {t.checkedInAt?<p className="cc-note">Checked in at {formatStamp(t.checkedInAt)}. Enjoy the concert.</p>:inactive?null:<p className="cc-hint">Show this code at the door. Bookmark this page or keep your ticket email.</p>}
   </section>
+  {inactive?null:<Program items={t.event.program}/>}
   <p className="cc-hint cc-center">Want to stay connected? <a className="ui-link" href="/sign-up">Create an LV Zion account</a></p>
  </main>;
 }

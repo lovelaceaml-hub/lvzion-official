@@ -104,6 +104,22 @@ select pg_temp.pass((public.concert_command(format('{"op":"edit","eventId":"%s",
 select pg_temp.login(102);
 select pg_temp.fails($$select public.concert_member_rsvp(gen_random_uuid(),pg_temp.d('ticket-7'),'ben@example.invalid',1)$$,'23514','closed RSVP rejects members');
 
+-- Program: managers edit it; everyone sees order, title and performers only.
+select pg_temp.fails($$select public.concert_program_save('[{"songNumber":"121","title":"Opening","duration":"3:08","performers":"Brass"}]')$$,'42501','member cannot edit the program');
+select pg_temp.fails($$select public.concert_program_full()$$,'42501','member cannot read song numbers and times');
+select pg_temp.login(104);
+select pg_temp.pass((public.concert_program_save('[{"songNumber":"121","title":"Opening Song","duration":"3:08","performers":"Brass ensemble"},{"songNumber":null,"title":"Second Song","duration":"4:00","performers":"Choir + piano"}]')->>'count')::integer=2,'manager saves a two-song program');
+select pg_temp.fails($$select public.concert_program_save('[{"songNumber":null,"title":"Bad","duration":"4 min","performers":null}]')$$,'23514','bad duration rejected');
+select pg_temp.fails($$select public.concert_program_save('[{"title":"No other keys"}]')$$,'22023','missing program fields rejected');
+select pg_temp.pass((public.concert_program_full()->'items'->0->>'songNumber')='121','managers see song numbers');
+select pg_temp.pass(jsonb_array_length(public.concert_program_full()->'items')=2,'failed saves left the program intact');
+select pg_temp.server();
+select pg_temp.pass((public.concert_invite_view(pg_temp.d('invite-101'))->'event'->'program'->1->>'title')='Second Song','invite page shows the program in order');
+select pg_temp.pass(not((public.concert_invite_view(pg_temp.d('invite-101'))->'event'->'program'->0) ? 'songNumber') and not((public.concert_invite_view(pg_temp.d('invite-101'))->'event'->'program'->0) ? 'duration'),'public program hides song numbers and times');
+select pg_temp.pass((public.concert_ticket_view(pg_temp.d('ticket-1'))->'event'->'program'->0->>'performers')='Brass ensemble','ticket page shows performers');
+select pg_temp.login(101);
+select pg_temp.pass(jsonb_array_length(public.concert_workspace(pg_temp.d('invite-101'))->'event'->'program')=2,'members see the program');
+
 -- Archive: old tickets scan as another event.
 select pg_temp.login(104);
 select pg_temp.pass((public.concert_command(format('{"op":"archive","eventId":"%s","expectedVersion":2}',current_setting('test.eid'))::jsonb)->>'ok')::boolean,'archive the concert');

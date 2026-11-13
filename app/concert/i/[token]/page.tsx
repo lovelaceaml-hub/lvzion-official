@@ -2,6 +2,7 @@ import {authAdminClient} from '../../../../lib/server/supabase';
 import {digest} from '../../../../lib/concert/server';
 import {inviteToken,object,parsePublicEvent,whenLine,type PublicEvent} from '../../../../lib/concert/domain';
 import GuestRsvp from '../../../../components/concert/guest-rsvp';
+import Program from '../../../../components/concert/program';
 import '../../../../components/concert/concert.css';
 export const dynamic='force-dynamic';
 export const metadata={title:'Healing Concert RSVP · LV Zion',robots:{index:false,follow:false},referrer:'no-referrer'};
@@ -29,6 +30,7 @@ export default async function Page({params}:{params:Promise<{token:string}>}){
     {v.event.details?<p className="cc-details">{v.event.details}</p>:null}
    </header>
    {!v.open?<p className="cc-note">RSVP is closed for this concert.</p>:v.full?<p className="cc-note">Sorry, every seat has been taken.</p>:<GuestRsvp invite={token}/>}
+   <Program items={v.event.program}/>
   </>:<section className="cc-public-head">
    <h1>{v.state==='none'?'No concert is open right now':v.state==='unavailable'?'RSVP is unavailable right now':'This invitation link is not valid'}</h1>
    <p className="cc-hint">{v.state==='unavailable'?'Please try again in a few minutes.':'Ask the person who invited you to send their link again.'}</p>
