@@ -340,6 +340,17 @@
    "verified_on": "2026-11-13",
    "applied_via": "Supabase MCP execute_sql in one transaction from branch claude/sleepy-wozniak-jutvtb (PR #84) after the display unit, PGlite database (60 tests) and browser tests (14) and the production build passed; schema_migrations row recorded by hand. Anthony: \"just have the link able to show this and be able to be full screen mode\".",
    "verification": "Readback: display_public_snapshot() returns screen Lobby Display with its 2 published slides; not executable by anon or authenticated (service_role only)."
+  },
+  {
+   "name": "display_mothers_love",
+   "hosted_version": "20261113235000",
+   "repository_version": "20261113235000",
+   "source": "supabase/migrations/20261113235000_display_mothers_love.sql",
+   "source_blob_sha": "c5820c405079aff749aced4228b523232c5e3b0a",
+   "status": "applied",
+   "verified_on": "2026-11-13",
+   "applied_via": "Supabase MCP execute_sql in one transaction from branch claude/sleepy-wozniak-jutvtb after display unit and database tests (61) and browser tests (17) and the production build passed; schema_migrations row recorded by hand. Anthony: \"real mother's love. and when a new submission happens it auto shows that even if on another screen display\".",
+   "verification": "Readback: valid_items accepts a mothers-love slide; every stored publication still valid."
   }
  ],
  "normalization": {
