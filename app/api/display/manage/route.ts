@@ -1,6 +1,8 @@
 import {requireMember} from '../../../../lib/server/supabase';
 import {body,reply} from '../../../../lib/server/http';
-import {parseDisplaySlides,isSlideId,isUuid,safeInstant} from '../../../../lib/continuous-display/live-contract';
+import {parseDisplaySlides,isSlideId,isUuid,safeInstant,DISPLAY_IMAGE_TYPES,DISPLAY_VIDEO_TYPES,DISPLAY_MEDIA_MAX_BYTES} from '../../../../lib/continuous-display/live-contract';
+import {signedUploadUrl} from '../../../../lib/server/display-media';
+import {randomBytes} from 'node:crypto';
 import {parseOperatingHours,parseDisplayMotionMode} from '../../../../lib/continuous-display/operations';
 import {createPairCode,deviceDigest,formatPairCode} from '../../../../lib/server/display';
 export const runtime='nodejs';
@@ -50,6 +52,19 @@ export async function POST(request:Request){
    r=await client.rpc(action==='approve'?'display_approve_draft':'display_publish_approved',{p_screen:screenId,p_expected_version:version});
    if(r.error)return reply({error:'Review or publication rejected. Check the approved version and eligibility.'},status(r));
    return reply(action==='approve'?{approved:true}:{publishedVersion:Number(r.data)});
+  }
+  if(action==='mediaUpload'){
+   const type=input.contentType,size=input.size;
+   const ext=typeof type==='string'?(DISPLAY_IMAGE_TYPES[type]??DISPLAY_VIDEO_TYPES[type]):undefined;
+   if(!ext||typeof size!=='number'||!Number.isSafeInteger(size)||size<1||size>DISPLAY_MEDIA_MAX_BYTES
+    ||Object.keys(input).some(k=>!['action','screenId','contentType','size'].includes(k)))
+    return reply({error:'Use a JPG, PNG or WebP picture, or an MP4 or WebM video, up to 50 MB.'},400);
+   r=await client.rpc('display_media_authorize',{p_screen:screenId,p_purpose:'upload'});
+   if(r.error||r.data!==true)return reply({error:'Uploading needs edit permission for this display.'},status(r)===200?403:status(r));
+   const media=randomBytes(16).toString('hex')+'.'+ext;
+   const uploadUrl=await signedUploadUrl(media);
+   if(!uploadUrl)return reply({error:'Uploads are not available right now.'},503);
+   return reply({media,uploadUrl});
   }
   if(action==='pair'){
    const code=createPairCode();

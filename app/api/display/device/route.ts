@@ -4,6 +4,7 @@ import {body,reply} from '../../../../lib/server/http';
 import {parseDisplaySnapshotR2} from '../../../../lib/continuous-display/operations';
 import {createDeviceSecret,DEVICE_COOKIE,deviceDigest,normalizePairCode} from '../../../../lib/server/display';
 import {settings} from '../../../../lib/server/config';
+import {todaysRooms} from '../../../../lib/server/rooms-feed';
 export const runtime='nodejs';
 export const dynamic='force-dynamic';
 export async function GET(request:NextRequest){
@@ -13,7 +14,10 @@ export async function GET(request:NextRequest){
   const admin=authAdminClient();
   const {data,error}=await admin.rpc('display_device_snapshot_r2',{p_token_digest:deviceDigest(token)});
   if(error||!data)return reply({paired:false});
-  return reply(parseDisplaySnapshotR2(data));
+  const snapshot=parseDisplaySnapshotR2(data);
+  // Room bookings are read only when a published slide shows them.
+  if(snapshot.slides.some(s=>s.kind==='rooms'))snapshot.rooms=await todaysRooms();
+  return reply(snapshot);
  }catch{return reply({paired:false});}
 }
 export async function POST(request:NextRequest){
