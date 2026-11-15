@@ -3,7 +3,7 @@ import {useEffect,useRef,useState} from 'react';
 import type{FormEvent}from'react';
 import type{DisplayRooms,DisplaySlide}from'../lib/continuous-display/live-contract';
 import type{DisplaySnapshotR2}from'../lib/continuous-display/operations';
-import {activeDisplaySlides,churchLocal}from '../lib/continuous-display/live-contract';
+import {activeDisplaySlides,churchLocal,rotationView}from '../lib/continuous-display/live-contract';
 import {parseDisplaySnapshotR2,overrideForDisplay,withinOperatingHours,type DisplayMotionMode}from '../lib/continuous-display/operations';
 import DisplayVisual from './display-visual';
 type Verified={packet:DisplaySnapshotR2;serverEpoch:number;verifiedAt:number};
@@ -20,6 +20,8 @@ export default function DisplayPlayer(){
  // Mother's Love: the newest recognition seen so far (undefined until the first answer), and one waiting to be welcomed.
  const mlSeen=useRef<string|null|undefined>(undefined);
  const mlJump=useRef<string|null>(null);
+ // Completed loops of the playlist: take-turns groups move on to their next slides each loop.
+ const loopCount=useRef(0);
  const [welcomeId,setWelcomeId]=useState<string|null>(null);
  const noteMothersLove=(packet:DisplaySnapshotR2)=>{
   const latest=packet.mothersLove?.latestId??null;
@@ -144,8 +146,9 @@ export default function DisplayPlayer(){
    }
    // Operating periods and per-slide expiry are evaluated from the verified server clock.
    if(!withinOperatingHours(v.packet.operatingHours,now)){blank();return;}
-   const items=activeDisplaySlides(v.packet.slides,now);
-   if(!items.length){blank();return;}
+   const allItems=activeDisplaySlides(v.packet.slides,now);
+   if(!allItems.length){blank();return;}
+   let items=rotationView(allItems,loopCount.current);
    const forced=overrideForDisplay(v.packet,now);
    if(forced){
     if(!overrideActive.current||shown.current!==forced.id){
@@ -156,7 +159,7 @@ export default function DisplayPlayer(){
    if(overrideActive.current){overrideActive.current=false;shown.current=null;}
    // A new Mother's Love recognition: show the Mother's Love turn now, whatever is on screen, with its arrival.
    if(mlJump.current){
-    const ml=items.find(s=>s.kind==='mothers-love');
+    const ml=allItems.find(s=>s.kind==='mothers-love');
     const welcome=mlJump.current;mlJump.current=null;
     if(ml){show(ml,welcome);return;}
    }
@@ -167,7 +170,9 @@ export default function DisplayPlayer(){
    const finished=!!existing&&existing.kind==='video'&&mediaEnded.current===existing.id;
    if(!existing||finished||performance.now()-shownAt.current>=duration){
     if(pending.current&&performance.now()-pending.current.verifiedAt<=30000){apply(pending.current);return;}
-    const next=items[index<0?0:(index+1)%items.length];
+    let next=items[index<0?0:(index+1)%items.length];
+    // Wrapping round to the start: take-turns groups move on to their next slides.
+    if(index>=0&&index+1>=items.length){loopCount.current++;items=rotationView(allItems,loopCount.current);next=items[0];}
     show(next);
    }
   },250);

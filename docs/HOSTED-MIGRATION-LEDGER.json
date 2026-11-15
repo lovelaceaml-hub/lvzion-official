@@ -351,6 +351,17 @@
    "verified_on": "2026-11-13",
    "applied_via": "Supabase MCP execute_sql in one transaction from branch claude/sleepy-wozniak-jutvtb after display unit and database tests (61) and browser tests (17) and the production build passed; schema_migrations row recorded by hand. Anthony: \"real mother's love. and when a new submission happens it auto shows that even if on another screen display\".",
    "verification": "Readback: valid_items accepts a mothers-love slide; every stored publication still valid."
+  },
+  {
+   "name": "display_rotation",
+   "hosted_version": "20261115150000",
+   "repository_version": "20261115150000",
+   "source": "supabase/migrations/20261115150000_display_rotation.sql",
+   "source_blob_sha": "9f2235c34434685c6b18b3eadbd84dd0dce73ac9",
+   "status": "applied",
+   "verified_on": "2026-11-15",
+   "applied_via": "Supabase MCP execute_sql in one transaction from branch claude/sleepy-wozniak-jutvtb after display unit and database tests (62), display browser tests (18) and the production build passed; schema_migrations row recorded by hand. Anthony: \"All 11 but in a rotation\".",
+   "verification": "Readback: valid_items accepts a rotating video slide; every stored publication still valid."
   }
  ],
  "normalization": {
