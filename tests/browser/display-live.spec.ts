@@ -130,3 +130,22 @@ test('a new Mother\'s Love recognition switches the TV to the Mother\'s Love tur
  await expect(page.locator('.cd-ml-frame')).toHaveAttribute('src','https://mothers-love.vercel.app/display?welcome='+latest);
  await expect(page.locator('.cd-ml-frame')).toHaveAttribute('allow',/autoplay/);
 });
+test('take-turns slides: each loop plays the next two of the group',async({page})=>{
+ await page.setViewportSize({width:1920,height:1080});
+ const instant=Date.parse('2026-11-15T12:00:00-08:00');
+ await page.clock.install({time:new Date(instant)});
+ const t=(id:string,rotate=false)=>({id,kind:'announcement',style:'editorial',title:'Fictional '+id,body:'Illustrative content only.',duration:8,...(rotate?{rotate:true}:{})});
+ await page.route('**/api/display/device',route=>route.fulfill({status:200,contentType:'application/json',body:JSON.stringify({
+  paired:true,screen:'Lobby Display',version:12,serverTime:new Date(instant).toISOString(),leaseUntil:new Date(instant+30000).toISOString(),
+  operatingHours:[],overrideSlideId:null,overrideUntil:null,motionMode:'still',
+  slides:[t('intro'),t('promo-1',true),t('promo-2',true),t('promo-3',true)]})}));
+ await page.goto('/display');
+ await expect(page.locator('.cd-slide h1')).toHaveText('Fictional intro');
+ const seen:string[]=[];
+ for(let i=0;i<6;i++){
+  await expect(page.locator('.cd-slide h1')).toBeVisible();
+  seen.push((await page.locator('.cd-slide h1').textContent())!.replace('Fictional ',''));
+  await page.clock.runFor(8300);
+ }
+ expect(seen).toEqual(['intro','promo-1','promo-2','intro','promo-3','promo-1']);
+});

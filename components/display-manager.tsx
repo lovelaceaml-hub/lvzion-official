@@ -15,7 +15,7 @@ import {EmptyState,Glass,IconBox,PageHeading,SectionHeader,StatGrid,StatTile,Tag
 import {useSwipeTabs} from '../lib/use-swipe-tabs';
 import DisplayVisual from './display-visual';
 import type{ChurchOffset,DisplayFit,DisplayKind,DisplaySlide,DisplayStyle}from'../lib/continuous-display/live-contract';
-import {DISPLAY_DURATION,KIND_LABELS,MAX_DISPLAY_SLIDES,churchDateTime,churchLocal,churchTimeToUtc,isTextKind,offsetForChurchTime,parseDisplaySlides}from'../lib/continuous-display/live-contract';
+import {DISPLAY_DURATION,KIND_LABELS,ROTATE_PER_LOOP,MAX_DISPLAY_SLIDES,churchDateTime,churchLocal,churchTimeToUtc,isTextKind,offsetForChurchTime,parseDisplaySlides}from'../lib/continuous-display/live-contract';
 import type {DisplayScreenR2} from '../lib/continuous-display/operations';
 import {DisplayMotionEditor,KindIcon,OperatingHoursEditor,PublicationControls,NewScreenEditor,SlideEligibilityEditor} from './display-operations-controls';
 const tabs=['content','playlist','publish','screens'] as const;
@@ -172,6 +172,8 @@ export default function DisplayManager(){
   :<label className="ui-field cd-span">{s.kind==='rooms'?'Note under the heading (optional)':'Caption on the TV (optional)'}<textarea className="ui-input" value={s.body??''} maxLength={160} rows={2} onChange={e=>change(index,{body:e.target.value.trim()?e.target.value:undefined})}/></label>}
   <label className="ui-field">Duration (seconds)<input className="ui-input" type="number" min={DISPLAY_DURATION[s.kind].min} max={DISPLAY_DURATION[s.kind].max} value={s.duration} onChange={e=>change(index,{duration:Number(e.target.value)})}/></label>
   {s.kind==='video'&&<p className="ui-hint cd-span">The TV plays videos with sound and moves on when the video ends, or at this time if that comes first.</p>}
+  <label className="cd-check cd-span"><input type="checkbox" checked={s.rotate===true} onChange={e=>change(index,{rotate:e.target.checked?true:undefined})}/>
+   Take turns with the slides next to it that also take turns ({ROTATE_PER_LOOP} play each time around)</label>
   {s.kind==='mothers-love'&&<p className="ui-hint cd-span">Plays the live Mother's Love TV for this long, with its song. When a new recognition is published, the TV switches to it right away and shows the new recognition.</p>}
   {s.kind==='rooms'&&<p className="ui-hint cd-span">Shows today’s study-room bookings from lvrooms.web.app: the room and the time only, never who booked. Finished bookings drop off through the day.</p>}
   {(s.kind==='schedule'||s.kind==='event')&&<label className="ui-field">Date<input className="ui-input" type="date" value={s.date||''} onChange={e=>change(index,{date:e.target.value})}/></label>}
@@ -220,7 +222,7 @@ export default function DisplayManager(){
      {slides.length===0?<Glass className="cd-state" as="div"><EmptyState icon={<FileText/>} title="No slides yet"
       action={<div className="cd-add-row-buttons">{addButtons('ui-button ui-button-secondary')}</div>}>Add an announcement, picture, video or study-room board. Until something is published, the TV shows a quiet welcome.</EmptyState></Glass>
      :<ol className="cd-strip" data-no-swipe>{slides.map((s,i)=><li key={s.id}><button type="button" className="cd-tile" aria-pressed={selected===i} onClick={()=>setSelected(i)}>
-       <span className="cd-tile-top"><span className="cd-tile-n">{two(i+1)}</span><KindIcon kind={s.kind} size={18}/></span><strong>{s.title||'Untitled'}</strong><small>{KIND_LABELS[s.kind]} · {s.duration}s</small></button></li>)}
+       <span className="cd-tile-top"><span className="cd-tile-n">{two(i+1)}</span><KindIcon kind={s.kind} size={18}/></span><strong>{s.title||'Untitled'}</strong><small>{KIND_LABELS[s.kind]} · {s.duration}s{s.rotate?' · takes turns':''}</small></button></li>)}
       {quickAdd.map(q=><li key={'add-'+q.kind}><button type="button" className="cd-tile cd-tile-add" disabled={busy||slides.length>=MAX_DISPLAY_SLIDES} onClick={()=>addSlide(q.kind)}><Plus size={22}/><strong>Add {q.label.toLowerCase()}</strong></button></li>)}
      </ol>}
     </section>

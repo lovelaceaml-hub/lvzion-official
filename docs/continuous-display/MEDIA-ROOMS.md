@@ -26,6 +26,10 @@ In Apps, Church Display, Content:
 
 Pictures shown whole (portrait flyers on a wide TV) sit on a blurred, dimmed copy of themselves instead of black bars.
 
+## Take turns (Anthony, 2026-11-15)
+
+For the 11 Healing Concert song promos ("All 11 but in a rotation"). Any slide can be marked "Take turns". Neighbouring take-turns slides form a group, and each loop of the TV plays only the next two of the group, in order, so every member comes around over the loops while each loop stays short. A playlist may now hold up to 32 slides (was 16). Migration `20261115150000_display_rotation.sql`.
+
 ## How it is built
 
 - Slide rules: `lib/continuous-display/live-contract.ts` (app) and `display_private.valid_items` in migration `20261113220000_display_media_rooms.sql` (database). Durations: text 8 to 60 s, picture 5 to 300 s, video 5 to 900 s, rooms 8 to 120 s.

@@ -5,7 +5,7 @@ export type DisplayMediaKind='image'|'video';
 export type DisplayFit='cover'|'contain';
 export type DisplayStyle='editorial'|'schedule'|'event'|'campaign';
 export type DisplayRow={time:string;label:string};
-export type DisplaySlide={id:string;kind:DisplayKind;style:DisplayStyle;title:string;body?:string;duration:number;date?:string;time?:string;location?:string;rows?:DisplayRow[];startsAt?:string;endsAt?:string;media?:string;fit?:DisplayFit};
+export type DisplaySlide={id:string;kind:DisplayKind;style:DisplayStyle;title:string;body?:string;duration:number;date?:string;time?:string;location?:string;rows?:DisplayRow[];startsAt?:string;endsAt?:string;media?:string;fit?:DisplayFit;rotate?:true};
 /** Today's study-room bookings for a rooms slide: room and time only, never who booked. */
 export type DisplayRoomBooking={room:string;start:string;end:string};
 export type DisplayRooms={date:string;bookings:DisplayRoomBooking[]};
@@ -49,16 +49,16 @@ export const isRecord=(value:unknown):value is Record<string,unknown>=>!!value&&
 const text=(value:unknown,max:number):value is string=>typeof value==='string'&&value.trim().length>0&&[...value].length<=max&&!/[\u0000-\u001f]/.test(value);
 const strict=(value:Record<string,unknown>,keys:string[])=>Object.keys(value).every(k=>keys.includes(k));
 export const isInt=(x:unknown,min:number,max:number):x is number=>typeof x==='number'&&Number.isSafeInteger(x)&&x>=min&&x<=max;
-export const MAX_DISPLAY_SLIDES=16;
+export const MAX_DISPLAY_SLIDES=32;
 const slideId=/^[a-z0-9][a-z0-9-]{2,49}$/;
 export function isSlideId(value:unknown):value is string{return typeof value==='string'&&slideId.test(value);}
 export function isUuid(value:unknown):value is string{return typeof value==='string'&&uuid.test(value);}
 export function safeInstant(value:unknown):value is string{return typeof value==='string'&&value.length<=40&&instant.test(value)&&Number.isFinite(Date.parse(value));}
 export function parseDisplaySlides(value:unknown):DisplaySlide[]{
- if(!Array.isArray(value)||value.length>MAX_DISPLAY_SLIDES)throw Error('Limit to sixteen short TV slides.');
+ if(!Array.isArray(value)||value.length>MAX_DISPLAY_SLIDES)throw Error('Limit to 32 TV slides.');
  const seen=new Set<string>();
  return value.map(raw=>{
-  if(!isRecord(raw)||!strict(raw,['id','kind','style','title','body','duration','date','time','location','rows','startsAt','endsAt','media','fit']))throw Error('Unknown or private display field.');
+  if(!isRecord(raw)||!strict(raw,['id','kind','style','title','body','duration','date','time','location','rows','startsAt','endsAt','media','fit','rotate']))throw Error('Unknown or private display field.');
   if(!isSlideId(raw.id)||seen.has(raw.id))throw Error('Slide identifiers must be unique.');
   seen.add(raw.id);
   if(!kinds.has(String(raw.kind))||!styles.has(String(raw.style))||!text(raw.title,74))throw Error('Use concise, readable TV content.');
@@ -77,6 +77,7 @@ export function parseDisplaySlides(value:unknown):DisplaySlide[]{
    if(typeof raw.date!=='string'||!/^\d{4}-\d{2}-\d{2}$/.test(raw.date)||!Number.isFinite(Date.parse(raw.date+'T12:00:00Z'))||new Date(raw.date+'T12:00:00Z').toISOString().slice(0,10)!==raw.date)throw Error('Enter a valid calendar date.');
   }
   if(raw.rows!==undefined&&(!Array.isArray(raw.rows)||raw.rows.length>3||raw.rows.some(r=>!isRecord(r)||!strict(r,['time','label'])||!text(r.time,28)||!text(r.label,80))))throw Error('Schedules allow three brief activities.');
+  if(raw.rotate!==undefined&&raw.rotate!==true)throw Error('Invalid take-turns setting.');
   if((raw.startsAt===undefined)!==(raw.endsAt===undefined))throw Error('A slide needs both its start and expiration.');
   if(raw.startsAt!==undefined&&(!safeInstant(raw.startsAt)||!safeInstant(raw.endsAt)||Date.parse(raw.startsAt)>=Date.parse(raw.endsAt as string)))throw Error('Invalid slide eligibility window.');
   return raw as unknown as DisplaySlide;
@@ -127,3 +128,21 @@ export function offsetForChurchTime(value:string):ChurchOffset{
 }
 // Las Vegas wall-clock text for manager screens (for example "Oct 14, 2026, 6:00 PM").
 export function churchDateTime(value:string):string{return new Date(value).toLocaleString('en-US',{timeZone:CHURCH_TIME_ZONE,dateStyle:'medium',timeStyle:'short'});}
+
+/** How many slides of a take-turns group play in each loop of the TV. */
+export const ROTATE_PER_LOOP=2;
+/**
+ * Neighbouring slides marked rotate form a group. In loop number `loop` only the next ROTATE_PER_LOOP slides of each
+ * group play, in order, so every slide of the group comes around over the loops (Anthony, 2026-11-15).
+ */
+export function rotationView(items:DisplaySlide[],loop:number,perLoop=ROTATE_PER_LOOP):DisplaySlide[]{
+ const out:DisplaySlide[]=[];
+ for(let i=0;i<items.length;){
+  if(!items[i].rotate){out.push(items[i]);i++;continue;}
+  let j=i;while(j<items.length&&items[j].rotate)j++;
+  const group=items.slice(i,j),take=Math.min(perLoop,group.length),start=((Math.max(0,Math.floor(loop))*perLoop)%group.length+group.length)%group.length;
+  for(let k=0;k<take;k++)out.push(group[(start+k)%group.length]);
+  i=j;
+ }
+ return out;
+}
