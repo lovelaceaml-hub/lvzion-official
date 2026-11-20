@@ -1,0 +1,4 @@
+# Approved media stays in permissioned deployment, not in Git.
+concert-promo.mp4
+concert-promo-poster.webp
+.DS_Store

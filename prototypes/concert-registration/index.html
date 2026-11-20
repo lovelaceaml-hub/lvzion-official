@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#eaf7ff">
+<meta name="description" content="The Words of Mother’s Love Healing Concert, December 6, 2026, in Las Vegas.">
+<title>The Words of Mother’s Love Healing Concert</title>
+<link rel="stylesheet" href="style.css">
+<script src="script.js" defer></script>
+</head>
+<body>
+<a class="skip" href="#details">Skip to event details</a>
+<svg class="symbols" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+<symbol id="heart" viewBox="0 0 24 24"><path d="M12 21s-9-5.4-9-11.2A4.8 4.8 0 0 1 12 7a4.8 4.8 0 0 1 9 2.8C21 15.6 12 21 12 21Z"/></symbol>
+<symbol id="arrow" viewBox="0 0 24 24"><path d="M4 12h15m-6-6 6 6-6 6"/></symbol>
+<symbol id="down" viewBox="0 0 24 24"><path d="M12 4v15m-6-6 6 6 6-6"/></symbol>
+<symbol id="pin" viewBox="0 0 24 24"><path d="M20 10c0 6-8 11-8 11s-8-5-8-11a8 8 0 1 1 16 0Z"/><circle cx="12" cy="10" r="2.5"/></symbol>
+<symbol id="time" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l4 2"/></symbol>
+<symbol id="play" viewBox="0 0 24 24"><path d="m8 5 12 7-12 7Z"/></symbol>
+<symbol id="pause" viewBox="0 0 24 24"><path d="M9 5v14m6-14v14"/></symbol>
+</svg>
+<main class="hero" id="top">
+  <div class="hero-bg" aria-hidden="true"></div>
+  <canvas id="motion-art" aria-hidden="true"></canvas>
+  <header class="hero-header">
+    <a href="#top" class="wordmark"><svg aria-hidden="true"><use href="#heart"/></svg><span><strong>Mother’s Love</strong><small>AND PEACE DAY</small></span></a>
+    <button type="button" id="motion-button" class="motion-button" hidden><svg class="pause-icon" aria-hidden="true"><use href="#pause"/></svg><svg class="play-icon" aria-hidden="true"><use href="#play"/></svg><span>Pause motion</span></button>
+  </header>
+  <div class="event-grid">
+    <div class="event-title" id="details">
+      <p class="label"><span></span> BEGINNING OF PEACE <span></span></p>
+      <h1 id="title"><span class="title-over">The Words of</span><strong>Mother’s Love</strong><span class="title-under">Healing Concert</span></h1>
+      <p class="performers"><svg aria-hidden="true"><use href="#heart"/></svg> Performed by Choir and Orchestra</p>
+    </div>
+    <div class="promo" aria-label="Concert promo">
+      <div class="promo-frame">
+        <video id="concert-promo" controls playsinline preload="none" poster="promo-poster.svg" aria-label="Words of Mother’s Love Healing Concert promo" hidden>
+
+        </video>
+        <div class="promo-poster" id="promo-fallback">
+          <img src="promo-poster.svg" width="1280" height="720" alt="Pastel illustration for Beginning of Peace, Words of Mother’s Love Healing Concert">
+          <span>Promo placeholder</span>
+        </div>
+      </div>
+      <p class="video-note" id="video-note">CONCERT PROMO <span aria-hidden="true">·</span> VIDEO NOT INCLUDED IN SOURCE</p>
+    </div>
+    <div class="facts" aria-label="Date and location">
+      <div><span class="fact-icon"><svg aria-hidden="true"><use href="#time"/></svg></span><p><strong>Sunday, December 6, 2026</strong><span>4:30–6:00 p.m.</span></p></div>
+      <div><span class="fact-icon"><svg aria-hidden="true"><use href="#pin"/></svg></span><p><strong>World Mission Society Church of God</strong><a href="https://maps.apple.com/?q=6720%20W%20Sahara%20Ave%2C%20Las%20Vegas%2C%20NV%2089146">6720 W Sahara Ave, Las Vegas, NV 89146 <span aria-hidden="true">↗</span></a></p></div>
+    </div>
+    <div class="signup">
+      <a data-registration href="https://lvz.app/modules/concert" class="button primary">Member registration <svg aria-hidden="true"><use href="#arrow"/></svg></a>
+      <p class="reg-note" id="reg-note">Guests: use the personal invitation link from your host.</p>
+    </div>
+  </div>
+</main>
+</body>
+</html>
