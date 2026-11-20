@@ -28,28 +28,73 @@ const particles = Array.from({length:33},(_,i)=>({x:((i*43+11)%103)/100,y:((i*31
   size:2.1 + i%6*.92,color:palette[i%palette.length], phase:i*1.669,speed:.038+i%7*.007}));
 let visible = true, paused = false, frame = 0, t = 0, last = null, w=0,h=0;
 const fract = x=>x-Math.floor(x);
-const pathY = (u, base, phase) => base + Math.sin(u*8.3-t*.94 + phase)*h*.034 + Math.sin(u*14.1-t*.64 + 1.3)*h*.014;
+const ribbons = [
+  {base:.235, amp:.151, phase:.2, tilt:-.24, speed:.97, colors:[[97,180,223],[154,188,229],[218,125,171]]},
+  {base:.526, amp:.168, phase:2.55, tilt:.54, speed:-.85, colors:[[241,138,156],[229,103,146],[244,177,84]]},
+  {base:.805, amp:.150, phase:4.15, tilt:-.20, speed:1.12, colors:[[104,174,123],[235,175,78],[226,119,141]]},
+];
+const rgba = (rgb,alpha) => 'rgba('+rgb.join(',')+','+alpha+')';
+const mix = (a,b,u) => a.map((v,i)=>Math.round(v+(b[i]-v)*u));
+function pathY(u,layer,offset=0) {
+  const phase=layer.phase+t*layer.speed;
+  const large=Math.sin(u*6.27-phase)*layer.amp;
+  const curl=Math.sin(u*12.6+phase*.63)*.046;
+  return h*(layer.base+large+curl+(u-.5)*layer.tilt+offset);
+}
+function path(layer,offset=0,reverse=false) {
+  for(let i=0;i<=52;i++){
+    const u=(reverse?52-i:i)/52, x=w*u, y=pathY(u,layer,offset);
+    if(i===0&&!reverse) ink.moveTo(x,y); else ink.lineTo(x,y);
+  }
+}
+function lightWash(){
+  const x=w*(.36+.28*Math.sin(t*.52));
+  const y=h*(.40+.24*Math.cos(t*.43));
+  const glow=ink.createRadialGradient(x,y,0,x,y,Math.max(w,h)*.48);
+  glow.addColorStop(0,'rgba(255,250,202,.74)');
+  glow.addColorStop(.29,'rgba(255,214,136,.29)');
+  glow.addColorStop(1,'rgba(255,237,157,0)');
+  ink.fillStyle=glow;ink.fillRect(0,0,w,h);
+}
 function draw(){
   ink.clearRect(0,0,w,h);
-  const spacing=Math.max(3.25,w*.006), ribbonBase=h*.857;
-  const grad=ink.createLinearGradient(0,0,w,0);
-  grad.addColorStop(0,'#d46c98bd');grad.addColorStop(.28,'#e6969ab0');grad.addColorStop(.6,'#e3ac60c5');
-  grad.addColorStop(1,'#a48b57b0');
-  ink.strokeStyle=grad;ink.lineWidth=w>750?1.25:.85;
-  for(let k=0;k<5;k++){
-    ink.beginPath();
-    for(let i=0;i<=42;i++){const u=i/42;const y=pathY(u,ribbonBase,0)+k*spacing;i?ink.lineTo(u*w,y):ink.moveTo(0,y);}
-    ink.stroke();
-  }
-  for(let j=0;j<9;j++){
-    const u=fract(.097*t+j*.123);
-    const x=u*w, y=pathY(u,ribbonBase,0)+(j%5)*spacing;
-    const r=w>830?3.5:2.2;
-    ink.globalAlpha=Math.min(1,u*13,(1-u)*13)*.78;ink.fillStyle=palette[j%palette.length];ink.strokeStyle=ink.fillStyle;
-    ink.beginPath();ink.ellipse(x,y,r*1.12,r*.76,-.27,0,2*Math.PI);ink.fill();
-    ink.beginPath();ink.moveTo(x+r,y);ink.lineTo(x+r,y-r*3.7);
-    if(j%2) ink.quadraticCurveTo(x+r*3.45,y-r*3.05,x+r*2.8,y-r*2.2);
-    ink.stroke();
+  lightWash();
+  const spread=Math.min(.104, Math.max(.05, w/h*.102));
+  for(const [n,layer] of ribbons.entries()){
+    const [l,m,r]=layer.colors;
+    // A translucent silk body gives each moving score genuine width and depth.
+    const body=ink.createLinearGradient(0,0,w,h*.2);
+    body.addColorStop(0,rgba(l,.25));body.addColorStop(.30,rgba(l,.34));
+    body.addColorStop(.58,rgba(m,.22));body.addColorStop(1,rgba(r,.41));
+    ink.beginPath();path(layer,-spread*.56);path(layer,spread*.56,true);ink.closePath();
+    ink.fillStyle=body;ink.fill();
+    const line=ink.createLinearGradient(0,0,w,h*.20);
+    line.addColorStop(0,rgba(l,.65));line.addColorStop(.41,rgba(m,.57));line.addColorStop(1,rgba(r,.72));
+    ink.lineCap='round';ink.lineJoin='round';
+    ink.beginPath();path(layer);
+    ink.strokeStyle=rgba(m,.13);ink.lineWidth=Math.max(10,Math.min(32,h*.034));ink.stroke();
+    for(let j=-2;j<=2;j++){
+      ink.beginPath();path(layer,j*spread*.17);
+      ink.strokeStyle=j===0?'rgba(255,250,220,.90)':line;
+      ink.lineWidth=j===0?2.6:1.1;
+      ink.stroke();
+    }
+    for(let j=0;j<4;j++){
+      const u=fract((n%2?-1:1)*t*(.115+n*.014)+j*.263+n*.063);
+      const x=u*w,y=pathY(u,layer,((j%3)-1)*spread*.17);
+      const veil=Math.min(1,u*9,(1-u)*9), radius=Math.max(9,Math.min(19,w*.037));
+      const flare=ink.createRadialGradient(x,y,0,x,y,radius*2);
+      flare.addColorStop(0,rgba([255,250,213],.96*veil));
+      flare.addColorStop(.28,rgba(m,.51*veil));flare.addColorStop(1,rgba(m,0));
+      ink.fillStyle=flare;ink.beginPath();ink.arc(x,y,radius*2,0,Math.PI*2);ink.fill();
+      ink.fillStyle=rgba(mix(l,r,u),.61*veil);
+      ink.beginPath();ink.ellipse(x,y,2.7,2,-.24,0,Math.PI*2);ink.fill();
+      if(j%2===1){
+        ink.beginPath();ink.moveTo(x+2.6,y);ink.lineTo(x+2.6,y-9.7);
+        ink.quadraticCurveTo(x+8.8,y-7.8,x+7.9,y-4.2);
+        ink.strokeStyle=ink.fillStyle;ink.lineWidth=1.25;ink.stroke();
+      }
+    }
   }
   for(const p of particles){
     const life=fract(p.y+t*p.speed);

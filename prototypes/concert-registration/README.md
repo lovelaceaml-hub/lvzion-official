@@ -1,6 +1,6 @@
 # Words of Mother’s Love Healing Concert
 
-A dependency-free, single-screen registration landing page. The promo panel, event details, and one official member registration button fit without scrolling at the tested phone and desktop sizes. The illustrated landscape includes animated hearts and music, Pause Motion, and automatic support for Reduce Motion.
+A dependency-free, single-screen registration landing page. The promo panel, event details, and one official member registration button fit without scrolling at the tested phone and desktop sizes. The illustrated landscape includes continuously flowing music-score ribbons and shifting light, Pause Motion, and automatic support for Reduce Motion.
 
 ## Preview or integrate
 

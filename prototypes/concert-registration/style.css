@@ -123,3 +123,9 @@ h1 strong{font-size:clamp(2.55rem,9.8vw,5.3rem);white-space:nowrap}
  .facts{padding:.46rem .61rem;gap:.36rem}
 }
 @media(max-width:360px){h1 strong{font-size:clamp(1.72rem,10.4vw,2.45rem)}.facts p strong{font-size:.73rem}.facts p{font-size:.72rem}}
+
+/* Piano-score silk and traveling light behind a quiet, legible center. */
+.event-grid::before{background:radial-gradient(ellipse at 50% 47%,#fffdf6ea 4%,#fff8eb9f 53%,#fff5e500 80%)}
+.event-title h1{filter:drop-shadow(0 2px 6px #fffaf1e7)}
+.event-title .label{filter:drop-shadow(0 0 5px #fffdf4)}
+.signup .reg-note{color:#284460;text-shadow:0 0 4px #fff8ea,0 0 9px #fff8ea}
