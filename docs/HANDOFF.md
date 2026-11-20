@@ -1,12 +1,16 @@
 # LV Zion Official — current handoff
 
-Updated October 25, 2026. This handoff and `AGENTS.md` describe the application to build and operate now. Milestone-specific release records are evidence, not additional product requirements.
+Updated November 20, 2026. This handoff and `AGENTS.md` describe the application to build and operate now. Milestone-specific release records are evidence, not additional product requirements.
 
 ## Authoritative requirements
 
 LV Zion Official is a self-contained, phone-first application at https://lvz.app. Only explicitly approved requirements govern its modules. All schedules, assignments and events are deliberately configured within this application; empty calendars are valid. A design reference supplies appearance or interaction, not data or scheduling policy. Preserve existing accounts, grants, organizational history and intentionally entered records.
 
 Keep compact module headers and the prominent center Apps launcher. The launcher shows only server-authorized modules (after the October 24 decisions: every approved module for every signed-in member). Continue the approved [Day Sheet design contract](design/LVZ-DESIGN-CONTRACT.md), shared tokens, accessible controls and phone-first layouts.
+
+## Event Invitation and Registration · November 20, 2026
+
+The public concert invitation, member and guest registration, private film playback and QR tickets are in the application. The November 12 entries below describe the original launch. The concert guide records the current guest experience, release baseline and instructions for the next quality review. [Concert handoff](concert/README.md)
 
 ## Church Display: pictures, videos and study rooms (released November 13, 2026)
 

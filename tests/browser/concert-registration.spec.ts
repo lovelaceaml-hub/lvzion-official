@@ -1,0 +1,318 @@
+import {expect, test, type Page} from '@playwright/test';
+import type {InviteDraft} from '../../lib/concert/registration';
+import {readFile} from 'node:fs/promises';
+import type {Workspace} from '../../lib/concert/domain';
+import {mockLocalBotChallenge} from './local-bot-challenge';
+
+const workspace: Workspace = {
+  viewerId:'10000000-0000-4000-8000-000000000001', name:'Fictional Member',
+  canManage:false, myTicket:null, invitedCount:0, inviteUrl:'/concert/rsvp',
+  event:{
+    id:'10000000-0000-4000-8000-000000000002', title:'The Words of Mother’s Love Healing Concert',
+    date:'2026-12-06', startTime:'16:30', doorsTime:null, venue:'Fictional Hall',
+    details:'', capacity:null, seatsTaken:0, publicRsvp:true, rsvpOpen:true, version:1, program:[],
+  },
+};
+
+async function mockConcert(page: Page, event = workspace.event) {
+  await page.route('**/api/concert', route => route.fulfill({json:{...workspace,event,email:'member@example.invalid'}}));
+  await page.route('**/api/concert/placement', route => route.fulfill({status:403,json:{}}));
+  await page.route('**/api/concert/promo/*', route => route.fulfill({status:503,body:''}));
+}
+
+async function openRegistration(page: Page) {
+  await mockConcert(page);
+  await page.goto('/modules/concert');
+  await page.getByRole('button', {name:'Register', exact:true}).click();
+  return page.getByRole('dialog');
+}
+
+test.beforeEach(async ({page, baseURL}) => {
+  await mockLocalBotChallenge(page, baseURL);
+});
+
+test('guest can retry an empty ticket lookup and return to the unfinished registration', async ({page}) => {
+  await page.emulateMedia({reducedMotion:'reduce'});
+  const emails: string[] = [];
+  await page.route('**/api/concert/registration', route => {
+    const input = route.request().postDataJSON();
+    if (input.op === 'requestCode') {
+      emails.push(input.email);
+      return route.fulfill({json:{challenge:'fictional-lookup-' + emails.length}});
+    }
+    if (input.op === 'verifyCode' && input.purpose === 'recovery') {
+      const tickets = input.email === 'attendee@example.invalid' && input.challenge === 'fictional-lookup-2'
+        ? [{id:'ticket',name:'Fictional Attendee',partySize:1,url:'/concert/ticket/example'}] : [];
+      return route.fulfill({json:{tickets}});
+    }
+    return route.fulfill({status:400,json:{error:'Unexpected operation'}});
+  });
+  const dialog = await openRegistration(page);
+  await dialog.getByRole('button', {name:'I am a guest.'}).click();
+  await dialog.getByLabel('Your full name').fill('Fictional Visitor');
+  await dialog.getByRole('button', {name:'Tickets & help'}).click();
+  const email = dialog.getByLabel('Registration email');
+  const code = dialog.getByLabel('Eight-digit email code');
+  await email.fill('missing@example.invalid');
+  await dialog.getByRole('button', {name:'Send verification code'}).click();
+  await code.fill('12345678');
+  await dialog.getByRole('button', {name:'Verify email'}).click();
+  await expect(dialog.getByRole('heading', {name:'No tickets found'})).toBeFocused();
+  await dialog.getByRole('button', {name:'Try another email'}).click();
+  await expect(email).toHaveValue('');
+  await email.fill('attendee@example.invalid');
+  await dialog.getByRole('button', {name:'Send verification code'}).click();
+  await expect(code).toHaveValue('');
+  await code.fill('87654321');
+  await dialog.getByRole('button', {name:'Verify email'}).click();
+  await expect(dialog.getByText('Fictional Attendee', {exact:true})).toBeVisible();
+  expect(emails).toEqual(['missing@example.invalid','attendee@example.invalid']);
+  await dialog.getByRole('button', {name:'Back to registration'}).click();
+  await expect(dialog.getByLabel('Your full name')).toHaveValue('Fictional Visitor');
+});
+
+test('VIP details follow the recipient draft and disappear when that recipient is removed', async ({page}) => {
+  let submitted: InviteDraft[] = [];
+  await page.route('**/api/concert/registration', route => {
+    const input = route.request().postDataJSON();
+    switch (input.op) {
+      case 'requestCode': return route.fulfill({json:{challenge:'fictional-sender-challenge'}});
+      case 'verifyCode': return route.fulfill({json:{proof:'fictional-sender-proof'}});
+      case 'create':
+        submitted = input.recipients;
+        return route.fulfill({json:{invitations:[]}});
+      default: return route.fulfill({status:400,json:{error:'Unexpected operation'}});
+    }
+  });
+  const dialog = await openRegistration(page);
+  await dialog.getByRole('button', {name:'I am a member.'}).click();
+  await dialog.getByRole('button', {name:'I am sending an invitation.'}).click();
+  await dialog.getByLabel('Your full name').fill('Fictional Sender');
+  await dialog.getByLabel('Your email address').fill('sender@example.invalid');
+  await dialog.getByRole('button', {name:'Continue',exact:true}).click();
+  const count = dialog.getByLabel('Number of invitations');
+  await count.selectOption('2');
+  const add = dialog.getByRole('button', {name:'Add recipients'});
+  await add.click();
+  await dialog.getByLabel('Guest’s full name').fill('Fictional First');
+  await dialog.getByLabel('Relationship').fill('Friend');
+  const next = dialog.getByRole('button', {name:'Next recipient'});
+  await next.click();
+  const vip = dialog.getByRole('checkbox', {name:'VIP', exact:true});
+  const title = dialog.getByLabel('VIP title');
+  await vip.check();
+  await title.fill('Fictional Director');
+  await vip.uncheck();
+  await vip.check();
+  await expect(title).toHaveValue('Fictional Director');
+  await vip.uncheck();
+  const back = dialog.getByRole('button', {name:'Back', exact:true});
+  await back.click();
+  await back.click();
+  await count.selectOption('1');
+  await count.selectOption('2');
+  await add.click();
+  await expect(dialog.getByLabel('Guest’s full name')).toHaveValue('Fictional First');
+  await next.click();
+  await vip.check();
+  await expect(title).toHaveValue('');
+  await title.fill('Discard this title');
+  await vip.uncheck();
+  await dialog.getByLabel('Guest’s full name').fill('Fictional Replacement');
+  await dialog.getByLabel('Relationship').fill('Neighbor');
+  await dialog.getByRole('button', {name:'Verify and send'}).click();
+  await dialog.getByLabel('Eight-digit email code').fill('12345678');
+  await dialog.getByRole('button', {name:'Verify and create invitations'}).click();
+  await expect(dialog.getByRole('heading', {name:'Your invitations'})).toBeFocused();
+  expect(submitted).toEqual([
+    {name:'Fictional First',relationship:'Friend',email:'',firstVisit:false,vip:null},
+    {name:'Fictional Replacement',relationship:'Neighbor',email:'',firstVisit:false,vip:null},
+  ]);
+});
+
+test('a member can return from duplicate-ticket recovery and continue to invitations', async ({page}) => {
+  await page.emulateMedia({reducedMotion:'reduce'});
+  await page.setViewportSize({width:320,height:568});
+  let registrations = 0;
+  await page.route('**/api/concert/registration', route => {
+    const input = route.request().postDataJSON();
+    switch (input.op) {
+      case 'register':
+        registrations++;
+        return route.fulfill({json:{existing:true,tickets:[]}});
+      case 'requestCode': return route.fulfill({json:{challenge:'fictional-member-lookup'}});
+      case 'verifyCode': return route.fulfill({json:{tickets:[
+        {id:'ticket',name:'Fictional Member',partySize:1,url:'/concert/ticket/example'},
+      ]}});
+      default: return route.fulfill({status:400,json:{error:'Unexpected operation'}});
+    }
+  });
+  const dialog = await openRegistration(page);
+  const register = page.getByRole('button', {name:'Register',exact:true});
+  await page.keyboard.press('Escape');
+  await expect(register).toBeFocused();
+  await expect(register).toBeInViewport({ratio:1});
+  expect(await page.evaluate(() => document.documentElement.scrollHeight)).toBeLessThanOrEqual(568);
+  await register.press('Enter');
+  await dialog.getByRole('button', {name:'I am a member.'}).click();
+  await dialog.getByRole('button', {name:'Both.'}).click();
+  await dialog.getByLabel('First name').fill('Fictional');
+  await dialog.getByLabel('Last name').fill('Member');
+  await dialog.getByLabel('Email address').fill('member@example.invalid');
+  await dialog.getByLabel('Group leader’s name').fill('Fictional Leader');
+  await dialog.getByRole('button', {name:'Register me'}).click();
+  await dialog.getByRole('button', {name:'Find my tickets'}).click();
+  await dialog.getByLabel('Registration email').fill('member@example.invalid');
+  await dialog.getByRole('button', {name:'Send verification code'}).click();
+  await dialog.getByLabel('Eight-digit email code').fill('12345678');
+  await dialog.getByRole('button', {name:'Verify email'}).click();
+  await expect(dialog.getByRole('link', {name:'Open QR ticket'})).toBeVisible();
+  await dialog.getByRole('button', {name:'Back to registration'}).click();
+  await expect(dialog.getByRole('heading', {name:'Check your registration'})).toBeFocused();
+  await dialog.getByRole('button', {name:'Continue to invitations'}).click();
+  await expect(dialog.getByLabel('Number of invitations')).toHaveValue('1');
+  await dialog.getByRole('button', {name:'Add recipients'}).click();
+  await dialog.getByLabel('Guest’s full name').fill('Fictional Invitee');
+  await page.keyboard.press('Escape');
+  await register.click();
+  await expect(dialog.getByLabel('Guest’s full name')).toHaveValue('Fictional Invitee');
+  await dialog.getByRole('button', {name:'Back',exact:true}).click();
+  await expect(dialog.getByLabel('Number of invitations')).toHaveValue('1');
+  await expect(dialog.getByRole('button', {name:'Back',exact:true})).toHaveCount(0);
+  await dialog.getByRole('button', {name:'Tickets & help'}).click();
+  await expect(dialog.getByLabel('Registration email')).toHaveValue('');
+  expect(registrations).toBe(1);
+});
+
+test('closing preserves a guest draft but clears completed tickets and a new registration gets a fresh request ID', async ({page}) => {
+  await page.emulateMedia({reducedMotion:'reduce'});
+  const ids: string[] = [];
+  await page.route('**/api/concert/registration', route => {
+    const input = route.request().postDataJSON();
+    ids.push(input.requestId);
+    return route.fulfill({json:{tickets:[{id:'ticket',name:input.names[0],partySize:1,url:'/concert/ticket/fictional-guest'}]}});
+  });
+  const dialog = await openRegistration(page);
+  const register = page.getByRole('button', {name:'Register',exact:true});
+  const guest = dialog.getByRole('button', {name:'I am a guest.'});
+  const name = dialog.getByLabel('Your full name');
+  await guest.click();
+  await name.fill('Fictional First');
+  await page.keyboard.press('Escape');
+  await register.click();
+  await expect(name).toHaveValue('Fictional First');
+  for (const person of ['First','Second']) {
+    if (person === 'Second') {
+      await guest.click();
+      await expect(name).toHaveValue('');
+      await name.fill('Fictional Second');
+    }
+    await dialog.getByLabel('Email for tickets').fill(person.toLowerCase()+'@example.invalid');
+    await dialog.getByLabel('Who invited you?').fill('Fictional Host');
+    await dialog.getByRole('button', {name:'Get my ticket'}).click();
+    await expect(dialog.getByRole('link', {name:'Open QR ticket'})).toBeVisible();
+    await dialog.getByRole('button', {name:'Close',exact:true}).click();
+    await expect(page.locator('a[href="/concert/ticket/fictional-guest"]')).toHaveCount(0);
+    await register.click();
+    await expect(guest).toBeVisible();
+  }
+  expect(ids).toHaveLength(2);
+  expect(new Set(ids).size).toBe(2);
+});
+
+for (const state of ['closed','full'] as const) {
+  test('featured member can recover tickets while registration is '+state, async ({page}) => {
+    await page.emulateMedia({reducedMotion:'reduce'});
+    await page.setViewportSize({width:320,height:568});
+    await mockConcert(page, {...workspace.event!,rsvpOpen:state !== 'closed',capacity:2,seatsTaken:state === 'full' ? 2 : 0});
+    await page.route('**/api/concert/registration', route => {
+      const input = route.request().postDataJSON();
+      if (input.purpose === 'recovery' && input.op === 'requestCode') return route.fulfill({json:{challenge:'fictional-challenge'}});
+      if (input.purpose === 'recovery' && input.op === 'verifyCode') return route.fulfill({json:{tickets:[
+        {id:'ticket',name:'Fictional Member',partySize:1,url:'/concert/ticket/recovered'},
+      ]}});
+      return route.fulfill({status:400,json:{error:'Unexpected registration attempt'}});
+    });
+    await page.goto('/modules/concert');
+    const help = page.getByRole('button', {name:'Tickets & help',exact:true});
+    await expect(page.getByRole('status').filter({hasText:state})).toBeVisible();
+    await expect(page.getByRole('button', {name:'Register',exact:true})).toHaveCount(0);
+    await expect(help).toBeInViewport({ratio:1});
+    expect(await page.evaluate(() => document.documentElement.scrollHeight)).toBeLessThanOrEqual(568);
+    await help.click();
+    const dialog = page.getByRole('dialog');
+    await dialog.getByLabel('Registration email').fill('member@example.invalid');
+    await dialog.getByRole('button', {name:'Send verification code'}).click();
+    await dialog.getByLabel('Eight-digit email code').fill('12345678');
+    await dialog.getByRole('button', {name:'Verify email'}).click();
+    await expect(dialog.getByRole('link', {name:'Open QR ticket'})).toBeVisible();
+    await page.keyboard.press('Escape');
+    await expect(help).toBeFocused();
+    await help.click();
+    await expect(dialog.getByLabel('Registration email')).toHaveValue('');
+    await expect(page.locator('a[href="/concert/ticket/recovered"]')).toHaveCount(0);
+  });
+}
+
+test('failed film retries the private media route in place and restores the native player', async ({page}) => {
+  await page.emulateMedia({reducedMotion:'reduce'});
+  await page.setViewportSize({width:320,height:568});
+  await mockConcert(page);
+  let available = false;
+  let filmRequests = 0;
+  const film = await readFile('tests/browser/fixtures/concert-retry.webm');
+  await page.route('**/api/concert/promo/film.mp4', route => {
+    filmRequests++;
+    if (!available) return route.fulfill({status:503,headers:{'Cache-Control':'no-store'},body:''});
+    return route.fulfill({contentType:'video/webm',body:film});
+  });
+  await page.goto('/modules/concert');
+  const retry = page.getByRole('button', {name:'Retry film'});
+  await expect(retry).toBeInViewport({ratio:1});
+  await expect(page.getByRole('button', {name:'Register',exact:true})).toBeInViewport({ratio:1});
+  const navigation = await page.evaluate(() => performance.timeOrigin);
+  const initialRequests = filmRequests;
+  await retry.press('Enter');
+  await expect.poll(() => filmRequests).toBeGreaterThan(initialRequests);
+  await expect(retry).toBeFocused();
+  available = true;
+  await retry.press('Enter');
+  const player = page.getByLabel('Healing Concert promotional film');
+  await expect(player).toBeFocused();
+  await expect(player).toHaveJSProperty('videoWidth',32);
+  await expect(player).toHaveJSProperty('paused',true);
+  await expect(player).toHaveJSProperty('controls',true);
+  expect(await page.evaluate(() => performance.timeOrigin)).toBe(navigation);
+});
+
+test('a completed lookup arriving after dismissal cannot reveal tickets in a reopened sheet', async ({page}) => {
+  await page.emulateMedia({reducedMotion:'reduce'});
+  const release = Promise.withResolvers<void>();
+  const received = Promise.withResolvers<void>();
+  await page.route('**/api/concert/registration', async route => {
+    if (route.request().postDataJSON().op === 'requestCode') {
+      await route.fulfill({json:{challenge:'fictional-lookup'}});
+      return;
+    }
+    received.resolve();
+    await release.promise;
+    await route.fulfill({json:{tickets:[{id:'late',name:'Fictional Guest',partySize:1,url:'/concert/ticket/late'}]}});
+  });
+  const dialog = await openRegistration(page);
+  const help = dialog.getByRole('button', {name:'Tickets & help'});
+  await help.click();
+  await dialog.getByLabel('Registration email').fill('guest@example.invalid');
+  await dialog.getByRole('button', {name:'Send verification code'}).click();
+  await dialog.getByLabel('Eight-digit email code').fill('12345678');
+  try {
+    await dialog.getByRole('button', {name:'Verify email'}).click();
+    await received.promise;
+    await page.keyboard.press('Escape');
+    await page.getByRole('button', {name:'Register',exact:true}).click();
+    await help.click();
+  } finally {
+    release.resolve();
+  }
+  await expect(dialog.getByLabel('Registration email')).toHaveValue('');
+  await expect(page.locator('a[href="/concert/ticket/late"]')).toHaveCount(0);
+});

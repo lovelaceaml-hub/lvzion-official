@@ -1,55 +1,41 @@
-# Healing Concert
+# Event Invitation and Registration
 
-RSVP tickets with QR codes and door check-in, inside lvz.app. Built 2026-11-12 from Anthony's plan
-(inside lvz.app; members and their guests; attendance only, no participation score; ticket on screen and by email).
+[Open the shared concert invitation](https://lvz.app/concert/rsvp) · [Open the member module](https://lvz.app/modules/concert)
 
-Status: **live on lvz.app since 2026-11-12** (Anthony: "Yes, release it"). Deployment `dpl_4kDkqdkxAN5sxMc29eg4HYMu7b4V` from main `dc520a4`; migration applied and the app approved. No concert is set up yet: a manager enters the real date, times, venue and seats in Concert settings.
+**The Words of Mother’s Love That Bring Peace** runs Sunday, December 6, 2026, from **4:30 to 6:00 p.m. Pacific** at World Mission Society Church of God, 6720 W Sahara Ave, Las Vegas, NV 89146. Use the flyer’s end time. Invitation copy reads “Experience the healing power of Mother’s love through heartfelt messages, uplifting music, and inspiring performances.”
 
-## What people see
+## Invitation and registration
 
-| Who | Where | What they can do |
-|---|---|---|
-| Any signed-in member | Apps → Healing Concert (`/modules/concert`) | See the concert, RSVP (party of 1 to 10), get a QR ticket on screen and by email, share a personal invite link |
-| A guest with no account | The member's invite link (`/concert/i/…`) | RSVP with name, email, optional phone and party size; the ticket opens right away and is emailed |
-| Anyone with a ticket | `/concert/ticket/…` (in the email) | Show the QR code at the door; a quiet link to create an LV Zion account |
-| Door staff (concert managers) | More → Scan tickets (`/modules/concert/scan`) | Scan with the phone camera (or from a photo); green Welcome, amber Already checked in, red Not valid |
-| Concert managers | More → Guest list, Concert settings | Edit the program (song number, title, time, performers; only order, title and performers are public), live counts, search, manual check-in and undo, resend a ticket, remove a ticket, download the list (CSV), set the date/time/venue/seats, open or close RSVP, close the concert |
+- At normal text size the opening view fits one phone screen. Keep the countdown (days, hours, minutes and seconds), playable film, event details and prominent Register action in view. The public landing omits the program list. The promo starts muted. Guests can enable audio themselves.
+- Use the supplied event artwork and its poster palette. The heart and musical lines move while the phone is still. Keep controls usable under Reduce Motion. Keep the top-right corner clear of a Pause button.
+- Register opens the existing form over the invitation. The poster stays at the top. The popup has a gilded ticket silhouette with a heart cleft, side cutouts, travelling lights and fork-ended ribbon choices. Opening, answering and going back should feel continuous. Put Tickets & help at the lower right. Preserve focus, readable labels, progress and entered values when navigating back. Closing a finished registration clears its result before the next person opens the sheet. Longer forms can scroll within the window.
+- The first question is **Are you a member of the Church of God?** The equally prominent choices are **I am a member.** and **I am a guest.** A personal invitation carries its host and recipient context.
+- Members choose to register themselves, send invitations or do both. Self-registration collects name, email and group leader. Collect the invitation count, each recipient’s name and relationship, optional email, and first-visit and VIP flags. Selecting VIP reveals title, organization and category. An address enables sending after sender verification. Without an address the sender can share the personal link.
+- Guests can register from the shared invitation. Require who invited them. Show extra attendees’ names together on the same form. Ticket recovery and invitation management use email verification. Keep email, QR and on-screen ticket branding recognizable at check-in. Event mail uses the events@lvz.app identity when the dedicated transport is configured.
+- Door staff use the existing scanner or manual check-in. A repeat scan reports the earlier check-in. Use fictional tickets on a local stack for acceptance tests.
 
-The owner manages it automatically. Give door volunteers a `manager` grant on the `concert` app.
+## Implementation and operating notes
 
-## How it works
+| Area | Start here |
+| --- | --- |
+| Shared, host and named invitation entry | `app/concert/rsvp/`, `app/concert/i/`, `app/concert/invitation/`, `components/concert/rsvp-page.tsx` |
+| Landing, film and countdown | `motion-invitation.tsx`, `motion-invitation.css`, `promo.tsx` and `film-palette.ts` in `components/concert/` |
+| Registration window and transitions | `concert-dialog.tsx`, `invitation-frame.tsx`, `popup-heart.tsx`, `answer-motion.ts`, `registration.tsx` and `registration-stage.css` in the same directory |
+| Validation, tickets, email and attendance | `lib/concert/`, `app/api/concert/`, `app/modules/concert/` and `app/concert/ticket/` |
+| Hosted schema history | [Migration ledger](../HOSTED-MIGRATION-LEDGER.json) |
 
-- The program (song list) shows on the invite page, every ticket page and in the member app, with order, title and performers only. Song numbers and times are visible only in Concert settings (Anthony, 2026-11-12). Migration `20261112210000_concert_program`.
+The approved 66-second **Film 10 – Nine Colours – Revision 3** and its extracted poster are private media. The public playback route issues 15-minute signed URLs for those two assets. Keep both binaries, signed URLs, private Drive links, service credentials, attendee records and live ticket tokens outside Git. The supplied event artwork is a separate public asset. Preserve ticket signing keys so issued tickets continue to scan.
 
-- One open concert at a time (`app_private.concert_events`). Closing it keeps the guest list; its tickets then scan as "another event".
-- Each member has one stable invite link. Guests who RSVP through it are recorded with who invited them.
-- Ticket and invite links are derived on the server from `LVZ_CONCERT_TOKEN_SECRET`; the database stores only SHA-256 digests. The QR code holds the ticket link, so any phone camera opens the ticket page.
-- An email already on the list never gets a second ticket and never reveals the first one: the ticket is re-sent to that address instead.
-- Seats count party sizes. RSVP stops when seats run out or a manager closes RSVP.
-- Guest RSVP is protected by BotID and its own rate-limit buckets (50 tries per network, 10 per email, each 15 minutes).
-- Ticket email (text and HTML with the QR as an inline image) goes through the existing SMTP settings and only when `LVZ_EMAIL_DELIVERY_ENABLED=true`. Without mail the ticket still shows on screen.
-- Scanning uses the browser's built-in QR reader where it exists and the `jsqr` library elsewhere (iPhone Safari).
+### Ticket operations
 
-Code: `supabase/migrations/20261112180000_healing_concert.sql`, `lib/concert/`, `app/api/concert/`, `app/modules/concert/`, `app/concert/`, `components/concert/`.
+An open event can enforce a seat limit. The server checks capacity and registration status before issuing tickets. Managers use the guest list for manual check-in, undo, ticket recovery and attendance export. Public ticket links expose the ticket needed for the door. Inviter information and staff-only details belong in the authorized management view. See the [original November 12 operations record](https://github.com/lovelaceaml-hub/lvzion-official/blob/d1aca29/docs/concert/README.md) for the launch history.
 
-## Checks run on 2026-11-12 (focused only, no full suite)
+## Handoff for the next review
 
-- `tests/concert-database.test.ts`: 45 SQL assertions on the real migrations (draft closed, permissions, RSVP, duplicate email, invite tracking, capacity by seats, scan ok/already/invalid/cancelled/other event, manual check-in/undo/cancel, stale versions, closing RSVP and the concert, no direct table access).
-- `tests/concert.test.ts`: 6 unit tests (scan parsing, RSVP validation, commands, email text and escaping, CSV formula protection).
-- `tests/browser/concert.spec.ts`: 3 phone-size browser tests on the real pages against a disposable database (member RSVP and ticket, invite link, door scan of a generated QR photo, guest list check-in, manager setup, signed-out prompt, invalid invite page).
-- TypeScript and the production Next.js build.
+The November 20 live design baseline is Vercel deployment `dpl_AffVBs3CUcqnjoNyMRuwMhcHGpnk` in `lvzion/lvzion-official`. Git-based release and test results are recorded in [the verification record](VERIFICATION.md). The release target is the existing shared route. Keep the current registration backend and public plus personal entry points.
 
-Live checks on 2026-11-12, signed out: `/modules/concert` and `/modules/concert/scan` load; `/api/concert` and `/api/concert/scan` return 401; unknown invite and ticket links reach the database and show "not valid"; a scripted guest RSVP is refused by BotID (403).
-
-Live test on 2026-11-13: Anthony's own signed-in RSVP (party of 1) showed the QR ticket and the 11-song program, and the ticket email arrived in his Gmail inbox (Updates tab, not spam).
-
-Not yet verified: a real phone camera scan at the door, and a guest RSVP through an invite link on a phone.
-
-## Release steps (done 2026-11-12 except steps 5 and 6)
-
-1. Set `LVZ_CONCERT_TOKEN_SECRET` (random, 32+ characters) in the Vercel production environment. Never change it after tickets go out.
-2. Apply `20261112180000_healing_concert.sql` to project `otecqlkqirncotytbfns` and update `docs/HOSTED-MIGRATION-LEDGER.json`.
-3. Deploy with the Vercel CLI from a clean checkout (automatic Git deploys stay off).
-4. Approve the module: `update app_private.app_modules set status='approved',approved_at=clock_timestamp(),approved_by=<owner member id> where module_key='concert';`
-5. In the app, open Concert settings and enter the real date, times, venue and seats.
-6. Confirm `LVZ_EMAIL_DELIVERY_ENABLED` and the SMTP settings in production, then make one real RSVP to Anthony's email and scan it on a phone at the door.
+1. Start with repository instructions and the verification record. Use Node 24 and the lockfile. Review the shipped source against both the shared invitation and a fictional host link.
+2. Exercise short portrait, landscape, an open keyboard, enlarged type, keyboard-only input and Reduce Motion. Watch the opening and answer transitions while the phone is still. Verify the ribbon cutouts, hit targets, focus restoration, help and draft retention. Also check private playback failure and the countdown boundary in Pacific time.
+3. Trace member, guest, both, and invitation-only paths through verification, optional email, first visits, VIP details, multi-attendee tickets and retrieval. Check duplication, capacity and repeated door scans with disposable data. Live smoke tests should be read-only.
+4. Refactor where a reproducible defect or duplicated behavior warrants a change. Keep interactive geometry, registration state and email delivery semantics covered with focused regressions. Follow the repository’s per-run authorization for a full suite.
+5. A physical iPhone playback, keyboard and camera scan remain separate device checks. Record observed results and distinguish local browser emulation, hosted smoke checks and real-device acceptance.

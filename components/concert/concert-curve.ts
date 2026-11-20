@@ -11,4 +11,3 @@ export function concertCurve(angle: number, heart: number, tilt: number) {
     y: ovalY + heart * (heartY - ovalY),
   };
 }
-

@@ -36,6 +36,11 @@
 .ml-title h1 strong { font-weight:400; }
 .ml-promo { grid-area:film; width:min(100%,59dvh,38rem); min-width:0; color:#fcebd8; }
 .ml-promo video,.ml-promo img { display:block; width:100%; height:auto; aspect-ratio:16/9; object-fit:contain; background:#180f23; border:1px solid #dfb58f; border-radius:.8rem; box-shadow:0 8px 36px #130a1e81; }
+.ml-promo-retry {
+  position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); min-height:44px; padding:.45rem .85rem;
+  border:1px solid #f8d2bd; border-radius:2rem; background:#311c31; color:#fff1dc; font:650 .85rem/1.2 system-ui,sans-serif;
+  white-space:nowrap; cursor:pointer;
+}
 .ml-promo small { display:block; margin-top:.33rem; text-align:right; font-size:.59rem; font-weight:620; letter-spacing:.13em; text-transform:uppercase; }
 .ml-facts { grid-area:facts; display:grid; gap:.54rem; width:min(100%,28rem); padding:.55rem .75rem; border-top:1px solid #edcaa860; border-bottom:1px solid #edcaa860; background:#211323bc; }
 .ml-facts > div { display:flex; align-items:center; gap:.7rem; }
@@ -47,6 +52,10 @@
 .ml-actions > button.ui-button { flex:1; justify-content:center; min-height:46px; border:1px solid #f8d2bd; border-radius:2rem; background:#fac4b0; color:#361a2d; box-shadow:0 3px 19px #170c2060; font:750 .93rem/1.2 system-ui,sans-serif; cursor:pointer; }
 .ml-actions > button.ui-button:hover { background:#ffdbca; }
 .ml-actions > button.ui-button-secondary,.ml-member-access { flex:none; background:#311c31; color:#fff1dc; }
+@media (max-width:420px) {
+  .ml-actions:has(> [role="status"]) { row-gap:.15rem; }
+  .ml-actions:has(> [role="status"]) > .ui-button-secondary { flex:1 1 0; min-width:0; padding-inline:.5rem; }
+}
 .ml-actions > p { flex-basis:100%; text-align:center; margin:0; font-size:.75rem; }
 .ml-member-access { min-height:44px; display:inline-flex; align-items:center; justify-content:center; gap:.5rem; font-weight:650; font-size:.74rem; text-decoration:none; }
 .ml-member-access { padding:0 .8rem; border-radius:2rem; }
@@ -109,6 +118,9 @@
   .ml-invitation .cc-dialog[open][data-presentation="registration"] .cc-dialog-inner { grid-template-columns:minmax(7rem,.65fr) minmax(0,1.35fr); gap:.4rem 1rem; }
   .ml-invitation .cc-dialog .cc-dialog-heading { grid-column:1 / -1; }
   .ml-invitation .cc-dialog[data-presentation="registration"] .cc-registration-poster { grid-column:1; grid-row:2 / span 2; max-height:40dvh; }
+}
+@media (orientation:portrait) and (max-height:600px) {
+  .ml-stage:has(.ml-actions > [role="status"]) .ml-promo { width:min(100%,max(7.4rem,calc((100dvh - var(--dock) - 24rem)*1.68))); }
 }
 @media (orientation:portrait) and (max-height:600px) { .ml-promo { width:min(100%,max(7.4rem,calc((100dvh - var(--dock) - 22.3rem)*1.68))); } }
 

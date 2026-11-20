@@ -10,6 +10,12 @@ Create an account with your own first and last names, personal email and a passw
 
 New accounts start Unassigned to age category, group and unit. An authorized member administrator verifies the person and places them. Unassigned accounts can see only their own records.
 
+## Register for the December concert
+
+Open the invitation on your phone and tap **Register**. Choose **I am a member.** to register yourself, invite others, or do both. Choose **I am a guest.** to register your party. On the shared invitation, enter who invited you and the name of each attendee. When you receive a personal invitation, open that link so the registration carries the host’s details. [Concert invitation](https://lvz.app/concert/rsvp)
+
+Open your QR ticket for check-in at the door. To retrieve a ticket later, open **Register**, then **Tickets & help** in the lower-right corner.
+
 ## Manage age categories, groups and units
 
 Open Member management. Authorized organization administrators see **Age categories, groups and units** at the top.

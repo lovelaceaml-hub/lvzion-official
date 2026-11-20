@@ -24,6 +24,13 @@ async function readJSON(response:Response){
 }
 async function post(input:Record<string,unknown>){return readJSON(await fetch('/api/concert',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(input)}));}
 
+function FeaturedRegistration({event, eventId, open, full}: {event: PublicEvent; eventId: string; open: boolean; full: boolean}) {
+ return <>
+  {(!open || full) && <p role="status">{open ? 'The concert is full.' : 'Registration is closed.'}</p>}
+  <Registration key={open && !full ? 'register' : 'recover'} event={event} eventId={eventId} recoveryOnly={!open || full} showPoster/>
+ </>;
+}
+
 function TicketView({data,reload,media}:{data:Data;media:PromoMedia;reload:()=>Promise<void>}){
  const event=data.event!;const ticket=data.myTicket;
  const available=seatsLeft(event);
@@ -43,7 +50,7 @@ function TicketView({data,reload,media}:{data:Data;media:PromoMedia;reload:()=>P
   {note?<p className="cc-note" role="status">{note}</p>:null}{error?<p className="cc-error" role="alert">{error}</p>:null}
  </>;
  if(isPeaceConcert(event)&&event.publicRsvp)return <MotionInvitation event={event} media={media}
-  action={event.rsvpOpen&&available!==0?<Registration event={event} eventId={event.id} showPoster/>:<p role="status">{event.rsvpOpen?'The concert is full.':'Registration is closed.'}</p>}
+  action={<FeaturedRegistration event={event} eventId={event.id} open={event.rsvpOpen} full={available===0}/>}
   extra={<ConcertInfo event={event}/>}/>;
  return <>
   <ConcertHero event={event}/>
@@ -250,7 +257,7 @@ export default function ConcertWorkspace({media,shared}:{media:PromoMedia;shared
  return <main className={'ui-main ui-narrow cc-page'+(view==='ticket'?' cc-attendee':'')} data-concert-view={view}>
   {!signedOut && <FrameControls title="Event Invitation and Registration" left={left} right={right} more={more}/>}
   {signedOut && shared && isPeaceConcert(shared.event) ? <MotionInvitation event={shared.event} media={media}
-   action={shared.open && !shared.full ? <Registration event={shared.event} eventId={shared.eventId} showPoster/> : <p>{shared.open ? 'The concert is full' : 'Registration is closed'}</p>}
+   action={<FeaturedRegistration event={shared.event} eventId={shared.eventId} open={shared.open} full={shared.full}/>}
    extra={<a className="ml-member-access" href="/sign-in?continue=concert">Member sign-in</a>}/> : signedOut?<EmptyState icon={<Music size={28}/>} title="Event Invitation and Registration" action={<div className="cc-actions"><a className="ui-button" href="/concert/rsvp">Open event registration</a><a className="ui-button ui-button-secondary" href="/sign-in?continue=concert">Sign in</a></div>}>{error}</EmptyState>
    :error?<p className="cc-error" role="alert">{error}</p>:null}
   {!data&&!error?<p className="cc-hint" role="status">Loading…</p>:null}

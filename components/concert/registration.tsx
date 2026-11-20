@@ -1,6 +1,6 @@
 'use client';
 
-import {useEffect, useLayoutEffect, useId, useRef, useState, type ReactNode} from 'react';
+import {useEffect, useEffectEvent, useLayoutEffect, useId, useRef, useState, type ReactNode} from 'react';
 import {ArrowLeft, ArrowRight, ChevronRight, Music, Heart, UserRound, UsersRound} from '../home-icons';
 import {createPortal} from 'react-dom';
 import TicketCard from './ticket-card';
@@ -13,7 +13,10 @@ type Step = 'start' | 'member' | 'identity' | 'guest' | 'sender' | 'quantity' | 
   | 'verifySender' | 'manage' | 'recover' | 'verifyRecovery' | 'tickets' | 'accept' | 'verifyRecipient';
 type PersonalInvite = {token: string; hasEmail: boolean; name: string};
 type ApiResult = {tickets?: NamedTicket[]; invitations?: InviteSummary[]; existing?: boolean; emailed?: boolean; proof?: string; challenge?: string};
-const emptyInvite: InviteDraft = {name:'', relationship:'', email:'', firstVisit:false, vip:null};
+type RecipientDraft = Omit<InviteDraft, 'vip'> & {includeVip: boolean; vip: NonNullable<InviteDraft['vip']>};
+const emptyInvite: RecipientDraft = {
+  name:'', relationship:'', email:'', firstVisit:false, includeVip:false, vip:{title:'',organization:'',category:''},
+};
 const emptyMember = {firstName:'', lastName:'', leader:''};
 
 async function api(data: Record<string, unknown>): Promise<ApiResult> {
@@ -91,6 +94,13 @@ export default function Registration({eventId, event, hostToken, personal, invit
   const [open, setOpen] = useState(false);
   const [showHelp, setShowHelp] = useState(recoveryOnly);
 
+  const [registrationId, setRegistrationId] = useState(0);
+  const [lookupId, setLookupId] = useState(0);
+  function startLookup() {
+    setLookupId(id => id + 1);
+    setShowHelp(true);
+  }
+
   const [footerSlot, setFooterSlot] = useState<HTMLDivElement | null>(null);
   return <ConcertDialog
     label={recoveryOnly ? 'Tickets & help' : mode === 'invite' ? 'Create named invitations' : 'Register'}
@@ -109,20 +119,22 @@ export default function Registration({eventId, event, hostToken, personal, invit
     </button>}</>}
   >
     {!recoveryOnly ? <div hidden={showHelp}>
-      <RegistrationFlow event={event} hostToken={hostToken} footerSlot={footerSlot} eventId={eventId} personal={personal} invitedBy={invitedBy} sendingInvitation={mode === 'invite'} active={open && !showHelp}/>
+      <RegistrationFlow key={registrationId} onReset={() => setRegistrationId(id => id+1)} event={event} hostToken={hostToken} footerSlot={footerSlot} eventId={eventId} personal={personal} invitedBy={invitedBy} onFindTickets={startLookup} sendingInvitation={mode === 'invite'} active={open && !showHelp}/>
     </div> : null}
     <div hidden={!showHelp}>
-      <RegistrationFlow event={event} hostToken={hostToken} footerSlot={footerSlot} eventId={eventId} tools active={open && showHelp}/>
+      <RegistrationFlow key={lookupId} onReset={() => setLookupId(id => id+1)} event={event} footerSlot={footerSlot} eventId={eventId} onFindTickets={startLookup} tools active={open && showHelp}/>
     </div>
   </ConcertDialog>;
 }
 
-function RegistrationFlow({eventId, event, hostToken, footerSlot, personal, invitedBy, tools = false, sendingInvitation = false, active}: {
+function RegistrationFlow({eventId, event, hostToken, footerSlot, personal, invitedBy, tools = false, sendingInvitation = false, onFindTickets, onReset, active}: {
   eventId: string; event?: PublicEvent; hostToken?: string; footerSlot: HTMLDivElement | null;
   personal?: PersonalInvite;
   invitedBy?: string;
   tools?: boolean;
   sendingInvitation?: boolean;
+  onFindTickets: () => void;
+  onReset: () => void;
   active: boolean;
 }) {
   const formId = useId();
@@ -138,7 +150,6 @@ function RegistrationFlow({eventId, event, hostToken, footerSlot, personal, invi
   const [both, setBoth] = useState(false);
   const [memberRegistration, setMemberRegistration] = useState(false);
   const [names, setNames] = useState(['']);
-  const vipDrafts = useRef(new Map<number, NonNullable<InviteDraft['vip']>>());
   const [recipients, setRecipients] = useState([emptyInvite]);
   const [inviteIndex, setInviteIndex] = useState(0);
   const [recipientName, setRecipientName] = useState(personal?.name ?? '');
@@ -159,6 +170,32 @@ function RegistrationFlow({eventId, event, hostToken, footerSlot, personal, invi
   const cue = useRef<Animation | null>(null);
   const direction = useRef<'forward' | 'back'>('forward');
   const formHeading = useRef<HTMLHeadingElement>(null);
+
+  const closedDuringWork = useRef(false);
+  const discardCompleted = useEffectEvent(() => {
+    closedDuringWork.current = pending.current;
+    if (step === 'tickets' || step === 'manage') {
+      onReset();
+      return;
+    }
+    // In “Both”, the invitation draft can outlive the completed seat reservation.
+    const ticketStep = steps.indexOf('tickets');
+    if (ticketStep >= 0) {
+      setSteps(steps.slice(ticketStep + 1));
+      setTickets([]);
+      setMember(emptyMember);
+      setMemberRegistration(false);
+      setExisting(false);
+      setEmailed(false);
+    }
+  });
+  useEffect(() => {
+    const sheet = formHeading.current?.closest('dialog');
+    if (!sheet) return;
+    const onClose = () => discardCompleted();
+    sheet.addEventListener('close', onClose);
+    return () => sheet.removeEventListener('close', onClose);
+  }, []);
 
   const previousHeight = useRef(0);
   function rememberHeight() {
@@ -219,6 +256,7 @@ function RegistrationFlow({eventId, event, hostToken, footerSlot, personal, invi
 
   async function run(work: () => Promise<void> | void) {
     if (pending.current) return;
+    closedDuringWork.current = false;
     pending.current = true;
     setBusy(true);
     setError('');
@@ -228,15 +266,22 @@ function RegistrationFlow({eventId, event, hostToken, footerSlot, personal, invi
     finally { pending.current = false; setBusy(false); }
   }
 
+  function finish(result: 'tickets' | 'manage', ticketPath?: string) {
+    if (!formHeading.current) return;
+    if (closedDuringWork.current) onReset();
+    else if (ticketPath) window.location.assign(ticketPath);
+    else next(result);
+  }
+
   async function register(fields: Record<string, unknown>) {
     if (hostToken && fields.names) {
       const response = await fetch('/api/concert/rsvp', {method:'POST', headers:{'Content-Type':'application/json'},
         body:JSON.stringify({invite:hostToken,name:names[0],email:guestEmail,inviterName,partySize:names.length,attendeeNames:names.slice(1)})});
       const result = await response.json();
       if (!response.ok) throw new Error(result.error || 'Your RSVP could not be saved.');
-      if (result.existing) {setExisting(true);setTickets([]);setEmailed(Boolean(result.emailed));next('tickets');return;}
+      if (result.existing) {setExisting(true);setTickets([]);setEmailed(Boolean(result.emailed));finish('tickets');return;}
       if (!/^\/concert\/ticket\/[\w-]{43}$/.test(result.ticketPath)) throw new Error('Your ticket could not be opened.');
-      window.location.assign(result.ticketPath);
+      finish('tickets', result.ticketPath);
       return;
     }
     const result = await api({op:'register', eventId, requestId:requestId(saveId), ...fields,
@@ -245,7 +290,7 @@ function RegistrationFlow({eventId, event, hostToken, footerSlot, personal, invi
     setMemberRegistration(Boolean(fields.member));
     setEmailed(result.emailed === true);
     setExisting(result.existing === true);
-    next('tickets');
+    finish('tickets');
   }
 
   async function requestCode(purpose: 'sender' | 'recipient' | 'recovery') {
@@ -267,7 +312,7 @@ function RegistrationFlow({eventId, event, hostToken, footerSlot, personal, invi
       setTickets(result.tickets ?? []);
       setExisting(false);
       setEmailed(false);
-      next('tickets');
+      finish('tickets');
     } else if (purpose === 'recipient') {
       setProof(result.proof ?? '');
       await register({name:recipientName, invitation:personal?.token, proof:result.proof});
@@ -280,9 +325,10 @@ function RegistrationFlow({eventId, event, hostToken, footerSlot, personal, invi
   async function saveInvitations(verified: string) {
     const data = await api(manageOnly
       ? {op:'list', eventId, proof:verified}
-      : {op:'create', eventId, proof:verified, requestId:requestId(batchId), senderName, recipients});
+      : {op:'create', eventId, proof:verified, requestId:requestId(batchId), senderName,
+          recipients:recipients.map(({includeVip, vip, ...recipient}) => ({...recipient, vip:includeVip ? vip : null}))});
     setInvitations(data.invitations ?? []);
-    next('manage');
+    finish('manage');
   }
 
   async function updateInvitations(op: 'resend' | 'withdraw', id: string) {
@@ -302,7 +348,7 @@ function RegistrationFlow({eventId, event, hostToken, footerSlot, personal, invi
   }
 
   const invite = recipients[inviteIndex];
-  const editInvite = (update: Partial<InviteDraft>) => setRecipients(list =>
+  const editInvite = (update: Partial<RecipientDraft>) => setRecipients(list =>
     list.map((item, i) => i === inviteIndex ? {...item,...update} : item));
   const editName = (index: number, value: string) => setNames(list => list.map((item,i) => i === index ? value : item));
   async function nextRecipient() {
@@ -318,7 +364,7 @@ function RegistrationFlow({eventId, event, hostToken, footerSlot, personal, invi
     identity:'Reserve your seat', guest:'Your registration',
     sender:manageOnly?'Find your invitations':'Who is sending the invitations?',
     quantity:'How many invitations are you sending?', invite:`Invitation ${inviteIndex+1} of ${recipients.length}`,
-    
+
     verifySender:'Verify your email', manage:'Your invitations', recover:'Find your tickets',
     verifyRecovery:'Verify your email', tickets:tickets.length?'Your tickets':existing?'Check your registration':'No tickets found',
     accept:'Accept your invitation', verifyRecipient:'Verify your invitation email',
@@ -382,14 +428,12 @@ function RegistrationFlow({eventId, event, hostToken, footerSlot, personal, invi
         'Add recipients', () => {setInviteIndex(0);next('invite');});
       case 'invite': return form(<>
         <Field label="Guest’s full name"><input className="ui-input" required minLength={2} maxLength={120} value={invite.name} onChange={e => editInvite({name:e.target.value})}/></Field>
-        <label className="cc-vip-toggle"><input type="checkbox" checked={Boolean(invite.vip)} onChange={e => {
-          if (invite.vip) vipDrafts.current.set(inviteIndex, invite.vip);
-          editInvite({vip:e.target.checked ? vipDrafts.current.get(inviteIndex) ?? {title:'',organization:'',category:''} : null});
-        }}/> VIP</label>
-        {invite.vip && <fieldset className="cc-vip-fields"><legend>VIP details</legend>
-        <Field label="VIP title"><input className="ui-input" required maxLength={120} value={invite.vip?.title??''} onChange={e => editInvite({vip:{...invite.vip!,title:e.target.value}})}/></Field>
-        <Field label="Organization"><input className="ui-input" required maxLength={120} value={invite.vip?.organization??''} onChange={e => editInvite({vip:{...invite.vip!,organization:e.target.value}})}/></Field>
-        <Field label="Category"><input className="ui-input" required maxLength={120} value={invite.vip?.category??''} onChange={e => editInvite({vip:{...invite.vip!,category:e.target.value}})}/></Field>
+        <label className="cc-vip-toggle"><input type="checkbox" checked={invite.includeVip}
+          onChange={e => editInvite({includeVip:e.target.checked})}/> VIP</label>
+        {invite.includeVip && <fieldset className="cc-vip-fields"><legend>VIP details</legend>
+        <Field label="VIP title"><input className="ui-input" required maxLength={120} value={invite.vip.title} onChange={e => editInvite({vip:{...invite.vip,title:e.target.value}})}/></Field>
+        <Field label="Organization"><input className="ui-input" required maxLength={120} value={invite.vip.organization} onChange={e => editInvite({vip:{...invite.vip,organization:e.target.value}})}/></Field>
+        <Field label="Category"><input className="ui-input" required maxLength={120} value={invite.vip.category} onChange={e => editInvite({vip:{...invite.vip,category:e.target.value}})}/></Field>
         </fieldset>}
         <Field label="Relationship"><input className="ui-input" required maxLength={120} value={invite.relationship} onChange={e => editInvite({relationship:e.target.value})}/></Field>
         <Field label="Guest’s email (optional)"><input className="ui-input" type="email" maxLength={254} value={invite.email} onChange={e => editInvite({email:e.target.value})}/></Field>
@@ -444,7 +488,10 @@ function RegistrationFlow({eventId, event, hostToken, footerSlot, personal, invi
           <button type="button" className="cc-reg-link" onClick={() => void share(ticket.url,ticket.name+'’s concert ticket')}>Share</button></div>
         </li>)}</ul> : <p className="cc-hint">{existing?'This email already has a registration or the invitation was already accepted. Verify the ticket email to retrieve the registration.':'Check the email used to register and try again.'}</p>}
         {emailed?<p className="cc-hint">We’ll send a copy to your email.</p>:null}
-        {existing?<button type="button" className="ui-button ui-button-secondary" onClick={e => answer(e.currentTarget, () => next('recover'))}>Find my tickets</button>:null}
+        {existing?<button type="button" className="ui-button ui-button-secondary" onClick={e => answer(e.currentTarget, onFindTickets)}>Find my tickets</button>:null}
+        {tools && <button type="button" className="ui-button ui-button-secondary" onClick={e => answer(e.currentTarget, onFindTickets)}>
+          {tickets.length ? 'Find tickets for another email' : 'Try another email'}
+        </button>}
         {both&&memberRegistration?<button type="button" className="ui-button" onClick={e => answer(e.currentTarget, () => next('quantity'))}>Continue to invitations</button>:null}
         {memberRegistration&&!both?<a className="cc-reg-link" href="/concert/setup">Set up your LV Zion account</a>:null}
       </>;
