@@ -49,7 +49,7 @@ export default function TicketWallet({event,tickets,embedded=false}:{event:Publi
   async function resend(){
     setSending(true);setNotice('');
     try{
-      const res=await fetch(tickets[0].url+'/resend',{method:'POST',headers:{'Content-Type':'application/json'},body:'{}'});
+      const res=await fetch(tickets[0].url+'/resend',{method:'POST',mode:'same-origin',referrerPolicy:'origin',headers:{'Content-Type':'application/json'},body:'{}'});
       const data=await res.json();
       setNotice(res.ok?'Sent to the registration email.':data.error || 'Email delivery failed. Please try again.');
     }catch{setNotice('Email delivery failed. Please try again.');}
