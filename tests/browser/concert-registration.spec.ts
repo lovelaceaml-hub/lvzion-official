@@ -23,7 +23,7 @@ async function mockConcert(page: Page, event = workspace.event) {
 async function openRegistration(page: Page) {
   await mockConcert(page);
   await page.goto('/modules/concert');
-  await page.getByRole('button', {name:'Register', exact:true}).click();
+  await page.getByRole('button', {name:'Tap here to register', exact:true}).click();
   return page.getByRole('dialog');
 }
 
@@ -145,7 +145,7 @@ test('a member can return from duplicate-ticket recovery and continue to invitat
     }
   });
   const dialog = await openRegistration(page);
-  const register = page.getByRole('button', {name:'Register',exact:true});
+  const register = page.getByRole('button', {name:'Tap here to register',exact:true});
   await page.keyboard.press('Escape');
   await expect(register).toBeFocused();
   await expect(register).toBeInViewport({ratio:1});
@@ -190,7 +190,7 @@ test('closing preserves a guest draft but clears completed tickets and a new reg
     return route.fulfill({json:{tickets:[{id:'ticket',name:input.names[0],partySize:1,url:'/concert/ticket/fictional-guest'}]}});
   });
   const dialog = await openRegistration(page);
-  const register = page.getByRole('button', {name:'Register',exact:true});
+  const register = page.getByRole('button', {name:'Tap here to register',exact:true});
   const guest = dialog.getByRole('button', {name:'I am a guest.'});
   const name = dialog.getByLabel('Your full name');
   await guest.click();
@@ -233,7 +233,7 @@ for (const state of ['closed','full'] as const) {
     await page.goto('/modules/concert');
     const help = page.getByRole('button', {name:'Tickets & help',exact:true});
     await expect(page.getByRole('status').filter({hasText:state})).toBeVisible();
-    await expect(page.getByRole('button', {name:'Register',exact:true})).toHaveCount(0);
+    await expect(page.getByRole('button', {name:'Tap here to register',exact:true})).toHaveCount(0);
     await expect(help).toBeInViewport({ratio:1});
     expect(await page.evaluate(() => document.documentElement.scrollHeight)).toBeLessThanOrEqual(568);
     await help.click();
@@ -266,7 +266,7 @@ test('failed film retries the private media route in place and restores the nati
   await page.goto('/modules/concert');
   const retry = page.getByRole('button', {name:'Retry film'});
   await expect(retry).toBeInViewport({ratio:1});
-  await expect(page.getByRole('button', {name:'Register',exact:true})).toBeInViewport({ratio:1});
+  await expect(page.getByRole('button', {name:'Tap here to register',exact:true})).toBeInViewport({ratio:1});
   const navigation = await page.evaluate(() => performance.timeOrigin);
   const initialRequests = filmRequests;
   await retry.press('Enter');
@@ -305,7 +305,7 @@ test('a completed lookup arriving after dismissal cannot reveal tickets in a reo
     await dialog.getByRole('button', {name:'Verify email'}).click();
     await received.promise;
     await page.keyboard.press('Escape');
-    await page.getByRole('button', {name:'Register',exact:true}).click();
+    await page.getByRole('button', {name:'Tap here to register',exact:true}).click();
     await help.click();
   } finally {
     release.resolve();

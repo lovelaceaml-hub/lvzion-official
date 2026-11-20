@@ -353,3 +353,17 @@
   .cc-dialog.cc-concert-stage[open][data-presentation] .cc-dialog-inner { padding-block-start:16px; }
   .cc-dialog.cc-concert-stage[open][data-presentation] { padding-bottom:9px; }
 }
+
+.cc-admission-title small {
+  display:block; margin-bottom:.18rem; color:#5a233b; font:600 clamp(.78rem,3vw,.95rem)/1.18 system-ui,sans-serif;
+  text-wrap:balance; overflow-wrap:anywhere;
+}
+.ml-actions .cc-admission-title { min-width:0; }
+@media (max-width:380px) {
+  .ml-actions:has(> .ui-button-secondary) > .ui-button[data-admission] {
+    grid-template-columns:1.65rem 1fr; padding-inline:.3rem; column-gap:.25rem;
+  }
+  .ml-actions:has(> .ui-button-secondary) .cc-admission-stub { display:none; }
+  .ml-actions:has(> .ui-button-secondary) .cc-admission-stamp { width:1.5rem; height:1.5rem; }
+  .ml-actions:has(> .ui-button-secondary) .cc-admission-title { font-size:1rem; }
+}

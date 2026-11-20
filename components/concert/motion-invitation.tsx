@@ -34,8 +34,8 @@ function ConcertCountdown({startsAt}: {startsAt: string}) {
   </div>;
 }
 
-export default function MotionInvitation({event, media, action, note, extra, invitedBy}: {
-  event: PublicEvent; media: PromoMedia; action: ReactNode; invitedBy?: string; note?: string; extra?: ReactNode;
+export default function MotionInvitation({event, media, action, note, extra}: {
+  event: PublicEvent; media: PromoMedia; action: ReactNode; note?: string; extra?: ReactNode;
 }) {
   const startsAt = vegasInstant(event.date, event.startTime);
   const [venue, ...address] = concertVenueLines(event.venue);
@@ -48,7 +48,7 @@ export default function MotionInvitation({event, media, action, note, extra, inv
         <ConcertCountdown startsAt={startsAt}/>
       </header>
       <div className="ml-grid">
-        <div className="ml-title"><ConcertLights startsAt={startsAt}/><div className="ml-lettering">{invitedBy ? <div className="ml-host"><b className="cc-type-heart" aria-hidden="true">♥</b><span>Invited by {invitedBy}</span></div> : <p className="ml-eyebrow">Healing Concert</p>}
+        <div className="ml-title"><ConcertLights startsAt={startsAt}/><div className="ml-lettering"><p className="ml-eyebrow">Healing Concert</p>
           <h1><span>The Words of</span><em>Mother’s Love</em><strong>That Bring Peace</strong></h1></div>
         </div>
         <Promo {...media}/>

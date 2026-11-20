@@ -395,6 +395,17 @@
    "verified_on": "2026-11-19",
    "applied_via": "Supabase MCP apply_migration after focused concert SQL, browser and production build checks",
    "verification": "Hosted readback confirmed private ticket fields, guest registration RPC execution limited to the service role, and inviter attribution in the manager-only attendance response. Disposable tests covered named attendees, reusable invitation parties, and public ticket privacy."
+  },
+  {
+   "name": "concert_invitation_party_receipts",
+   "hosted_version": "20261120200217",
+   "repository_version": "20261120195201",
+   "source": "supabase/migrations/20261120195201_concert_invitation_party_receipts.sql",
+   "source_blob_sha": "b98f9a386d3325f7cc0df559bca396c979c58758",
+   "status": "applied",
+   "verified_on": "2026-11-20",
+   "applied_via": "Supabase MCP apply_migration after focused concert database, browser and mail checks",
+   "verification": "Hosted readback confirmed all three new RPCs are executable by service_role only among the application roles. In a disposable database, a named invitation confirmed a corrected party, produced matching guest and sender QR images, and scoped the status list to the sender and event."
   }
  ],
  "normalization": {

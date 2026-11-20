@@ -75,8 +75,19 @@ ${isPeaceConcert(event) ? '</td></tr></table>' : ''}
 </td></tr>`;
 }
 
-export function ticketGroupHtml(event: PublicEvent, tickets: EmailTicket[]) {
-  return emailFrame(tickets.length === 1 ? 'Admission ticket' : 'Admission tickets', emailHeader(event), `
+type HostConfirmation = {name:string; email:string; additionalNames:string[]; statusUrl:string};
+export function hostReceiptHtml(event:PublicEvent, name:string, delivery:string, statusUrl:string) {
+  return emailFrame('Your concert invitations',emailHeader(event),`
+<tr><td align="center" style="padding:20px;color:#182b48"><strong>${escape(name)}</strong><p>${escape(delivery)}</p>
+${actionLink(statusUrl,'View my invitation statuses')}</td></tr>${eventFacts(event)}`);
+}
+
+export function ticketGroupHtml(event: PublicEvent, tickets: EmailTicket[], host?:HostConfirmation) {
+  return emailFrame(host ? 'Your guest confirmed attendance' : tickets.length === 1 ? 'Admission ticket' : 'Admission tickets', emailHeader(event), `
+${host ? `<tr><td align="center" style="padding:18px"><strong>${escape(host.name)} confirmed attendance.</strong>
+<p>${escape(host.email)}</p>${host.additionalNames.length ? '<p>With '+host.additionalNames.map(escape).join(', ')+'</p>' : ''}
+<p>Your copy of the party’s ticket is below. Both copies use the same QR code.</p>
+${actionLink(host.statusUrl,'View my invitation statuses')}</td></tr>` : ''}
 <tr><td align="center" style="padding:16px;color:#182b48;font-size:15px;font-weight:700">Show ${tickets.length === 1 ? 'this QR code' : 'each attendee’s QR code'} at the door.</td></tr>
 ${tickets.map(ticket => ticketRow(ticket, tickets.length > 1, event)).join('')}
 ${eventFacts(event)}`);

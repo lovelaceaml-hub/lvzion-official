@@ -1,3 +1,5 @@
+import {after} from 'next/server';
+import {deliverConcertMail} from '../../../../lib/concert/registration-server';
 import {createHmac} from 'node:crypto';
 import {ConcertError,identifier,object,parseGuestRsvp} from '../../../../lib/concert/domain';
 import {body} from '../../../../lib/server/http';
@@ -32,6 +34,7 @@ export async function POST(request:Request){
    inviterName:rsvp.inviterName,attendeeNames:rsvp.attendeeNames,
   }}));
   const ticketId=identifier(r.ticketId);
+  if ('invite' in rsvp) after(async () => { await deliverConcertMail('host_party',ticketId); });
   const emailed=await sendTicket(ticketId);
   // A repeat email never reveals the existing ticket; it is re-sent to the address on file instead.
   if(r.created!==true)return json({ok:true,existing:true,emailed});

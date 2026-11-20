@@ -12,7 +12,7 @@ export default function ConcertRsvpPage({entry, event, open, full, invitedBy, pe
   open: boolean;
   full: boolean;
   invitedBy?: string;
-  personal?: {token: string; hasEmail: boolean; name: string};
+  personal?: {token: string; email: string; name: string};
 }) {
   const peace = isPeaceConcert(event);
   const eventId = 'eventId' in entry ? entry.eventId : hostEventId;
@@ -26,13 +26,11 @@ export default function ConcertRsvpPage({entry, event, open, full, invitedBy, pe
   const recovery = !canRegister && eventId ? <Registration event={event} hostToken={'invite' in entry ? entry.invite : undefined} eventId={eventId} recoveryOnly showPoster={peace}/> : undefined;
   if (peace) {
     return <main className="cc-page"><MotionInvitation event={event} media={concertPromoMedia()} action={action}
-      extra={recovery}
-      invitedBy={invitedBy}/></main>;
+      extra={recovery}/></main>;
   }
   return <main className="ui-main cc-page cc-public cc-attendee cc-register-landing">
     <div className="cc-register-scroll" role="region" aria-label="Concert details" tabIndex={0}>
       <ConcertHero event={event} directions={directions}/>
-      {invitedBy ? <p className="cc-invited-by">Invited by <strong>{invitedBy}</strong></p> : null}
       {description ? <p className="cc-register-description">{description}</p> : null}
     </div>
     <footer className={`cc-register-actions${canRegister ? ' cc-register-actions-floating' : ''}`} aria-label="Concert actions">

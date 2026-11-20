@@ -45,7 +45,7 @@ export default function GuestRsvp({entry, invitedBy, showPoster}: {entry: RsvpEn
     }
   }
 
-  return <ConcertDialog label="Register" title="Event Invitation and Registration" primary presentation="registration" showPoster={showPoster}>
+  return <ConcertDialog label="Tap here to register" title="Event Invitation and Registration" primary presentation="registration" invitedBy={invitedBy} showPoster={showPoster}>
     {repeat ? <section className="cc-form" role="status">
       <h3>You’re already on the list</h3>
       <p className="cc-hint">{repeat.emailed

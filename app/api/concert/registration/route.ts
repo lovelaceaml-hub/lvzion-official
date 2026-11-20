@@ -82,6 +82,13 @@ async function invited(admin: Admin, input: Input) {
 
 async function registrations(admin: Admin, input: Input) {
   const id = identifier(input.requestId);
+  if (input.invitation && input.names) {
+    const result = object(await rpc(admin, 'concert_accept_party', {
+      id, digest:digest(ticketTokenFor(id)), inviteDigest:digest(field(input.invitation, 'your invitation', 64)),
+      names:attendeeNames(input.names), email:registrationEmail(input.email),
+    }));
+    return registrationResult(result);
+  }
   const invitation = input.invitation ? await invited(admin, input) : null;
   const eventId = invitation?.eventId ?? identifier(input.eventId);
   const intake = input.member ? memberDetails(input.member) : undefined;
@@ -102,6 +109,10 @@ async function registrations(admin: Admin, input: Input) {
   const result = object(await rpc(admin, 'concert_register_named', {
     id, eventId, email, tickets, ...(intake ? {intake} : {inviterName}), inviteId: invitation?.id, verified: Boolean(proof),
   }));
+  return registrationResult(result);
+}
+
+async function registrationResult(result: Input) {
   const notification = typeof result.notification === 'string' ? result.notification : null;
   const delivery = typeof result.delivery === 'string' ? result.delivery : null;
   if (delivery || notification) after(async () => {
@@ -150,6 +161,10 @@ async function senderInvitations(admin: Admin, input: Input) {
     rows = await rpc(admin, 'concert_named_invitation', {eventId, sender, batch, action: 'list'});
   }
   const invitations = Array.isArray(rows) ? rows : [];
+  if (action === 'create' || action === 'resend') {
+    const receipts = invitations.filter(row => action === 'create' || row.id === query.id);
+    after(async () => { await Promise.allSettled(receipts.map(row => deliverConcertMail('host_receipt', String(row.id)))); });
+  }
   if (invitations.some(row => row.accepted && ['pending','failed'].includes(row.notification))) after(async () => {
     await Promise.allSettled(invitations.filter(row => row.accepted && ['pending','failed'].includes(row.notification))
       .map(row => deliverConcertMail('registered', String(row.id))));

@@ -1,3 +1,4 @@
+import TicketActions from '../../../../components/concert/ticket-actions';
 import {qrSvg,ticketUrl} from '../../../../lib/concert/server';
 import {ticketByToken} from '../../../../lib/concert/routes';
 import {ticketToken} from '../../../../lib/concert/domain';
@@ -18,6 +19,6 @@ export default async function Page({params}:{params:Promise<{token:string}>}){
  const svg=inactiveMessage?undefined:await qrSvg(ticketUrl(token));
  return <main className="ui-main cc-page cc-public cc-attendee">
   <TicketCard event={t.event} name={t.name} partySize={t.partySize} svg={svg} checkedInAt={t.checkedInAt} inactiveMessage={inactiveMessage}/>
-  {inactiveMessage?null:<div className="cc-landing-actions"><ConcertInfo event={t.event}/></div>}
+  {inactiveMessage?null:<div className="cc-landing-actions"><TicketActions url={ticketUrl(token)}/><ConcertInfo event={t.event}/></div>}
  </main>;
 }

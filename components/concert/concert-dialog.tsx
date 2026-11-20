@@ -79,9 +79,9 @@ export default function ConcertDialog({label, title, primary = false, children, 
       type="button" aria-haspopup="dialog" onClick={e => openDialog(e.currentTarget)}>
       {opensTicket ? <>
         <span className="cc-admission-stamp" aria-hidden="true">♥</span>
-        <span className="cc-admission-title">{label}</span>
+        <span className="cc-admission-title">{invitedBy && <small>You’ve been invited by {invitedBy}</small>}{label}</span>
         <span className="cc-admission-stub" aria-hidden="true"><ArrowRight size={21}/></span>
-      </> : label}
+      </> : <>{primary && invitedBy && <small>You’ve been invited by {invitedBy} · </small>}{label}</>}
     </button>
     <dialog className={themed ? 'ui-sheet cc-dialog cc-concert-stage' : 'ui-sheet cc-dialog'} data-presentation={presentation} data-has-footer={footer ? true : undefined} aria-labelledby={titleId} ref={dialog} style={themed ? {
         '--paper-cut':`url(#${frameId}-cut)`, '--ribbon-cut':`url(#${frameId}-ribbon)`,

@@ -26,7 +26,7 @@ try {
   available = true;
   await retry.click();
   await page.waitForFunction(() => document.querySelector('video')?.readyState >= 2);
-  await expect(page.getByRole('button', {name:'Register', exact:true})).toBeInViewport();
+  await expect(page.getByRole('button', {name:'Tap here to register', exact:true})).toBeInViewport();
   console.log('Public film retry passed after an error before hydration.');
 } finally {
   hydrate();

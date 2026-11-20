@@ -222,4 +222,24 @@ select pg_temp.fails($$select count(*) from app_private.concert_tickets$$,'42501
 select pg_temp.server();
 select pg_temp.fails($$select count(*) from app_private.concert_tickets$$,'42501','server role cannot read the tickets table directly');
 select pg_temp.admin();
+-- A personal link can correct recipient details and reserve several seats with one scan.
+update app_private.concert_events set capacity=null,rsvp_open=true where id='70000000-0000-4000-8000-000000000001';
+insert into app_private.concert_named_invites(id,batch_id,event_id,token_digest,sender_email,sender_name,guest_name,guest_email,relationship,first_visit)
+values('73000000-0000-4000-8000-000000000009',gen_random_uuid(),'70000000-0000-4000-8000-000000000001',pg_temp.d('party-invite'),
+'party-host@example.invalid','Fictional Host','Original Guest','original@example.invalid','Friend',false);
+select pg_temp.server();
+select set_config('test.party',jsonb_build_object('id','71000000-0000-4000-8000-000000000009','inviteDigest',pg_temp.d('party-invite'),
+'digest',pg_temp.d('party-qr'),'email','corrected@example.invalid','names',jsonb_build_array('Corrected Guest','Second Guest'))::text,true);
+select pg_temp.pass(public.concert_accept_party(current_setting('test.party')::jsonb)->'tickets'->0->>'partySize'='2','single QR reserves both seats');
+select pg_temp.pass(public.concert_accept_party(current_setting('test.party')::jsonb)->'tickets'->0->>'name'='Corrected Guest','idempotent confirmation uses corrected name');
+select pg_temp.pass(public.concert_accept_party(current_setting('test.party')::jsonb||jsonb_build_object('id',gen_random_uuid()))->>'existing'='true','repeat confirmation cannot claim another ticket');
+select set_config('test.context',public.concert_host_context('{"reference":"73000000-0000-4000-8000-000000000009","source":"named"}')::text,true);
+select pg_temp.pass(current_setting('test.context')::jsonb->>'guestEmail'='corrected@example.invalid' and
+ current_setting('test.context')::jsonb->'additionalNames'->>0='Second Guest','host receipt reflects corrected email and party names');
+select pg_temp.pass(public.concert_delivery('{"kind":"host_receipt","reference":"73000000-0000-4000-8000-000000000009"}')->>'email'='party-host@example.invalid','host receipt queued to sender');
+select pg_temp.pass(public.concert_sender_status('{"eventId":"70000000-0000-4000-8000-000000000001","email":"party-host@example.invalid"}')=
+ '[{"name":"Corrected Guest","status":"Confirmed","partySize":2}]'::jsonb,'status exposes only this sender’s party');
+select pg_temp.pass(not has_function_privilege('anon','public.concert_sender_status(jsonb)','execute') and
+ not has_function_privilege('authenticated','public.concert_host_context(jsonb)','execute'),'only service role can read host data');
+select pg_temp.admin();
 rollback;

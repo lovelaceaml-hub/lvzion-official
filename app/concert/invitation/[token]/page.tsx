@@ -15,5 +15,5 @@ export default async function Page({params}: {params: Promise<{token: string}>})
   </main>;
   return <ConcertRsvpPage entry={{eventId:invitation.eventId}} event={invitation.event}
     open={invitation.available} full={false} invitedBy={invitation.senderName}
-    personal={{token, hasEmail:Boolean(invitation.email), name:invitation.name}}/>;
+    personal={{token, email:invitation.email ?? '', name:invitation.name}}/>;
 }
