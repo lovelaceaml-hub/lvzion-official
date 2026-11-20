@@ -20,6 +20,11 @@ export default function ConcertPromo({video, poster}: PromoMedia) {
   useEffect(() => {
     const element = player.current;
     if (!element || !video) return;
+    // A server-rendered player can fail before React attaches its error listener.
+    if (element.error) {
+      setFailed(true);
+      return;
+    }
     if (!matchMedia('(prefers-reduced-motion: reduce)').matches) {
       void element.play().catch(() => { /* The native play control remains available. */ });
     }
