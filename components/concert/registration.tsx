@@ -265,26 +265,15 @@ function RegistrationFlow({eventId, event, hostToken, footerSlot, personal, invi
     finally { pending.current = false; setBusy(false); }
   }
 
-  function finish(result: 'tickets' | 'manage', ticketPath?: string) {
+  function finish(result: 'tickets' | 'manage') {
     if (!formHeading.current) return;
     if (closedDuringWork.current) onReset();
-    else if (ticketPath) window.location.assign(ticketPath);
     else next(result);
   }
 
   async function register(fields: Record<string, unknown>) {
-    if (hostToken && fields.names) {
-      const response = await fetch('/api/concert/rsvp', {method:'POST', headers:{'Content-Type':'application/json'},
-        body:JSON.stringify({invite:hostToken,name:names[0],email:guestEmail,inviterName,partySize:names.length,attendeeNames:names.slice(1)})});
-      const result = await response.json();
-      if (!response.ok) throw new Error(result.error || 'Your RSVP could not be saved.');
-      if (result.existing) {setExisting(true);setTickets([]);setEmailed(Boolean(result.emailed));finish('tickets');return;}
-      if (!/^\/concert\/ticket\/[\w-]{43}$/.test(result.ticketPath)) throw new Error('Your ticket could not be opened.');
-      finish('tickets', result.ticketPath);
-      return;
-    }
     const result = await api({op:'register', eventId, requestId:requestId(saveId), ...fields,
-      ...(fields.member ? {} : {inviterName})});
+      ...(hostToken && fields.names ? {hostToken} : fields.member ? {} : {inviterName})});
     setTickets(result.tickets ?? []);
     setMemberRegistration(Boolean(fields.member));
     setEmailed(result.emailed === true);

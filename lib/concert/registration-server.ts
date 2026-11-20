@@ -39,6 +39,7 @@ export async function namedInvitation(client: Rpc, token: unknown) {
   const row = object(value);
   return {
     id: String(row.id), name: String(row.name), email: typeof row.email === 'string' ? row.email : null,
+    confirmedTicket: typeof row.confirmedTicket === 'string' ? row.confirmedTicket : null,
     senderName: String(row.senderName), available: row.available === true, accepted: row.accepted === true,
     event: parsePublicEvent(row.event), eventId: String(object(row.event).id),
   };

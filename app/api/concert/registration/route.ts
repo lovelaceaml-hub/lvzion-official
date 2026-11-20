@@ -3,13 +3,13 @@ import {randomUUID} from 'node:crypto';
 import {body} from '../../../../lib/server/http';
 import {verifyHuman} from '../../../../lib/server/bot-protection';
 import {consumeLoginLimit} from '../../../../lib/server/login';
-import {ConcertError, identifier, inviterNameValue, object} from '../../../../lib/concert/domain';
+import {ConcertError, identifier, inviteToken, inviterNameValue, object} from '../../../../lib/concert/domain';
 import {attendeeNames, field, guestName, inviteRecipients, memberDetails, registrationEmail} from '../../../../lib/concert/registration';
 import {
   deliverConcertMail, issueProof, namedInvitation, namedInviteToken, namedInviteUrl, redeemProof,
   requireProof, rpc, sessionProof, setupPinMatches, ticketList, type ProofPurpose,
 } from '../../../../lib/concert/registration-server';
-import {digest, qrSvg, ticketTokenFor} from '../../../../lib/concert/server';
+import {digest, newTicket, qrSvg, ticketTokenFor} from '../../../../lib/concert/server';
 import {call, failure, json} from '../../../../lib/concert/routes';
 import {allowedSignupEmail, signupSettings} from '../../../../lib/signup';
 import {userClient} from '../../../../lib/server/supabase';
@@ -82,10 +82,14 @@ async function invited(admin: Admin, input: Input) {
 
 async function registrations(admin: Admin, input: Input) {
   const id = identifier(input.requestId);
-  if (input.invitation && input.names) {
+  if ((input.invitation || input.hostToken) && input.names) {
+    const ticket = newTicket();
+    const source = input.hostToken ? {
+      hostDigest:digest(inviteToken(input.hostToken)), eventId:identifier(input.eventId),
+      requestDigest:digest(JSON.stringify(['reusable-party',input.hostToken,id])),
+    } : {inviteDigest:digest(field(input.invitation, 'your invitation', 64))};
     const result = object(await rpc(admin, 'concert_accept_party', {
-      id, digest:digest(ticketTokenFor(id)), inviteDigest:digest(field(input.invitation, 'your invitation', 64)),
-      names:attendeeNames(input.names), email:registrationEmail(input.email),
+      ...source, id:ticket.id, digest:ticket.digest, names:attendeeNames(input.names), email:registrationEmail(input.email),
     }));
     return registrationResult(result);
   }
@@ -115,10 +119,12 @@ async function registrations(admin: Admin, input: Input) {
 async function registrationResult(result: Input) {
   const notification = typeof result.notification === 'string' ? result.notification : null;
   const delivery = typeof result.delivery === 'string' ? result.delivery : null;
-  if (delivery || notification) after(async () => {
+  const hostParty = typeof result.hostParty === 'string' ? result.hostParty : null;
+  if (delivery || notification || hostParty) after(async () => {
     await Promise.allSettled([
       delivery && deliverConcertMail('tickets', delivery),
       notification && deliverConcertMail('registered', notification),
+      hostParty && deliverConcertMail('host_party',hostParty),
     ]);
   });
   return {tickets: await displayTickets(result.tickets), existing: result.existing === true, emailed: Boolean(delivery)};

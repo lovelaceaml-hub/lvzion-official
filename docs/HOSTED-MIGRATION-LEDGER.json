@@ -406,6 +406,17 @@
    "verified_on": "2026-11-20",
    "applied_via": "Supabase MCP apply_migration after focused concert database, browser and mail checks",
    "verification": "Hosted readback confirmed all three new RPCs are executable by service_role only among the application roles. In a disposable database, a named invitation confirmed a corrected party, produced matching guest and sender QR images, and scoped the status list to the sender and event."
+  },
+  {
+   "name": "concert_invitation_ticket_identity",
+   "hosted_version": "20261120202448",
+   "repository_version": "20261120202150",
+   "source": "supabase/migrations/20261120202150_concert_invitation_ticket_identity.sql",
+   "source_blob_sha": "8f315541fecddcc0c1a2439b040d3ee7301a16fa",
+   "status": "applied",
+   "verified_on": "2026-11-20",
+   "applied_via": "Supabase MCP apply_migration after focused concert database, browser, and mail tests",
+   "verification": "Hosted readback confirmed the invitation-key index and service-only RPC privileges. Disposable tests covered repeated personal links, independent parties sharing an inbox, retrying reusable submissions, and upgrading historical confirmations."
   }
  ],
  "normalization": {

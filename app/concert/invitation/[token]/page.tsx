@@ -1,4 +1,7 @@
-import {namedInvitation} from '../../../../lib/concert/registration-server';
+import {after} from 'next/server';
+import {redirect} from 'next/navigation';
+import {ticketTokenFor} from '../../../../lib/concert/server';
+import {deliverConcertMail, namedInvitation} from '../../../../lib/concert/registration-server';
 import {authAdminClient} from '../../../../lib/server/supabase';
 import ConcertRsvpPage from '../../../../components/concert/rsvp-page';
 import '../../../../components/concert/concert.css';
@@ -13,7 +16,14 @@ export default async function Page({params}: {params: Promise<{token: string}>})
     <section className="cc-panel cc-public-head"><h1>This invitation is unavailable</h1><p>Ask the person who invited you to send a current link.</p>
     <a className="ui-button" href="/concert/rsvp">Open the concert page</a></section>
   </main>;
+  if (invitation.confirmedTicket) {
+    const ticketId = invitation.confirmedTicket;
+    after(async () => { await Promise.allSettled([
+      deliverConcertMail('tickets',ticketId), deliverConcertMail('registered',invitation.id),
+    ]); });
+    redirect('/concert/ticket/'+ticketTokenFor(ticketId));
+  }
   return <ConcertRsvpPage entry={{eventId:invitation.eventId}} event={invitation.event}
-    open={invitation.available} full={false} invitedBy={invitation.senderName}
+    open={invitation.available || invitation.accepted} full={false} invitedBy={invitation.senderName}
     personal={{token, email:invitation.email ?? '', name:invitation.name}}/>;
 }

@@ -232,7 +232,7 @@ select set_config('test.party',jsonb_build_object('id','71000000-0000-4000-8000-
 'digest',pg_temp.d('party-qr'),'email','corrected@example.invalid','names',jsonb_build_array('Corrected Guest','Second Guest'))::text,true);
 select pg_temp.pass(public.concert_accept_party(current_setting('test.party')::jsonb)->'tickets'->0->>'partySize'='2','single QR reserves both seats');
 select pg_temp.pass(public.concert_accept_party(current_setting('test.party')::jsonb)->'tickets'->0->>'name'='Corrected Guest','idempotent confirmation uses corrected name');
-select pg_temp.pass(public.concert_accept_party(current_setting('test.party')::jsonb||jsonb_build_object('id',gen_random_uuid()))->>'existing'='true','repeat confirmation cannot claim another ticket');
+select pg_temp.pass(public.concert_accept_party(current_setting('test.party')::jsonb||jsonb_build_object('id',gen_random_uuid()))->'tickets'->0->>'id'='71000000-0000-4000-8000-000000000009','a fresh phone request returns the same bound QR');
 select set_config('test.context',public.concert_host_context('{"reference":"73000000-0000-4000-8000-000000000009","source":"named"}')::text,true);
 select pg_temp.pass(current_setting('test.context')::jsonb->>'guestEmail'='corrected@example.invalid' and
  current_setting('test.context')::jsonb->'additionalNames'->>0='Second Guest','host receipt reflects corrected email and party names');
@@ -241,5 +241,38 @@ select pg_temp.pass(public.concert_sender_status('{"eventId":"70000000-0000-4000
  '[{"name":"Corrected Guest","status":"Confirmed","partySize":2}]'::jsonb,'status exposes only this sender’s party');
 select pg_temp.pass(not has_function_privilege('anon','public.concert_sender_status(jsonb)','execute') and
  not has_function_privilege('authenticated','public.concert_host_context(jsonb)','execute'),'only service role can read host data');
+select pg_temp.admin();
+insert into app_private.concert_named_invites(id,batch_id,event_id,token_digest,sender_email,sender_name,guest_name,relationship,first_visit)
+values(gen_random_uuid(),gen_random_uuid(),'70000000-0000-4000-8000-000000000001',pg_temp.d('second-party'),'other@example.invalid','Second Host','Second Party','Friend',false);
+select pg_temp.server();
+select pg_temp.pass(public.concert_accept_party(current_setting('test.party')::jsonb || jsonb_build_object(
+ 'id','71000000-0000-4000-8000-000000000010','inviteDigest',pg_temp.d('second-party'),'digest',pg_temp.d('second-qr'),
+ 'names',jsonb_build_array('Second Party')))->'tickets'->0->>'id'='71000000-0000-4000-8000-000000000010',
+ 'a different invitation using the same receipt email gets only its own ticket');
+select pg_temp.pass(jsonb_array_length(public.concert_recover_tickets('{"eventId":"70000000-0000-4000-8000-000000000001","email":"corrected@example.invalid"}'))=2,
+ 'inbox recovery includes both independently booked parties');
+select pg_temp.pass(public.concert_named_invitation(jsonb_build_object('action','view','digest',pg_temp.d('party-invite')))->>'confirmedTicket'='71000000-0000-4000-8000-000000000009',
+ 'reopening the personal link identifies its confirmed ticket');
+select pg_temp.admin();
+-- A reusable host link identifies the inviter; only the individual submission
+-- key can replay the party's ticket when the response was interrupted.
+select pg_temp.server();
+select set_config('test.host_party',jsonb_build_object('id','71000000-0000-4000-8000-000000000011',
+ 'eventId','70000000-0000-4000-8000-000000000001','hostDigest',pg_temp.d('invite-101'),
+ 'requestDigest',pg_temp.d('private-submit'),'digest',pg_temp.d('host-qr'),'email','corrected@example.invalid',
+ 'names',jsonb_build_array('Invited Party'))::text,true);
+select pg_temp.pass(public.concert_accept_party(current_setting('test.host_party')::jsonb)->>'hostParty'='71000000-0000-4000-8000-000000000011',
+ 'a reusable invite issues the party ticket even when another guest uses this inbox');
+select pg_temp.pass(public.concert_accept_party(current_setting('test.host_party')::jsonb||jsonb_build_object('id',gen_random_uuid()))->>'delivery'='71000000-0000-4000-8000-000000000011',
+ 'reusable submission retries resolve to one ticket and one set of receipts');
+select pg_temp.admin();
+update app_private.concert_named_invites set party_confirmed=false where token_digest=pg_temp.d('party-invite');
+update app_private.concert_mail set status='sent' where kind='registered' and reference_id='73000000-0000-4000-8000-000000000009';
+update app_private.concert_events set rsvp_open=false where id='70000000-0000-4000-8000-000000000001';
+select pg_temp.server();
+select pg_temp.pass(public.concert_accept_party(current_setting('test.party')::jsonb)->>'delivery'='71000000-0000-4000-8000-000000000009',
+ 'a legacy accepted link returns its ticket even after registration closes');
+select pg_temp.pass(public.concert_delivery('{"kind":"registered","reference":"73000000-0000-4000-8000-000000000009"}')->>'email'='party-host@example.invalid',
+ 'legacy text confirmation is upgraded to an automatic host QR receipt');
 select pg_temp.admin();
 rollback;
