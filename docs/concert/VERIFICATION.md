@@ -8,6 +8,14 @@ The annotated release tag [concert-rsvp-2026-11-20](https://github.com/lovelacea
 
 The review found two registration state defects. Ticket lookup from a duplicate registration shared state with registration itself. A removed recipient’s VIP fields could also carry over to a replacement recipient at the same index. The refactor isolates verified ticket lookup from the in-progress registration and keeps VIP details with the recipient draft. The public request includes VIP details only for recipients marked VIP. The same review found that completed ticket links remained visible on reopening the sheet. Completed results are cleared on dismissal, including a response arriving after dismissal. Unfinished drafts are retained. Closed and full events offer ticket recovery from the member landing, and guests can retry an interrupted film in place. Regression coverage lives in `tests/browser/concert-registration.spec.ts`.
 
+## Mobile invitation and QR layout
+
+The invitation places the heart immediately below the countdown. The register button uses a gold label and inward-moving light trails. Reduce Motion keeps the button still. The confirmation window and the emailed ticket share a compact pass with Download and Share. When a registration has several tickets, the attendee selector changes both the visible QR and the ticket actions.
+
+The latest layout checks covered both mobile Chromium and WebKit at 320 × 460, 320 × 568, 375 × 667, 390 × 844, 568 × 320, 667 × 300 and 844 × 390. The invitation, confirmation and reopened ticket fit at normal text size in all 42 combinations. Each of the 28 QR screenshots decoded to the expected synthetic ticket URL. The ticket-switching regression also passed in both engines.
+
+The independent registration review found and fixed draft loss during a ticket-recovery retry and stale VIP details after removing a recipient. The earlier repository-wide results are recorded below. Physical iPhone, VoiceOver, and door-camera acceptance remain open.
+
 ## Repository-wide checks
 
 Use Node 24 and the lockfile. This release’s full-suite run was explicitly requested. Commands below report the initial result and any targeted reruns after fixes.

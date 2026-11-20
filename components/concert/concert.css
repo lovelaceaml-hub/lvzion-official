@@ -676,3 +676,100 @@
 .cc-field-progress progress::-webkit-progress-bar { background:#675466; }
 .cc-field-progress progress::-webkit-progress-value { background:linear-gradient(90deg,#d78caa,#ffdaa0); transition:width .28s; }
 .cc-field-progress progress::-moz-progress-bar { background:#c58697; }
+
+/* Admission pass shared by the confirmation window and the emailed ticket. */
+.cc-page.cc-wallet {
+  width:min(100%,29rem); margin-inline:auto; padding:.55rem max(.8rem,env(safe-area-inset-left));
+  gap:.45rem; box-sizing:border-box;
+}
+.app-frame[data-signed-out="true"]:has(.cc-wallet) { --frame-bottom:env(safe-area-inset-bottom,0px); }
+:is(.cc-wallet,.cc-ticket-view) .cc-ticket {
+  margin:0; overflow:hidden; color:#352238; background:#fff8eb; border:1px solid #c79e67;
+  border-radius:1.1rem; box-shadow:0 4px 18px #46223c18;
+}
+:is(.cc-wallet,.cc-ticket-view) .cc-ticket .cc-ticket-head {
+  position:relative; padding:.7rem 1rem; background:linear-gradient(115deg,#371d35,#643348);
+  color:#fff2d5; border-bottom:1px solid #d5b47e; text-align:center;
+}
+:is(.cc-wallet,.cc-ticket-view) .cc-ticket-head .cc-kicker { margin:0 0 .22rem; color:#f9d593; font-size:.63rem; letter-spacing:.17em; }
+:is(.cc-wallet,.cc-ticket-view) .cc-ticket .cc-ticket-head :is(h1,h4) {
+  margin:0 auto; max-width:26ch; color:#fff3dd; font:600 clamp(1.05rem,4.4vw,1.48rem)/1.12 Georgia,serif;
+}
+:is(.cc-wallet,.cc-ticket-view) .cc-ticket .cc-ticket-head :is(h1,h4) span { display:inline; font:inherit; color:inherit; }
+:is(.cc-wallet,.cc-ticket-view) .cc-ticket[data-peace-concert] .cc-ticket-head .cc-hero-title-peace { color:#fff0d5; }
+:is(.cc-wallet,.cc-ticket-view) .cc-ticket .cc-ticket-head .cc-hero-title-love { color:#ffe0ab; font-style:italic; }
+:is(.cc-wallet,.cc-ticket-view) .cc-ticket-finish .cc-ticket-heart { top:.35rem; left:.45rem; transform:none; width:1.25rem; height:1.25rem; font-size:.7rem; }
+:is(.cc-wallet,.cc-ticket-view) .cc-ticket-body { padding:.6rem; gap:.35rem; }
+:is(.cc-wallet,.cc-ticket-view) .cc-ticket .cc-qr {
+  width:clamp(9.5rem,26dvh,15.5rem); aspect-ratio:1; height:auto; padding:0; background:white;
+  border:1px solid #dfceb4; border-radius:.6rem; box-shadow:none;
+}
+:is(.cc-wallet,.cc-ticket-view) .cc-ticket-person strong { font:bold 1.12rem/1.15 Georgia,serif; color:#382337; }
+:is(.cc-wallet,.cc-ticket-view) .cc-ticket-person span,
+:is(.cc-wallet,.cc-ticket-view) .cc-ticket-instruction { color:#554554; font-size:.78rem; line-height:1.25; }
+:is(.cc-wallet,.cc-ticket-view) .cc-ticket-facts {
+  padding:.52rem .85rem; gap:.32rem; border-top:1px dashed #cba980; background:#f9efdf;
+}
+:is(.cc-wallet,.cc-ticket-view) .cc-ticket-facts p { margin:0; color:#4b3545; font:.77rem/1.28 system-ui,sans-serif; gap:.45rem; }
+:is(.cc-wallet,.cc-ticket-view) .cc-ticket-facts strong { color:#382437; }
+:is(.cc-wallet,.cc-ticket-view) .cc-ticket-facts p:first-child :is(strong,span) { display:inline; }
+:is(.cc-wallet,.cc-ticket-view) .cc-ticket-facts svg { color:#875634; width:15px; height:15px; }
+.cc-wallet .cc-reg-tools,.cc-ticket-view .cc-reg-tools,.cc-wallet-secondary {
+  display:flex; justify-content:center; align-items:center; flex-wrap:wrap; gap:.45rem;
+}
+.cc-wallet-secondary { gap:.25rem 1rem; }
+.cc-wallet-secondary > :is(a,button.ui-button),.cc-ticket-view .cc-pass-open {
+  display:inline-grid; place-items:center; min-height:44px; padding:0 .3rem;
+  border:0; background:transparent; box-shadow:none; color:#64384c; font:650 .82rem/1.15 system-ui,sans-serif; text-decoration:underline;
+}
+.cc-wallet .cc-landing-actions { gap:0; }
+.cc-wallet .cc-reg-tools > :is(a,button),.cc-ticket-view .cc-reg-tools > :is(.ui-button,button) {
+  display:inline-grid; place-items:center; flex:1; min-height:44px; border-radius:.8rem;
+  font:700 .92rem/1.2 system-ui,sans-serif; border:1px solid #916078; color:#4b2841; background:#fff5e8;
+}
+.cc-wallet .cc-reg-tools a.ui-button,.cc-ticket-view .cc-reg-tools a.ui-button { background:#57273f; color:#ffe7ac; }
+.cc-wallet .cc-reg-tools [role=status]:empty { display:none; }
+.cc-ticket-view { display:grid; gap:.4rem; min-width:0; }
+.cc-ticket-view .cc-reg-tools > .cc-pass-open { flex:none; }
+@media (max-height:700px) {
+  :is(.cc-wallet,.cc-ticket-view) .cc-ticket .cc-ticket-body:has(.cc-qr) {
+    display:grid; grid-template-columns:minmax(0,1fr) auto; grid-template-areas:"name qr" "hint qr";
+    align-items:center; gap:.2rem .4rem; padding:.4rem .55rem; text-align:left;
+  }
+  :is(.cc-wallet,.cc-ticket-view) .cc-ticket-body .cc-ticket-person { grid-area:name; align-self:end; }
+  :is(.cc-wallet,.cc-ticket-view) .cc-ticket-body :is(.cc-ticket-instruction,.cc-note) { grid-area:hint; align-self:start; }
+  :is(.cc-wallet,.cc-ticket-view) .cc-ticket .cc-qr { grid-area:qr; width:clamp(8.25rem,26dvh,11rem); }
+}
+@media (orientation:landscape) and (max-height:520px) {
+  .cc-page.cc-wallet { width:min(100%,48rem); padding-block:.25rem; }
+  :is(.cc-wallet,.cc-ticket-view) .cc-ticket:has(.cc-qr) {
+    display:grid; grid-template-columns:minmax(0,1fr) auto; grid-template-rows:auto auto;
+  }
+  :is(.cc-wallet,.cc-ticket-view) .cc-ticket .cc-ticket-head { padding:.42rem 1.4rem; }
+  :is(.cc-wallet,.cc-ticket-view) .cc-ticket .cc-ticket-body:has(.cc-qr) {
+    grid-column:2; grid-row:1/3; grid-template-columns:1fr; grid-template-areas:"name" "qr"; gap:.15rem; padding:.22rem .45rem;
+  }
+  :is(.cc-wallet,.cc-ticket-view) .cc-ticket-person { display:block; text-align:center; }
+  :is(.cc-wallet,.cc-ticket-view) .cc-ticket-person strong { font-size:.9rem; }
+  :is(.cc-wallet,.cc-ticket-view) .cc-ticket-person span { margin-left:.4rem; }
+  :is(.cc-wallet,.cc-ticket-view) .cc-ticket-instruction { display:none; }
+  :is(.cc-wallet,.cc-ticket-view) .cc-ticket-facts { grid-column:1; align-content:center; }
+  .cc-wallet .cc-landing-actions { display:flex; gap:.65rem; justify-content:center; }
+  .cc-wallet .cc-reg-tools > :is(a,button) { padding-inline:.65rem; flex:auto; }
+}
+.cc-ticket-view .cc-pass-picker {
+  width:100%; min-width:0; max-width:15rem; min-height:36px; padding:.25rem;
+  color:#46263e; background:#fffaf0; border:1px solid #bc9e82; border-radius:.5rem;
+  font:650 .78rem/1.2 system-ui,sans-serif;
+}
+.cc-ticket-view .cc-ticket-person { min-width:0; max-width:100%; }
+@media (orientation:landscape) and (max-height:520px) {
+  .cc-ticket-view .cc-pass-picker { max-width:8.5rem; }
+}
+
+@media (orientation:portrait) and (max-height:520px) {
+  .app-frame:has(.cc-wallet) { --frame-top:calc(46px + env(safe-area-inset-top,0px)); }
+  .app-frame:has(.cc-wallet) .app-frame-header { min-height:44px; height:44px; padding-block:0; top:env(safe-area-inset-top,0px); }
+  .cc-wallet .cc-ticket .cc-ticket-head { padding-block:.25rem; }
+  .cc-wallet .cc-ticket-head .cc-kicker { margin-bottom:0; }
+}

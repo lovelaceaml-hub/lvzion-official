@@ -1,9 +1,10 @@
+import type {ReactNode} from 'react';
 import {formatStamp, type PublicEvent} from '../../lib/concert/domain';
 import {isPeaceConcert} from '../../lib/concert/branding';
 import {ConcertDateAndVenue, PeaceConcertTitle} from './event-design';
 
-export default function TicketCard({event, name, partySize, svg, checkedInAt, inactiveMessage, embedded = false}: {
-  event: PublicEvent; embedded?: boolean;
+export default function TicketCard({event, name, partySize, svg, checkedInAt, inactiveMessage, embedded = false, compact = false, attendeePicker}: {
+  event: PublicEvent; embedded?: boolean; compact?: boolean; attendeePicker?: ReactNode;
   name: string;
   partySize: number;
   svg?: string;
@@ -23,7 +24,7 @@ export default function TicketCard({event, name, partySize, svg, checkedInAt, in
     </header>
     <div className="cc-ticket-body">
       <div className="cc-ticket-person">
-        <strong>{name}</strong>
+        {attendeePicker ?? <strong>{name}</strong>}
         <span>Party of {partySize}</span>
       </div>
       {svg ? <div className="cc-qr" role="img" aria-label="Ticket QR code" dangerouslySetInnerHTML={{__html: svg}}/> : null}
@@ -31,7 +32,7 @@ export default function TicketCard({event, name, partySize, svg, checkedInAt, in
         <p className="cc-note">Checked in at {formatStamp(checkedInAt)}</p> :
         <p className="cc-ticket-instruction">Show this QR code at the door.</p>}
     </div>
-    <ConcertDateAndVenue event={event} className="cc-ticket-facts"/>
-    {!embedded && peace && event.startTime === '16:30' && !inactiveMessage ? <a className="cc-ticket-calendar" href="/concert/mothers-love.ics" download>Add to calendar</a> : null}
+    <ConcertDateAndVenue compact={compact} event={event} className="cc-ticket-facts"/>
+    {!compact && !embedded && peace && event.startTime === '16:30' && !inactiveMessage ? <a className="cc-ticket-calendar" href="/concert/mothers-love.ics" download>Add to calendar</a> : null}
   </section>;
 }

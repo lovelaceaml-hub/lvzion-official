@@ -216,3 +216,15 @@
   .ml-countdown time { font-size:1.5rem; }
   .ml-invitation .cc-dialog[data-presentation="registration"]:has(.cc-registration-poster) { max-height:calc(100dvh - 2.6rem); }
 }
+
+/* Start the invitation beneath the clock. Leave spare height below the action. */
+@media (orientation:portrait) {
+  .ml-stage { grid-template-rows:auto auto auto; align-content:start; row-gap:clamp(.35rem,1.25dvh,.9rem); }
+  .ml-grid { align-self:start; gap:clamp(.4rem,1.5dvh,1rem); }
+  .ml-actions { margin-block-start:clamp(.1rem,1dvh,.65rem); }
+}
+
+@media (orientation:portrait) and (max-height:520px) {
+  .ml-stage { row-gap:.16rem; }
+  .ml-actions { margin-block-start:0; }
+}

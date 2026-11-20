@@ -78,6 +78,11 @@ export default function ConcertDialog({label, title, primary = false, children, 
       onPointerDown={opensTicket ? followLight : undefined}
       type="button" aria-haspopup="dialog" onClick={e => openDialog(e.currentTarget)}>
       {opensTicket ? <>
+        <span className="cc-admission-trails" aria-hidden="true">{['left','right'].map(side =>
+          <svg key={side} viewBox="0 0 100 38" preserveAspectRatio="none">
+            <path pathLength="100" d="M-5 29 C18 38 41 2 27 8 S40 39 96 18"/>
+            <path className="cc-trail-star" d="m88 16 1.5 3.5L94 21l-4.5 1.5L88 27l-1.5-4.5L82 21l4.5-1.5z"/>
+          </svg>)}</span>
         <span className="cc-admission-stamp" aria-hidden="true">♥</span>
         <span className="cc-admission-title">{invitedBy && <small>You’ve been invited by {invitedBy}</small>}{label}</span>
         <span className="cc-admission-stub" aria-hidden="true"><ArrowRight size={21}/></span>

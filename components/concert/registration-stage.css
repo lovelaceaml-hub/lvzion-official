@@ -367,3 +367,69 @@
   .ml-actions:has(> .ui-button-secondary) .cc-admission-stamp { width:1.5rem; height:1.5rem; }
   .ml-actions:has(> .ui-button-secondary) .cc-admission-title { font-size:1rem; }
 }
+
+.ml-actions > button.ui-button[data-admission] {
+  color:#ffe2a0; border-color:#e2b873;
+  background:radial-gradient(ellipse at var(--touch-light) -140%,#b36979,transparent 75%),linear-gradient(105deg,#481c37,#792e4b 48%,#441e38);
+  box-shadow:inset 0 0 0 3px #55243d,inset 0 0 0 4px #b98c59,0 4px 20px #f6b0592d;
+}
+.ml-actions .cc-admission-title { position:relative; color:#ffe6a3; text-shadow:0 1px 2px #391224; }
+.ml-actions .cc-admission-title small { color:#fff0df; }
+.ml-actions .cc-admission-stamp { color:#ffe2ae; border-color:#e3b678; }
+.ml-actions .cc-admission-stub { border-color:#d0a06d; background:#ffd2980e; }
+.cc-admission-trails { position:absolute; inset:0; pointer-events:none; display:flex; align-items:center; justify-content:space-between; }
+.cc-admission-trails svg { width:min(17%,6rem); height:70%; fill:none; stroke:#f8cc85; stroke-width:1.1; opacity:.65; }
+.cc-admission-trails svg:last-child { transform:scaleX(-1); }
+.cc-admission-trails path { vector-effect:non-scaling-stroke; }
+.cc-admission-trails .cc-trail-star { fill:#fff1b6; stroke:none; }
+@media (prefers-reduced-motion:no-preference) {
+  .ml-actions > button[data-admission]:not(:active) { animation:cc-invite-pulse 3.8s ease-in-out infinite; }
+  .cc-admission-trails path:first-child { stroke-dasharray:30 90; animation:cc-trail-draw 3.8s ease-in-out infinite; }
+  .cc-trail-star { animation:cc-trail-bloom 3.8s ease-in-out infinite; }
+}
+@keyframes cc-invite-pulse { 0%,70%,100% {transform:scale(1)} 45% {transform:scale(1.018);box-shadow:inset 0 0 0 3px #55243d,inset 0 0 0 4px #d6ac77,0 0 20px #ffcf8152} }
+@keyframes cc-trail-draw { 0% {stroke-dashoffset:34;opacity:0} 20% {opacity:.95} 55%,100% {stroke-dashoffset:-100;opacity:0} }
+@keyframes cc-trail-bloom { 0%,28%,70%,100% {opacity:.15} 47% {opacity:1} }
+
+/* Once a QR is ready, give the poster's space to the actual admission pass. */
+.cc-dialog[open][data-presentation]:has(.cc-dialog-inner > div:not([hidden]) .cc-ticket-view .cc-qr) {
+  width:min(96vw,29rem); max-height:calc(100dvh - .5rem); margin:auto; padding:0;
+  border:1px solid #c9a679; border-radius:1rem; clip-path:none; background:#fff6e9;
+  & :is(.cc-invitation-frame,.cc-heart-flight,.cc-poster-stage,.cc-host-signature,.cc-heart-signature) { display:none; }
+  & .cc-dialog-inner { display:block; flex:1 1 auto; margin:0; padding:.4rem .65rem 0; background:transparent; }
+  & .cc-dialog-heading { min-height:32px; margin:0; padding:0; }
+  & .cc-dialog-heading h2 { font-size:.78rem; }
+  & .cc-dialog-close { position:static; margin-left:auto; min-width:36px; width:36px; height:36px; min-height:36px; }
+  & .cc-registration { display:grid; gap:.25rem; padding:0; }
+  & .cc-registration h3 { position:absolute; width:1px; height:1px; overflow:hidden; clip-path:inset(50%); }
+  & .cc-dialog-footer { margin:0 .65rem; padding:0; }
+  & .cc-hint { margin:.15rem 0; font-size:.75rem; }
+  & .cc-ticket-view .cc-reg-tools { display:grid; grid-template-columns:1.17fr .85fr 1fr; gap:.25rem; }
+  & .cc-ticket-view .cc-reg-tools > :is(a,button) { min-width:0; margin:0; padding-inline:.2rem; text-align:center; font-size:.8rem; }
+  & .cc-ticket-view .cc-ticket-head { padding:.4rem 1.2rem; }
+  & .cc-ticket-head h4 { font:600 1.08rem/1.08 Georgia,serif; max-width:32ch; }
+  & .cc-ticket-view .cc-ticket-head .cc-kicker { font-size:.58rem; margin-bottom:.12rem; }
+}
+@media (orientation:landscape) and (max-height:520px) {
+  .cc-dialog[open][data-presentation]:has(.cc-dialog-inner > div:not([hidden]) .cc-ticket-view .cc-qr) {
+    width:min(96vw,46rem); max-width:96vw; height:min(100dvh,21rem); max-height:100dvh;
+    & .cc-ticket-view { gap:.1rem; }
+
+    & .cc-ticket-view .cc-qr { width:8rem; }
+    & .cc-ticket-head h4 { font-size:1rem; }
+    & .cc-dialog-footer { position:absolute; right:3.2rem; top:.12rem; bottom:auto; }
+    & .cc-hint { line-height:1.2; margin:0; }
+  }
+}
+
+@media (max-height:610px) {
+  .cc-ticket-view .cc-ticket-head .cc-kicker { display:none; }
+  .cc-dialog[open][data-presentation]:has(.cc-dialog-inner > div:not([hidden]) .cc-ticket-view .cc-qr) {
+    height:min(calc(100dvh - .5rem),32rem);
+    & .cc-ticket-facts .cc-event-fact:nth-child(2) { display:none; }
+  }
+}
+
+@media (orientation:portrait) and (max-width:350px) {
+  .ml-actions:not(:has(> .ui-button-secondary)) > button[data-admission] { grid-template-columns:2rem minmax(0,1fr) 2rem; }
+}

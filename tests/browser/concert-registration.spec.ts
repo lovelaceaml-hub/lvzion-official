@@ -313,3 +313,29 @@ test('a completed lookup arriving after dismissal cannot reveal tickets in a reo
   await expect(dialog.getByLabel('Registration email')).toHaveValue('');
   await expect(page.locator('a[href="/concert/ticket/late"]')).toHaveCount(0);
 });
+
+test('a guest can switch between party tickets with the QR and actions in view', async ({page}) => {
+  await page.emulateMedia({reducedMotion:'reduce'});
+  await page.setViewportSize({width:320,height:568});
+  const tickets = ['First Guest','Second Guest'].map((name,index) => ({
+    name,id:String(index),partySize:1,url:'/concert/ticket/fictional-'+index,
+    svg:'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 41 41"><rect width="41" height="41" fill="white"/></svg>',
+  }));
+  await page.route('**/api/concert/registration',route => route.fulfill({json:{tickets,emailed:true}}));
+  const dialog=await openRegistration(page);
+  await dialog.getByRole('button',{name:'I am a guest.'}).click();
+  await dialog.getByLabel('Your full name').fill('First Guest');
+  await dialog.getByLabel('Email for tickets').fill('family@example.invalid');
+  await dialog.getByLabel('Who invited you?').fill('Fictional Host');
+  await dialog.getByRole('button',{name:'Add one attendee'}).click();
+  await dialog.getByLabel('Attendee 2 full name').fill('Second Guest');
+  await dialog.getByRole('button',{name:'Get tickets'}).click();
+  await dialog.getByLabel('Choose a ticket').selectOption('1');
+  await expect(dialog.getByRole('link',{name:'Download QR'})).toHaveAttribute('href','/concert/ticket/fictional-1/qr');
+  for(const viewport of [{width:320,height:568},{width:568,height:320}]) {
+    await page.setViewportSize(viewport);
+    await expect(dialog.getByRole('img',{name:'Ticket QR code'})).toBeInViewport({ratio:1});
+    await expect(dialog.getByRole('button',{name:'Share',exact:true})).toBeInViewport({ratio:1});
+    await expect.poll(() => dialog.locator('.cc-dialog-inner').evaluate(el => el.scrollHeight-el.clientHeight)).toBeLessThanOrEqual(1);
+  }
+});

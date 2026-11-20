@@ -155,7 +155,9 @@ function RegistrationFlow({eventId, event, hostToken, footerSlot, personal, invi
   const [proof, setProof] = useState('');
   const [challenge, setChallenge] = useState('');
   const [code, setCode] = useState('');
+  const [ticketIndex, setTicketIndex] = useState(0);
   const [tickets, setTickets] = useState<NamedTicket[]>([]);
+  const currentTicket = tickets[ticketIndex] ?? tickets[0];
   const [invitations, setInvitations] = useState<InviteSummary[]>([]);
   const [emailed, setEmailed] = useState(false);
   const [existing, setExisting] = useState(false);
@@ -274,6 +276,7 @@ function RegistrationFlow({eventId, event, hostToken, footerSlot, personal, invi
   async function register(fields: Record<string, unknown>) {
     const result = await api({op:'register', eventId, requestId:requestId(saveId), ...fields,
       ...(hostToken && fields.names ? {hostToken} : fields.member ? {} : {inviterName})});
+    setTicketIndex(0);
     setTickets(result.tickets ?? []);
     setMemberRegistration(Boolean(fields.member));
     setEmailed(result.emailed === true);
@@ -296,6 +299,7 @@ function RegistrationFlow({eventId, event, hostToken, footerSlot, personal, invi
     const result = await api({op:'verifyCode', purpose, challenge, code,
       email:purpose === 'sender' ? email : purpose === 'recovery' ? recoveryEmail : undefined});
     if (purpose === 'recovery') {
+      setTicketIndex(0);
       setTickets(result.tickets ?? []);
       setExisting(false);
       setEmailed(false);
@@ -461,20 +465,29 @@ function RegistrationFlow({eventId, event, hostToken, footerSlot, personal, invi
           </div> : null}
         </li>)}</ul> : <p className="cc-hint">There are no invitations for this email.</p>}
       </>;
-      case 'tickets': return <>
-        {tickets.length ? <ul className="cc-reg-results">{tickets.map(ticket => <li key={ticket.id}>
-          {event && ticket.svg ? <TicketCard event={event} name={ticket.name} partySize={ticket.partySize} svg={ticket.svg} embedded/> : <strong>{ticket.name}</strong>}<div className="cc-reg-tools"><a className="ui-button" href={ticket.url}>Open QR ticket</a>
-          <a className="cc-reg-link" href={ticket.url+'/qr'} download>Download QR</a>
-          <button type="button" className="cc-reg-link" onClick={() => void share(ticket.url,ticket.name+'’s concert ticket')}>Share</button></div>
-        </li>)}</ul> : <p className="cc-hint">{existing?'This email already has a registration or the invitation was already accepted. Verify the ticket email to retrieve the registration.':'Check the email used to register and try again.'}</p>}
-        {emailed?<p className="cc-hint">We’ll send a copy to your email.</p>:null}
-        {existing?<button type="button" className="ui-button ui-button-secondary" onClick={e => answer(e.currentTarget, onFindTickets)}>Find my tickets</button>:null}
-        {tools && <button type="button" className="ui-button ui-button-secondary" onClick={e => answer(e.currentTarget, onFindTickets)}>
-          {tickets.length ? 'Find tickets for another email' : 'Try another email'}
-        </button>}
-        {both&&memberRegistration?<button type="button" className="ui-button" onClick={e => answer(e.currentTarget, () => next('quantity'))}>Continue to invitations</button>:null}
-        {memberRegistration&&!both?<a className="cc-reg-link" href="/concert/setup">Set up your LV Zion account</a>:null}
-      </>;
+      case 'tickets': {
+        const picker = tickets.length > 1 && <select className="cc-pass-picker" aria-label="Choose a ticket"
+          value={ticketIndex} onChange={e => setTicketIndex(Number(e.target.value))}>
+          {tickets.map((ticket,index) => <option value={index} key={ticket.id}>{index+1}/{tickets.length} · {ticket.name}</option>)}
+        </select>;
+        return <>
+          {tickets.length ? <div className="cc-ticket-view">
+            {currentTicket && <>
+              {event && currentTicket.svg ? <TicketCard event={event} name={currentTicket.name} partySize={currentTicket.partySize} svg={currentTicket.svg} compact embedded attendeePicker={picker || undefined}/> : picker || <strong>{currentTicket.name}</strong>}
+              <div className="cc-reg-tools"><a className="ui-button" href={currentTicket.url+'/qr'} download>Download QR</a>
+                <button className="cc-reg-link" type="button" onClick={() => void share(currentTicket.url,currentTicket.name+'’s concert ticket')}>Share</button>
+                <a className="cc-pass-open" href={currentTicket.url}>Open QR ticket</a></div>
+            </>}
+          </div> : <p className="cc-hint">{existing?'This email already has a registration or the invitation was already accepted. Verify the ticket email to retrieve the registration.':'Check the email used to register and try again.'}</p>}
+          {emailed?<p className="cc-hint">We’ll send a copy to your email.</p>:null}
+          {existing?<button type="button" className="ui-button ui-button-secondary" onClick={e => answer(e.currentTarget, onFindTickets)}>Find my tickets</button>:null}
+          {tools && <button type="button" className="ui-button ui-button-secondary" onClick={e => answer(e.currentTarget, onFindTickets)}>
+            {tickets.length ? 'Find tickets for another email' : 'Try another email'}
+          </button>}
+          {both&&memberRegistration?<button type="button" className="ui-button" onClick={e => answer(e.currentTarget, () => next('quantity'))}>Continue to invitations</button>:null}
+          {memberRegistration&&!both?<a className="cc-reg-link" href="/concert/setup">Set up your LV Zion account</a>:null}
+        </>;
+      }
     }
   }
 
