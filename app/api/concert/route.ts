@@ -2,6 +2,7 @@ import {parseEvent,parseMemberCommand,parseProgramEntries,ConcertError,object,id
 import {body} from '../../../lib/server/http';
 import {digest,inviteTokenFor,inviteUrl,newTicket,qrSvg,ticketTokenFor,ticketUrl} from '../../../lib/concert/server';
 import {call,failure,json,member,sendTicket} from '../../../lib/concert/routes';
+import {settings} from '../../../lib/server/config';
 export const runtime='nodejs';
 export const dynamic='force-dynamic';
 
@@ -14,7 +15,8 @@ async function workspace(client:Awaited<ReturnType<typeof member>>):Promise<Work
  if(p.myTicket){const t=object(p.myTicket),id=identifier(t.id),url=ticketUrl(ticketTokenFor(id));
   myTicket={id,name:String(t.name),email:String(t.email),partySize:Number(t.partySize),checkedInAt:typeof t.checkedInAt==='string'?t.checkedInAt:null,url,qrSvg:await qrSvg(url)};}
  const user=await client.auth.getUser();
- return {viewerId:me,name:String(p.name??''),canManage:p.canManage,event:p.event?parseEvent(p.event):null,myTicket,invitedCount:p.invitedCount as number,inviteUrl:inviteUrl(invite),email:user.data.user?.email??''};
+ const event=p.event?parseEvent(p.event):null;
+ return {viewerId:me,name:String(p.name??''),canManage:p.canManage,event,myTicket,invitedCount:p.invitedCount as number,inviteUrl:event?.publicRsvp?settings().origin+'/concert/rsvp':inviteUrl(invite),email:user.data.user?.email??''};
 }
 export async function GET(request:Request){
  try{

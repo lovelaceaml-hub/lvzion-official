@@ -17,7 +17,7 @@ export type TicketView={valid:true;ticketId:string;name:string;email:string;part
 export function parseTicketView(value:unknown):TicketView{
  const p=object(value);if(p.valid!==true)return {valid:false};
  const e=object(p.event);if(typeof e.archived!=='boolean'||(p.status!=='active'&&p.status!=='cancelled'))throw new ConcertError('Ticket could not be verified.',503,'unavailable');
- return {valid:true,ticketId:String(p.ticketId),name:String(p.name),email:String(p.email),partySize:partyValue(p.partySize),status:p.status,
+ return {valid:true,ticketId:String(p.ticketId),name:String(p.name),email:typeof p.email==='string'?p.email:'',partySize:partyValue(p.partySize),status:p.status,
   checkedInAt:typeof p.checkedInAt==='string'?p.checkedInAt:null,event:{...parsePublicEvent(e),archived:e.archived}};
 }
 /** Server-trusted read of a ticket by its token (service role). */

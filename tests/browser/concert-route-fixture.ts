@@ -25,7 +25,7 @@ const setup=`begin;
   values('${mid(104)}',app_private.concert_module_id(),'manager','Fictional door volunteer',now()-interval '1 hour');
  commit;`;
 
-export async function openConcert(page:Page,{as,event=true}:{as:number|null;event?:boolean}){
+export async function openConcert(page:Page,{as,event=true,featured=false}:{as:number|null;event?:boolean;featured?:boolean}){
  const db=new PGlite();
  const migrations=(await readdir('supabase/migrations')).filter(p=>p.endsWith('.sql')&&p!=='20261014224708_contacts_private_owner_pilot_v1.sql'&&!/worship_duty_(live_activation|live_setup|operations)/.test(p)).sort();
  for(const path of ['supabase/tests/bootstrap.sql',...migrations.map(p=>'supabase/migrations/'+p),'supabase/seed/fictional_members.sql'])await db.exec(await readFile(path,'utf8'));
@@ -39,7 +39,13 @@ export async function openConcert(page:Page,{as,event=true}:{as:number|null;even
  const origin=new URL(page.context().pages()[0]?.url()||'http://127.0.0.1:3017').origin;
  const fail=(e:unknown)=>{const x=e instanceof ConcertError?e:databaseError((e as {code?:string}).code);return {status:x.status,json:{error:x.message,code:x.code}};};
  const signedOut={status:401,json:{error:'Sign in to your LV Zion account.',code:'session'}};
- if(event){actor=member.devin;await call(`select public.concert_command($1::jsonb) as value`,[JSON.stringify({op:'create',title:'Healing Concert',date:'2030-12-06',startTime:'18:00',doorsTime:'17:30',venue:'Fictional Main Hall',details:'Free entry. Fictional test event.',capacity:120,rsvpOpen:true})]);actor=as;}
+ if(event){
+  const schedule=featured?{title:'The Words of Mother’s Love Healing Concert',date:'2026-12-06',startTime:'16:30',doorsTime:null}
+   :{title:'Healing Concert',date:'2030-12-06',startTime:'18:00',doorsTime:'17:30'};
+  actor=member.devin;
+  await call('select public.concert_command($1::jsonb) as value',[JSON.stringify({op:'create',...schedule,venue:'Fictional Main Hall',details:'Free entry. Fictional test event.',capacity:120,rsvpOpen:true})]);
+  actor=as;
+ }
 
  await page.route(url=>url.pathname==='/api/concert'&&url.searchParams.get('program')==='full',async route=>{
   try{await route.fulfill({json:await call('select public.concert_program_full() as value')});}catch(e){await route.fulfill(fail(e));}
@@ -64,6 +70,14 @@ export async function openConcert(page:Page,{as,event=true}:{as:number|null;even
  await page.route('**/api/concert/attendance**',async route=>{
   if(actor===null){await route.fulfill(signedOut);return;}
   try{await route.fulfill({json:await call('select public.concert_attendance() as value')});}catch(e){await route.fulfill(fail(e));}
+ });
+ await page.route('**/api/concert/door',async route=>{
+  if(actor===null){await route.fulfill(signedOut);return;}
+  try{
+   const input=route.request().method()==='GET'?{action:'status'}:route.request().postDataJSON();
+   if(input.action==='walk')input.digest=digest(ticketToken(input.id));
+   await route.fulfill({json:await call('select public.concert_door($1::jsonb) as value',[JSON.stringify(input)])});
+  }catch(e){await route.fulfill(fail(e));}
  });
  await page.route('**/api/concert/scan',async route=>{
   if(actor===null){await route.fulfill(signedOut);return;}

@@ -26,7 +26,11 @@ export async function POST(request:Request){
   try{await verifyHuman();}catch{throw new ConcertError('We could not verify this request. Reload the page and try again.',403,'verification');}
   const admin=await limit(request,rsvp.email);
   const t=newTicket();
-  const r=object(await call(admin,'concert_guest_rsvp',{p_invite_digest:digest(rsvp.invite),p_ticket:t.id,p_digest:t.digest,p_name:rsvp.name,p_email:rsvp.email,p_phone:rsvp.phone,p_party:rsvp.partySize}));
+  const r=object(await call(admin,'concert_register_guest_party',{p:{
+   ...('invite' in rsvp ? {inviteDigest:digest(rsvp.invite)} : {eventId:rsvp.eventId}),
+   ticketId:t.id,digest:t.digest,name:rsvp.name,email:rsvp.email,phone:rsvp.phone,partySize:rsvp.partySize,
+   inviterName:rsvp.inviterName,attendeeNames:rsvp.attendeeNames,
+  }}));
   const ticketId=identifier(r.ticketId);
   const emailed=await sendTicket(ticketId);
   // A repeat email never reveals the existing ticket; it is re-sent to the address on file instead.

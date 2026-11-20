@@ -16,7 +16,7 @@ export const moduleStyles:ModuleStyle[]=[
  {key:'worship-duty',routes:['/modules/worship-duty'],title:'Worship Duty',icon:'calendar',atlas:'Liquid Opal, sapphire'},
  {key:'guidance-teachers',routes:['/modules/guidance-teachers'],title:'Guidance Teachers',icon:'people',atlas:'White and lavender service cards'},
  {key:'mothers-love',routes:['/modules/mothers-love'],title:'Mother’s Love',icon:'heart',atlas:'Liquid Opal, rose'},
- {key:'concert',routes:['/modules/concert','/concert'],title:'Healing Concert',icon:'music',atlas:'Aurora Night',darkByDesign:true},
+ {key:'concert',routes:['/modules/concert','/concert'],title:'Event Invitation and Registration',icon:'heart',atlas:'Healing Concert, coral and sky blue'},
  {key:'song-library',routes:['/modules/song-library'],title:'Song library',icon:'music',atlas:'Copper Noir',darkByDesign:true},
 ];
 const matches=(path:string,route:string)=>path===route||path.startsWith(route+'/');

@@ -3,12 +3,12 @@ export const TIME_ZONE='America/Los_Angeles';
 export const MAX_PARTY=10;
 export type ProgramItem={position:number;title:string;performers:string|null};
 export type ProgramEntry={songNumber:string|null;title:string;duration:string|null;performers:string|null};
-export type ConcertEvent={id:string;title:string;date:string;startTime:string;doorsTime:string|null;venue:string;details:string;capacity:number|null;rsvpOpen:boolean;version:number;seatsTaken:number;program:ProgramItem[]};
+export type ConcertEvent={id:string;title:string;date:string;startTime:string;doorsTime:string|null;venue:string;details:string;capacity:number|null;rsvpOpen:boolean;publicRsvp?:boolean;version:number;seatsTaken:number;program:ProgramItem[]};
 export type MyTicket={id:string;name:string;email:string;partySize:number;checkedInAt:string|null;url:string;qrSvg:string};
 export type Workspace={viewerId:string;name:string;canManage:boolean;event:ConcertEvent|null;myTicket:MyTicket|null;invitedCount:number;inviteUrl:string};
-export type AttendanceTicket={id:string;name:string;email:string;phone:string|null;partySize:number;member:boolean;invitedBy:string|null;createdAt:string;checkedInAt:string|null;checkedInBy:string|null};
+export type AttendanceTicket={id:string;name:string;email:string;phone:string|null;partySize:number;member:boolean;invitedBy:string|null;additionalNames?:string[];createdAt:string;checkedInAt:string|null;checkedInBy:string|null};
 export type Attendance={event:ConcertEvent|null;tickets:AttendanceTicket[]};
-export type ScanResult={result:'ok'|'already'|'invalid'|'cancelled'|'other_event';name?:string;partySize?:number;checkedInAt?:string};
+export type ScanResult={result:'ok'|'already'|'invalid'|'cancelled'|'other_event';name?:string;partySize?:number;checkedInAt?:string;vip?:boolean};
 export type PublicEvent={title:string;date:string;startTime:string;doorsTime:string|null;venue:string;details:string;program:ProgramItem[]};
 
 export class ConcertError extends Error{
@@ -64,10 +64,21 @@ export function parseMemberCommand(value:unknown):MemberCommand{
  }
  throw new ConcertError('Unknown action.');
 }
-export type GuestRsvp={invite:string;name:string;email:string;phone:string|null;partySize:number};
+export type RsvpEntry={invite:string}|{eventId:string};
+export function inviterNameValue(value:unknown):string{
+ if(typeof value!=='string'||value.length>120||control.test(value)||!value.trim())throw new ConcertError('Enter the name of the person who invited you.');
+ return value.trim().replace(/ +/g,' ').normalize('NFC');
+}
+export type GuestRsvp=RsvpEntry&{name:string;email:string;phone:string|null;partySize:number;inviterName:string;attendeeNames:string[]};
 export function parseGuestRsvp(value:unknown):GuestRsvp{
- const p=object(value);fields(p,['invite','name','email','partySize'],['phone']);
- return {invite:inviteToken(p.invite),name:nameValue(p.name),email:emailValue(p.email),phone:phoneValue(p.phone),partySize:partyValue(p.partySize)};
+ const p=object(value);
+ fields(p,['invite' in p?'invite':'eventId','name','email','partySize'],['phone','inviterName','attendeeNames']);
+ const entry='invite' in p?{invite:inviteToken(p.invite)}:{eventId:identifier(p.eventId)};
+ const name=nameValue(p.name),email=emailValue(p.email),phone=phoneValue(p.phone),partySize=partyValue(p.partySize);
+ const inviterName=inviterNameValue(p.inviterName);
+ const names=p.attendeeNames??[];
+ if(!Array.isArray(names)||names.length!==partySize-1)throw new ConcertError('Enter a name for every attendee.');
+ return {...entry,name,email,phone,partySize,inviterName,attendeeNames:names.map(nameValue)};
 }
 export function inviteToken(v:unknown):string{const s=text(v,64);if(!/^[A-Za-z0-9_-]{22}$/.test(s))throw new ConcertError('This invitation link is not valid.');return s;}
 export function ticketToken(v:unknown):string{const s=text(v,64);if(!/^[A-Za-z0-9_-]{43}$/.test(s))throw new ConcertError('This ticket link is not valid.');return s;}
@@ -97,7 +108,7 @@ export function parseEvent(value:unknown):ConcertEvent{
  if(capacity!==null&&!Number.isInteger(capacity))throw new ConcertError('Concert could not be verified.',503,'unavailable');
  if(typeof e.rsvpOpen!=='boolean'||!Number.isInteger(e.seatsTaken))throw new ConcertError('Concert could not be verified.',503,'unavailable');
  return {id:identifier(e.id),title:text(e.title,80),date:dateValue(e.date),startTime:clockValue(e.startTime),doorsTime:e.doorsTime===null?null:clockValue(e.doorsTime),
-  venue:text(e.venue,120),details:text(e.details,600),capacity:capacity as number|null,rsvpOpen:e.rsvpOpen,version:version(e.version),seatsTaken:e.seatsTaken as number,program:parseProgram(e.program)};
+  venue:text(e.venue,120),details:text(e.details,600),capacity:capacity as number|null,rsvpOpen:e.rsvpOpen,publicRsvp:e.publicRsvp===true,version:version(e.version),seatsTaken:e.seatsTaken as number,program:parseProgram(e.program)};
 }
 export function parsePublicEvent(value:unknown):PublicEvent{
  const e=object(value);
@@ -107,7 +118,8 @@ export function parseAttendance(value:unknown):Attendance{
  const p=object(value);if(!Array.isArray(p.tickets)||p.tickets.length>5000)throw new ConcertError('Attendance could not be verified.',503,'unavailable');
  return {event:p.event===null?null:parseEvent(p.event),tickets:p.tickets.map(raw=>{const t=object(raw);
   if(typeof t.member!=='boolean')throw new ConcertError('Attendance could not be verified.',503,'unavailable');
-  return {id:identifier(t.id),name:text(t.name,120),email:text(t.email,254),phone:nullableText(t.phone,30),partySize:partyValue(t.partySize),member:t.member,
+  const additionalNames=Array.isArray(t.additionalNames)?t.additionalNames.map(name=>text(name,120)):[];
+  return {id:identifier(t.id),name:text(t.name,120),email:t.email===null?'':text(t.email,254),phone:nullableText(t.phone,30),partySize:partyValue(t.partySize),member:t.member,additionalNames,
    invitedBy:nullableText(t.invitedBy,160),createdAt:timestamp(t.createdAt)??'',checkedInAt:timestamp(t.checkedInAt),checkedInBy:nullableText(t.checkedInBy,160)};})};
 }
 export function parseScan(value:unknown):ScanResult{
@@ -115,6 +127,7 @@ export function parseScan(value:unknown):ScanResult{
  if(!['ok','already','invalid','cancelled','other_event'].includes(result as string))throw new ConcertError('Scan could not be verified.',503,'unavailable');
  const out:ScanResult={result:result as ScanResult['result']};
  if(p.name!==undefined)out.name=text(p.name,120);
+ if(p.vip===true)out.vip=true;
  if(p.partySize!==undefined)out.partySize=partyValue(p.partySize);
  if(p.checkedInAt!==undefined&&p.checkedInAt!==null)out.checkedInAt=timestamp(p.checkedInAt)??undefined;
  return out;
@@ -122,6 +135,7 @@ export function parseScan(value:unknown):ScanResult{
 export function databaseError(code?:string):ConcertError{
  if(code==='42501')return new ConcertError('You do not have permission for this action.',403,'permission');
  if(code==='40001')return new ConcertError('This concert changed on another device. Refresh before saving.',409,'stale');
+ if(code==='LVZDM')return new ConcertError('A guest with this name is already registered. Search again before adding a walk-in.',409,'matching_guest');
  if(code==='LVZCF')return new ConcertError('Sorry, the concert is full.',409,'full');
  if(code==='23505')return new ConcertError('That is already registered or already open.',409,'conflict');
  if(code==='23514')return new ConcertError('RSVP is closed, or this change does not fit the current concert. Refresh and check.',409,'closed');
@@ -139,7 +153,7 @@ export function seatsLeft(e:Pick<ConcertEvent,'capacity'|'seatsTaken'>):number|n
 /** CSV with formula-injection protection for spreadsheet apps. */
 export function attendanceCsv(a:Attendance):string{
  const cell=(v:string|number|null|boolean)=>{let s=v===null?'':String(v);if(/^[=+\-@\t\r]/.test(s))s="'"+s;return /[",\n]/.test(s)?'"'+s.replace(/"/g,'""')+'"':s;};
- const rows=[['Name','Email','Phone','Party','Member','Invited by','RSVP time','Checked in','Checked in by']];
- for(const t of a.tickets)rows.push([t.name,t.email,t.phone??'',String(t.partySize),t.member?'Yes':'No',t.invitedBy??'',t.createdAt?new Date(t.createdAt).toLocaleString('en-US',{timeZone:TIME_ZONE}):'',t.checkedInAt?new Date(t.checkedInAt).toLocaleString('en-US',{timeZone:TIME_ZONE}):'',t.checkedInBy??'']);
+ const rows=[['Name','Email','Phone','Party','Member','Invited by','RSVP time','Checked in','Checked in by','Additional attendees']];
+ for(const t of a.tickets)rows.push([t.name,t.email,t.phone??'',String(t.partySize),t.member?'Yes':'No',t.invitedBy??'',t.createdAt?new Date(t.createdAt).toLocaleString('en-US',{timeZone:TIME_ZONE}):'',t.checkedInAt?new Date(t.checkedInAt).toLocaleString('en-US',{timeZone:TIME_ZONE}):'',t.checkedInBy??'',t.additionalNames?.join('\n')??'']);
  return rows.map(r=>r.map(cell).join(',')).join('\r\n')+'\r\n';
 }

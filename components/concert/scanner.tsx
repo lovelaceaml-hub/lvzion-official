@@ -2,7 +2,9 @@
 import {useCallback,useEffect,useRef,useState} from 'react';
 import jsQR from 'jsqr';
 import {FrameControls} from '../app-frame';
-import {formatStamp,parseScan,type ScanResult} from '../../lib/concert/domain';
+import {formatStamp,object,parseEvent,parseScan,type ConcertEvent,type ScanResult} from '../../lib/concert/domain';
+import {ConcertSectionHeading} from './event-design';
+import DoorLookup from './door-lookup';
 import './concert.css';
 
 type Detector={detect:(source:CanvasImageSource)=>Promise<{rawValue:string}[]>};
@@ -27,7 +29,22 @@ export default function ConcertScanner(){
  const [camera,setCamera]=useState<'starting'|'on'|'off'|'denied'>('starting'),[result,setResult]=useState<ScanResult|null>(null),[error,setError]=useState(''),[count,setCount]=useState(0);
  const busy=useRef(false),last=useRef<{code:string;at:number}>({code:'',at:0}),resume=useRef<ReturnType<typeof setTimeout>|null>(null);
  const [access,setAccess]=useState<'checking'|'ok'|'signed-out'|'denied'|'error'>('checking');
- useEffect(()=>{const c=new AbortController();fetch('/api/concert/attendance',{cache:'no-store',signal:c.signal}).then(r=>setAccess(r.ok?'ok':r.status===401?'signed-out':r.status===403?'denied':'error')).catch(()=>{if(!c.signal.aborted)setAccess('error');});return()=>c.abort();},[]);
+ const [event,setEvent]=useState<ConcertEvent|null>(null);
+ useEffect(()=>{
+  const controller=new AbortController();
+  async function checkAccess(){
+   try{
+    const response=await fetch('/api/concert/door',{cache:'no-store',signal:controller.signal});
+    if(!response.ok){setAccess(response.status===401?'signed-out':response.status===403?'denied':'error');return;}
+    const data=object(await response.json());
+    if(controller.signal.aborted)return;
+    setEvent(data.event?parseEvent(data.event):null);
+    setAccess('ok');
+   }catch{if(!controller.signal.aborted)setAccess('error');}
+  }
+  void checkAccess();
+  return()=>controller.abort();
+ },[]);
 
  const submit=useCallback(async(code:string)=>{
   const now=Date.now();if(busy.current||(code===last.current.code&&now-last.current.at<5000))return;
@@ -36,7 +53,7 @@ export default function ConcertScanner(){
    const response=await fetch('/api/concert/scan',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({code})});
    const data=await response.json().catch(()=>null);
    if(!response.ok)throw Error(typeof data?.error==='string'?data.error:'The scan could not be checked.');
-   const r=parseScan(data);setResult(r);if(r.result==='ok')setCount(c=>c+1);
+   const r=parseScan(data);setResult(r);if(r.result==='ok')setCount(c=>c+(r.partySize??1));
    beep(r.result==='ok');try{navigator.vibrate?.(r.result==='ok'?80:[60,60,60]);}catch{}
   }catch(x){setError(x instanceof Error?x.message:'The scan could not be checked.');}
   if(resume.current)clearTimeout(resume.current);
@@ -84,21 +101,24 @@ export default function ConcertScanner(){
  const shown=result?message(result):null;
  if(access!=='ok')return <main className="ui-main ui-narrow cc-page">
   <FrameControls title="Scan tickets" left={{label:'Concert',icon:'music',href:'/modules/concert'}} right={{label:'Scan',icon:'clipboard',active:true}}/>
+  <ConcertSectionHeading title="Door check-in"/>
   <p className={access==='checking'?'cc-hint':'cc-error'} role={access==='checking'?'status':'alert'}>{access==='checking'?'Checking access…':access==='signed-out'?'Sign in to your LV Zion account to scan tickets.':access==='denied'?'Only concert door staff can scan tickets. Ask a concert manager for access.':'The scanner is unavailable right now. Refresh to try again.'}</p>
   {access==='signed-out'?<a className="ui-button" href="/sign-in">Sign in</a>:null}
  </main>;
- return <main className="cc-scan">
+ return <main className="ui-main ui-narrow cc-page cc-scan">
   <FrameControls title="Scan tickets" left={{label:'Guest list',short:'Guests',icon:'people',href:'/modules/concert#guests'}} right={{label:'Scan',icon:'clipboard',active:true}}/>
+  <ConcertSectionHeading title="Door check-in" event={event}/>
   <div className="cc-scan-frame">
    <video ref={video} className="cc-scan-video" playsInline muted aria-label="Camera view"/>
    <span className="cc-scan-target" aria-hidden="true"/>
    {camera!=='on'?<p className="cc-scan-status" role="status">{camera==='starting'?'Starting the camera…':camera==='denied'?'Camera access is off. Allow the camera for lvz.app in your browser settings, or scan from a photo below.':'No camera is available. Scan from a photo below.'}</p>:null}
-   {shown?<div className="cc-result" data-tone={shown.tone} role="alert"><strong>{shown.title}</strong><span>{shown.detail}</span></div>:null}
+   {shown?<div className="cc-result" data-tone={shown.tone} role="alert"><strong>{shown.title}{result?.vip?<span className="cc-vip-badge">VIP</span>:null}</strong><span>{shown.detail}</span></div>:null}
   </div>
   <canvas ref={canvas} hidden/>
   <div className="cc-scan-foot">
    <p className="cc-hint" aria-live="polite">{count?`${count} checked in on this phone`:'Point the camera at a ticket QR code.'}</p>
    {error?<p className="cc-error" role="alert">{error}</p>:null}
+   <DoorLookup onCheckIn={r=>{if(r.result==='ok')setCount(c=>c+(r.partySize??1));}}/>
    <label className="ui-button ui-button-secondary cc-photo">Scan from a photo<input ref={photo} type="file" accept="image/*" onChange={e=>void fromPhoto(e.target.files?.[0])}/></label>
   </div>
  </main>;

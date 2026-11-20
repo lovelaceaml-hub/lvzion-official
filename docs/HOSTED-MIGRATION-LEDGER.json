@@ -362,6 +362,39 @@
    "verified_on": "2026-11-15",
    "applied_via": "Supabase MCP execute_sql in one transaction from branch claude/sleepy-wozniak-jutvtb after display unit and database tests (62), display browser tests (18) and the production build passed; schema_migrations row recorded by hand. Anthony: \"All 11 but in a rotation\".",
    "verification": "Readback: valid_items accepts a rotating video slide; every stored publication still valid."
+  },
+  {
+   "name": "concert_shared_rsvp",
+   "hosted_version": "20261119154040",
+   "repository_version": "20261119150000",
+   "source": "supabase/migrations/20261119150000_concert_shared_rsvp.sql",
+   "source_blob_sha": "c2a5583c3d9feb6e340f400f000b0833e7246bc8",
+   "status": "applied",
+   "verified_on": "2026-11-19",
+   "applied_via": "Supabase MCP apply_migration after the build and focused concert checks passed",
+   "verification": "Hosted readback confirmed event-level opt-in closed by default, shared RPC permissions limited to the service role, and the insert helper inaccessible to the service role directly. Enabled shared RSVP for the December 6 concert only after the owner selected one shared link. Disposable tests covered public registration, duplicate email, party capacity, and repeat scans. Live /concert/rsvp verified signed out on a phone-sized viewport."
+  },
+  {
+   "name": "concert_event_registration",
+   "hosted_version": "20261119191138",
+   "repository_version": "20261119183923",
+   "source": "supabase/migrations/20261119183923_concert_event_registration.sql",
+   "source_blob_sha": "a12defc93edfb78358e1784c398e249fed0b6ca3",
+   "status": "applied",
+   "verified_on": "2026-11-19",
+   "applied_via": "Supabase MCP apply_migration after focused concert SQL, browser, race and local Auth checks",
+   "verification": "Hosted readback confirmed the module label, service-only registration RPC, staff-authenticated door RPC, and the existing shared December event without a conflicting closing time."
+  },
+  {
+   "name": "concert_guest_inviter_name",
+   "hosted_version": "20261119223602",
+   "repository_version": "20261119223008",
+   "source": "supabase/migrations/20261119223008_concert_guest_inviter_name.sql",
+   "source_blob_sha": "3466621d7c8c7fde775e4ab7a55c12305051e6ce",
+   "status": "applied",
+   "verified_on": "2026-11-19",
+   "applied_via": "Supabase MCP apply_migration after focused concert SQL, browser and production build checks",
+   "verification": "Hosted readback confirmed private ticket fields, guest registration RPC execution limited to the service role, and inviter attribution in the manager-only attendance response. Disposable tests covered named attendees, reusable invitation parties, and public ticket privacy."
   }
  ],
  "normalization": {

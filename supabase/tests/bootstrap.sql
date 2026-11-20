@@ -4,6 +4,9 @@ create role supabase_auth_admin nologin;
 create role authenticated nologin;
 create role service_role nologin bypassrls;
 create schema auth;
+-- The display media migration registers its private bucket during replay.
+create schema storage;
+create table storage.buckets(id text primary key,name text,public boolean,file_size_limit bigint,allowed_mime_types text[]);
 create table auth.users(id uuid primary key,email text,email_confirmed_at timestamptz);
 create table auth.sessions(id uuid primary key,user_id uuid references auth.users,created_at timestamptz default now(),not_after timestamptz);
 create function auth.uid() returns uuid language sql stable as $$ select nullif(current_setting('request.jwt.claim.sub',true),'')::uuid $$;

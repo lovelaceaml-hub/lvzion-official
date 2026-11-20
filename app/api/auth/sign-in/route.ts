@@ -23,6 +23,9 @@ export async function POST(request:Request) {
   let member=await client.rpc('my_membership_id');
   if(!member.error&&!member.data){try{await completeEnrollment(client);member=await client.rpc('my_membership_id');}catch{/* Membership remains unavailable. */}}
   if(member.error || !member.data) {await client.auth.signOut({scope:'local'}); throw new Error('Membership unavailable.');}
+  if(attempt.data.user.email_confirmed_at&&attempt.data.user.email) {
+   await admin.rpc('concert_member_intake',{p:{email:attempt.data.user.email.toLowerCase(),memberId:member.data}}).then(()=>undefined,()=>undefined);
+  }
   return reply({ok:true,next:'/members'});
  } catch {
   // A floor reduces obvious fast-fail differences; it is not a constant-time guarantee.

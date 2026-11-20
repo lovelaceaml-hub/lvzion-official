@@ -1,6 +1,7 @@
 import test from 'node:test';import assert from 'node:assert/strict';
 import {attendanceCsv,parseProgram,parseProgramEntries,parseGuestRsvp,parseMemberCommand,parseScan,tokenFromScan,whenLine,databaseError} from '../lib/concert/domain.ts';
-import {ticketHtml,ticketText,ticketSubject} from '../lib/concert/email.ts';
+import {invitationHtml,ticketGroupHtml,ticketHtml,ticketText,ticketSubject} from '../lib/concert/email.ts';
+import {concertDetails,concertDisplayTitle,concertTimeLabel,PEACE_CONCERT_ITINERARY,PEACE_CONCERT_TITLE} from '../lib/concert/branding.ts';
 const token='A'.repeat(21)+'b-_'+'9'.repeat(19);
 
 test('scanned codes accept only the ticket link or the bare token',()=>{
@@ -15,8 +16,10 @@ test('scanned codes accept only the ticket link or the bare token',()=>{
 });
 
 test('guest RSVP is validated and normalized',()=>{
- const r=parseGuestRsvp({invite:'abcdefghijklmnopqrstuv',name:'  Gail   Guest ',email:' Gail@Example.COM ',phone:'',partySize:2});
- assert.deepEqual(r,{invite:'abcdefghijklmnopqrstuv',name:'Gail Guest',email:'gail@example.com',phone:null,partySize:2});
+ const party={invite:'abcdefghijklmnopqrstuv',name:'  Gail   Guest ',email:' Gail@Example.COM ',phone:'',partySize:2,inviterName:'  Alex   Example ',attendeeNames:['Second Guest']};
+ assert.deepEqual(parseGuestRsvp(party),{invite:'abcdefghijklmnopqrstuv',name:'Gail Guest',email:'gail@example.com',phone:null,partySize:2,inviterName:'Alex Example',attendeeNames:['Second Guest']});
+ assert.throws(()=>parseGuestRsvp({...party,inviterName:'   '}),/who invited you/);
+ assert.throws(()=>parseGuestRsvp({...party,attendeeNames:[]}),/every attendee/);
  assert.throws(()=>parseGuestRsvp({invite:'short',name:'Gail',email:'g@example.com',partySize:1}),/invitation link/);
  assert.throws(()=>parseGuestRsvp({invite:'abcdefghijklmnopqrstuv',name:'G',email:'g@example.com',partySize:1}),/full name/);
  assert.throws(()=>parseGuestRsvp({invite:'abcdefghijklmnopqrstuv',name:'Gail',email:'nope',partySize:1}),/email/);
@@ -55,6 +58,25 @@ test('ticket email carries the link, details and escapes names',()=>{
 test('attendance CSV neutralizes spreadsheet formulas',()=>{
  const csv=attendanceCsv({event:null,tickets:[{id:'1',name:'=HYPERLINK("x")',email:'a@b.co',phone:null,partySize:1,member:false,invitedBy:'Ava, Example',createdAt:'',checkedInAt:null,checkedInBy:null}]});
  assert.match(csv,/^Name,Email/);assert.ok(csv.includes(`"'=HYPERLINK(""x"")"`));assert.ok(csv.includes('"Ava, Example"'));
+});
+
+test('December concert uses the flyer title and time while preserving other event schedules',()=>{
+ const event={title:'The Words of Mother’s Love Healing Concert',date:'2026-12-06',startTime:'16:30',doorsTime:null,venue:'Fictional Hall, 100 Example Ave, Las Vegas, NV 89146',details:'',program:[]};
+ const mail={name:'Gail Guest',partySize:2,event,ticketUrl:'https://lvz.app/concert/ticket/'+token};
+ assert.equal(concertDisplayTitle(event),PEACE_CONCERT_TITLE);
+ assert.equal(concertTimeLabel(event),'4:30–6:00 PM Pacific');
+ assert.equal(concertDisplayTitle({...event,date:'2027-12-06'}),event.title);
+ assert.equal(concertTimeLabel({...event,startTime:'14:00'}),'Starts 2:00 PM');
+ assert.ok(ticketSubject(mail).includes(PEACE_CONCERT_TITLE));
+ assert.match(ticketHtml(mail,'ticket-qr'),/4:30–6:00 PM.*Fictional Hall<br>100 Example Ave/s);
+ const group=ticketGroupHtml(event,[{name:'Gail Guest',url:mail.ticketUrl,qrCid:'first'},{name:'Guest <Two>',url:mail.ticketUrl+'?guest=2',qrCid:'second'}]);
+ assert.match(group,/Mother’s Love.*That Bring Peace/s);
+ assert.match(group,/cid:first.*cid:second/s);
+ assert.match(group,/Open ticket for Guest &lt;Two&gt;/);
+ assert.match(invitationHtml({event,name:'Gail Guest',sender:'Fictional <Host>',url:mail.ticketUrl}),/Fictional &lt;Host&gt;.*Open your invitation/s);
+ assert.deepEqual(concertDetails('Concert description\n\n'+PEACE_CONCERT_ITINERARY),{
+  description:'Concert description',itinerary:[{time:'4:30 PM',title:'Welcome Presentation'},{time:'5:00 PM',title:'Choir & Orchestra Performances'},{time:null,title:'Closing Remarks'}],
+ });
 });
 
 test('program entries are validated and the public program keeps order',()=>{

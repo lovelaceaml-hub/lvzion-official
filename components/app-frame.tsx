@@ -67,6 +67,7 @@ export default function AppFrame({children}:{children:ReactNode}){
   return item.href?<a href={item.href} aria-label={name} aria-current={item.active?'page':undefined}>{inner}</a>:<button type="button" aria-label={name} disabled={item.disabled} aria-current={item.active?'page':undefined} onClick={item.onClick}>{inner}</button>;
  }
  function signedOutLink(){
+  if(path==='/concert/rsvp'||path.startsWith('/concert/i/')||path.startsWith('/concert/invitation/')||path.startsWith('/concert/ticket/'))return null;
   if(path==='/sign-in')return <a className="app-frame-session" href="/sign-up">Create account</a>;
   return <a className="app-frame-session" href="/sign-in"><LogIn size={18}/><span>Sign in</span></a>;
  }

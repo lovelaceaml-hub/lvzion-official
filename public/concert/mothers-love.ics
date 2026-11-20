@@ -1,0 +1,13 @@
+BEGIN:VCALENDAR
+VERSION:2.0
+PRODID:-//LV Zion//Event Invitation and Registration//EN
+BEGIN:VEVENT
+UID:words-of-love-20261206@lvz.app
+DTSTAMP:20261120T000000Z
+DTSTART:20261207T003000Z
+DTEND:20261207T020000Z
+SUMMARY:The Words of Mother’s Love That Bring Peace
+LOCATION:World Mission Society Church of God\, 6720 W Sahara Ave\,
+  Las Vegas\, NV 89146
+END:VEVENT
+END:VCALENDAR

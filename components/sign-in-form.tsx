@@ -4,16 +4,16 @@ import CaptchaChallenge from './captcha-challenge';
 import AuthShell from './auth-shell';
 import {ArrowRight} from './home-icons';
 import {postJson} from '../lib/post-json';
-export default function SignIn({captchaRequired=false,siteKey=''}:{captchaRequired?:boolean;siteKey?:string}){
+export default function SignIn({captchaRequired=false,siteKey='',continueToConcert=false}:{captchaRequired?:boolean;siteKey?:string;continueToConcert?:boolean}){
  const[message,setMessage]=useState('');const[busy,setBusy]=useState(false);const[captcha,setCaptcha]=useState('');const[resetVersion,setResetVersion]=useState(0);
  async function submit(e:React.FormEvent<HTMLFormElement>){
   e.preventDefault();setBusy(true);
-  try{const r=await postJson('/api/auth/sign-in',{...Object.fromEntries(new FormData(e.currentTarget)),captchaToken:captcha||undefined});const d=await r.json();if(r.ok)location.assign('/members');else setMessage(d.error);}
+  try{const r=await postJson('/api/auth/sign-in',{...Object.fromEntries(new FormData(e.currentTarget)),captchaToken:captcha||undefined});const d=await r.json();if(r.ok)location.assign(continueToConcert?'/modules/concert':'/members');else setMessage(d.error);}
   catch{setMessage('Sign-in is temporarily unavailable.');}
   finally{setBusy(false);setCaptcha('');setResetVersion(x=>x+1);}
  }
- return <AuthShell eyebrow="Welcome to LV Zion" title="Good to see you." lede="Sign in with your email and password, or an existing invitation username."
-  after={<p className="lvz-auth-foot">A quiet place for your community to connect.</p>}>
+ return <AuthShell eyebrow={continueToConcert?'Healing Concert':'Welcome to LV Zion'} title={continueToConcert?'Sign in to manage the event':'Good to see you.'} lede="Sign in with your email and password, or an existing invitation username."
+  mark={!continueToConcert} after={continueToConcert?undefined:<p className="lvz-auth-foot">A quiet place for your community to connect.</p>}>
   <form className="lvz-auth-form" onSubmit={submit}>
    <label className="ui-field">Username or email<input className="ui-input" name="identifier" autoComplete="username" autoCapitalize="none" spellCheck={false} maxLength={254} placeholder="you@example.com" required/></label>
    <label className="ui-field">Password<input className="ui-input" name="password" type="password" autoComplete="current-password" maxLength={256} placeholder="Password" required/></label>
@@ -23,6 +23,7 @@ export default function SignIn({captchaRequired=false,siteKey=''}:{captchaRequir
   </form>
   {message&&<p role="status" className="ui-notice">{message}</p>}
   <p className="lvz-auth-alt">New here? <a className="ui-link" href="/sign-up">Create an account</a></p>
+  <p className="lvz-auth-alt"><a className="ui-link" href="/concert/setup">Set up a concert registration account</a></p>
   <p className="lvz-auth-alt"><a className="ui-link" href="/request-access">Access an existing member record</a></p>
  </AuthShell>;
 }

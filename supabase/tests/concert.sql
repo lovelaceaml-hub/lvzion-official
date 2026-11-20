@@ -58,6 +58,29 @@ select pg_temp.pass((public.concert_command('{"op":"create","title":"Healing Con
 select pg_temp.fails($$select public.concert_command('{"op":"create","title":"Second","date":"2030-12-07","startTime":"18:00","doorsTime":null,"venue":"Main Hall","details":"","capacity":null,"rsvpOpen":true}')$$,'23505','only one open concert at a time');
 select pg_temp.fails($$select public.concert_command('{"op":"create","title":"Second","date":"2030-12-07","startTime":"18:00","doorsTime":null,"venue":"Main Hall","details":"","capacity":null,"rsvpOpen":true,"extra":1}')$$,'22023','unexpected fields rejected');
 
+savepoint shared_rsvp;
+select pg_temp.admin();
+select set_config('test.shared_eid',(select id::text from app_private.concert_events where status='active'),true);
+select pg_temp.pass(not has_function_privilege('anon','public.concert_shared_view()','EXECUTE'),'anonymous cannot bypass the application shared-view route');
+select pg_temp.server();
+select pg_temp.pass(public.concert_shared_view() is null,'shared RSVP is opt-in');
+select pg_temp.fails($$select public.concert_shared_rsvp(current_setting('test.shared_eid')::uuid,gen_random_uuid(),pg_temp.d('shared-closed'),'Shared Guest','shared@example.invalid',null,1)$$,'23514','unenabled event rejects shared RSVP');
+select pg_temp.admin();
+update app_private.concert_events set public_rsvp=true where status='active';
+select pg_temp.login(101);
+select pg_temp.fails($$select public.concert_shared_rsvp(current_setting('test.shared_eid')::uuid,gen_random_uuid(),pg_temp.d('shared-member'),'Shared Guest','shared@example.invalid',null,1)$$,'42501','members cannot bypass public RSVP controls');
+select pg_temp.server();
+select pg_temp.pass(public.concert_shared_view()->'event'->>'id'=current_setting('test.shared_eid'),'shared view shows the enabled event');
+select pg_temp.fails($$select public.concert_shared_rsvp(gen_random_uuid(),gen_random_uuid(),pg_temp.d('shared-elsewhere'),'Shared Guest','shared@example.invalid',null,1)$$,'23514','stale shared form cannot register for another event');
+select pg_temp.pass((public.concert_shared_rsvp(current_setting('test.shared_eid')::uuid,gen_random_uuid(),pg_temp.d('shared-ticket'),'Shared Guest','shared@example.invalid',null,6)->>'created')::boolean,'shared RSVP issues a ticket');
+select pg_temp.pass((public.concert_shared_rsvp(current_setting('test.shared_eid')::uuid,gen_random_uuid(),pg_temp.d('shared-duplicate'),'Shared Guest','SHARED@example.invalid',null,6)->>'created')::boolean=false,'shared RSVP deduplicates email');
+select pg_temp.pass((public.concert_shared_view()->>'full')::boolean,'shared party counts against capacity');
+select pg_temp.login(104);
+select pg_temp.pass(public.concert_scan(pg_temp.d('shared-ticket'))->>'result'='ok','door scan checks in a shared RSVP ticket');
+select pg_temp.pass(public.concert_scan(pg_temp.d('shared-ticket'))->>'result'='already','repeated shared-ticket scans do not record attendance again');
+select pg_temp.pass((public.concert_attendance()->'tickets'->0->>'invitedBy') is null,'shared RSVP has no member inviter');
+rollback to savepoint shared_rsvp;
+
 -- Member RSVP.
 select pg_temp.login(101);
 select pg_temp.pass((public.concert_member_rsvp('c0000000-0000-4000-8000-000000000001',pg_temp.d('ticket-1'),'ava@example.invalid',2)->>'created')::boolean,'member RSVP creates a ticket');
@@ -69,12 +92,24 @@ select pg_temp.fails($$select public.concert_member_rsvp(gen_random_uuid(),pg_te
 select pg_temp.server();
 select pg_temp.pass((public.concert_invite_view(pg_temp.d('invite-101'))->>'invitedBy')='Ava Example','invite link names the inviter');
 select pg_temp.pass((public.concert_invite_view(pg_temp.d('invite-unknown'))->>'valid')::boolean=false,'unknown invite link is invalid');
-select pg_temp.pass((public.concert_guest_rsvp(pg_temp.d('invite-101'),'c0000000-0000-4000-8000-000000000002',pg_temp.d('ticket-2'),' Gail Guest ','Gail@Example.invalid','(702) 555-0100',3)->>'created')::boolean,'guest RSVP through invite');
+select set_config('test.guest_party',jsonb_build_object(
+ 'ticketId','c0000000-0000-4000-8000-000000000002','inviteDigest',pg_temp.d('invite-101'),'digest',pg_temp.d('ticket-2'),
+ 'name',' Gail Guest ','email','Gail@Example.invalid','phone','(702) 555-0100','partySize',3,
+ 'inviterName','Ava Example','attendeeNames',jsonb_build_array('Second Attendee','Third Attendee'))::text,true);
+select pg_temp.fails($$select public.concert_register_guest_party(current_setting('test.guest_party')::jsonb-'inviterName')$$,'22023','guest party requires the inviter');
+select pg_temp.fails($$select public.concert_register_guest_party(current_setting('test.guest_party')::jsonb||'{"attendeeNames":[]}')$$,'22023','guest party requires one name per attendee');
+select pg_temp.pass((public.concert_register_guest_party(current_setting('test.guest_party')::jsonb)->>'created')::boolean,'guest RSVP through invite');
 select pg_temp.pass((public.concert_guest_rsvp(pg_temp.d('invite-101'),'c0000000-0000-4000-8000-000000000003',pg_temp.d('ticket-3'),'Someone Else','gail@example.invalid',null,1)->>'created')::boolean=false,'same email does not create a second ticket');
 select pg_temp.fails($$select public.concert_guest_rsvp(pg_temp.d('invite-unknown'),gen_random_uuid(),pg_temp.d('ticket-4'),'Nope Guest','nope@example.invalid',null,1)$$,'42501','unknown invite cannot RSVP');
 select pg_temp.fails($$select public.concert_guest_rsvp(pg_temp.d('invite-101'),gen_random_uuid(),pg_temp.d('ticket-5'),'Bad Email','not-an-email',null,1)$$,'22023','bad email rejected');
 select pg_temp.fails($$select public.concert_guest_rsvp(pg_temp.d('invite-101'),gen_random_uuid(),pg_temp.d('ticket-6'),'Too Many','many@example.invalid',null,2)$$,'LVZCF','capacity counts seats (2+3 of 6 taken)');
 select pg_temp.pass((public.concert_ticket_view(pg_temp.d('ticket-2'))->>'name')='Gail Guest','ticket view shows the guest name');
+select pg_temp.pass(not (public.concert_ticket_view(pg_temp.d('ticket-2')) ?| array['inviterName','additionalNames']),'public ticket omits the guest party details');
+select pg_temp.login(104);
+select pg_temp.pass(exists(select 1 from jsonb_array_elements(public.concert_attendance()->'tickets') t
+ where t->>'name'='Gail Guest' and t->>'invitedBy'='Ava Example' and t->'additionalNames'='["Second Attendee","Third Attendee"]'),
+ 'staff see all names on the shared party ticket');
+select pg_temp.server();
 select pg_temp.pass((public.concert_ticket_view(pg_temp.d('ticket-404'))->>'valid')::boolean=false,'unknown ticket is invalid');
 
 select pg_temp.login(101);
@@ -125,6 +160,63 @@ select pg_temp.login(104);
 select pg_temp.pass((public.concert_command(format('{"op":"archive","eventId":"%s","expectedVersion":2}',current_setting('test.eid'))::jsonb)->>'ok')::boolean,'archive the concert');
 select pg_temp.pass(public.concert_scan(pg_temp.d('ticket-1'))->>'result'='other_event','archived ticket scans as another event');
 
+-- Named tickets use the same capacity, check-in and ticket view as legacy tickets.
+select pg_temp.admin();
+insert into app_private.concert_events(id,title,event_date,start_time,venue,capacity,public_rsvp,created_by,updated_by)
+ values('70000000-0000-4000-8000-000000000001','Registration Test','2030-12-07','16:30','Fictional Auditorium',4,true,pg_temp.m(104),pg_temp.m(104));
+select set_config('test.registration',jsonb_build_object(
+ 'id','71000000-0000-4000-8000-000000000001','eventId','70000000-0000-4000-8000-000000000001','email','coordinator@example.invalid','inviterName','Shared Link Inviter',
+ 'tickets',jsonb_build_array(
+  jsonb_build_object('id','71000000-0000-4000-8000-000000000001','name','Lead Guest','digest',pg_temp.d('named-lead')),
+  jsonb_build_object('id','71000000-0000-4000-8000-000000000002','name','Second Guest','digest',pg_temp.d('named-second'))
+ ))::text,true);
+select pg_temp.login(101);
+select pg_temp.fails($$select public.concert_register_named(current_setting('test.registration')::jsonb)$$,'42501','authenticated caller cannot issue public tickets directly');
+select pg_temp.fails($$select public.concert_register_guest_party('{}')$$,'42501','authenticated caller cannot issue a guest party ticket');
+select pg_temp.fails($$select public.concert_door('{"action":"find","name":"Lead"}')$$,'42501','member cannot search for guests');
+select pg_temp.server();
+select pg_temp.pass(jsonb_array_length(public.concert_register_named(current_setting('test.registration')::jsonb)->'tickets')=2,'named party issues two tickets');
+select pg_temp.pass(jsonb_array_length(public.concert_register_named(current_setting('test.registration')::jsonb)->'tickets')=2,'replayed request returns the same named tickets');
+select pg_temp.pass((public.concert_ticket_view(pg_temp.d('named-second'))->>'partySize')::int=1,'secondary guest gets an individual ticket');
+select pg_temp.pass(jsonb_array_length(public.concert_recover_tickets('{"eventId":"70000000-0000-4000-8000-000000000001","email":"coordinator@example.invalid"}'))=2,'verified recovery can return all named tickets');
+select pg_temp.pass(jsonb_array_length(public.concert_named_invitation(jsonb_build_object(
+ 'action','create','batch','72000000-0000-4000-8000-000000000001','eventId','70000000-0000-4000-8000-000000000001',
+ 'name','Verified Inviter','sender','inviter@example.invalid','recipients',jsonb_build_array(jsonb_build_object(
+  'id','73000000-0000-4000-8000-000000000001','name','Named VIP','email','vip@example.invalid','relationship','Friend',
+  'digest',pg_temp.d('named-invite'),'firstVisit',true,'vip',jsonb_build_object('title','Director','organization','Fictional Arts','category','Music'))))))=1,
+ 'one verified named invitation is stored');
+select pg_temp.pass(not(public.concert_named_invitation(jsonb_build_object('action','view','digest',pg_temp.d('named-invite'))) ? 'vip'),'personal invite response excludes VIP metadata');
+select pg_temp.pass(public.concert_delivery('{"kind":"invitation","reference":"73000000-0000-4000-8000-000000000001"}')->>'email'='vip@example.invalid','mail queue claims the intended recipient');
+select pg_temp.pass(public.concert_delivery('{"kind":"invitation","reference":"73000000-0000-4000-8000-000000000001"}') is null,'mail worker cannot claim an in-progress delivery twice');
+select set_config('test.accept',jsonb_build_object(
+ 'id','71000000-0000-4000-8000-000000000003','eventId','70000000-0000-4000-8000-000000000001','email','vip@example.invalid',
+ 'inviteId','73000000-0000-4000-8000-000000000001','verified',true,'tickets',jsonb_build_array(
+  jsonb_build_object('id','71000000-0000-4000-8000-000000000003','name','Named VIP','digest',pg_temp.d('named-vip'))
+ ))::text,true);
+select pg_temp.fails($$select public.concert_register_named(current_setting('test.accept')::jsonb||'{"email":"wrong@example.invalid"}')$$,'42501','personal invitation rejects an address mismatch');
+select pg_temp.pass(jsonb_array_length(public.concert_register_named(current_setting('test.accept')::jsonb)->'tickets')=1,'named acceptance issues one ticket');
+select pg_temp.pass(public.concert_delivery('{"kind":"registered","reference":"73000000-0000-4000-8000-000000000001"}')->>'email'='inviter@example.invalid','acceptance queues one notification to the verified inviter');
+select pg_temp.login(104);
+select pg_temp.pass((select count(*) from jsonb_array_elements(public.concert_attendance()->'tickets') t
+ where t->>'invitedBy'='Shared Link Inviter')=2,'staff see the inviter on both individual tickets');
+select pg_temp.pass(public.concert_door(jsonb_build_object('action','scan','digest',pg_temp.d('named-vip')))->>'vip'='true','VIP badge is visible at the door');
+select pg_temp.pass(public.concert_door(jsonb_build_object('action','scan','digest',pg_temp.d('named-vip')))->>'result'='already','named tickets are idempotent at the door');
+select pg_temp.pass(jsonb_array_length(public.concert_door('{"action":"find","name":"Second"}'))=1,'door can find an individual attendee');
+select pg_temp.pass(public.concert_door('{"action":"check","id":"71000000-0000-4000-8000-000000000002"}')->>'result'='ok','door can check in a guest by name');
+select set_config('test.walk',jsonb_build_object('action','walk','id','71000000-0000-4000-8000-000000000004','name','Fictional Walk In','digest',pg_temp.d('walking-guest'))::text,true);
+select pg_temp.pass(public.concert_door(current_setting('test.walk')::jsonb)->>'result'='ok','walk-in reserves and checks in the last seat');
+select pg_temp.pass(public.concert_door(current_setting('test.walk')::jsonb)->>'result'='already','walk-in retry does not record another attendee');
+select pg_temp.fails($$select public.concert_door(current_setting('test.walk')::jsonb||jsonb_build_object('id',gen_random_uuid(),'name','Extra Guest','digest',pg_temp.d('extra-guest')))$$,'LVZCF','walk-in cannot exceed capacity');
+select pg_temp.pass(public.concert_registration_report()->>'invitationCount'='1','organizer counts invitations separately');
+select pg_temp.server();
+select pg_temp.pass(public.concert_shared_view()->>'full'='true','door and online reservations use the same seats');
+select pg_temp.pass(public.concert_verify(jsonb_build_object('action','issue','id','74000000-0000-4000-8000-000000000001',
+  'purpose','sender','scope','event','email','inviter@example.invalid','digest',pg_temp.d('proof'))) is null,'email proof can be issued');
+select pg_temp.pass(public.concert_verify(jsonb_build_object('action','redeem','id','74000000-0000-4000-8000-000000000001',
+  'purpose','sender','digest',pg_temp.d('proof')))->>'email'='inviter@example.invalid','email proof returns the bound address');
+select pg_temp.pass(public.concert_verify(jsonb_build_object('action','redeem','id','74000000-0000-4000-8000-000000000001',
+  'purpose','sender','digest',pg_temp.d('proof'))) is null,'email proof cannot be used twice');
+select pg_temp.login(104);
 -- No direct table access for clients.
 select pg_temp.fails($$select count(*) from app_private.concert_tickets$$,'42501','members cannot read the tickets table');
 select pg_temp.server();

@@ -17,3 +17,7 @@ supabase/.branches/
 
 # Claude Code session worktrees
 .claude/worktrees/
+
+# Private concert media belongs on the access-controlled media host.
+/public/concert/*.mp4
+/public/concert/promo-cover.webp

@@ -278,15 +278,28 @@
  --lvz-accent-2:#d9a0f0;--lvz-tint-1:#6b2840;--lvz-tint-2:#55286b;
 }
 
-/* Concert: Aurora Night. Dark by design. Ready for the module. */
-[data-lvz-module="concert"],:root[data-lvz-scheme="dark"] [data-lvz-module="concert"]{
+/* Healing Concert: coral, sky blue, and warm paper from the concert artwork. */
+[data-lvz-module="concert"]{
+ color-scheme:light;
+ --lvz-ground:#f9f6ef;--lvz-surface:#fffdf9;--lvz-sunken:#f2eee7;
+ --lvz-ink:#182b48;--lvz-ink-quiet:#48576d;--lvz-ink-faint:#675e6a;
+ --lvz-line:#ded5cd;--lvz-line-input:#968996;
+ --lvz-accent:#a52e47;--lvz-accent-strong:#822439;--lvz-accent-soft:#f7e5e7;--lvz-on-accent:#ffffff;--lvz-focus:#1e5b8f;
+ --lvz-accent-2:#b33349;--lvz-tint-1:#d9edfa;--lvz-tint-2:#fbe6db;--lvz-glass-edge:#e5d8ce;--lvz-glint:rgb(255 255 255 / 96%);
+ --lvz-alert:#844a1c;--lvz-danger:#8a2639;--lvz-danger-soft:#fbe3e8;--lvz-warning:#784907;--lvz-warning-soft:#fff1d5;--lvz-success:#235940;--lvz-success-soft:#e2f2e7;--lvz-time-marker:#a52e47;
+ --cc-poster-ink:#17345b;--cc-poster-coral:#a32e43;--cc-poster-paper:#fffaf3;
+ --cc-poster-gold:#ffe9b0;--cc-poster-rose:#ffd9df;--cc-qr-paper:#fff;
+ --cc-scanner-ground:#20364c;--cc-scanner-guide:#ffca95;--cc-scanner-mask:rgb(12 20 33 / 45%);
+ --cc-print-ink:#182b48;--cc-print-quiet:#48576d;--cc-print-line:#ded5cd;--cc-print-sky:#e5f1f9;
+}
+:root[data-lvz-scheme="dark"] [data-lvz-module="concert"]{
  color-scheme:dark;
- --lvz-ground:#0e1025;--lvz-surface:#191b38;--lvz-sunken:#22244a;
- --lvz-ink:#f4f2ff;--lvz-ink-quiet:#b9b9e1;--lvz-ink-faint:#6c6c9c;
- --lvz-line:#494675;--lvz-line-input:#8d8bbd;
- --lvz-accent:#a08aff;--lvz-accent-strong:#c2b5ff;--lvz-accent-soft:#2c2b5a;--lvz-on-accent:#101125;--lvz-focus:#a08aff;
- --lvz-accent-2:#7fc4f0;--lvz-tint-1:#1f4f80;--lvz-tint-2:#5a2a6e;--lvz-glass-edge:rgb(255 255 255 / 12%);--lvz-glint:rgb(255 255 255 / 28%);
- --lvz-alert:#ffb184;--lvz-danger:#ffb3a9;--lvz-danger-soft:#47242c;--lvz-warning:#f3d58c;--lvz-warning-soft:#40361f;--lvz-success:#9ae3b2;--lvz-success-soft:#173a2a;--lvz-time-marker:#ff829a;
+ --lvz-ground:#171e2b;--lvz-surface:#222e3f;--lvz-sunken:#192331;
+ --lvz-ink:#fff5ed;--lvz-ink-quiet:#d6ddea;--lvz-ink-faint:#c4c9d5;
+ --lvz-line:#485569;--lvz-line-input:#91a0b5;
+ --lvz-accent:#ff9ea6;--lvz-accent-strong:#ffb9be;--lvz-accent-soft:#3f293a;--lvz-on-accent:#301525;--lvz-focus:#9bd7ff;
+ --lvz-accent-2:#f69097;--lvz-tint-1:#243b5a;--lvz-tint-2:#4d2e42;--lvz-glass-edge:#4a5260;--lvz-glint:rgb(255 255 255 / 20%);
+ --lvz-alert:#efb780;--lvz-danger:#ffb3a9;--lvz-danger-soft:#47242c;--lvz-warning:#f3d58c;--lvz-warning-soft:#40361f;--lvz-success:#9ae3b2;--lvz-success-soft:#173a2a;--lvz-time-marker:#ff9ea6;
 }
 
 /* Song library: Copper Noir. Dark by design. Ready for the module. */
@@ -324,7 +337,7 @@
 
 /* Light scheme (owner request, Oct 24): a near-white ground (about 1% of the
  * app colour), white surfaces and mostly-white glass, so colour reads as an
- * accent rather than a wash. Dark, Concert and Song library keep their material. */
+ * accent rather than a wash. Dark, Concert and Song library use their dedicated material. */
 :root:not([data-lvz-scheme="dark"]),:root:not([data-lvz-scheme="dark"]) [data-lvz-module]:not([data-lvz-module="concert"]):not([data-lvz-module="song-library"]){
  --lvz-surface:#ffffff;
  --lvz-backdrop:radial-gradient(at 0 25%,color-mix(in srgb,var(--lvz-tint-1) 4%,transparent),transparent 42%),radial-gradient(at 100% 5%,color-mix(in srgb,var(--lvz-tint-2) 3%,transparent),transparent 42%),color-mix(in srgb,var(--lvz-accent) 1%,#ffffff);
