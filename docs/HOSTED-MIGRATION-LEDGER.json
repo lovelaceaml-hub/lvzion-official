@@ -417,6 +417,17 @@
    "verified_on": "2026-11-20",
    "applied_via": "Supabase MCP apply_migration after focused concert database, browser, and mail tests",
    "verification": "Hosted readback confirmed the invitation-key index and service-only RPC privileges. Disposable tests covered repeated personal links, independent parties sharing an inbox, retrying reusable submissions, and upgrading historical confirmations."
+  },
+  {
+   "name": "concert_individual_passes",
+   "hosted_version": "20261120221342",
+   "repository_version": "20261120215528",
+   "source": "supabase/migrations/20261120215528_concert_individual_passes.sql",
+   "source_blob_sha": "ded77386425546ab2f9b4101b3bde6c1592b5b37",
+   "status": "applied",
+   "verified_on": "2026-11-20",
+   "applied_via": "Supabase MCP apply_migration after focused concert database, browser and mail checks",
+   "verification": "Hosted readback checked seat totals, individual pass migration, the party-position index, and service-only ticket reads. Disposable tests verified independent admissions, duplicate scans, historic check-ins and cancellations, and recipient-scoped QR receipts."
   }
  ],
  "normalization": {
