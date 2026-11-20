@@ -12,7 +12,7 @@ import {answerPulse} from './answer-motion';
 type Step = 'start' | 'member' | 'identity' | 'guest' | 'sender' | 'quantity' | 'invite'
   | 'verifySender' | 'manage' | 'recover' | 'verifyRecovery' | 'tickets' | 'accept' | 'verifyRecipient';
 type PersonalInvite = {token: string; hasEmail: boolean; name: string};
-type ApiResult = {tickets?: NamedTicket[]; invitations?: InviteSummary[]; existing?: boolean; emailed?: boolean; proof?: string; challenge?: string};
+type ApiResult = {batchProof?: string; tickets?: NamedTicket[]; invitations?: InviteSummary[]; existing?: boolean; emailed?: boolean; proof?: string; challenge?: string};
 type RecipientDraft = Omit<InviteDraft, 'vip'> & {includeVip: boolean; vip: NonNullable<InviteDraft['vip']>};
 const emptyInvite: RecipientDraft = {
   name:'', relationship:'', email:'', firstVisit:false, includeVip:false, vip:{title:'',organization:'',category:''},
@@ -318,21 +318,26 @@ function RegistrationFlow({eventId, event, hostToken, footerSlot, personal, invi
       await register({name:recipientName, invitation:personal?.token, proof:result.proof});
     } else {
       setProof(result.proof ?? '');
-      await saveInvitations(result.proof ?? '');
+      await listInvitations(result.proof ?? '');
     }
   }
 
-  async function saveInvitations(verified: string) {
-    const data = await api(manageOnly
-      ? {op:'list', eventId, proof:verified}
-      : {op:'create', eventId, proof:verified, requestId:requestId(batchId), senderName,
-          recipients:recipients.map(({includeVip, vip, ...recipient}) => ({...recipient, vip:includeVip ? vip : null}))});
+  async function listInvitations(verified: string) {
+    const data = await api({op:'list', eventId, proof:verified});
+    setInvitations(data.invitations ?? []);
+    finish('manage');
+  }
+
+  async function createInvitations() {
+    const data = await api({op:'create', eventId, email, requestId:requestId(batchId), senderName,
+      recipients:recipients.map(({includeVip, vip, ...recipient}) => ({...recipient, vip:includeVip ? vip : null}))});
+    setProof(data.batchProof ?? '');
     setInvitations(data.invitations ?? []);
     finish('manage');
   }
 
   async function updateInvitations(op: 'resend' | 'withdraw', id: string) {
-    const result = await api({op, id, eventId, proof});
+    const result = await api({op, id, eventId, proof, ...(manageOnly ? {} : {batch:batchId.current})});
     setInvitations(result.invitations ?? []);
     setNotice(op === 'withdraw' ? 'Invitation withdrawn.' : 'Delivery status updated.');
   }
@@ -352,7 +357,7 @@ function RegistrationFlow({eventId, event, hostToken, footerSlot, personal, invi
     list.map((item, i) => i === inviteIndex ? {...item,...update} : item));
   const editName = (index: number, value: string) => setNames(list => list.map((item,i) => i === index ? value : item));
   async function nextRecipient() {
-    if (inviteIndex+1===recipients.length) { await requestCode('sender'); return; }
+    if (inviteIndex+1===recipients.length) { await createInvitations(); return; }
     rememberHeight();
     setInviteIndex(index => index+1);
 
@@ -438,7 +443,7 @@ function RegistrationFlow({eventId, event, hostToken, footerSlot, personal, invi
         <Field label="Relationship"><input className="ui-input" required maxLength={120} value={invite.relationship} onChange={e => editInvite({relationship:e.target.value})}/></Field>
         <Field label="Guest’s email (optional)"><input className="ui-input" type="email" maxLength={254} value={invite.email} onChange={e => editInvite({email:e.target.value})}/></Field>
         <label className="cc-vip-toggle"><input type="checkbox" checked={invite.firstVisit} onChange={e => editInvite({firstVisit:e.target.checked})}/> First time visiting</label>
-      </>, inviteIndex+1<recipients.length?'Next recipient':'Verify and send', nextRecipient);
+      </>, inviteIndex+1<recipients.length?'Next recipient':(recipients.length===1?'Create invitation':'Create invitations'), nextRecipient);
       case 'accept': return form(<>
         <Field label="Your full name"><input className="ui-input" required minLength={2} maxLength={120} autoComplete="name" value={recipientName} onChange={e => setRecipientName(e.target.value)}/></Field>
         {inviterField}
@@ -459,10 +464,10 @@ function RegistrationFlow({eventId, event, hostToken, footerSlot, personal, invi
         const purpose = step==='verifySender'?'sender':step==='verifyRecovery'?'recovery':'recipient';
         return <>
           {form(<Field label="Eight-digit email code"><input className="ui-input" required inputMode="numeric" autoComplete="one-time-code" pattern="[0-9]{8}" maxLength={8} value={code} onChange={e => setCode(e.target.value)}/></Field>,
-            step==='verifySender'&&!manageOnly?'Verify and create invitations':'Verify email',
+            'Verify email',
             async () => {
               if (step==='verifyRecipient'&&proof) await register({name:recipientName,invitation:personal?.token,proof});
-              else if (step==='verifySender'&&proof) await saveInvitations(proof);
+              else if (step==='verifySender'&&proof) await listInvitations(proof);
               else await confirmCode(purpose);
             })}
           <button type="button" className="cc-reg-link" disabled={busy} onClick={() => void run(() => requestCode(purpose))}>Send a new code</button>

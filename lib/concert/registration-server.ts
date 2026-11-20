@@ -67,13 +67,13 @@ export async function redeemProof(client: Rpc, purpose: ProofPurpose, id: string
   return {email: String(verified.email), scope: String(verified.scope)};
 }
 
-export function sessionProof(purpose: ProofPurpose, email: string, scope: string) {
-  const expiry = Date.now() + (purpose === 'sender' ? 60 : 15)*60_000;
+export function sessionProof(purpose: ProofPurpose | 'batch', email: string, scope: string) {
+  const expiry = Date.now() + (purpose === 'sender' || purpose === 'batch' ? 60 : 15)*60_000;
   const payload = Buffer.from(JSON.stringify({purpose, email, scope, expiry})).toString('base64url');
   return payload+'.'+mac('concert-session:'+payload);
 }
 
-export function requireProof(token: unknown, purpose: ProofPurpose, scope: string) {
+export function requireProof(token: unknown, purpose: ProofPurpose | 'batch', scope: string) {
   if (typeof token === 'string' && token.length < 1024) {
     const [payload, signature, extra] = token.split('.');
     if (payload && signature && !extra && matches(mac('concert-session:'+payload), signature)) {

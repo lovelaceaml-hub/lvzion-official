@@ -115,31 +115,47 @@ async function registrations(admin: Admin, input: Input) {
 
 async function senderInvitations(admin: Admin, input: Input) {
   const eventId = identifier(input.eventId);
-  const sender = requireProof(input.proof, 'sender', eventId);
   const action = input.op;
-  const query: Input = {eventId, sender, action};
+  const isNewBatch = action === 'create' && input.email !== undefined;
+  const batch = action === 'create' ? identifier(input.requestId)
+    : input.batch === undefined ? undefined : identifier(input.batch);
+  const scope = batch ? eventId + ':' + batch : eventId;
+  const sender = isNewBatch ? registrationEmail(input.email)
+    : action !== 'create' && batch ? requireProof(input.proof, 'batch', scope)
+    : requireProof(input.proof, 'sender', eventId);
+  const query: Input = {eventId, sender, batch, action};
   if (action === 'create') {
-    query.batch = identifier(input.requestId);
     query.name = guestName(input.senderName);
     query.recipients = inviteRecipients(input.recipients).map(recipient => {
       const id = randomUUID();
       return {...recipient, id, digest: digest(namedInviteToken(id))};
     });
   }
-  if (action === 'resend' || action === 'withdraw') query.id = identifier(input.id);
+  if (action === 'resend' || action === 'withdraw') {
+    query.id = identifier(input.id);
+    if (batch) {
+      // The mutation RPC scopes by sender and invitation ID. A batch receipt
+      // grants access only to the immutable set of invitations in that batch.
+      const allowed = await rpc(admin, 'concert_named_invitation', {eventId, sender, batch, action:'list'});
+      if (!Array.isArray(allowed) || !allowed.some(row => row.id === query.id)) {
+        throw new ConcertError('Invitation is unavailable.', 403);
+      }
+    }
+  }
   let rows = await rpc(admin, 'concert_named_invitation', query);
   if (Array.isArray(rows) && (action === 'create' || action === 'resend' || action === 'list')) {
     await Promise.allSettled(rows.filter(row => row.hasEmail && !row.accepted && !row.withdrawn &&
       (action === 'resend' ? row.id === query.id : row.delivery === 'pending'))
       .map(row => deliverConcertMail('invitation', String(row.id))));
-    rows = await rpc(admin, 'concert_named_invitation', {eventId, sender, action: 'list'});
+    rows = await rpc(admin, 'concert_named_invitation', {eventId, sender, batch, action: 'list'});
   }
   const invitations = Array.isArray(rows) ? rows : [];
   if (invitations.some(row => row.accepted && ['pending','failed'].includes(row.notification))) after(async () => {
     await Promise.allSettled(invitations.filter(row => row.accepted && ['pending','failed'].includes(row.notification))
       .map(row => deliverConcertMail('registered', String(row.id))));
   });
-  return {invitations: invitations.map(({notification: _notification, ...row}) => ({...row, url: namedInviteUrl(String(row.id))}))};
+  return {...(isNewBatch ? {batchProof:sessionProof('batch', sender, scope)} : {}),
+    invitations: invitations.map(({notification: _notification, ...row}) => ({...row, url: namedInviteUrl(String(row.id))}))};
 }
 
 export async function POST(request: Request) {

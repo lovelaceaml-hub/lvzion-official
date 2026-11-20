@@ -76,8 +76,7 @@ test('VIP details follow the recipient draft and disappear when that recipient i
   await page.route('**/api/concert/registration', route => {
     const input = route.request().postDataJSON();
     switch (input.op) {
-      case 'requestCode': return route.fulfill({json:{challenge:'fictional-sender-challenge'}});
-      case 'verifyCode': return route.fulfill({json:{proof:'fictional-sender-proof'}});
+
       case 'create':
         submitted = input.recipients;
         return route.fulfill({json:{invitations:[]}});
@@ -120,9 +119,7 @@ test('VIP details follow the recipient draft and disappear when that recipient i
   await vip.uncheck();
   await dialog.getByLabel('Guest’s full name').fill('Fictional Replacement');
   await dialog.getByLabel('Relationship').fill('Neighbor');
-  await dialog.getByRole('button', {name:'Verify and send'}).click();
-  await dialog.getByLabel('Eight-digit email code').fill('12345678');
-  await dialog.getByRole('button', {name:'Verify and create invitations'}).click();
+  await dialog.getByRole('button', {name:'Create invitations'}).click();
   await expect(dialog.getByRole('heading', {name:'Your invitations'})).toBeFocused();
   expect(submitted).toEqual([
     {name:'Fictional First',relationship:'Friend',email:'',firstVisit:false,vip:null},
