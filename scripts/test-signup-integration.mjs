@@ -1,4 +1,5 @@
 // Real, disposable loopback Auth/PostgREST/Next.js/SMTP tests. No external email.
+import {isDeepStrictEqual} from 'node:util';
 import assert from 'node:assert/strict';import {request} from '@playwright/test';
 import {readFileSync,existsSync} from 'node:fs';import {execFileSync} from 'node:child_process';import {randomUUID} from 'node:crypto';
 const root='/tmp/lvz-integration',base='http://127.0.0.1:3000';
@@ -41,12 +42,47 @@ try{
  const mid=w.data.self.id;check('Unassigned cannot enumerate groups or member directory',w.data.groups.length===0&&w.data.directory.length===0&&w.data.unassignedMembers.length===0);
  check('Unassigned owns only their verified contact',w.data.contacts.email===signup.email);
  check('real Auth session cookies are HttpOnly',(await c.storageState()).cookies.every(x=>x.httpOnly));
- const modules=await c.get('/api/members/experience');check('Unassigned module feed denied',!modules.ok());
+ const privateFeedFixture=JSON.parse(sql(`
+  with target as (
+   select m.id as module_id,l.member_id from app_private.app_modules m
+   cross join app_private.account_links l
+   where m.status='approved' and l.username='demo_101' order by m.id limit 1
+  ), activity as (
+   insert into app_private.module_activities(module_id,recipient_member_id,title,begins_at,ends_at)
+   select module_id,member_id,'Fictional private activity',now(),now()+interval '1 hour' from target returning id
+  ), notice as (
+   insert into app_private.module_notices(module_id,recipient_member_id)
+   select module_id,member_id from target returning id
+  ), favorite as (
+   insert into app_private.member_module_favorites(member_id,module_ids,version)
+   select member_id,array[module_id],1 from target returning module_ids[1] as id
+  )
+  select json_build_object('activity',activity.id,'notice',notice.id,'favorite',favorite.id)
+  from activity,notice,favorite`));
+ const response=await c.get('/api/members/experience');
+ check('confirmed Unassigned member can open the module feed',response.status()===200);
+ const {modules,...personalFeed}=await response.json();
+ const approved=JSON.parse(sql(`
+  select json_agg(json_build_object(
+   'id',id,'name',display_name,'shortName',short_name,'description',description,
+   'accent',accent,'route',route_path,'status',status) order by id)
+  from app_private.app_modules where status='approved' and approved_at is not null`));
+ const catalog=modules.map(({canManage,...entry})=>entry).sort((a,b)=>a.id.localeCompare(b.id));
+ check('Unassigned sees the full approved catalog with only its public fields',
+  approved.length>0 && isDeepStrictEqual(catalog,approved));
+ check('Unassigned has no module management privileges',modules.every(m=>m.canManage===false));
+ check('new Unassigned feed exposes no private activity, notification or favorite from another member',
+  isDeepStrictEqual(personalFeed,{activities:[],notifications:[],favorites:[],favoriteVersion:0}));
  const replay=await post(c,'/api/auth/confirm',otp);check('signup token cannot be consumed twice',replay.status!==200);
  await post(c,'/api/auth/sign-out',{});result=await post(c,'/api/auth/sign-in',{identifier:signup.email,password:signup.password});check('Unassigned can sign in again by email',result.status===200);
  const duplicate=await post(c,'/api/auth/sign-up',signup);check('duplicate email receives same generic signup message',duplicate.status===200&&duplicate.data.message===resultGeneric());
  check('duplicate signup cannot create another membership',sql("select count(*) from public.members where display_name='Jamie Integration'")==='1');
  await post(unit,'/api/auth/sign-in',{identifier:'demo_101',password:fixture.password});check('unit leader sees no Unassigned queue',(await workspace(unit)).data.unassignedMembers.length===0);
+ const recipientFeed=await (await unit.get('/api/members/experience')).json();
+ check('the intended recipient can see the private activity, notification and favorite',
+  recipientFeed.activities.some(a=>a.id===privateFeedFixture.activity) &&
+  recipientFeed.notifications.some(n=>n.id===privateFeedFixture.notice) &&
+  recipientFeed.favorites.includes(privateFeedFixture.favorite));
  const payload={memberId:mid,unitId:'33333333-3333-4333-8333-000000000001',verified:'yes',reason:'Independently verified synthetic member'};
  const command=(ctx,action,p,requestId=randomUUID())=>post(ctx,'/api/members/command',{action,payload:p,requestId});
  check('unit leader cannot claim signup',(await command(unit,'enrollment.assign',payload)).status===403);
