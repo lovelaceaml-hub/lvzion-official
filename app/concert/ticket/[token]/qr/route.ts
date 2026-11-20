@@ -9,5 +9,5 @@ export async function GET(_request:Request,{params}:{params:Promise<{token:strin
   const ticket=await ticketByToken(token);
   if (!ticket.valid || ticket.status!=='active' || ticket.event.archived) return new Response(null,{status:404,headers});
   return new Response(new Uint8Array(await qrPng(ticketUrl(token))),{headers:{...headers,
-    'Content-Type':'image/png','Content-Disposition':'attachment; filename="concert-ticket.png"'}});
+    'Content-Type':'image/png','Content-Disposition':'inline; filename="concert-ticket.png"'}});
 }

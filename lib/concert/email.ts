@@ -1,6 +1,6 @@
 /** Ticket email text and HTML. Pure functions so they can be tested without sending mail. */
 import {formatDate, formatTime, type PublicEvent} from './domain.ts';
-import {concertDisplayTitle, concertTimeLabel, concertVenueLines, isPeaceConcert, PEACE_CONCERT_TITLE_LINES} from './branding.ts';
+import {concertCalendar, concertDisplayTitle, concertTimeLabel, concertVenueLines, isPeaceConcert, PEACE_CONCERT_TITLE_LINES} from './branding.ts';
 
 export type TicketMail = {name: string; partySize: number; event: PublicEvent; ticketUrl: string};
 const escape = (s: string) => s.replace(/[&<>"']/g, c => ({'&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'}[c]!));
@@ -65,7 +65,7 @@ function ticketRow({name, partySize, url, qrCid}: EmailTicket, group: boolean, e
   return `<tr><td align="center" style="padding:18px 16px;border-top:1px solid #d7ba95">
 ${isPeaceConcert(event) ? `<table role="presentation" width="100%" cellpadding="0" cellspacing="0" bgcolor="#fff8eb" style="border:3px double #c6a373"><tr><td align="center" style="padding:14px"><span aria-hidden="true" style="color:#94572e;font:26px Georgia,serif">&#9829;</span><p style="margin:8px 0;font:italic 20px Georgia,serif;color:#74384a">${escape(concertDisplayTitle(event))}</p><p style="margin:6px 0 12px;color:#493444">${escape(formatDate(event.date))}</p>` : ''}
 <h2 style="margin:0;color:#182b48;font-size:19px;line-height:25px;overflow-wrap:anywhere">${escape(name)}</h2>
-${partySize ? `<p style="margin:4px 0 0;color:#45536a;font-size:14px">Party of ${partySize}</p>` : ''}
+${partySize && partySize > 1 ? `<p style="margin:4px 0 0;color:#45536a;font-size:14px">Party of ${partySize}</p>` : ''}
 <table role="presentation" cellpadding="0" cellspacing="0" style="margin:12px auto"><tr>
 <td bgcolor="#fff5e8" style="padding:7px;border:1px solid #c8a06b;border-radius:14px">
 <img src="cid:${escape(qrCid)}" width="204" height="204" alt="${escape('Ticket QR code for '+name)}" style="display:block;max-width:100%;height:auto;background:#fff;border-radius:7px">
@@ -75,7 +75,7 @@ ${isPeaceConcert(event) ? '</td></tr></table>' : ''}
 </td></tr>`;
 }
 
-type HostConfirmation = {name:string; email:string; additionalNames:string[]; statusUrl:string};
+export type HostConfirmation = {name:string; email:string; additionalNames:string[]; statusUrl:string};
 export function hostReceiptHtml(event:PublicEvent, name:string, delivery:string, statusUrl:string) {
   return emailFrame('Your concert invitations',emailHeader(event),`
 <tr><td align="center" style="padding:20px;color:#182b48"><strong>${escape(name)}</strong><p>${escape(delivery)}</p>
@@ -83,14 +83,16 @@ ${actionLink(statusUrl,'View my invitation statuses')}</td></tr>${eventFacts(eve
 }
 
 export function ticketGroupHtml(event: PublicEvent, tickets: EmailTicket[], host?:HostConfirmation) {
+  const calendar=concertCalendar(event);
   return emailFrame(host ? 'Your guest confirmed attendance' : tickets.length === 1 ? 'Admission ticket' : 'Admission tickets', emailHeader(event), `
 ${host ? `<tr><td align="center" style="padding:18px"><strong>${escape(host.name)} confirmed attendance.</strong>
 <p>${escape(host.email)}</p>${host.additionalNames.length ? '<p>With '+host.additionalNames.map(escape).join(', ')+'</p>' : ''}
-<p>Your copy of the party’s ticket is below. Both copies use the same QR code.</p>
+<p>Your copies of the admission tickets are below. Each person has their own QR code.</p>
 ${actionLink(host.statusUrl,'View my invitation statuses')}</td></tr>` : ''}
 <tr><td align="center" style="padding:16px;color:#182b48;font-size:15px;font-weight:700">Show ${tickets.length === 1 ? 'this QR code' : 'each attendee’s QR code'} at the door.</td></tr>
 ${tickets.map(ticket => ticketRow(ticket, tickets.length > 1, event)).join('')}
-${eventFacts(event)}`);
+${eventFacts(event)}
+${calendar ? '<tr><td align="center" style="padding:16px">Add to calendar · <a href="https://lvz.app'+calendar.apple+'">Apple Calendar</a> · <a href="'+escape(calendar.google)+'">Google Calendar</a></td></tr>' : ''}`);
 }
 
 export function ticketHtml({name, partySize, event, ticketUrl}: TicketMail, qrCid: string) {

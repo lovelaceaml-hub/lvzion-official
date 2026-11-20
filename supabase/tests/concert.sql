@@ -222,7 +222,7 @@ select pg_temp.fails($$select count(*) from app_private.concert_tickets$$,'42501
 select pg_temp.server();
 select pg_temp.fails($$select count(*) from app_private.concert_tickets$$,'42501','server role cannot read the tickets table directly');
 select pg_temp.admin();
--- A personal link can correct recipient details and reserve several seats with one scan.
+-- A personal link can correct recipient details and reserve several individually scannable seats.
 update app_private.concert_events set capacity=null,rsvp_open=true where id='70000000-0000-4000-8000-000000000001';
 insert into app_private.concert_named_invites(id,batch_id,event_id,token_digest,sender_email,sender_name,guest_name,guest_email,relationship,first_visit)
 values('73000000-0000-4000-8000-000000000009',gen_random_uuid(),'70000000-0000-4000-8000-000000000001',pg_temp.d('party-invite'),
@@ -230,7 +230,7 @@ values('73000000-0000-4000-8000-000000000009',gen_random_uuid(),'70000000-0000-4
 select pg_temp.server();
 select set_config('test.party',jsonb_build_object('id','71000000-0000-4000-8000-000000000009','inviteDigest',pg_temp.d('party-invite'),
 'digest',pg_temp.d('party-qr'),'email','corrected@example.invalid','names',jsonb_build_array('Corrected Guest','Second Guest'))::text,true);
-select pg_temp.pass(public.concert_accept_party(current_setting('test.party')::jsonb)->'tickets'->0->>'partySize'='2','single QR reserves both seats');
+select pg_temp.pass(jsonb_array_length(public.concert_accept_party(current_setting('test.party')::jsonb)->'tickets')=2,'one active QR per named attendee');
 select pg_temp.pass(public.concert_accept_party(current_setting('test.party')::jsonb)->'tickets'->0->>'name'='Corrected Guest','idempotent confirmation uses corrected name');
 select pg_temp.pass(public.concert_accept_party(current_setting('test.party')::jsonb||jsonb_build_object('id',gen_random_uuid()))->'tickets'->0->>'id'='71000000-0000-4000-8000-000000000009','a fresh phone request returns the same bound QR');
 select set_config('test.context',public.concert_host_context('{"reference":"73000000-0000-4000-8000-000000000009","source":"named"}')::text,true);
@@ -249,7 +249,7 @@ select pg_temp.pass(public.concert_accept_party(current_setting('test.party')::j
  'id','71000000-0000-4000-8000-000000000010','inviteDigest',pg_temp.d('second-party'),'digest',pg_temp.d('second-qr'),
  'names',jsonb_build_array('Second Party')))->'tickets'->0->>'id'='71000000-0000-4000-8000-000000000010',
  'a different invitation using the same receipt email gets only its own ticket');
-select pg_temp.pass(jsonb_array_length(public.concert_recover_tickets('{"eventId":"70000000-0000-4000-8000-000000000001","email":"corrected@example.invalid"}'))=2,
+select pg_temp.pass(jsonb_array_length(public.concert_recover_tickets('{"eventId":"70000000-0000-4000-8000-000000000001","email":"corrected@example.invalid"}'))=3,
  'inbox recovery includes both independently booked parties');
 select pg_temp.pass(public.concert_named_invitation(jsonb_build_object('action','view','digest',pg_temp.d('party-invite')))->>'confirmedTicket'='71000000-0000-4000-8000-000000000009',
  'reopening the personal link identifies its confirmed ticket');
@@ -275,4 +275,23 @@ select pg_temp.pass(public.concert_accept_party(current_setting('test.party')::j
 select pg_temp.pass(public.concert_delivery('{"kind":"registered","reference":"73000000-0000-4000-8000-000000000009"}')->>'email'='party-host@example.invalid',
  'legacy text confirmation is upgraded to an automatic host QR receipt');
 select pg_temp.admin();
+select pg_temp.server();
+select set_config('test.companion_digest',encode(sha256(convert_to(public.concert_accept_party(current_setting('test.party')::jsonb)->'tickets'->1->>'companionToken','UTF8')),'hex'),true);
+select pg_temp.pass(jsonb_array_length(public.concert_ticket_view(current_setting('test.companion_digest'))->'passes')=1,'individual companion link exposes only its own pass');
+select pg_temp.pass(jsonb_array_length(public.concert_ticket_view(pg_temp.d('party-qr'))->'passes')=2,'lead link exposes its entire party');
+select pg_temp.login(104);
+select pg_temp.pass(public.concert_scan(pg_temp.d('party-qr'))->>'result'='ok','first party member admitted');
+select pg_temp.server();
+select pg_temp.pass(public.concert_ticket_view(current_setting('test.companion_digest'))->>'checkedInAt' is null,'companion still awaiting admission');
+select pg_temp.login(104);
+select pg_temp.pass(public.concert_scan(current_setting('test.companion_digest'))->>'result'='ok','companion admitted independently');
+select pg_temp.pass(public.concert_scan(current_setting('test.companion_digest'))->>'result'='already','companion repeat scan rejected');
+select pg_temp.pass(public.concert_scan(pg_temp.d('party-qr'))->>'result'='already','lead repeat scan rejected');
+select pg_temp.admin();
+-- Older aggregate tickets retain historical check-ins and cancellation when expanded.
+insert into app_private.concert_tickets(id,event_id,guest_name,email,party_size,status,checked_in_at,checked_in_by,token_digest)
+values('71000000-0000-4000-8000-000000000077','70000000-0000-4000-8000-000000000001','Legacy Party','historic@example.invalid',3,'cancelled',now(),'44444444-4444-4444-8444-000000000104',pg_temp.d('historic'));
+set constraints all immediate;
+select pg_temp.pass((select count(*)=3 and sum(party_size)=3 and bool_and(status='cancelled' and checked_in_at=now())
+ from app_private.concert_tickets where registration_id='71000000-0000-4000-8000-000000000077'),'historic cancelled/checked-in party keeps all seats and attendance states');
 rollback;

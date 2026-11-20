@@ -79,19 +79,24 @@ test('December concert uses the flyer title and time while preserving other even
  });
 });
 
-test('sender receipts link to statuses and confirmation identifies the party and shared QR',()=>{
- const event={title:'Concert',date:'2026-12-06',startTime:'16:30',doorsTime:null,venue:'Fictional Hall',details:'',program:[]};
+test('sender receipts link to statuses and both receipts include each attendee QR and both calendars',()=>{
+ const event={title:'The Words of Mother’s Love Healing Concert',date:'2026-12-06',startTime:'16:30',doorsTime:null,venue:'Fictional Hall',details:'',program:[]};
  const url='https://example.invalid/concert/status/fictional';
  const ticket={name:'Example Guest',partySize:2,url:'https://example.invalid/concert/ticket/fixture',qrCid:'party'};
  const receipt=hostReceiptHtml(event,'Guest <One>','Your invitation was emailed.',url);
  assert.ok(receipt.includes(url));
  assert.match(receipt,/Guest &lt;One&gt;/);
  const details={name:ticket.name,email:'guest@example.invalid',additionalNames:['Example <Two>'],statusUrl:url};
- const guest=ticketGroupHtml(event,[ticket]);
- const host=ticketGroupHtml(event,[ticket],details);
+ const tickets=[{...ticket,partySize:1},{name:'Example Two',url:ticket.url+'-two',qrCid:'companion',partySize:1}];
+ const guest=ticketGroupHtml(event,tickets);
+ const host=ticketGroupHtml(event,tickets,details);
  for(const message of [host,guest]){
   assert.ok(message.includes(ticket.url));
   assert.ok(message.includes('cid:party'));
+  assert.ok(message.includes('cid:companion'));
+  assert.ok(message.includes(ticket.url+'-two'));
+  assert.match(message,/mothers-love\.ics/);
+  assert.match(message,/20261207T003000Z%2F20261207T020000Z/);
  }
  assert.ok(host.includes(url));
  assert.ok(host.includes(details.email));

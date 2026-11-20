@@ -53,3 +53,14 @@ export const PEACE_CONCERT_ITINERARY = [
   '5:00 PM — Choir & Orchestra Performances',
   'Closing Remarks',
 ].join('\n');
+
+export function concertCalendar(event:PublicEvent) {
+  if (!isPeaceConcert(event) || event.startTime !== PEACE_CONCERT_START) return null;
+  return {
+    apple:'/concert/mothers-love.ics',
+    google:'https://calendar.google.com/calendar/render?'+new URLSearchParams({
+      action:'TEMPLATE', text:concertDisplayTitle(event), location:event.venue,
+      dates:'20261207T003000Z/20261207T020000Z', ctz:'America/Los_Angeles',
+    }),
+  };
+}

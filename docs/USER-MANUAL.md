@@ -12,9 +12,9 @@ New accounts start Unassigned to age category, group and unit. An authorized mem
 
 ## Register for the December concert
 
-Open the invitation on your phone and tap **Tap here to register**. Choose **I am a member.** to register yourself, invite others, or do both. Choose **I am a guest.** to register your party. On the shared invitation, enter who invited you and the name of each attendee. When you receive a personal invitation, tap the button with your host’s name, correct your details if needed, and add anyone coming with you. Choose **Confirm your attendance** to see your party QR. You and your host receive copies by email. Hosts can check all invitation statuses using the private link in their confirmation email. [Concert invitation](https://lvz.app/concert/rsvp)
+Open the invitation on your phone and tap **Tap here to register**. Choose **I am a member.** to register yourself, invite others, or do both. Choose **I am a guest.** to register your party. On the shared invitation, enter who invited you and the name of each attendee. When you receive a personal invitation, tap the button with your host’s name, correct your details if needed, and add anyone coming with you. Choose **Confirm your attendance** to see one QR for each attendee. You and your host receive copies by email. Hosts can check all invitation statuses using the private link in their confirmation email. [Concert invitation](https://lvz.app/concert/rsvp)
 
-Open your QR ticket for check-in at the door. To retrieve a ticket later, open **Register**, then **Tickets & help** in the lower-right corner.
+Swipe the ticket or tap an attendee number for each scan at the door. Tap **Save image** or **Save all** and choose the photo-saving action on your phone. Under **Options**, you can also open an image to save, resend the receipt, or add the concert to Apple or Google Calendar. To retrieve a ticket later, open **Register**, then **Tickets & help** in the lower-right corner.
 
 ## Manage age categories, groups and units
 

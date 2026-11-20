@@ -34,3 +34,9 @@ Use Node 24 and the lockfile. This release’s full-suite run was explicitly req
 For the signup check, use a fresh loopback namespace with a disposable `/tmp/lvz-integration`, PostgreSQL binaries on PATH and a production build. Set `LVZ_SIGNUP_INTEGRATION=true`, `LVZ_SIGNUP_HOOK_INTEGRATION=true` and `LVZ_INTEGRATION_DIR=/tmp/lvz-integration`. Optionally supply checksum-verified archives via `LVZ_INTEGRATION_ARCHIVE_DIR`. Start with `node tests/integration/start-stack.mjs`, run `node scripts/test-signup-integration.mjs`, and stop with `node tests/integration/stop-stack.mjs`.
 
 There is no standalone lint script. Synthetic registration and door tests use fictional identities and ticket codes. Physical iPhone camera, VoiceOver, real keyboard behavior and real event-day attendance require separate acceptance. See the [concert guide](README.md) for the current product requirements and review checklist.
+
+## Individual admission tickets
+
+The lead ticket opens the party wallet. A companion’s link opens that person’s ticket. The database regression checks that the door admits each attendee separately, rejects repeat scans, and preserves historical seat totals, check-in state and cancellations. It also exercises retries and limits companion links to their own pass.
+
+A local registration with three fictional attendees produced three different QR images. Each image decoded to its own ticket URL. The guest and inviter received matching sets of PNGs through a local mail sink, and resending from the wallet delivered the set to the registration inbox. Mobile Chromium and WebKit exercised swiping, numbered selection, labeled PNG file sharing, the combined image fallback and both calendar links. The ICS file and Google Calendar template specify December 6 from 4:30 to 6:00 p.m. Pacific. Native photo-library and calendar app interactions still need hands-on device acceptance.

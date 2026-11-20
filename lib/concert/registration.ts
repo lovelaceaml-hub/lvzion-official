@@ -20,7 +20,7 @@ export type InviteSummary = {
   delivery: 'pending' | 'sending' | 'sent' | 'failed' | null;
   url: string;
 };
-export type NamedTicket = {id: string; name: string; partySize: number; svg?: string; url: string};
+export type NamedTicket = {id: string; name: string; partySize: number; svg?: string; checkedInAt?: string | null; url: string};
 
 export function field(value: unknown, label: string, max = 120) {
   if (typeof value !== 'string') throw new ConcertError(`Enter ${label}.`);
@@ -77,6 +77,8 @@ export function ticketRecords(value: unknown) {
   if (!Array.isArray(value)) return [];
   return value.map(item => {
     const record = object(item);
-    return {id: String(record.id), name: String(record.name), partySize: partyValue(record.partySize)};
+    return {id: String(record.id), name: String(record.name), partySize: partyValue(record.partySize),
+      checkedInAt:typeof record.checkedInAt === 'string' ? record.checkedInAt : null,
+      companionToken:typeof record.companionToken === 'string' && /^[\w-]{43}$/.test(record.companionToken) ? record.companionToken : undefined};
   });
 }

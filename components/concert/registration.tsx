@@ -3,7 +3,7 @@
 import {useEffect, useEffectEvent, useLayoutEffect, useId, useRef, useState, type ReactNode} from 'react';
 import {ArrowLeft, ArrowRight, ChevronRight, Music, Heart, UserRound, UsersRound} from '../home-icons';
 import {createPortal} from 'react-dom';
-import TicketCard from './ticket-card';
+import TicketWallet from './ticket-wallet';
 import {MAX_PARTY, type PublicEvent} from '../../lib/concert/domain';
 import {type InviteDraft, type InviteSummary, type NamedTicket} from '../../lib/concert/registration';
 import ConcertDialog from './concert-dialog';
@@ -155,9 +155,7 @@ function RegistrationFlow({eventId, event, hostToken, footerSlot, personal, invi
   const [proof, setProof] = useState('');
   const [challenge, setChallenge] = useState('');
   const [code, setCode] = useState('');
-  const [ticketIndex, setTicketIndex] = useState(0);
   const [tickets, setTickets] = useState<NamedTicket[]>([]);
-  const currentTicket = tickets[ticketIndex] ?? tickets[0];
   const [invitations, setInvitations] = useState<InviteSummary[]>([]);
   const [emailed, setEmailed] = useState(false);
   const [existing, setExisting] = useState(false);
@@ -276,7 +274,6 @@ function RegistrationFlow({eventId, event, hostToken, footerSlot, personal, invi
   async function register(fields: Record<string, unknown>) {
     const result = await api({op:'register', eventId, requestId:requestId(saveId), ...fields,
       ...(hostToken && fields.names ? {hostToken} : fields.member ? {} : {inviterName})});
-    setTicketIndex(0);
     setTickets(result.tickets ?? []);
     setMemberRegistration(Boolean(fields.member));
     setEmailed(result.emailed === true);
@@ -299,7 +296,6 @@ function RegistrationFlow({eventId, event, hostToken, footerSlot, personal, invi
     const result = await api({op:'verifyCode', purpose, challenge, code,
       email:purpose === 'sender' ? email : purpose === 'recovery' ? recoveryEmail : undefined});
     if (purpose === 'recovery') {
-      setTicketIndex(0);
       setTickets(result.tickets ?? []);
       setExisting(false);
       setEmailed(false);
@@ -466,19 +462,9 @@ function RegistrationFlow({eventId, event, hostToken, footerSlot, personal, invi
         </li>)}</ul> : <p className="cc-hint">There are no invitations for this email.</p>}
       </>;
       case 'tickets': {
-        const picker = tickets.length > 1 && <select className="cc-pass-picker" aria-label="Choose a ticket"
-          value={ticketIndex} onChange={e => setTicketIndex(Number(e.target.value))}>
-          {tickets.map((ticket,index) => <option value={index} key={ticket.id}>{index+1}/{tickets.length} · {ticket.name}</option>)}
-        </select>;
         return <>
-          {tickets.length ? <div className="cc-ticket-view">
-            {currentTicket && <>
-              {event && currentTicket.svg ? <TicketCard event={event} name={currentTicket.name} partySize={currentTicket.partySize} svg={currentTicket.svg} compact embedded attendeePicker={picker || undefined}/> : picker || <strong>{currentTicket.name}</strong>}
-              <div className="cc-reg-tools"><a className="ui-button" href={currentTicket.url+'/qr'} download>Download QR</a>
-                <button className="cc-reg-link" type="button" onClick={() => void share(currentTicket.url,currentTicket.name+'’s concert ticket')}>Share</button>
-                <a className="cc-pass-open" href={currentTicket.url}>Open QR ticket</a></div>
-            </>}
-          </div> : <p className="cc-hint">{existing?'This email already has a registration or the invitation was already accepted. Verify the ticket email to retrieve the registration.':'Check the email used to register and try again.'}</p>}
+          {tickets.length && event && tickets[0].svg ? <TicketWallet event={event} tickets={tickets} embedded/>
+            : tickets.length ? <div className="cc-reg-tools">{tickets.map(t=><div key={t.id}><strong>{t.name}</strong> <a href={t.url}>Open QR ticket</a></div>)}</div> : <p className="cc-hint">{existing?'This email already has a registration or the invitation was already accepted. Verify the ticket email to retrieve the registration.':'Check the email used to register and try again.'}</p>}
           {emailed?<p className="cc-hint">We’ll send a copy to your email.</p>:null}
           {existing?<button type="button" className="ui-button ui-button-secondary" onClick={e => answer(e.currentTarget, onFindTickets)}>Find my tickets</button>:null}
           {tools && <button type="button" className="ui-button ui-button-secondary" onClick={e => answer(e.currentTarget, onFindTickets)}>

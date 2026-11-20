@@ -4,6 +4,7 @@ const privateHeaders=[{key:'Cache-Control',value:'private, no-store'},{key:'Refe
 const config:NextConfig={async headers(){return[
  {source:'/:path*',headers:[{key:'X-Content-Type-Options',value:'nosniff'},{key:'Referrer-Policy',value:'same-origin'},{key:'Content-Security-Policy',value:"frame-ancestors 'none'; base-uri 'self'; object-src 'none'"}]},
  {source:'/concert/:path*',headers:privateHeaders},
+ {source:'/concert/mothers-love.ics',headers:[{key:'Content-Type',value:'text/calendar; charset=utf-8'},{key:'Content-Disposition',value:'inline; filename="mothers-love.ics"'}]},
  {source:'/auth/:path*',headers:privateHeaders},
  {source:'/api/:path*',headers:privateHeaders},
  {source:'/members/:path*',headers:privateHeaders},

@@ -25,7 +25,7 @@ export default function TicketCard({event, name, partySize, svg, checkedInAt, in
     <div className="cc-ticket-body">
       <div className="cc-ticket-person">
         {attendeePicker ?? <strong>{name}</strong>}
-        <span>Party of {partySize}</span>
+        <span>{partySize===1 ? 'Admits one' : 'Party of '+partySize}</span>
       </div>
       {svg ? <div className="cc-qr" role="img" aria-label="Ticket QR code" dangerouslySetInnerHTML={{__html: svg}}/> : null}
       {inactiveMessage ? <p className="cc-warning">{inactiveMessage}</p> : checkedInAt ?
@@ -33,6 +33,6 @@ export default function TicketCard({event, name, partySize, svg, checkedInAt, in
         <p className="cc-ticket-instruction">Show this QR code at the door.</p>}
     </div>
     <ConcertDateAndVenue compact={compact} event={event} className="cc-ticket-facts"/>
-    {!compact && !embedded && peace && event.startTime === '16:30' && !inactiveMessage ? <a className="cc-ticket-calendar" href="/concert/mothers-love.ics" download>Add to calendar</a> : null}
+    {!compact && !embedded && peace && event.startTime === '16:30' && !inactiveMessage ? <a className="cc-ticket-calendar" href="/concert/mothers-love.ics">Add to calendar</a> : null}
   </section>;
 }

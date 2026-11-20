@@ -1,7 +1,7 @@
 import {parseEvent,parseMemberCommand,parseProgramEntries,ConcertError,object,identifier,type Workspace} from '../../../lib/concert/domain';
 import {body} from '../../../lib/server/http';
 import {digest,inviteTokenFor,inviteUrl,newTicket,qrSvg,ticketTokenFor,ticketUrl} from '../../../lib/concert/server';
-import {call,failure,json,member,sendTicket} from '../../../lib/concert/routes';
+import {call,failure,json,member,sendTicket,ticketByToken} from '../../../lib/concert/routes';
 import {settings} from '../../../lib/server/config';
 export const runtime='nodejs';
 export const dynamic='force-dynamic';
@@ -13,7 +13,9 @@ async function workspace(client:Awaited<ReturnType<typeof member>>):Promise<Work
  if(typeof p.canManage!=='boolean'||!Number.isInteger(p.invitedCount))throw new ConcertError('Concert could not be verified.',503,'unavailable');
  let myTicket=null;
  if(p.myTicket){const t=object(p.myTicket),id=identifier(t.id),url=ticketUrl(ticketTokenFor(id));
-  myTicket={id,name:String(t.name),email:String(t.email),partySize:Number(t.partySize),checkedInAt:typeof t.checkedInAt==='string'?t.checkedInAt:null,url,qrSvg:await qrSvg(url)};}
+  const wallet=await ticketByToken(ticketTokenFor(id));
+  const passes=wallet.valid ? await Promise.all(wallet.passes.map(async pass=>({...pass,svg:await qrSvg(pass.url)}))) : undefined;
+  myTicket={id,passes,name:String(t.name),email:String(t.email),partySize:Number(t.partySize),checkedInAt:typeof t.checkedInAt==='string'?t.checkedInAt:null,url,qrSvg:await qrSvg(url)};}
  const user=await client.auth.getUser();
  const event=p.event?parseEvent(p.event):null;
  return {viewerId:me,name:String(p.name??''),canManage:p.canManage,event,myTicket,invitedCount:p.invitedCount as number,inviteUrl:event?.publicRsvp?settings().origin+'/concert/rsvp':inviteUrl(invite),email:user.data.user?.email??''};

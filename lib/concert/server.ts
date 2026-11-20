@@ -3,7 +3,9 @@ import {createHash,createHmac,randomUUID} from 'node:crypto';
 import QRCode from 'qrcode';
 import {settings} from '../server/config';
 import {mailConfigured,sendConcertEmail} from '../server/mail';
-import {ticketHtml,ticketSubject,ticketText} from './email';
+import {ticketGroupHtml, type HostConfirmation} from './email';
+import {ticketRecords, type NamedTicket} from './registration';
+import {concertDisplayTitle, concertWhen} from './branding';
 import type {PublicEvent} from './domain';
 
 /** Separate secret for concert links, so rotating sign-in secrets never voids printed tickets. */
@@ -21,12 +23,24 @@ const qrOptions={errorCorrectionLevel:'M' as const,margin:4,color:{dark:'#09285c
 export const qrSvg=(url:string)=>QRCode.toString(url,{...qrOptions,type:'svg'});
 export const qrPng=(url:string)=>QRCode.toBuffer(url,{...qrOptions,type:'png',width:440});
 
-/** Sends the ticket email. Returns false (never throws) when mail is off or delivery fails. */
-export async function emailTicket(to:string,m:{name:string;partySize:number;event:PublicEvent;token:string}):Promise<boolean>{
- if(!mailConfigured())return false;
- try{
-  const url=ticketUrl(m.token),mail={name:m.name,partySize:m.partySize,event:m.event,ticketUrl:url};
-  await sendConcertEmail(to,ticketSubject(mail),ticketText(mail),{html:ticketHtml(mail,'ticket-qr'),attachments:[{filename:'ticket-qr.png',content:await qrPng(url),cid:'ticket-qr',contentType:'image/png'}]});
-  return true;
- }catch{return false;}
+export function ticketList(records:unknown):NamedTicket[] {
+  return ticketRecords(records).map(({companionToken,...ticket}) => ({
+    ...ticket,url:ticketUrl(companionToken ?? ticketTokenFor(ticket.id)),
+  }));
+}
+
+export async function sendPassReceipt(to:string,event:PublicEvent,tickets:NamedTicket[],host?:HostConfirmation) {
+  if (!mailConfigured() || !to || !tickets.length) return false;
+  const cards=tickets.map((t,index)=>({...t,qrCid:'ticket-'+index}));
+  try {
+    const attachments=await Promise.all(cards.map(async (t,index)=>({
+      filename:'ticket-'+(index+1)+'.png',content:await qrPng(t.url),cid:t.qrCid,contentType:'image/png',
+    })));
+    const title=concertDisplayTitle(event);
+    const subject=host ? 'Your guest confirmed · '+host.name : 'Your tickets · '+title;
+    const text=[subject,concertWhen(event),event.venue,...(host?[host.email,host.statusUrl]:[]),
+      'Show one QR code per attendee.',...cards.map(t=>t.name+'\n'+t.url)].join('\n\n');
+    await sendConcertEmail(to,subject,text,{html:ticketGroupHtml(event,cards,host),attachments});
+    return true;
+  } catch { return false; }
 }

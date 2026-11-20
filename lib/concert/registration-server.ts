@@ -5,10 +5,10 @@ import {sendAccountEmail, sendConcertEmail} from '../server/mail';
 import {authAdminClient} from '../server/supabase';
 import {concertDisplayTitle, concertWhen} from './branding';
 import {ConcertError, object, parsePublicEvent} from './domain';
-import {concertVerificationHtml, guestRegisteredHtml, hostReceiptHtml, invitationHtml, ticketGroupHtml} from './email';
-import {ticketRecords} from './registration';
+import {concertVerificationHtml, guestRegisteredHtml, hostReceiptHtml, invitationHtml} from './email';
+export {ticketList} from './server';
 import {call, ticketByToken, type Rpc} from './routes';
-import {digest, qrPng, ticketTokenFor, ticketUrl} from './server';
+import {digest, sendPassReceipt, ticketList, ticketTokenFor} from './server';
 
 export type ProofPurpose = 'sender' | 'recipient' | 'recovery' | 'setup';
 
@@ -30,7 +30,6 @@ export function rpc(client: Rpc, name: string, parameters: Record<string, unknow
 
 export const namedInviteToken = (id: string) => mac('named-concert-invite:v1:'+id);
 export const namedInviteUrl = (id: string) => settings().origin + '/concert/invitation/' + namedInviteToken(id);
-export const ticketList = (value: unknown) => ticketRecords(value).map(ticket => ({...ticket, url: ticketUrl(ticketTokenFor(ticket.id))}));
 
 export async function namedInvitation(client: Rpc, token: unknown) {
   if (typeof token !== 'string' || !/^[\w-]{43}$/.test(token)) return null;
@@ -131,16 +130,7 @@ export async function deliverConcertMail(kind: 'invitation' | 'registered' | 'ti
       const tickets = ticketList(message.tickets);
       const lead = await ticketByToken(ticketTokenFor(reference));
       if (!lead.valid || !tickets.length) throw new Error('Ticket unavailable');
-      const title = concertDisplayTitle(lead.event);
-      const when = concertWhen(lead.event);
-      const texts = tickets.map(ticket => `${ticket.name}\n${ticket.url}`);
-      const cards = tickets.map((ticket, index) => ({...ticket, qrCid: `ticket-${index}`}));
-      const attachments = await Promise.all(cards.map(async (ticket, index) => ({
-        filename: `ticket-${index+1}.png`, content: await qrPng(ticket.url), cid: ticket.qrCid, contentType: 'image/png',
-      })));
-      await sendConcertEmail(email, 'Your tickets · '+title,
-        [title, when, lead.event.venue, 'Show your QR at the door.', ...texts].join('\n\n'),
-        {attachments, html: ticketGroupHtml(lead.event, cards)});
+      if (!await sendPassReceipt(email,lead.event,tickets)) throw new Error('Delivery failed');
     } else if (kind === 'invitation') {
       const invitation = await namedInvitation(client, namedInviteToken(reference));
       if (!invitation?.available) throw new Error('Invitation unavailable');
@@ -160,14 +150,10 @@ export async function deliverConcertMail(kind: 'invitation' | 'registered' | 'ti
           [host.name,delivery,'View all your invitation statuses:',url].join('\n'),
           {html:hostReceiptHtml(host.event,host.name,delivery,url)});
       } else if (host.ticketId) {
-        const qrUrl = ticketUrl(ticketTokenFor(host.ticketId));
-        const ticket = {name:host.name, partySize:host.partySize, url:qrUrl, qrCid:'party-ticket'};
-        const text = [host.name+' confirmed attendance.',host.guestEmail,'Party of '+host.partySize,...host.additionalNames,
-          concertWhen(host.event),host.event.venue,'Your copy of the guest’s ticket:',qrUrl,'View all your invitations:',url].join('\n');
-        await sendConcertEmail(email,'Your guest confirmed · '+host.name,text,{
-          html:ticketGroupHtml(host.event,[ticket],{name:host.name,email:host.guestEmail,additionalNames:host.additionalNames,statusUrl:url}),
-          attachments:[{filename:'party-ticket.png',content:await qrPng(qrUrl),cid:'party-ticket',contentType:'image/png'}],
-        });
+        const lead=await ticketByToken(ticketTokenFor(host.ticketId));
+        if (!lead.valid || !await sendPassReceipt(email,host.event,lead.passes,{
+          name:host.name,email:host.guestEmail,additionalNames:host.additionalNames,statusUrl:url,
+        })) throw new Error('Delivery failed');
       } else {
         // Older registrations may predate invitation-specific tickets.
         await sendConcertEmail(email,'Your guest registered',host.name+' registered through your concert invitation.\n'+url,{html:guestRegisteredHtml(host.name)});

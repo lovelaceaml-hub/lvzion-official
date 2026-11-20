@@ -91,7 +91,7 @@ export default function ConcertDialog({label, title, primary = false, children, 
     <dialog className={themed ? 'ui-sheet cc-dialog cc-concert-stage' : 'ui-sheet cc-dialog'} data-presentation={presentation} data-has-footer={footer ? true : undefined} aria-labelledby={titleId} ref={dialog} style={themed ? {
         '--paper-cut':`url(#${frameId}-cut)`, '--ribbon-cut':`url(#${frameId}-ribbon)`,
       } as CSSProperties : undefined} data-ticket-sheet={opensTicket || undefined}
-      onClose={() => { finishOpening(); onClose?.(); }}
+      onClose={e => { if (e.target === e.currentTarget) { finishOpening(); onClose?.(); } }}
       onAnimationEnd={e => { if (e.animationName === 'cc-program-turn') finishOpening(); }}
       onPointerDownCapture={finishOpening} onKeyDownCapture={finishOpening}
       onFocusCapture={e => { if (e.target instanceof HTMLInputElement) fieldAtFocus.current = e.target.value; }}

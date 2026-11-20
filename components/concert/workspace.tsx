@@ -10,7 +10,7 @@ import {concertDetails,concertDisplayTitle,concertWhen,isPeaceConcert,PEACE_CONC
 import {ConcertHero,ConcertSectionHeading} from './event-design';
 import ConcertDialog from './concert-dialog';
 import ConcertInfo from './concert-info';
-import TicketCard from './ticket-card';
+import TicketWallet from './ticket-wallet';
 import './concert.css';
 
 type View='ticket'|'invite'|'guests'|'settings';
@@ -38,12 +38,9 @@ function TicketView({data,reload,media}:{data:Data;media:PromoMedia;reload:()=>P
  async function rsvp(e:FormEvent){e.preventDefault();setBusy(true);setError('');setNote('');
   try{const r=await post({op:'rsvp',email,partySize:party}) as {emailed?:boolean};await reload();setNote(r.emailed?'Your ticket is ready and a copy was emailed to you.':'Your ticket is ready. Keep this page or take a screenshot.');}
   catch(x){setError(x instanceof Error?x.message:'RSVP could not be confirmed.');}finally{setBusy(false);}}
- async function resend(){if(!ticket)return;setBusy(true);setError('');setNote('');
-  try{await post({op:'resend',ticketId:ticket.id});setNote('Sent to '+ticket.email+'.');}catch(x){setError(x instanceof Error?x.message:'The email could not be sent.');}finally{setBusy(false);}}
  if(ticket)return <>
-  <TicketCard event={event} name={ticket.name} partySize={ticket.partySize} svg={ticket.qrSvg} checkedInAt={ticket.checkedInAt}/>
+  <TicketWallet event={event} tickets={ticket.passes ?? [{...ticket,svg:ticket.qrSvg}]}/>
   <div className="cc-ticket-actions">
-   <button type="button" className="ui-button ui-button-secondary" disabled={busy} onClick={()=>void resend()}>Email my ticket</button>
    <a className="ui-button ui-button-quiet" href={ticket.url}>Open ticket page</a>
    <ConcertInfo event={event}/>
   </div>

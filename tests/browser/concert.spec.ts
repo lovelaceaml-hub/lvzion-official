@@ -34,7 +34,7 @@ test('member RSVPs and can download a QR for their personal invite link',async({
  await expect(page.getByRole('img',{name:'Ticket QR code'}).locator('svg')).toBeVisible();
  await expect(page.getByRole('heading',{name:PEACE_CONCERT_TITLE})).toBeVisible();
  await expect(page.getByText('4:30–6:00 PM Pacific',{exact:true})).toBeVisible();
- await expect(page.getByText('Party of 2',{exact:true})).toBeVisible();
+ await expect(page.getByText('Admits one',{exact:true})).toBeVisible();
  await expect(page.getByText('Fictional Main Hall',{exact:true})).toBeVisible();
  await capture(page,'concert-member-ticket');
  await page.getByRole('button',{name:'Invite',exact:true}).first().click();
@@ -91,7 +91,7 @@ test('door staff scan: welcome, already checked in, invalid, and the guest list 
  await expect(page.getByText('Scan from a photo',{exact:true})).toBeVisible();
  await scanPhoto(page,guest);
  await expect(page.locator('.cc-result')).toContainText('Welcome, Gail Guest');
- await expect(page.locator('.cc-result')).toContainText('Party of 3');
+ await expect(page.locator('.cc-result')).toContainText('Party of 1');
  await capture(page,'concert-scan-welcome');
  await scanPhoto(page,guest);
  await expect(page.locator('.cc-result')).toContainText('Already checked in');

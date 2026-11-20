@@ -314,10 +314,11 @@ test('a completed lookup arriving after dismissal cannot reveal tickets in a reo
   await expect(page.locator('a[href="/concert/ticket/late"]')).toHaveCount(0);
 });
 
-test('a guest can switch between party tickets with the QR and actions in view', async ({page}) => {
+for (const partySize of [2,10]) test('a guest can switch between party tickets with the QR and actions in view · '+partySize, async ({page}) => {
   await page.emulateMedia({reducedMotion:'reduce'});
   await page.setViewportSize({width:320,height:568});
-  const tickets = ['First Guest','Second Guest'].map((name,index) => ({
+  const guests=Array.from({length:partySize},(_,i)=>i===0?'First Guest':'Guest '+(i+1));
+  const tickets = guests.map((name,index) => ({
     name,id:String(index),partySize:1,url:'/concert/ticket/fictional-'+index,
     svg:'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 41 41"><rect width="41" height="41" fill="white"/></svg>',
   }));
@@ -327,15 +328,22 @@ test('a guest can switch between party tickets with the QR and actions in view',
   await dialog.getByLabel('Your full name').fill('First Guest');
   await dialog.getByLabel('Email for tickets').fill('family@example.invalid');
   await dialog.getByLabel('Who invited you?').fill('Fictional Host');
-  await dialog.getByRole('button',{name:'Add one attendee'}).click();
-  await dialog.getByLabel('Attendee 2 full name').fill('Second Guest');
+  for(let i=1;i<partySize;i++){
+    await dialog.getByRole('button',{name:'Add one attendee'}).click();
+    await dialog.getByLabel('Attendee '+(i+1)+' full name').fill(guests[i]);
+  }
   await dialog.getByRole('button',{name:'Get tickets'}).click();
-  await dialog.getByLabel('Choose a ticket').selectOption('1');
-  await expect(dialog.getByRole('link',{name:'Download QR'})).toHaveAttribute('href','/concert/ticket/fictional-1/qr');
+  const second=dialog.getByRole('button',{name:'Ticket 2 of '+partySize+' · Guest 2'});
+  await second.click();
+  await expect(second).toHaveAttribute('aria-pressed','true');
+  await dialog.getByRole('button',{name:'Options',exact:true}).click();
+  await expect(page.getByRole('link',{name:'Open QR ticket'})).toHaveAttribute('href','/concert/ticket/fictional-1');
+  await page.getByRole('button',{name:'Close ticket options'}).click();
+  await expect(dialog.getByRole('button',{name:'Save all'})).toBeVisible();
   for(const viewport of [{width:320,height:568},{width:568,height:320}]) {
     await page.setViewportSize(viewport);
     await expect(dialog.getByRole('img',{name:'Ticket QR code'})).toBeInViewport({ratio:1});
     await expect(dialog.getByRole('button',{name:'Share',exact:true})).toBeInViewport({ratio:1});
-    await expect.poll(() => dialog.locator('.cc-dialog-inner').evaluate(el => el.scrollHeight-el.clientHeight)).toBeLessThanOrEqual(1);
+    await expect.poll(()=>dialog.locator('.cc-dialog-inner').evaluate(el=>el.scrollHeight-el.clientHeight)).toBeLessThanOrEqual(1);
   }
 });
