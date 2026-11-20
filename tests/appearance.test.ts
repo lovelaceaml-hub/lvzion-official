@@ -45,7 +45,8 @@ test('device appearance does not override published audience displays',()=>{
 
 // Every palette block in the token file must keep text, secondary text, links
 // and button labels readable (WCAG AA 4.5:1) on both its ground and surface.
-const css=readFileSync(new URL('../styles/lvz-tokens.css',import.meta.url),'utf8');
+const css=['lvz-tokens.css','guidance-teachers-tokens.css']
+ .map(file=>readFileSync(new URL('../styles/'+file,import.meta.url),'utf8')).join('\n');
 function luminance(hex:string){const c=hex.slice(1).match(/../g)!.map(v=>parseInt(v,16)/255).map(v=>v<=.04045?v/12.92:((v+.055)/1.055)**2.4);return c[0]*.2126+c[1]*.7152+c[2]*.0722;}
 function contrast(a:string,b:string){const x=luminance(a),y=luminance(b);return(Math.max(x,y)+.05)/(Math.min(x,y)+.05);}
 function block(selector:string){

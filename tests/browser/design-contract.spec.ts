@@ -40,7 +40,15 @@ for(const path of ['/sign-in','/sign-up','/experience-preview','/member-preview'
  test(`${path} fits a 320px phone and uses the shared base ground`,async({page})=>{
   await page.setViewportSize({width:320,height:700});await page.goto(path);
   expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);
-  expect(await page.evaluate(()=>getComputedStyle(document.body).backgroundColor)).toBe('rgb(236, 239, 255)');
+  const colors=await page.evaluate(()=>{
+   const swatch=document.createElement('span');
+   swatch.style.backgroundColor='color-mix(in srgb,var(--lvz-accent) 1%,white)';
+   document.body.append(swatch);
+   const expected=getComputedStyle(swatch).backgroundColor;
+   swatch.remove();
+   return {actual:getComputedStyle(document.body).backgroundColor,expected};
+  });
+  expect(colors.actual).toBe(colors.expected);
  });
 }
 
