@@ -216,9 +216,16 @@ function RegistrationFlow({festival, eventId, event, hostToken, footerSlot, pers
   const success = (step === 'tickets' && !tools && !existing && tickets.length > 0) ||
     (step === 'manage' && !manageOnly && invitations.length > 0);
   const transition = festival && success ? 'success' : direction.current;
+  const lastScene = useRef<{step: Step; index: number} | null>(null);
   useLayoutEffect(() => {
-    if (festival && active) return playFestivalTransition(formHeading.current, transition);
-  }, [festival, active, step, inviteIndex, transition]);
+    if (festival && active) {
+      const previous = lastScene.current;
+      lastScene.current = {step, index:inviteIndex};
+      const context = previous?.step === step && !tools
+        ? previous.index !== inviteIndex ? 'recipient-page' : 'return' : undefined;
+      return playFestivalTransition(formHeading.current, transition, context);
+    }
+  }, [festival, active, step, inviteIndex, transition, tools]);
 
   const previousHeight = useRef(0);
   function rememberHeight() {

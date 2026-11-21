@@ -1,3 +1,13 @@
+.cc-festival-sky {
+  position: absolute;
+  z-index: 6;
+  inset: 0;
+  overflow: hidden;
+  border: 0;
+  background: transparent;
+  pointer-events: none;
+}
+
 .cc-festival-sky[popover] {
   position: fixed;
   inset: 0;
@@ -16,7 +26,6 @@
 }
 
 .cc-festival-sky::backdrop { background: transparent; pointer-events: none; }
-.cc-festival-sky[data-direction="back"] { transform: scaleX(-1); }
 
 .cc-festival-sky > i {
   --particle-light: #fff2ca;
@@ -77,26 +86,321 @@
     animation: cc-sky-rise var(--particle-duration) var(--particle-delay) cubic-bezier(.22,.57,.35,1) both;
   }
 
-  .cc-festival-sky::before {
+  .cc-festival-sky[data-scene="open"]::before {
     content: "";
     position: absolute;
     inset: 0;
-    background: linear-gradient(142deg, transparent 28%, #cce7d122 43%, #ffeac14d 51%,
-      #ffd8e644 57%, transparent 72%);
-    animation: cc-sky-wind 870ms cubic-bezier(.26,.07,.29,1) both;
-  }
-
-  .cc-festival-sky:is([data-direction="open"], [data-direction="success"])::before {
     background: radial-gradient(ellipse at var(--sky-x, 50%) var(--sky-y, 78%), #ffeec89e,
       #fbd4c968 22%, #d6d6ff29 49%, transparent 72%);
     transform-origin: var(--sky-x, 50%) var(--sky-y, 78%);
     animation: cc-sky-bloom 1060ms ease-out both;
   }
 
-  .cc-festival-sky[data-direction="success"]::before {
-    --sky-x: 50%;
-    --sky-y: 60%;
+  .cc-festival-sky > b {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    width: 54vmin;
+    aspect-ratio: 1;
+    opacity: 0;
+    border: 1px solid #ffe9b688;
+    border-radius: 50%;
+    animation-duration: 760ms;
+    animation-delay: calc(var(--scene-index) * 55ms);
+    animation-timing-function: cubic-bezier(.22,.65,.3,1);
+    animation-fill-mode: both;
   }
+
+  .cc-festival-sky[data-scene][data-direction="back"] > b {
+    animation-direction: reverse;
+    animation-duration: 600ms;
+  }
+  .cc-festival-sky[data-direction="back"][data-scene$="-page"] > b { animation-duration: 500ms; }
+  .cc-festival-sky[data-direction="back"] > i { animation-direction: reverse; }
+  .cc-festival-sky[data-scene="page-turn"] > i { --particle-duration: 850ms; }
+  .cc-festival-sky[data-scene="open"] > [data-shape="leaf"] { --particle-duration: 1150ms; }
+
+  .cc-festival-sky:is([data-scene="horizon"], [data-scene="ribbon"], [data-scene="beam"],
+    [data-scene="page-turn"], [data-scene="return"], [data-scene$="-page"]) > b:not(:first-child) {
+    display: none;
+  }
+
+  .cc-festival-sky[data-scene="horizon"] > b {
+    left: -15%;
+    top: 70%;
+    width: 130%;
+    height: 40%;
+    border: 0;
+    background: radial-gradient(ellipse at 50% 100%, #fff2cb99, #f0b49b55 40%, transparent 70%);
+    animation-name: cc-scene-horizon;
+    animation-duration: 940ms;
+  }
+
+  .cc-festival-sky[data-scene="curtains"] > b {
+    left: 0;
+    top: 0;
+    width: 50%;
+    height: 100%;
+    border: 0;
+    border-radius: 0;
+    background: repeating-linear-gradient(90deg, #e9ceb577, #fff2d699 12%, #cfb1ce55 25%);
+    transform-origin: left center;
+    animation-name: cc-scene-curtain;
+    animation-duration: 880ms;
+  }
+  .cc-festival-sky[data-scene="curtains"] > b:nth-child(2) {
+    left: 50%;
+    transform-origin: right center;
+  }
+  .cc-festival-sky[data-scene="curtains"] > b:nth-child(n + 3) { display: none; }
+
+  .cc-festival-sky[data-scene="halo"] > b {
+    box-shadow: 0 0 0 12px #ffddaa16, inset 0 0 0 10px #fff3d416;
+    animation-name: cc-scene-halo;
+    animation-duration: 840ms;
+  }
+
+  .cc-festival-sky[data-scene="hearts"] > b {
+    display: none;
+  }
+  .cc-festival-sky[data-scene="hearts"] > i {
+    animation-name: cc-scene-heart-arc;
+    --particle-duration: 820ms;
+  }
+
+  .cc-festival-sky[data-scene="ribbon"] > b {
+    left: 8%;
+    top: 45%;
+    width: 84%;
+    height: 12%;
+    border: 0;
+    border-radius: 50%;
+    background: linear-gradient(0deg, transparent, #fff1cc88 48%, #ffe1bdaa 50%, transparent);
+    transform-origin: left center;
+    animation-name: cc-scene-ribbon;
+    animation-duration: 850ms;
+  }
+
+  .cc-festival-sky[data-scene="sparkles"] > b {
+    left: calc(12% + var(--scene-index) * 17%);
+    top: calc(65% - var(--scene-index) * 7%);
+    width: 13vmin;
+    border: 0;
+    border-radius: 0;
+    background: #ffe9b5bb;
+    clip-path: polygon(50% 0, 57% 43%, 100% 50%, 57% 57%, 50% 100%, 43% 57%, 0 50%, 43% 43%);
+    animation-name: cc-scene-sparkle;
+    animation-duration: 600ms;
+    animation-delay: calc(var(--scene-index) * 100ms);
+  }
+
+  .cc-festival-sky[data-scene="page-turn"] > b {
+    left: -20%;
+    top: -10%;
+    width: 140%;
+    height: 120%;
+    border: 0;
+    border-radius: 0 0 90% 0;
+    background: linear-gradient(135deg, #94b59255, #fff0c8aa 50%, #c2d0a999 51%, transparent 75%);
+    transform-origin: top right;
+    animation-name: cc-scene-page-turn;
+    animation-duration: 920ms;
+  }
+
+  .cc-festival-sky[data-scene="beam"] > b {
+    left: 48%;
+    top: 0;
+    width: 4%;
+    height: 100%;
+    border: 0;
+    border-radius: 0;
+    background: linear-gradient(90deg, transparent, #fff2cbaa, transparent);
+    transform-origin: center top;
+    animation-name: cc-scene-beam;
+    animation-duration: 820ms;
+  }
+
+  .cc-festival-sky[data-scene="pearls"] > b {
+    left: 48%;
+    top: 70%;
+    width: 5vmin;
+    height: 45%;
+    border: 0;
+    border-radius: 50%;
+    background: radial-gradient(ellipse at 50% 5%, #fff9e9cc, #eed8cb66 20%, transparent 70%);
+    transform-origin: center bottom;
+    --fan-angle: calc((var(--scene-index) - 2) * 24deg);
+    animation-name: cc-scene-pearl-fan;
+    animation-duration: 850ms;
+  }
+
+  .cc-festival-sky[data-scene="ripple"] > b {
+    width: 60vmin;
+    height: 18vmin;
+    top: 66%;
+    border-color: #e2e8ed77;
+    box-shadow: 0 2px 0 #fff1ce33;
+    animation-name: cc-scene-ripple;
+    animation-duration: 860ms;
+  }
+
+  .cc-festival-sky[data-scene="trails"] > b {
+    left: calc(8% + var(--scene-index) * 20%);
+    top: calc(20% + var(--scene-index) * 9%);
+    width: 22vmin;
+    height: 2px;
+    border: 0;
+    border-radius: 50%;
+    background: linear-gradient(90deg, transparent, #fff4d6cc);
+    --trail-x: calc((2 - var(--scene-index)) * 15vw);
+    --trail-y: calc((2 - var(--scene-index)) * 7vh);
+    animation-name: cc-scene-trail;
+    animation-duration: 580ms;
+  }
+  .cc-festival-sky[data-scene="trails"] > b::after {
+    content: "";
+    position: absolute;
+    right: 0;
+    top: -4px;
+    width: 10px;
+    height: 10px;
+    background: #fff4d6;
+    clip-path: polygon(50% 0, 60% 40%, 100% 50%, 60% 60%, 50% 100%, 40% 60%, 0 50%, 40% 40%);
+  }
+
+  .cc-festival-sky:is([data-scene="gold"], [data-scene="ticket-success"]) > b {
+    border: 0;
+    border-radius: 0;
+    background: conic-gradient(transparent 10deg, #ffda8577 15deg, transparent 20deg,
+      transparent 80deg, #fff0b699 90deg, transparent 100deg, transparent 170deg, #ffda8566 180deg,
+      transparent 190deg, transparent 260deg, #fff0b699 270deg, transparent 280deg);
+    animation-name: cc-scene-gold;
+    animation-duration: 850ms;
+  }
+  .cc-festival-sky[data-scene="ticket-success"] > b {
+    width: 80vmin;
+    animation-name: cc-scene-ticket-burst;
+    animation-duration: 880ms;
+  }
+
+  .cc-festival-sky[data-scene="return"] > b {
+    width: 70vmin;
+    height: 35vmin;
+    border: 0;
+    background: radial-gradient(ellipse, #fff1d066, transparent 65%);
+    animation-name: cc-scene-return;
+    animation-duration: 680ms;
+  }
+  .cc-festival-sky[data-scene$="-page"] > b {
+    left: 12%;
+    top: 65%;
+    width: 76%;
+    height: 2px;
+    border: 0;
+    background: linear-gradient(90deg, transparent, #e7cc9477, transparent);
+    animation-duration: 500ms;
+    animation-name: cc-scene-field-page;
+  }
+  .cc-festival-sky[data-scene="recipient-page"] > b { animation-name: cc-scene-recipient-page; }
+  .cc-festival-sky[data-scene="result-page"] > b {
+    left: 50%;
+    top: 50%;
+    width: 24vmin;
+    height: 24vmin;
+    background: transparent;
+    border: 1px solid #fff1cd55;
+    animation-name: cc-scene-result-page;
+  }
+}
+
+@keyframes cc-scene-horizon {
+  0% { opacity: 0; transform: translateY(35%) scaleY(.4); }
+  35% { opacity: .85; }
+  100% { opacity: 0; transform: translateY(-35%) scaleY(1.2); }
+}
+@keyframes cc-scene-curtain {
+  0% { opacity: 0; transform: scaleX(1); }
+  18% { opacity: .6; }
+  100% { opacity: 0; transform: scaleX(.05); }
+}
+@keyframes cc-scene-halo {
+  0% { opacity: 0; transform: translate(-50%, -50%) scale(.2); }
+  30% { opacity: .8; }
+  100% { opacity: 0; transform: translate(-50%, -50%) scale(1.8); }
+}
+@keyframes cc-scene-heart-arc {
+  0% { opacity: 0; transform: rotate(-55deg) scale(.5); }
+  35% { opacity: .9; transform: translate3d(calc(var(--particle-dx) * -.3), calc(var(--particle-dy) * .5), 0) rotate(-65deg) scale(.8); }
+  100% { opacity: 0; transform: translate3d(var(--particle-dx), var(--particle-dy), 0) rotate(-30deg) scale(.7); }
+}
+@keyframes cc-scene-ribbon {
+  0% { opacity: 0; transform: scaleX(.02) rotate(-3deg); }
+  40% { opacity: .8; }
+  100% { opacity: 0; transform: scaleX(1) rotate(0); }
+}
+@keyframes cc-scene-sparkle {
+  0% { opacity: 0; transform: translate(-50%, -50%) scale(.1) rotate(-20deg); }
+  40% { opacity: .9; }
+  100% { opacity: 0; transform: translate(-50%, -50%) scale(1.4) rotate(30deg); }
+}
+@keyframes cc-scene-page-turn {
+  0% { opacity: 0; transform: rotate(-12deg) scaleX(1); }
+  20% { opacity: .75; }
+  100% { opacity: 0; transform: rotate(24deg) scaleX(.02); }
+}
+@keyframes cc-scene-beam {
+  0% { opacity: 0; transform: scaleY(.05); }
+  35% { opacity: .8; transform: scaleY(1); }
+  100% { opacity: 0; transform: scaleY(1) scaleX(3); }
+}
+@keyframes cc-scene-pearl-fan {
+  0% { opacity: 0; transform: translateY(-100%) rotate(0) scaleY(.2); }
+  40% { opacity: .85; }
+  100% { opacity: 0; transform: translateY(-100%) rotate(var(--fan-angle)) scaleY(1); }
+}
+@keyframes cc-scene-ripple {
+  0% { opacity: 0; transform: translate(-50%, -50%) scale(.15); }
+  30% { opacity: .65; }
+  100% { opacity: 0; transform: translate(-50%, -50%) scale(1.6); }
+}
+@keyframes cc-scene-trail {
+  0% { opacity: 0; transform: scaleX(.2); }
+  25% { opacity: .85; }
+  100% { opacity: 0; transform: translate(var(--trail-x), var(--trail-y)) scaleX(.05); }
+}
+@keyframes cc-scene-gold {
+  0% { opacity: 0; transform: translate(-50%, -50%) rotate(-35deg) scale(.5); }
+  40% { opacity: .6; }
+  100% { opacity: 0; transform: translate(-50%, -50%) rotate(15deg) scale(1.5); }
+}
+@keyframes cc-scene-ticket-burst {
+  0% { opacity: 0; transform: translate(-50%, -50%) scale(.1); }
+  28% { opacity: .95; }
+  100% { opacity: 0; transform: translate(-50%, -50%) scale(2.2); }
+}
+@keyframes cc-scene-return {
+  0% { opacity: 0; transform: translate(-50%, -35%); }
+  35% { opacity: .65; }
+  100% { opacity: 0; transform: translate(-50%, -65%); }
+}
+@keyframes cc-scene-field-page {
+  0% { opacity: 0; transform: translateY(6px) scaleX(.8); }
+  40% { opacity: .6; }
+  100% { opacity: 0; transform: translateY(-4px) scaleX(1); }
+}
+@keyframes cc-scene-recipient-page {
+  0% { opacity: 0; transform: translateX(-10%); }
+  40% { opacity: .6; }
+  100% { opacity: 0; transform: translateX(10%); }
+}
+@keyframes cc-scene-result-page {
+  0% { opacity: 0; transform: translate(-50%, -50%) scale(.8); }
+  40% { opacity: .5; }
+  100% { opacity: 0; transform: translate(-50%, -50%) scale(1.1); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .cc-festival-sky { display: none; }
 }
 
 @keyframes cc-sky-rise {
@@ -107,12 +411,6 @@
     opacity: 0;
     transform: translate3d(var(--particle-dx), var(--particle-dy), 0) rotate(var(--particle-turn-end)) scale(.83);
   }
-}
-
-@keyframes cc-sky-wind {
-  0% { opacity: 0; transform: translateX(-65%); }
-  27% { opacity: .83; }
-  100% { opacity: 0; transform: translateX(64%); }
 }
 
 @keyframes cc-sky-bloom {
