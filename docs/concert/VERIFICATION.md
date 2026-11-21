@@ -1,5 +1,11 @@
 # Concert release and review
 
+## Heart, expression and gold sparkle draft
+
+The follow-up draft adds four accent combinations to the restored leaf sweep. The welcoming wave, inclusion gesture, consideration gesture and gratitude bow use the existing concert illustrations. Paired rose and lavender hearts mark the invitation. The ticket reveal uses champagne hearts and five gold glints. Both leaf heights, timing and the artwork files are unchanged.
+
+On `8f6b53a`, type checking and the three focused registration browser checks passed. The four playable examples were checked at phone width for artwork, different heart paths, gold glints, viewport coverage, Hold mid-sweep and Reduce Motion. The draft is ready for visual review before publication.
+
 ## Original leaf sweep draft
 
 The November 21 draft restores the PR 91 leaf sweep. Alternate questions raise the same leaf endpoints six percentage points. Opening and completion use the original path. Back mirrors the destination's earlier path. The original timings, colors and supplied concert artwork are preserved. Fable and Argon challenged the plan before Astra implemented and reviewed it.
