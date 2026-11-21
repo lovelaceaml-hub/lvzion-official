@@ -1,8 +1,7 @@
 import './festival-sky.css';
 
-export type FestivalScene = 'open' | 'horizon' | 'curtains' | 'halo' | 'hearts' | 'ribbon'
-  | 'sparkles' | 'page-turn' | 'beam' | 'pearls' | 'ripple' | 'trails' | 'gold'
-  | 'ticket-success' | 'return' | 'field-page' | 'recipient-page' | 'result-page';
+export type FestivalDirection = 'open' | 'forward' | 'back' | 'success';
+export type LeafRise = 0 | 6;
 
 // From and to positions as viewport percentages, size in pixels, and delay.
 const particles = [
@@ -26,38 +25,33 @@ const particles = [
   ['leaf', 'sage', 42, 85, 102, 34, 39, 185],
 ] as const;
 
-export function openFestivalSky(dialog: HTMLDialogElement, scene: FestivalScene, back = false) {
+export function createFestivalSky(direction: FestivalDirection, rise: LeafRise = 0) {
   const sky = document.createElement('span');
-  // A manual popover sits above the modal without changing its focus or hit testing.
-  const native = typeof sky.showPopover === 'function';
-  if (native) sky.popover = 'manual';
   sky.inert = true;
   sky.setAttribute('aria-hidden', 'true');
   sky.className = 'cc-festival-sky';
-  sky.dataset.scene = scene;
-  sky.dataset.direction = scene === 'open' ? 'open' : back ? 'back' : 'forward';
-  if (scene !== 'open') {
-    for (let index = 0; index < 5; index++) {
-      const shape = document.createElement('b');
-      shape.style.setProperty('--scene-index', String(index));
-      sky.append(shape);
-    }
-  }
+  sky.dataset.direction = direction;
   for (const [shape, color, startX, startY, endX, endY, size, delay] of particles) {
-    if (scene !== 'open' && !(scene === 'hearts' && shape === 'heart') &&
-        !(scene === 'page-turn' && shape === 'leaf') &&
-        !((scene === 'gold' || scene === 'ticket-success') && shape === 'star')) continue;
+    const leafRise = shape === 'leaf' ? rise : 0;
     const particle = document.createElement('i');
     particle.dataset.shape = shape;
     particle.dataset.color = color;
     particle.style.setProperty('--particle-x', startX + '%');
     particle.style.setProperty('--particle-y', startY + '%');
     particle.style.setProperty('--particle-dx', (endX - startX) + 'vw');
-    particle.style.setProperty('--particle-dy', (endY - startY) + 'dvh');
+    particle.style.setProperty('--particle-dy', (endY - startY - leafRise) + 'dvh');
     particle.style.setProperty('--particle-size', size + 'px');
     particle.style.setProperty('--particle-delay', delay + 'ms');
     sky.append(particle);
   }
+  return sky;
+}
+
+export function openFestivalSky(dialog: HTMLDialogElement, direction: FestivalDirection, rise: LeafRise) {
+  const sky = createFestivalSky(direction, rise);
+  // A manual popover covers the viewport without moving focus or intercepting taps.
+  const native = typeof sky.showPopover === 'function';
+  if (native) sky.popover = 'manual';
   dialog.append(sky);
   if (!native) return sky;
   try {

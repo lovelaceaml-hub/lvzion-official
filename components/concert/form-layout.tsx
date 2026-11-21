@@ -1,7 +1,7 @@
 import {Children, Fragment, isValidElement, useLayoutEffect, useRef, useState, type ReactNode} from 'react';
 import {createPortal, flushSync} from 'react-dom';
 import {ArrowRight} from '../home-icons';
-import {playFestivalTransition} from './answer-motion';
+type PageTurn = (target: HTMLElement | null, direction: 'forward' | 'back', page: number) => void;
 
 type Layout = {starts: number[]; anchor: number};
 
@@ -10,9 +10,10 @@ function pageOf(starts: number[], unit: number) {
 }
 
 export function RegistrationForm({id, active, busy, multipleGuests, festival, confirmAttendance, footer, progress,
-  children, label, onFinish}: {
+  children, label, onFinish, onPageTurn}: {
   id: string; active: boolean; busy: boolean; multipleGuests: boolean; festival: boolean; confirmAttendance: boolean;
   footer: HTMLElement | null; progress: ReactNode; children: ReactNode; label: string;
+  onPageTurn: PageTurn;
   onFinish: (submitter: HTMLElement | null) => void;
 }) {
   const fields = useRef<HTMLFieldSetElement>(null);
@@ -86,7 +87,7 @@ export function RegistrationForm({id, active, busy, multipleGuests, festival, co
   function showPage(index: number, animate = true) {
     flushSync(() => setLayout(current => ({...current, anchor: starts[index]})));
     position.current?.focus();
-    if (animate) playFestivalTransition(position.current, index < page ? 'back' : 'forward');
+    if (animate) onPageTurn(position.current, index < page ? 'back' : 'forward', index);
   }
 
   const submit = <button type="submit" form={id} className="ui-button cc-reg-next" disabled={busy}
@@ -134,14 +135,14 @@ export function RegistrationForm({id, active, busy, multipleGuests, festival, co
   </form>;
 }
 
-export function ResultPages({children, festival}: {children: ReactNode[]; festival: boolean}) {
+export function ResultPages({children, festival, onPageTurn}: {children: ReactNode[]; festival: boolean; onPageTurn: PageTurn}) {
   const [index, setIndex] = useState(0);
   const current = Math.min(index, children.length - 1);
   const position = useRef<HTMLSpanElement>(null);
   function go(next: number) {
     flushSync(() => setIndex(next));
     position.current?.focus();
-    playFestivalTransition(position.current, next < current ? 'back' : 'forward');
+    onPageTurn(position.current, next < current ? 'back' : 'forward', next);
   }
   if (!festival) return <ul className="cc-reg-results">{children}</ul>;
   return <>

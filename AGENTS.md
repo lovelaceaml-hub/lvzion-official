@@ -59,6 +59,8 @@ For Study Rooms, use docs/study-rooms/README.md. Historical installation receipt
 
 For concert invitation, registration, and ticket work, follow [the concert guide](docs/concert/README.md) and its focused check instructions. Treat the current concert release and device checks in that guide as the handoff for this feature.
 
+For Healing Concert registration (Anthony, 2026-11-21), keep the original leaf sweep and vary it only a little. Use no generated images. Show playable examples before publishing.
+
 ## Verification
 
 Use Node 24. Run `npm ci --ignore-scripts`, `npm run build` and `npm run test:browser`. Browser tests use a loopback-only server with activation disabled. For real local Auth signup tests, run `LVZ_SIGNUP_INTEGRATION=true node tests/integration/start-stack.mjs`, then `LVZ_INTEGRATION_DIR=/tmp/lvz-integration node scripts/test-signup-integration.mjs`, then `node tests/integration/stop-stack.mjs`. Use a new disposable integration directory containing only fictional identities and ephemeral test credentials. Never commit or publish that directory or send real addresses to local SMTP.

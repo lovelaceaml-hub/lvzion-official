@@ -1,6 +1,6 @@
 'use client';
 
-import {useEffect, useEffectEvent, useLayoutEffect, useId, useRef, useState, type ReactNode} from 'react';
+import {useCallback, useEffect, useEffectEvent, useLayoutEffect, useId, useRef, useState, type ReactNode} from 'react';
 import {ArrowLeft, ChevronRight, UserRound, UsersRound} from '../home-icons';
 import {RegistrationForm, ResultPages} from './form-layout';
 import {ChoiceArt, type ChoiceArtKind} from './choice-art';
@@ -216,16 +216,21 @@ function RegistrationFlow({festival, eventId, event, hostToken, footerSlot, pers
   const success = (step === 'tickets' && !tools && !existing && tickets.length > 0) ||
     (step === 'manage' && !manageOnly && invitations.length > 0);
   const transition = festival && success ? 'success' : direction.current;
-  const lastScene = useRef<{step: Step; index: number} | null>(null);
+  const route = steps.join('/') + (step === 'invite' ? '/' + inviteIndex : '');
+  const visited = useRef<{route: string; page: number}[]>([]);
+  const playStep = useCallback((target: HTMLElement | null, direction: 'forward' | 'back' | 'success', page?: number) => {
+    const path = visited.current;
+    const last = path.at(-1);
+    const currentPage = page ?? (last?.route === route ? last.page : 0);
+    // Back reuses the destination's sweep, including after a paged form or a branch.
+    const previous = path.findIndex(point => point.route === route && point.page === currentPage);
+    if (previous < 0) path.push({route, page:currentPage});
+    else path.length = previous + 1;
+    return playFestivalTransition(target, direction, path.length % 2 === 0 ? 6 : 0);
+  }, [route]);
   useLayoutEffect(() => {
-    if (festival && active) {
-      const previous = lastScene.current;
-      lastScene.current = {step, index:inviteIndex};
-      const context = previous?.step === step && !tools
-        ? previous.index !== inviteIndex ? 'recipient-page' : 'return' : undefined;
-      return playFestivalTransition(formHeading.current, transition, context);
-    }
-  }, [festival, active, step, inviteIndex, transition, tools]);
+    if (festival && active) return playStep(formHeading.current, transition);
+  }, [festival, active, playStep, transition]);
 
   const previousHeight = useRef(0);
   function rememberHeight() {
@@ -394,7 +399,7 @@ function RegistrationFlow({festival, eventId, event, hostToken, footerSlot, pers
   const form = (children: ReactNode, label: string, action: () => Promise<void> | void) => {
     return <RegistrationForm key={step} id={formId} active={active} busy={busy}
       multipleGuests={step === 'guest' && names.length > 1} festival={festival} confirmAttendance={confirmingParty}
-      footer={footerSlot} progress={<FieldProgress/>} label={label} onFinish={source => answer(source, action)}>
+      footer={footerSlot} onPageTurn={playStep} progress={<FieldProgress/>} label={label} onFinish={source => answer(source, action)}>
       {children}
     </RegistrationForm>;
   };
@@ -484,7 +489,7 @@ function RegistrationFlow({festival, eventId, event, hostToken, footerSlot, pers
       }
       case 'manage': return <>
         {festival && !manageOnly && invitations.length > 0 && <p className="cc-hint cc-festival-thanks"><Gesture kind="gratitude"/> Thank you for inviting your guests.</p>}
-        {invitations.length ? <ResultPages festival={festival}>{invitations.map(item => <li key={item.id}>
+        {invitations.length ? <ResultPages festival={festival} onPageTurn={playStep}>{invitations.map(item => <li key={item.id}>
           <div><strong>{item.name}</strong>{item.vip?<span className="cc-vip-badge">VIP</span>:null}</div>
           <small>{item.withdrawn?'Withdrawn':item.accepted?'Registered':item.delivery==='sent'?'Email sent':item.delivery==='failed'?'Email delivery failed':item.hasEmail?'Email pending':'Personal link ready'}</small>
           {!item.withdrawn && !item.accepted ? <div className="cc-reg-tools">

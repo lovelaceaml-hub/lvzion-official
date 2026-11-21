@@ -1,27 +1,9 @@
-import {openFestivalSky, type FestivalScene} from './festival-sky';
+import {openFestivalSky, type FestivalDirection, type LeafRise} from './festival-sky';
 import './festival-motion.css';
 import './register-attention.css';
 
-type FestivalDirection = 'forward' | 'back' | 'success';
-
 const reducedMotion = '(prefers-reduced-motion: reduce)';
 const activeTransitions = new WeakMap<HTMLDialogElement, () => void>();
-const stepScenes: Record<string, FestivalScene> = {
-  start:'horizon', member:'curtains', identity:'halo', guest:'hearts', sender:'ribbon',
-  quantity:'sparkles', invite:'page-turn', verifySender:'beam', manage:'pearls',
-  recover:'ripple', verifyRecovery:'trails', tickets:'gold',
-};
-
-const entrances: Partial<Record<FestivalScene, string>> = {
-  horizon:'translateY(10px)', curtains:'translateX(18px) rotateY(12deg)',
-  halo:'scale(.96)', hearts:'translateY(22px)', ribbon:'scaleX(.96)',
-  sparkles:'scale(.94)', 'page-turn':'translate(16px, 8px) rotate(2deg)',
-  beam:'translateY(-12px)', pearls:'rotate(-2deg) translateY(8px)',
-  ripple:'scale(.985)', trails:'translateY(6px) scale(.97)', gold:'scale(.95)',
-  'ticket-success':'translateY(16px) scale(.94)', return:'translateY(-5px)',
-  'field-page':'translateY(7px)', 'recipient-page':'translateX(10px)',
-  'result-page':'scale(.985)',
-};
 
 const leafFlights = [
   // Start and end heights, size, delay, and color across three depth planes.
@@ -32,9 +14,29 @@ const leafFlights = [
   [86, 12, 8, 137, 'sage'], [54, 20, 7, 152, 'fern'],
 ] as const;
 
+export function createFestivalLeaves(direction: FestivalDirection, rise: LeafRise = 0) {
+  const scene = document.createElement('span');
+  scene.className = 'cc-festival-leaves';
+  scene.inert = true;
+  scene.setAttribute('aria-hidden', 'true');
+  scene.dataset.direction = direction;
+  for (const [start, end, size, delay, color] of leafFlights) {
+    const flight = document.createElement('span');
+    flight.className = 'cc-leaf-flight';
+    flight.style.setProperty('--flight-from', start+'%');
+    flight.style.setProperty('--flight-to', (end - rise)+'%');
+    flight.style.setProperty('--leaf-size', size+'cqi');
+    flight.style.setProperty('--leaf-delay', delay+'ms');
+    flight.dataset.color = color;
+    flight.append(document.createElement('i'));
+    scene.append(flight);
+  }
+  return scene;
+}
+
 // Shared by opening, route changes and the adaptive form pager.
-export function playFestivalTransition(target: HTMLElement | null, stepDirection: FestivalDirection,
-  context?: 'return' | 'recipient-page') {
+export function playFestivalTransition(target: HTMLElement | null, stepDirection: Exclude<FestivalDirection, 'open'>,
+  pathRise: LeafRise) {
   const section = target?.closest<HTMLElement>('.cc-registration[data-festival]');
   const sheet = section?.closest<HTMLDialogElement>('.cc-concert-stage[open]');
   if (!section || !sheet || target?.closest('[hidden]')) return;
@@ -47,9 +49,7 @@ export function playFestivalTransition(target: HTMLElement | null, stepDirection
 
   const direction = opening ? 'open' : stepDirection;
   const pager = target?.closest<HTMLElement>('.cc-page-nav');
-  const motif: FestivalScene = opening ? 'open' : context ??
-    (pager ? pager.dataset.for === 'form' ? 'field-page' : 'result-page' :
-      success && section.dataset.step === 'tickets' ? 'ticket-success' : stepScenes[section.dataset.step ?? ''] ?? 'horizon');
+  const rise = opening || success ? 0 : pathRise;
   const form = section.querySelector('.cc-reg-form');
   const content = (pager?.dataset.for === 'results'
     ? Array.from(section.querySelectorAll<HTMLElement>('.cc-reg-results'))
@@ -57,19 +57,14 @@ export function playFestivalTransition(target: HTMLElement | null, stepDirection
       : Array.from(section.querySelectorAll<HTMLElement>(':scope > :not(h3, .cc-reg-back, .cc-page-nav, [hidden])')))
     .flatMap(element => element.matches('.cc-choices') ? Array.from(element.children) as HTMLElement[] : [element])
     .filter(element => !element.contains(document.activeElement) && !element.closest('[hidden]'));
-  const paging = motif.endsWith('-page');
-  const entry = opening ? 'translateY(12px)' : direction === 'back'
-    ? paging ? 'translateX(-7px)' : 'translateY(-6px)' : entrances[motif] ?? 'none';
-  // Keep the heading visible and the field hit targets stationary during entry.
-  // Animate children so the section does not contain the floating Back button.
+  const entry = opening || success ? 'translateY(12px)' : `translateX(${direction === 'back' ? -24 : 24}px)`;
+  // Fields and the focused heading keep their positions during the sweep.
   const animations = content.map((element, index) => {
-    const transform = element.hasAttribute('data-form-unit') ? 'none' :
-      motif === 'curtains' && index % 2 === 0 ? 'translateX(-18px) rotateY(-12deg)' : entry;
+    const transform = element.hasAttribute('data-form-unit') ? 'none' : entry;
     return element.animate(
-      [{transform, opacity:opening ? 0 : paging ? .7 : .35}, {transform:'none', opacity:1}],
-      {id:'festival-entry-' + motif, delay:(opening ? 220 : paging ? 0 : 35) + Math.min(index, 4)*(motif === 'beam' ? 70 : 35),
-        duration:opening ? 350 : paging ? 280 : motif === 'ripple' ? 520 : 380,
-        easing:'cubic-bezier(.19,.72,.24,1)', fill:'backwards'},
+      [{transform, opacity:opening ? 0 : .35}, {transform:'none', opacity:1}],
+      {id:'festival-step', delay:(opening ? 220 : 35) + Math.min(index, 3)*30,
+        duration:opening ? 350 : 300, easing:'cubic-bezier(.19,.72,.24,1)', fill:'backwards'},
     );
   });
   if (opening) {
@@ -86,24 +81,10 @@ export function playFestivalTransition(target: HTMLElement | null, stepDirection
     ));
   }
 
-  const scene = document.createElement('span');
-  scene.className = 'cc-festival-leaves';
-  scene.setAttribute('aria-hidden', 'true');
-  scene.dataset.direction = direction;
-  for (const [start, end, size, delay, color] of opening ? leafFlights : []) {
-    const flight = document.createElement('span');
-    flight.className = 'cc-leaf-flight';
-    flight.style.setProperty('--flight-from', start+'%');
-    flight.style.setProperty('--flight-to', end+'%');
-    flight.style.setProperty('--leaf-size', size+'cqi');
-    flight.style.setProperty('--leaf-delay', delay+'ms');
-    flight.dataset.color = color;
-    flight.append(document.createElement('i'));
-    scene.append(flight);
-  }
+  const scene = createFestivalLeaves(direction, rise);
   sheet.dataset.scene = direction;
-  if (opening) sheet.append(scene);
-  const sky = openFestivalSky(sheet, motif, direction === 'back');
+  sheet.append(scene);
+  const sky = openFestivalSky(sheet, direction, rise);
 
   const stopForFocus = (event: FocusEvent) => {
     if (!(event.target instanceof HTMLElement)) return;
@@ -116,14 +97,14 @@ export function playFestivalTransition(target: HTMLElement | null, stepDirection
     for (const animation of animations) animation.cancel();
     window.clearTimeout(timer);
     scene.remove();
-    sky?.remove();
+    sky.remove();
     delete sheet.dataset.scene;
     preference.removeEventListener('change', clear);
     document.removeEventListener('visibilitychange', clear);
     sheet.removeEventListener('close', clear);
     sheet.removeEventListener('focusin', stopForFocus);
   };
-  const timer = window.setTimeout(clear, opening ? 1380 : paging ? 560 : 1100);
+  const timer = window.setTimeout(clear, 1380);
   activeTransitions.set(sheet, clear);
   preference.addEventListener('change', clear);
   document.addEventListener('visibilitychange', clear);
