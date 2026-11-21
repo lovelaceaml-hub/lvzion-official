@@ -22,6 +22,7 @@ export default function ConcertDialog({label, title, primary = false, children, 
 }) {
   const dialog = useRef<HTMLDialogElement>(null);
   const corner = useRef<HTMLButtonElement>(null);
+  const syncViewport = useRef<(() => void) | null>(null);
   const titleId = useId();
   const fieldAtFocus = useRef('');
   const themed = presentation === 'registration' && showPoster;
@@ -37,7 +38,9 @@ export default function ConcertDialog({label, title, primary = false, children, 
     }
     button.focus({preventScroll:true});
     sheet.toggleAttribute('data-opening-scene', opensScene);
+    sheet.removeAttribute('data-keyboard');
     sheet.showModal();
+    syncViewport.current?.();
     onOpen?.(fromHelp);
     corner.current?.showPopover?.();
   }
@@ -46,26 +49,56 @@ export default function ConcertDialog({label, title, primary = false, children, 
     const sheet = dialog.current;
     const viewport = window.visualViewport;
     if (!sheet || !viewport) return;
-    function resize() {
-      if (!sheet || !viewport) return;
-      const typing = sheet.contains(document.activeElement) && document.activeElement?.matches('input:not([type=checkbox]),textarea');
-      sheet.toggleAttribute('data-keyboard', Boolean(typing && window.innerHeight - viewport.height > 100 && viewport.scale < 1.1));
-      sheet.style.setProperty('--keyboard-inset', Math.max(0, window.innerHeight - viewport.offsetTop - viewport.height) + 'px');
-      sheet.style.setProperty('--visible-height', viewport.height + 'px');
-      sheet.style.setProperty('--visible-top', viewport.offsetTop + 'px');
+    const body = sheet.querySelector<HTMLElement>('.cc-dialog-inner');
+    let frame = 0;
+    let revealField = false;
+
+    function update() {
+      if (!sheet || !viewport || !sheet.open) return;
+      // Safari can keep the viewport shortened after blur or a step change.
+      const layoutHeight = Math.max(window.innerHeight, document.documentElement.clientHeight);
+      const unzoomed = Math.abs(viewport.scale - 1) < .05;
+      const keyboard = unzoomed && layoutHeight - viewport.height > 100;
+      sheet.toggleAttribute('data-keyboard', keyboard);
+      const visibleHeight = unzoomed ? viewport.height : layoutHeight;
+      const visibleTop = keyboard ? Math.max(0, viewport.offsetTop) : 0;
+      sheet.style.setProperty('--visible-height', visibleHeight + 'px');
+      sheet.style.setProperty('--visible-top', visibleTop + 'px');
+      sheet.style.setProperty('--keyboard-inset', (keyboard ? Math.max(0, layoutHeight - visibleTop - visibleHeight) : 0) + 'px');
+
+      const field = document.activeElement;
+      if (!revealField || !keyboard || !body || !body.contains(field) ||
+          !field?.matches('input, textarea, select')) return;
+      // Reveal the focused field inside the sheet without scrolling the page.
+      const bounds = body.getBoundingClientRect();
+      const control = field.getBoundingClientRect();
+      const label = field.closest('.ui-field')?.getBoundingClientRect();
+      if (control.bottom > bounds.bottom - 8) body.scrollTop += control.bottom - bounds.bottom + 8;
+      else if ((label?.top ?? control.top) < bounds.top + 8) body.scrollTop += (label?.top ?? control.top) - bounds.top - 8;
     }
-    resize();
-    viewport.addEventListener('resize', resize);
-    viewport.addEventListener('scroll', resize);
-    window.addEventListener('resize', resize);
-    sheet.addEventListener('focusin', resize);
-    sheet.addEventListener('focusout', resize);
+
+    function schedule(event: Event) {
+      revealField ||= event.type !== 'scroll';
+      if (frame) return;
+      frame = window.requestAnimationFrame(() => {
+        frame = 0;
+        update();
+        revealField = false;
+      });
+    }
+
+    syncViewport.current = update;
+    viewport.addEventListener('resize', schedule);
+    viewport.addEventListener('scroll', schedule);
+    window.addEventListener('resize', schedule);
+    sheet.addEventListener('focusin', schedule);
     return () => {
-      window.removeEventListener('resize', resize);
-      viewport.removeEventListener('resize', resize);
-      viewport.removeEventListener('scroll', resize);
-      sheet.removeEventListener('focusin', resize);
-      sheet.removeEventListener('focusout', resize);
+      syncViewport.current = null;
+      window.cancelAnimationFrame(frame);
+      window.removeEventListener('resize', schedule);
+      viewport.removeEventListener('resize', schedule);
+      viewport.removeEventListener('scroll', schedule);
+      sheet.removeEventListener('focusin', schedule);
     };
   }, []);
   return <>
@@ -93,8 +126,13 @@ export default function ConcertDialog({label, title, primary = false, children, 
         if (field instanceof HTMLSelectElement || (field instanceof HTMLInputElement && field.type === 'checkbox')) acknowledgeField(field);
       }}
       onClickCapture={e => {
-        const button = e.target instanceof Element ? e.target.closest<HTMLButtonElement>('.cc-party-size button') : null;
-        if (button) acknowledgeField(button);
+        if (!(e.target instanceof Element)) return;
+        const focused = document.activeElement;
+        if (e.target.closest('button.cc-reg-back, button.cc-corner-help, button.cc-dialog-close') &&
+            e.currentTarget.contains(focused) &&
+            (focused instanceof HTMLInputElement || focused instanceof HTMLTextAreaElement)) focused.blur();
+        const partySize = e.target.closest<HTMLButtonElement>('.cc-party-size button');
+        if (partySize) acknowledgeField(partySize);
       }}
     >
       <div className="ui-sheet-body cc-dialog-inner">

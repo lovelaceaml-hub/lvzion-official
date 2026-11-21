@@ -349,6 +349,73 @@ test('adaptive form paging alternates the leaves and preserves focus and field p
   await expect(dialog.getByLabel('Your full name')).toHaveValue('Fictional Visitor');
 });
 
+test('sender fields stay in place through the iPhone keyboard lifecycle', async ({page}) => {
+  await page.setViewportSize({width:390, height:844});
+  const dialog = await openRegistration(page);
+  await dialog.getByRole('button', {name:'I am a member.'}).click();
+  await dialog.getByRole('button', {name:'I am sending an invitation.'}).click();
+  const name = dialog.getByLabel('Your full name');
+  const email = dialog.getByLabel('Your email address');
+  const poster = dialog.locator('.cc-poster-stage');
+  await expect(name).toBeVisible();
+  await expect(poster).toBeHidden();
+  const settledTop = (await dialog.boundingBox())!.y;
+  expect(await email.evaluate(field => parseFloat(getComputedStyle(field).fontSize))).toBeGreaterThanOrEqual(16);
+
+  const viewportHeight = await page.evaluate(() => window.visualViewport!.height);
+  async function resizeKeyboard(height: number, top = 0, scale = 1) {
+    await page.evaluate(({height, top, scale}) => {
+      const visual = window.visualViewport!;
+      Object.defineProperties(visual, {
+        height:{configurable:true, value:height},
+        offsetTop:{configurable:true, value:top},
+        scale:{configurable:true, value:scale},
+      });
+      visual.dispatchEvent(new Event('resize'));
+    }, {height, top, scale});
+  }
+
+  async function expectAboveKeyboard(control: Locator) {
+    await expect.poll(() => control.evaluate(element => {
+      const rect = element.getBoundingClientRect();
+      const visual = window.visualViewport!;
+      return rect.top >= visual.offsetTop - 1 &&
+        rect.bottom <= visual.offsetTop + visual.height + 1;
+    })).toBe(true);
+  }
+
+  await name.fill('Fictional Sender');
+  await resizeKeyboard(315);
+  await expect(dialog).toHaveAttribute('data-keyboard', '');
+  expect((await dialog.boundingBox())!.y).toBeCloseTo(settledTop, 0);
+  await email.fill('sender@example.invalid');
+  await resizeKeyboard(245, 24, 1.01);
+  await expect.poll(async () => Math.round((await dialog.boundingBox())!.y - settledTop)).toBe(24);
+  await expect.poll(async () => {
+    const field = (await email.boundingBox())!;
+    const body = (await dialog.locator('.cc-dialog-inner').boundingBox())!;
+    return field.y >= body.y - 1 && field.y + field.height <= body.y + body.height + 1;
+  }).toBe(true);
+  await expect(email).toBeFocused();
+  await expect(dialog.locator('.cc-page-nav:visible')).toHaveCount(0);
+  await expectAboveKeyboard(email);
+  await expectAboveKeyboard(dialog.getByRole('button', {name:'Continue'}));
+  await expectAboveKeyboard(dialog.getByRole('button', {name:'Tickets & help'}));
+
+  await dialog.getByRole('button', {name:'Back', exact:true}).click();
+  await expect(dialog.getByRole('button', {name:'I am sending an invitation.'})).toBeVisible();
+  await expect(dialog).toHaveAttribute('data-keyboard', '');
+  await expect(poster).toBeHidden();
+  await expect(dialog.locator('.cc-festival-sky')).toHaveCount(0);
+
+  await resizeKeyboard(viewportHeight);
+  await expect(dialog).not.toHaveAttribute('data-keyboard', '');
+  await expect(poster).toBeVisible();
+  await dialog.getByRole('button', {name:'I am sending an invitation.'}).click();
+  await expect(name).toHaveValue('Fictional Sender');
+  await expect(email).toHaveValue('sender@example.invalid');
+});
+
 test('invitation, verification and paged results follow the same leaf sequence', async ({page}) => {
   await page.setViewportSize({width:390,height:844});
   await page.emulateMedia({reducedMotion:'no-preference'});

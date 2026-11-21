@@ -88,11 +88,9 @@ function Choice({children, icon, festival, selected, onClick}: {
 function focusRegistrationStep(heading: HTMLHeadingElement | null) {
   const dialog = heading?.closest('dialog');
   if (!dialog?.open) return;
-  if (!dialog.classList.contains('cc-festival-stage')) {
-    dialog.scrollTop = 0;
-    const body = heading?.closest('.cc-dialog-inner');
-    if (body) body.scrollTop = 0;
-  }
+  dialog.scrollTop = 0;
+  const body = heading?.closest('.cc-dialog-inner');
+  if (body) body.scrollTop = 0;
   heading?.focus({preventScroll: true});
 }
 

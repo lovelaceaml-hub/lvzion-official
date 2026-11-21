@@ -1,5 +1,11 @@
 # Concert release and review
 
+## iPhone keyboard stability follow-up
+
+The phone layout reserves space for text entry before focus. While the keyboard is visible, the form scrolls inside the card, page boundaries stay fixed and transition effects pause. Back and valid form navigation dismiss the keyboard while the viewport catches up. The poster and motion resume on the appropriate steps after the viewport recovers.
+
+Opus reviewed the refactor and its follow-up. Copilot identified a test gap, so the regression now measures the field, Continue and Help against a simulated keyboard viewport. The production build and all 21 tests across the two focused concert browser specs passed. The keyboard test simulates delayed dismissal, a 24 px viewport offset, slight scale variation and draft restoration. A physical iPhone check remains open. The full repository suite was not run. This follow-up is pending publication.
+
 ## Heart, expression and gold sparkle release
 
 The update adds four accent combinations to the restored leaf sweep. The welcoming wave, inclusion gesture, consideration gesture and gratitude bow use the existing concert illustrations. Paired rose and lavender hearts mark the invitation. The ticket reveal uses champagne hearts and five gold glints. Both leaf heights, timing and the artwork files are unchanged.
