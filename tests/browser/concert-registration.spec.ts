@@ -124,6 +124,30 @@ test('the festival Register button and its label stay centered with help visible
   await expect.poll(() => greeting.evaluate(image => (image as HTMLImageElement).naturalWidth)).toBeGreaterThan(0);
 });
 
+test('registration scenes sweep forward and back, then clear and respect reduced motion', async ({page}) => {
+  await page.emulateMedia({reducedMotion:'no-preference'});
+  const dialog = await openRegistration(page);
+  const scene = dialog.locator('.cc-festival-leaves');
+  await expect(scene).toHaveAttribute('data-direction', 'open');
+  await expect(scene.locator('.cc-leaf-flight')).toHaveCount(10);
+  await expect(scene).toHaveCSS('pointer-events', 'none');
+  await expect(scene).toHaveCount(0);
+
+  await dialog.getByRole('button', {name:'I am a member.'}).click();
+  await expect(scene).toHaveAttribute('data-direction', 'forward');
+  await expect(scene).toHaveCount(0);
+  await expect(dialog.getByRole('heading', {level:3})).toBeFocused();
+
+  await dialog.getByRole('button', {name:'Back', exact:true}).click();
+  await expect(scene).toHaveAttribute('data-direction', 'back');
+  await expect(scene).toHaveCSS('transform', 'matrix(-1, 0, 0, 1, 0, 0)');
+  await page.emulateMedia({reducedMotion:'reduce'});
+  await expect(scene).toHaveCount(0);
+  await dialog.getByRole('button', {name:'I am a guest.'}).click();
+  await expect(dialog.getByLabel('Your full name')).toBeVisible();
+  await expect(dialog).not.toHaveAttribute('data-scene');
+});
+
 test('VIP details follow the recipient draft and disappear when that recipient is removed', async ({page}) => {
   let submitted: InviteDraft[] = [];
   await page.route('**/api/concert/registration', route => {

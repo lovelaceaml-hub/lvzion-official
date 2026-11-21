@@ -96,9 +96,6 @@ export default function ConcertDialog({label, title, primary = false, children, 
           <button className="cc-dialog-close" type="button" aria-label="Close" onClick={() => dialog.current?.close()}><X size={21} aria-hidden="true"/></button>
         </header>
         {showPoster ? <div className="cc-poster-stage">
-          {themed && <div className="cc-festival-foliage" aria-hidden="true">
-            <span/><span/>
-          </div>}
           <div className="cc-program-fan">
             <Image className="cc-registration-poster" src={PEACE_CONCERT_POSTER}
               alt={PEACE_CONCERT_TITLE + ' concert poster'} width={1280} height={720} unoptimized/>

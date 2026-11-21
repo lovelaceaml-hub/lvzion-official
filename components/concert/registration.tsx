@@ -118,7 +118,7 @@ export default function Registration({eventId, event, hostToken, personal, invit
   const [footerSlot, setFooterSlot] = useState<HTMLDivElement | null>(null);
   return <ConcertDialog
     label={recoveryOnly ? 'Tickets & help' : mode === 'invite' ? 'Create named invitations' : 'Tap here to register'}
-    title={recoveryOnly ? 'Registration help' : 'Event Invitation and Registration'}
+    title={recoveryOnly ? 'Registration help' : festival ? 'The Words of Mother’s Love' : 'Event Invitation and Registration'}
     primary={!recoveryOnly}
     presentation="registration"
     showPoster={showPoster} invitedBy={invitedBy}
@@ -217,7 +217,7 @@ function RegistrationFlow({festival, eventId, event, hostToken, footerSlot, pers
     (step === 'manage' && !manageOnly && invitations.length > 0);
   const transition = festival && success ? 'success' : direction.current;
   const wasActive = useRef(false);
-  useEffect(() => {
+  useLayoutEffect(() => {
     const opening = active && !wasActive.current;
     wasActive.current = active;
     if (festival && active) return playFestivalTransition(formHeading.current, opening && !success ? 'open' : transition);
