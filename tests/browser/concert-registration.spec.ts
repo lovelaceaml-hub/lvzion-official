@@ -467,4 +467,5 @@ test('short phone keeps ordinary questions fixed and confines a large party to i
   await dialog.getByLabel('Attendee 10 full name').fill('Fictional Companion');
   await assertFit();
   await expect(dialog.getByRole('button',{name:'Get tickets'})).toBeInViewport({ratio:1});
+  await expect(dialog.getByRole('button',{name:'Get tickets'})).toHaveCSS('clip-path', 'none');
 });

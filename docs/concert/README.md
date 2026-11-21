@@ -33,6 +33,8 @@ An open event can enforce a seat limit. The server checks capacity and registrat
 
 ## Handoff for the next review
 
+The celestial registration redesign is staged on [the private design branch](https://github.com/lovelaceaml-hub/lvzion-official/tree/design/heavenly-concert-registration). The Register button opens from a dusk-blue arch into sunrise. Answers lead into forward or reverse leaf sweeps, and completed registrations settle into gold light around the ticket. Help returns to the same draft with a shorter scene change. Reduce Motion skips the visual effects. The [celestial redesign verification](VERIFICATION.md#celestial-registration-redesign) records the reviewed changes and release checks.
+
 The festival redesign shipped from `7a8911b760699d69928c8cfcf1ad02627ce661c6` on `main`. Vercel production deployment `dpl_9qKuBbbxNipxAL7d7sUmPwxpi3or` in `lvzion/lvzion-official` serves the shared invitation. The release smoke check covered the centered ribbon, greeting, guest form, return from Help and opening leaves. [Live invitation](https://lvz.app/concert/rsvp) · [Release checks and limitations](VERIFICATION.md#festival-registration-redesign) · [Download the synthetic phone walkthrough](qa/mobile-registration.mp4)
 
 **Pick up with a physical iPhone and Android phone.** Open the shared invitation in Safari and Chrome. Rotate the phone, open the guest form, bring up the keyboard and return from Help. Check that the focused field, action and help control stay reachable and that only an overflowing list of additional names scrolls. Repeat with Reduce Motion. Profile the first tap and question changes on-device. The largest observed transition frame in the four-times CPU slowdown test was 153 ms.

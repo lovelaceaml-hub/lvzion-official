@@ -1,5 +1,17 @@
 # November 20 concert release and review
 
+## Celestial registration redesign
+
+The design revision is `fcb6841` on [the private design branch](https://github.com/lovelaceaml-hub/lvzion-official/tree/design/heavenly-concert-registration). The existing production release is recorded below.
+
+The Register button and form share the invitation’s artwork and dawn palette. An opening bloom leads into the campaign greeting. Near, middle and far leaves travel at different speeds across question changes and reverse direction on Back. Answers give brief visual feedback, Help uses a regular step change, and a warmer arrival reveals the ticket. Opus critiqued the concept. Fable’s first review prompted the visible horizon, different leaf speeds and warm ticket reveal. Fable approved the revised design from source, and Copilot’s final review found no actionable code issues.
+
+The motion uses staged reveals inspired by the public Apple product scripts and the interaction timing in OpenAI’s GPT-6.2 paper lamp builder. The concert uses its own artwork and the campaign’s greeting, consideration and gratitude themes. [Apple iPhone](https://www.apple.com/iphone-18-pro/) · [Apple MacBook Pro](https://www.apple.com/macbook-pro/) · [OpenAI interactive web examples](https://openai.com/index/introducing-gpt-6-2-astra-sol/#computer-use-and-interactive-web-design)
+
+On this design revision the cloud ran the production build and both focused Chromium concert specs. TypeScript and the build passed after a retry, and all 17 browser tests passed. Coverage included the Register button’s alignment, opening, leaf speeds, forward and reverse motion, keyboard focus, Help and draft restoration, Reduce Motion, a 320 × 568 form and synthetic QR issuance. The 10 focused concert unit tests also passed. The 390 × 844 and 320 × 568 visual inspection identified a legacy ribbon cut on the form action, which was removed in the follow-up. Physical iPhone, Android and VoiceOver checks remain open.
+
+The first production build reported that the pinned Next.js 16.4.3 is affected by published advisories. Retrying produced a build for local QA. The project's dependency version is still 16.4.3. Next.js 16.4.5 lists the patches. [Next.js security release](https://github.com/vercel/next.js/releases/tag/v16.4.5)
+
 ## Festival registration redesign
 
 The release under review is commit `7a8911b`, Vercel deployment `dpl_9qKuBbbxNipxAL7d7sUmPwxpi3or`. The 390 × 844 walkthrough records a local guest registration from the shared entry through ticket options, using fictional details and a fixture QR. The promo player is empty in this fixture. [Phone walkthrough](qa/mobile-registration.mp4) · [Handoff and focused test commands](README.md#handoff-for-the-next-review)
