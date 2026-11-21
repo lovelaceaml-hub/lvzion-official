@@ -10,6 +10,12 @@ The final alignment review used the production build with fictional data. Shared
 
 The tested source tree merged in [PR #95](https://github.com/lovelaceaml-hub/lvzion-official/pull/95) as `de07495539e0012d6535292f91128c1731fa2950`. Vercel built and promoted `dpl_8rk1LC4LVvsS8QvGirBVUXJeE3hG` to lvz.app. The live phone-size check verified the one-minute Register cycle, opening and member and guest sweeps, the new fields, and the matching invalid invitation, status and ticket screens. [Live registration](https://lvz.app/concert/rsvp)
 
+## Registration bottom anchor follow-up
+
+The mobile sender form jumped to the top as soon as it appeared because its text fields triggered a top-position rule. Registration now uses a common bottom anchor across questions. The keyboard raises that anchor as it covers the screen, and dismissing it restores the previous position. The compact poster and keyboard scrolling behavior remain in place.
+
+A 390 × 844 regression reproduced a 452 px change in the bottom edge before the fix. On the updated production build it verified the opening, member choice and sender form share an anchor, then tested focus before the keyboard opens, simulated keyboard heights, dismissal and Back. The build and all 18 focused registration browser checks passed. A physical iPhone was not used for this check.
+
 ## iPhone keyboard stability follow-up
 
 The phone layout reserves space for text entry before focus. While the keyboard is visible, the form scrolls inside the card, page boundaries stay fixed and transition effects pause. Back and valid form navigation dismiss the keyboard while the viewport catches up. The poster and motion resume on the appropriate steps after the viewport recovers.

@@ -343,17 +343,27 @@ test('adaptive form paging alternates the leaves and preserves focus and field p
   await expect(dialog.getByLabel('Full Name', {exact:true})).toHaveValue('Fictional Visitor');
 });
 
-test('sender fields stay in place through the iPhone keyboard lifecycle', async ({page}) => {
+test('registration keeps its bottom anchor until the iPhone keyboard opens', async ({page}) => {
   await page.setViewportSize({width:390, height:844});
+  await page.emulateMedia({reducedMotion:'reduce'});
   const dialog = await openRegistration(page);
+  const cardBottom = () => dialog.evaluate(sheet => sheet.getBoundingClientRect().bottom);
+  const landing = await cardBottom();
+  async function expectRestingPosition() {
+    await expect(dialog).not.toHaveAttribute('data-keyboard', '');
+    await expect.poll(async () => Math.abs(await cardBottom() - landing)).toBeLessThan(1);
+  }
+
   await dialog.getByRole('button', {name:'I am a member.'}).click();
+  await expectRestingPosition();
   await dialog.getByRole('button', {name:'I’m inviting someone.'}).click();
   const name = dialog.getByLabel('Full Name', {exact:true});
   const email = dialog.getByLabel('Email', {exact:true});
   const poster = dialog.locator('.cc-poster-stage');
   await expect(name).toBeVisible();
   await expect(poster).toBeHidden();
-  const settledTop = (await dialog.boundingBox())!.y;
+  await expectRestingPosition();
+  const settled = (await dialog.boundingBox())!;
   expect(await email.evaluate(field => parseFloat(getComputedStyle(field).fontSize))).toBeGreaterThanOrEqual(16);
 
   const viewportHeight = await page.evaluate(() => window.visualViewport!.height);
@@ -379,12 +389,18 @@ test('sender fields stay in place through the iPhone keyboard lifecycle', async 
   }
 
   await name.fill('Fictional Sender');
+  await expectRestingPosition();
+  await resizeKeyboard(530);
+  await expect.poll(async () => Math.abs(await cardBottom() - (landing - (viewportHeight - 530)))).toBeLessThan(1);
+  expect((await dialog.boundingBox())!.height).toBeCloseTo(settled.height, 0);
+
   await resizeKeyboard(315);
   await expect(dialog).toHaveAttribute('data-keyboard', '');
-  expect((await dialog.boundingBox())!.y).toBeCloseTo(settledTop, 0);
+  await expect.poll(() => cardBottom()).toBeLessThan(315);
+  expect((await dialog.boundingBox())!.y).toBeLessThan(settled.y);
   await email.fill('sender@example.invalid');
   await resizeKeyboard(245, 24, 1.01);
-  await expect.poll(async () => Math.round((await dialog.boundingBox())!.y - settledTop)).toBe(24);
+  await expect.poll(async () => Math.abs(await cardBottom() - (landing - (viewportHeight - 24 - 245)))).toBeLessThan(1);
   await expect.poll(async () => {
     const field = (await email.boundingBox())!;
     const body = (await dialog.locator('.cc-dialog-inner').boundingBox())!;
@@ -396,6 +412,14 @@ test('sender fields stay in place through the iPhone keyboard lifecycle', async 
   await expectAboveKeyboard(dialog.getByRole('button', {name:'Continue'}));
   await expectAboveKeyboard(dialog.getByRole('button', {name:'Tickets & help'}));
 
+  await email.blur();
+  await resizeKeyboard(viewportHeight);
+  await expectRestingPosition();
+  await expect(email).toHaveValue('sender@example.invalid');
+
+  await email.focus();
+  await resizeKeyboard(245, 24, 1.01);
+  await expect(dialog).toHaveAttribute('data-keyboard', '');
   await dialog.getByRole('button', {name:'Back', exact:true}).click();
   await expect(dialog.getByRole('button', {name:'I’m inviting someone.'})).toBeVisible();
   await expect(dialog).toHaveAttribute('data-keyboard', '');
@@ -403,9 +427,10 @@ test('sender fields stay in place through the iPhone keyboard lifecycle', async 
   await expect(dialog.locator('.cc-festival-sky')).toHaveCount(0);
 
   await resizeKeyboard(viewportHeight);
-  await expect(dialog).not.toHaveAttribute('data-keyboard', '');
+  await expectRestingPosition();
   await expect(poster).toBeVisible();
   await dialog.getByRole('button', {name:'I’m inviting someone.'}).click();
+  await expectRestingPosition();
   await expect(name).toHaveValue('Fictional Sender');
   await expect(email).toHaveValue('sender@example.invalid');
 });
