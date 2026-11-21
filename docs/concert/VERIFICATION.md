@@ -1,5 +1,11 @@
 # Concert release and review
 
+## Original leaf sweep draft
+
+The November 21 draft restores the PR 91 leaf sweep. Alternate questions raise the same leaf endpoints six percentage points. Opening and completion use the original path. Back mirrors the destination's earlier path. The original timings, colors and supplied concert artwork are preserved. Fable and Argon challenged the plan before Astra implemented and reviewed it.
+
+The cloud built `8061e6f` and passed all 20 tests across the two focused concert browser specs. The two playable samples passed a 390 px browser comparison with identical timings, hearts and sparkles. At 320 px, Reduce Motion skipped the sweep. Publication awaits Anthony's visual review and approval.
+
 ## Distinct scene update
 
 The registration update gives all twelve destinations individual scenes. Small form pages, recipient changes and result pages use shorter cues. The opening artwork, Help size and Reduce Motion remain as documented in the concert guide.
