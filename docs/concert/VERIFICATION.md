@@ -1,5 +1,11 @@
 # November 20 concert release and review
 
+## Distinct scene update
+
+The registration draft gives all twelve destinations individual scenes. Small form pages, recipient changes and result pages use shorter cues. The opening artwork, Help size and Reduce Motion remain as documented in the concert guide.
+
+Cloud Chromium passed all 20 focused concert browser checks before the last field-position refinement. The final implementation in `5b73477` passed the production build and the three affected checks covering distinct scenes, adaptive form pages, alternate invitations and verification. The cloud sampled three scenes at 390 × 844. The draft awaits publication approval. [Concert guide](README.md)
+
 ## Full-screen registration motion
 
 Register makes two hops with a gold halo. The form rises from the invitation, and hearts, sparkles and leaves cross the viewport on opening, question changes, Back and ticket arrival. The effects clear after the scene, when a control takes focus, or when the form closes. Reduce Motion keeps Register still and skips both layers of the scene. The muted Help circle measures 28 × 28 px inside a 44 × 44 px button on both the invitation and the form.

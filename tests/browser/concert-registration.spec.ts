@@ -168,7 +168,7 @@ test('Register hops twice and remains steady for keyboard and reduced motion', a
   await expect(register).toHaveCSS('animation-name', 'none');
 });
 
-test('registration scenes sweep forward and back across the viewport and respect reduced motion', async ({page}) => {
+test('registration scenes have distinct geometry, preserve opening and Help, and respect reduced motion', async ({page}) => {
   await page.emulateMedia({reducedMotion:'no-preference'});
   const dialog = await openRegistration(page);
   const scene = dialog.locator('.cc-festival-leaves');
@@ -194,30 +194,177 @@ test('registration scenes sweep forward and back across the viewport and respect
   await expect(scene).toHaveCount(0);
   await expect(sky).toHaveCount(0);
 
+  const geometry = sky.locator('b').first();
   await dialog.getByRole('button', {name:'Tickets & help'}).click();
-  await expect(scene).toHaveAttribute('data-direction', 'forward');
+  await expect(geometry).toHaveCSS('animation-name', 'cc-scene-ripple');
   await dialog.getByRole('button', {name:'Back to registration'}).click();
-  await expect(scene).toHaveAttribute('data-direction', 'forward');
-  await expect(scene).toHaveCount(0);
+  await expect(geometry).toHaveCSS('animation-name', 'cc-scene-return');
+  await expect(sky).toHaveCount(0);
 
   await dialog.getByRole('button', {name:'I am a member.'}).click();
-  await expect(scene).toHaveAttribute('data-direction', 'forward');
-  await expect(sky).toHaveAttribute('data-direction', 'forward');
+  await expect(geometry).toHaveCSS('animation-name', 'cc-scene-curtain');
+  const curtains = await sky.locator('b').evaluateAll(shapes => shapes.slice(0, 2).map(shape => ({
+    origin:getComputedStyle(shape).transformOrigin, left:getComputedStyle(shape).left,
+  })));
+  expect(curtains[0].origin).not.toEqual(curtains[1].origin);
+  expect(curtains[0].left).not.toEqual(curtains[1].left);
   const heading = dialog.getByRole('heading', {level:3});
   await expect(heading).toBeFocused();
   await expect(heading).toHaveCSS('opacity', '1');
-  await expect(scene).toHaveCount(0);
+  await expect(heading).toHaveCSS('transform', 'none');
+  await expect(sky).toHaveCount(0);
+
+  await dialog.getByRole('button', {name:'I am registering myself.'}).click();
+  await expect(geometry).toHaveCSS('animation-name', 'cc-scene-halo');
+  await expect(geometry).toHaveCSS('border-radius', '50%');
+  await expect(sky).toHaveCount(0);
+  await dialog.getByRole('button', {name:'Back', exact:true}).click();
+  await expect(geometry).toHaveCSS('animation-name', 'cc-scene-curtain');
+  await expect(geometry).toHaveCSS('animation-direction', 'reverse');
+  await expect(sky).toHaveCount(0);
 
   await dialog.getByRole('button', {name:'Back', exact:true}).click();
-  await expect(scene).toHaveAttribute('data-direction', 'back');
-  await expect(scene).toHaveCSS('transform', 'matrix(-1, 0, 0, 1, 0, 0)');
-  await expect(sky).toHaveCSS('transform', 'matrix(-1, 0, 0, 1, 0, 0)');
+  await expect(geometry).toHaveCSS('animation-name', 'cc-scene-horizon');
+  await expect(geometry).toHaveCSS('animation-direction', 'reverse');
+  await expect(sky).toHaveCount(0);
+  await dialog.getByRole('button', {name:'I am a guest.'}).click();
+  await expect(sky.locator('i').first()).toHaveCSS('animation-name', 'cc-scene-heart-arc');
+  await dialog.getByLabel('Your full name').fill('Fictional Visitor');
+  await expect(sky).toHaveCount(0);
+  await dialog.getByRole('button', {name:'Tickets & help'}).click();
+  await expect(geometry).toHaveCSS('animation-name', 'cc-scene-ripple');
+  await dialog.getByRole('button', {name:'Back to registration'}).click();
+  await expect(geometry).toHaveCSS('animation-name', 'cc-scene-return');
+  await expect(dialog.getByLabel('Your full name')).toHaveValue('Fictional Visitor');
   await page.emulateMedia({reducedMotion:'reduce'});
   await expect(scene).toHaveCount(0);
   await expect(sky).toHaveCount(0);
+  await dialog.getByRole('button', {name:'Back', exact:true}).click();
   await dialog.getByRole('button', {name:'I am a guest.'}).click();
   await expect(dialog.getByLabel('Your full name')).toBeVisible();
   await expect(dialog).not.toHaveAttribute('data-scene');
+
+  await page.keyboard.press('Escape');
+  await page.emulateMedia({reducedMotion:'no-preference'});
+  await page.evaluate(() => Object.defineProperty(HTMLElement.prototype, 'showPopover', {
+    configurable:true, value:undefined,
+  }));
+  await page.getByRole('button', {name:'Tap here to register', exact:true}).click();
+  await expect(sky).not.toHaveAttribute('popover');
+  await expect(sky).toHaveCSS('position', 'absolute');
+  await expect(sky).toHaveCSS('pointer-events', 'none');
+  await expect(sky.locator('i').first()).toHaveCSS('animation-name', 'cc-sky-rise');
+  await expect(sky).toHaveCount(0);
+  await dialog.getByRole('button', {name:'Back', exact:true}).click();
+  await expect(geometry).toHaveCSS('animation-name', 'cc-scene-horizon');
+  await page.keyboard.press('Escape');
+  await expect(sky).toHaveCount(0);
+});
+
+test('adaptive form paging has a quiet scene and a restrained reverse without moving its focus', async ({page}) => {
+  await page.setViewportSize({width:390,height:844});
+  await page.emulateMedia({reducedMotion:'no-preference'});
+  const dialog = await openRegistration(page);
+  await dialog.getByRole('button', {name:'I am a guest.'}).click();
+  const sky = dialog.locator('.cc-festival-sky');
+  await expect(sky.locator('i').first()).toHaveCSS('animation-name', 'cc-scene-heart-arc');
+  await page.setViewportSize({width:320,height:360});
+  const form = dialog.locator('.cc-reg-form:visible');
+  await expect(form).toHaveAttribute('data-layout', 'paged');
+  const inputs = form.locator('input:visible');
+  for (const input of await inputs.all()) {
+    await input.fill(await input.getAttribute('type') === 'email' ? 'visitor@example.invalid' : 'Fictional Visitor');
+  }
+  await dialog.getByRole('button', {name:'Next', exact:true}).click();
+  const geometry = sky.locator('b').first();
+  await expect(geometry).toHaveCSS('animation-name', 'cc-scene-field-page');
+  const position = form.locator('.cc-page-nav span');
+  await expect(position).toBeFocused();
+  await expect(position).toHaveCSS('transform', 'none');
+  const firstField = form.locator('[data-form-unit]:visible').first();
+  await expect(firstField).toHaveCSS('transform', 'none');
+  expect(await firstField.evaluate(unit =>
+    unit.getAnimations().some(animation => animation.id === 'festival-entry-field-page'))).toBe(true);
+  await form.getByRole('button', {name:'Previous page'}).click();
+  await expect(geometry).toHaveCSS('animation-name', 'cc-scene-field-page');
+  await expect(geometry).toHaveCSS('animation-direction', 'reverse');
+  await expect(position).toBeFocused();
+  await expect(sky).toHaveCount(0);
+  await expect(dialog.getByLabel('Your full name')).toHaveValue('Fictional Visitor');
+});
+
+test('alternate invitation and verification steps use distinct scenes and quieter recipient and result paging', async ({page}) => {
+  await page.setViewportSize({width:390,height:844});
+  await page.emulateMedia({reducedMotion:'no-preference'});
+  await page.route('**/api/concert/registration', route => {
+    const input = route.request().postDataJSON();
+    if (input.op === 'requestCode') return route.fulfill({json:{challenge:'fictional-scene-code'}});
+    if (input.op === 'register' || (input.op === 'verifyCode' && input.purpose === 'recovery')) {
+      return route.fulfill({json:{tickets:[{id:'ticket',name:'Fictional Guest',partySize:1,url:'/concert/ticket/scene'}]}});
+    }
+    if (input.op === 'create' || input.op === 'verifyCode') {
+      return route.fulfill({json:{invitations:[1, 2].map(index => ({
+        id:'invitation-' + index, name:'Fictional Guest ' + index, url:'/concert/invitation/scene-' + index,
+        hasEmail:false, withdrawn:false, accepted:false, delivery:'pending',
+      }))}});
+    }
+    return route.fulfill({status:400,json:{error:'Unexpected operation'}});
+  });
+  const dialog = await openRegistration(page);
+  const sky = dialog.locator('.cc-festival-sky');
+  const geometry = sky.locator('b').first();
+  await expect(dialog).toBeVisible();
+  await expect(sky).toHaveCount(0);
+  await dialog.getByRole('button', {name:'I am a member.'}).click();
+  await expect(geometry).toHaveCSS('animation-name', 'cc-scene-curtain');
+  await dialog.getByRole('button', {name:'I am sending an invitation.'}).click();
+  await expect(geometry).toHaveCSS('animation-name', 'cc-scene-ribbon');
+  await dialog.getByLabel('Your full name').fill('Fictional Sender');
+  await dialog.getByLabel('Your email address').fill('sender@example.invalid');
+  await dialog.getByRole('button', {name:'Continue', exact:true}).click();
+  await expect(geometry).toHaveCSS('animation-name', 'cc-scene-sparkle');
+  const cadence = await sky.locator('b').evaluateAll(shapes => shapes.map(shape => getComputedStyle(shape).animationDelay));
+  expect(new Set(cadence).size).toBe(5);
+  await dialog.getByLabel('Number of invitations').selectOption('2');
+  await dialog.getByRole('button', {name:'Add recipients'}).click();
+  await expect(geometry).toHaveCSS('animation-name', 'cc-scene-page-turn');
+  await expect(sky.locator('[data-shape="leaf"]')).toHaveCount(6);
+  await dialog.getByLabel('Guest’s full name').fill('Fictional First');
+  await dialog.getByLabel('Relationship').fill('Friend');
+  await dialog.getByRole('button', {name:'Next recipient'}).click();
+  await expect(geometry).toHaveCSS('animation-name', 'cc-scene-recipient-page');
+  await expect(sky.locator('i')).toHaveCount(0);
+  await dialog.getByLabel('Guest’s full name').fill('Fictional Second');
+  await dialog.getByLabel('Relationship').fill('Friend');
+  await dialog.getByRole('button', {name:'Create invitations', exact:true}).click();
+  await expect(geometry).toHaveCSS('animation-name', 'cc-scene-pearl-fan');
+  await dialog.getByRole('button', {name:'Next invitation', exact:true}).click();
+  await expect(geometry).toHaveCSS('animation-name', 'cc-scene-result-page');
+  await dialog.getByRole('button', {name:'Tickets & help'}).click();
+  await expect(geometry).toHaveCSS('animation-name', 'cc-scene-ripple');
+  await dialog.getByRole('button', {name:'Manage invitations I sent'}).click();
+  await expect(geometry).toHaveCSS('animation-name', 'cc-scene-ribbon');
+  await dialog.getByLabel('Your email address').fill('sender@example.invalid');
+  await dialog.getByRole('button', {name:'Send verification code'}).click();
+  await expect(geometry).toHaveCSS('animation-name', 'cc-scene-beam');
+  await dialog.getByRole('button', {name:'Back', exact:true}).click();
+  await dialog.getByRole('button', {name:'Back', exact:true}).click();
+  await dialog.getByLabel('Registration email').fill('guest@example.invalid');
+  await dialog.getByRole('button', {name:'Send verification code'}).click();
+  await expect(geometry).toHaveCSS('animation-name', 'cc-scene-trail');
+  await dialog.getByLabel('Eight-digit email code').fill('12345678');
+  await dialog.getByRole('button', {name:'Verify email'}).click();
+  await expect(geometry).toHaveCSS('animation-name', 'cc-scene-gold');
+  await page.keyboard.press('Escape');
+  await expect(sky).toHaveCount(0);
+  await page.getByRole('button', {name:'Tap here to register', exact:true}).click();
+  await dialog.getByRole('button', {name:'I am a guest.'}).click();
+  await dialog.getByLabel('Your full name').fill('Fictional Guest');
+  await dialog.getByLabel('Email for tickets').fill('guest@example.invalid');
+  await dialog.getByLabel('Who invited you?').fill('Fictional Host');
+  await dialog.getByRole('button', {name:'Get my ticket'}).click();
+  await expect(geometry).toHaveCSS('animation-name', 'cc-scene-ticket-burst');
+  await expect(dialog.getByRole('heading', {level:3})).toBeFocused();
 });
 
 test('VIP details follow the recipient draft and disappear when that recipient is removed', async ({page}) => {

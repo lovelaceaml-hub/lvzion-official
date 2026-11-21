@@ -1,6 +1,8 @@
 import './festival-sky.css';
 
-type Scene = 'open' | 'forward' | 'back' | 'success';
+export type FestivalScene = 'open' | 'horizon' | 'curtains' | 'halo' | 'hearts' | 'ribbon'
+  | 'sparkles' | 'page-turn' | 'beam' | 'pearls' | 'ripple' | 'trails' | 'gold'
+  | 'ticket-success' | 'return' | 'field-page' | 'recipient-page' | 'result-page';
 
 // From and to positions as viewport percentages, size in pixels, and delay.
 const particles = [
@@ -24,16 +26,27 @@ const particles = [
   ['leaf', 'sage', 42, 85, 102, 34, 39, 185],
 ] as const;
 
-export function openFestivalSky(dialog: HTMLDialogElement, direction: Scene) {
+export function openFestivalSky(dialog: HTMLDialogElement, scene: FestivalScene, back = false) {
   const sky = document.createElement('span');
-  if (typeof sky.showPopover !== 'function') return;
   // A manual popover sits above the modal without changing its focus or hit testing.
-  sky.popover = 'manual';
+  const native = typeof sky.showPopover === 'function';
+  if (native) sky.popover = 'manual';
   sky.inert = true;
   sky.setAttribute('aria-hidden', 'true');
   sky.className = 'cc-festival-sky';
-  sky.dataset.direction = direction;
+  sky.dataset.scene = scene;
+  sky.dataset.direction = scene === 'open' ? 'open' : back ? 'back' : 'forward';
+  if (scene !== 'open') {
+    for (let index = 0; index < 5; index++) {
+      const shape = document.createElement('b');
+      shape.style.setProperty('--scene-index', String(index));
+      sky.append(shape);
+    }
+  }
   for (const [shape, color, startX, startY, endX, endY, size, delay] of particles) {
+    if (scene !== 'open' && !(scene === 'hearts' && shape === 'heart') &&
+        !(scene === 'page-turn' && shape === 'leaf') &&
+        !((scene === 'gold' || scene === 'ticket-success') && shape === 'star')) continue;
     const particle = document.createElement('i');
     particle.dataset.shape = shape;
     particle.dataset.color = color;
@@ -46,10 +59,12 @@ export function openFestivalSky(dialog: HTMLDialogElement, direction: Scene) {
     sky.append(particle);
   }
   dialog.append(sky);
+  if (!native) return sky;
   try {
     sky.showPopover();
-    return sky;
   } catch {
-    sky.remove();
+    // Retain a click-through inline layer if the native top layer is unavailable.
+    sky.removeAttribute('popover');
   }
+  return sky;
 }
