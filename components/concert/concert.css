@@ -966,3 +966,30 @@
 @media (min-aspect-ratio:4/3) {
   .cc-ticket-scan-controls .cc-pass-dots { justify-content:center; }
 }
+
+/* Keep the receipt utilities usable alongside a ten-person ticket wallet. */
+.cc-pass-deck:has([data-peace-concert]) .cc-pass-dots {
+  max-width: none; flex-wrap: nowrap; align-items: center;
+}
+.cc-page .cc-pass-deck:has([data-peace-concert]) .cc-pass-dots :is(button, select) {
+  box-sizing: border-box; min-width: 44px; min-height: 44px;
+}
+.cc-pass-dots select {
+  width: 3.4rem; border: 1px solid #426281; border-radius: .65rem; background: white; color: #112d63;
+}
+.cc-pass-deck:has([data-peace-concert]) .cc-pass-options[open] {
+  width: min(96vw, 31rem); max-height: calc(100dvh - .5rem);
+  gap: .35rem; padding: .65rem;
+  background: #fffdf4; color: #102755; border-color: #ef526b;
+}
+.cc-pass-options[data-panel="options"] { grid-template-columns: repeat(2, minmax(0,1fr)); }
+.cc-pass-options[data-panel="options"] :is(header, h4, p) { grid-column: 1/-1; }
+.cc-pass-options:is([data-panel="photo"],[data-panel="all"]) img {
+  width: 100%; max-height: max(60px,calc(100dvh - 12rem)); object-fit: contain;
+}
+@media (max-height: 440px) and (orientation:landscape) {
+  .cc-pass-deck:has([data-peace-concert]) .cc-pass-options[data-panel="options"] {
+    grid-template-columns: repeat(3, minmax(0,1fr)); gap: 3px;
+  }
+  .cc-pass-options[data-panel="options"] h4 { grid-column: auto; align-self: center; }
+}

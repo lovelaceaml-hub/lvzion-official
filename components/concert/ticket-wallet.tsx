@@ -6,6 +6,7 @@ import type {PublicEvent} from '../../lib/concert/domain';
 import type {NamedTicket} from '../../lib/concert/registration';
 import {passImages} from './pass-images';
 import TicketCard from './ticket-card';
+import './festival-registration.css';
 
 type Panel='options'|'photo'|'all';
 export default function TicketWallet({event,tickets,embedded=false,extraOptions}:{event:PublicEvent;tickets:NamedTicket[];embedded?:boolean;extraOptions?:ReactNode}) {
@@ -13,6 +14,7 @@ export default function TicketWallet({event,tickets,embedded=false,extraOptions}
   const [panel,setPanel]=useState<Panel>('options');
   const [prepared,setPrepared]=useState<Awaited<ReturnType<typeof passImages>>>();
   const [imageUrl,setImageUrl]=useState('');
+  const [imageFailed,setImageFailed]=useState(false);
   const [notice,setNotice]=useState('');
   const [sending,setSending]=useState(false);
   const modal=useRef<HTMLDialogElement>(null);
@@ -25,7 +27,8 @@ export default function TicketWallet({event,tickets,embedded=false,extraOptions}
   useEffect(()=>{
     let active=true;
     setPrepared(undefined);
-    passImages(tickets,title).then(value=>{if(active)setPrepared(value);}).catch(()=>{});
+    setImageFailed(false);
+    passImages(tickets,title).then(value=>{if(active)setPrepared(value);}).catch(()=>{if(active)setImageFailed(true);});
     return ()=>{active=false;};
   },[tickets,title]);
   useEffect(()=>{
@@ -63,10 +66,16 @@ export default function TicketWallet({event,tickets,embedded=false,extraOptions}
       else{await navigator.clipboard.writeText(ticket.url);show('options','Ticket link copied.');}
     }catch(error){if(!(error instanceof DOMException && error.name==='AbortError'))show('options','Use Open QR ticket to copy the address.');}
   }
+  // Large parties keep the active ticket, its neighbours and a direct picker in reach.
+  const firstToggle=tickets.length<=4 ? 0 : Math.max(0,Math.min(index-1,tickets.length-3));
+  const visibleTickets=tickets.length<=4 ? tickets : tickets.slice(firstToggle,firstToggle+3);
   const picker=tickets.length>1 ? <div className="cc-pass-identity"><strong>{ticket.name}</strong>
-    <div className="cc-pass-dots" aria-label="Choose a ticket">{tickets.map((t,i)=><button type="button" key={t.id}
+    <div className="cc-pass-dots" aria-label="Choose a ticket">{visibleTickets.map((t,offset)=>{const i=firstToggle+offset;return <button type="button" key={t.id}
       aria-label={'Ticket '+(i+1)+' of '+tickets.length+' · '+t.name} aria-pressed={i===index}
-      onClick={()=>setIndex(i)}>{i+1}</button>)}</div></div>:undefined;
+      onClick={()=>setIndex(i)}>{i+1}</button>;})}
+      {tickets.length>4 && <select aria-label="Choose from all tickets" value={index} onChange={e=>setIndex(Number(e.target.value))}>
+        {tickets.map((t,i)=><option key={t.id} value={i}>{i+1} · {t.name}</option>)}
+      </select>}</div></div>:undefined;
   const swipeHandlers: DOMAttributes<HTMLDivElement> = {
     onPointerDown(e) {
       if (!e.isPrimary || e.button !== 0) return;
@@ -111,7 +120,7 @@ export default function TicketWallet({event,tickets,embedded=false,extraOptions}
         <span className="cc-ticket-code" role="img" aria-label="Enlarged ticket QR code" dangerouslySetInnerHTML={{__html:ticket.svg}}/>
       </div>
     </dialog>}
-    <dialog ref={modal} className="cc-pass-options" aria-label={panel==='options'?'Ticket options':'Save ticket images'}
+    <dialog ref={modal} className="cc-pass-options" data-panel={panel} aria-label={panel==='options'?'Ticket options':'Save ticket images'}
       onClose={()=>setNotice('')}>
       <header><h3>{panel==='options'?'Ticket options':panel==='all'?'Save all tickets':'Save ticket image'}</h3>
         <button type="button" onClick={()=>modal.current?.close()} aria-label="Close ticket options">×</button></header>
@@ -126,7 +135,7 @@ export default function TicketWallet({event,tickets,embedded=false,extraOptions}
 
       </>:<>
         <p>Touch and hold the image to save it to your photos or gallery.</p>
-        {panel==='all' && !prepared ? tickets.map(t=><img key={t.id} src={t.url+'/qr'} alt={'Ticket for '+t.name}/>)
+        {panel==='all' && !prepared ? <p role="status">{imageFailed ? 'The combined image is unavailable. Open each ticket to save its image.' : 'Preparing your party image…'}</p>
           : <img src={imageUrl || ticket.url+'/qr'} alt={panel==='all'?'All party tickets':'Ticket for '+ticket.name}/>}
         {(panel!=='all'||prepared) && <a href={imageUrl || ticket.url+'/qr'} download={panel==='all'?'Concert-party-tickets.png':'Concert-ticket.png'}>Download image</a>}
       </>}

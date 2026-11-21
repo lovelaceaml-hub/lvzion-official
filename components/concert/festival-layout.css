@@ -1,0 +1,140 @@
+/* The dialog owns the viewport budget. Only the list of additional names
+   can consume and scroll the space left by its neighbouring fields. */
+dialog.cc-dialog.cc-concert-stage[data-presentation][data-corner-help][open] {
+  --sheet-pad: clamp(10px, 3.5vw, 20px);
+  --corner-gap: max(48px, calc(44px + env(safe-area-inset-bottom)));
+  --sheet-room: calc(var(--visible-height, 100dvh) - var(--corner-gap) - max(6px, env(safe-area-inset-top)));
+  box-sizing: border-box;
+  width: min(calc(100% - 12px), 32rem);
+  max-height: var(--sheet-room) !important;
+  padding: 0;
+  gap: 0;
+  & > .cc-dialog-inner {
+    flex: 0 1 auto;
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    min-height: 0;
+    gap: .5rem;
+    margin: 0;
+    padding: .6rem var(--sheet-pad);
+    overflow: visible;
+  }
+  & .cc-dialog-heading { flex: none; min-height: 44px; margin: 0; padding: 0; }
+  & .cc-dialog-close { position: static; flex: none; width: 44px; min-height: 44px; height: 44px; }
+  & .cc-poster-stage { flex: none; margin: 0; }
+  & .cc-dialog-inner > div:not([hidden]) { min-height: 0; }
+  & .cc-registration[data-festival] {
+    min-height: 0; padding: 0; gap: .5rem;
+    grid-template-columns: minmax(0, 1fr);
+  }
+  & .cc-dialog-footer {
+    flex: none; align-self: stretch; margin: 0; padding: 0 var(--sheet-pad) .5rem;
+  }
+  & .cc-submit-slot:not(:empty) { padding: 0; margin: 0; }
+  & .cc-reg-form, & .cc-answer-fields, & .ui-field { min-width: 0; min-height: 0; }
+  & .cc-reg-form .ui-field { gap: 2px; margin: 0; }
+  & .cc-reg-form .ui-input { box-sizing: border-box; width: 100%; min-height: 44px; padding-block: .3rem; }
+  & .cc-party-size :is(button,select), & .cc-vip-toggle { min-height: 44px; }
+  & .cc-party-size { grid-template-columns: 44px minmax(44px,1fr) 44px; }
+  & .cc-vip-fields { min-width: 0; }
+  & .cc-reg-results { margin: 0; padding: 0; }
+  & .cc-hint, & .cc-error, & .cc-note { margin-block: 0; overflow-wrap: anywhere; }
+  & [hidden] { display: none; }
+}
+@media (max-height: 720px) {
+  dialog.cc-dialog.cc-concert-stage[data-presentation][data-corner-help][open] {
+    --sheet-pad: 10px;
+    & > .cc-dialog-inner { gap: 5px; padding-block: 5px; }
+    & .cc-registration[data-festival] { gap: 5px; }
+    & .cc-registration[data-festival] > h3 { font-size: 1.17rem; line-height: 1.14; }
+    & .cc-reg-form, & .cc-answer-fields { gap: 5px; }
+    & .cc-field-progress { display: none; }
+    & .cc-dialog-footer { padding-bottom: 6px; }
+  }
+}
+/* At these heights the emblem in the header takes the place of the poster
+   during data entry. Adding another attendee never rescales the artwork. */
+@media (max-height: 660px) {
+  dialog.cc-dialog.cc-concert-stage[data-corner-help][open]:has(.cc-dialog-inner > div:not([hidden]) .cc-registration:not([data-step="start"]):not([data-step="member"])) .cc-poster-stage { display: none; }
+}
+dialog.cc-dialog.cc-concert-stage[data-corner-help][open][data-keyboard] {
+  inset-block-start: var(--visible-top, 0px);
+  inset-block-end: auto;
+  margin-block-start: 2px;
+  & .cc-poster-stage, & .cc-field-progress { display: none; }
+}
+@media (orientation: landscape) and (max-height: 520px) {
+  dialog.cc-dialog.cc-concert-stage[data-corner-help][data-presentation][open] {
+    --corner-gap: 2px;
+    width: min(calc(100vw - 96px), 55rem);
+    & .cc-dialog-inner { gap: 3px; }
+    & .cc-dialog-inner:has(> div:not([hidden]) :is([data-step="start"],[data-step="member"])) {
+      display: grid;
+      grid-template-columns: minmax(6rem, 1fr) minmax(0, 2fr);
+      column-gap: .7rem;
+    }
+    & .cc-dialog-heading { grid-column: 1/-1; }
+    & .cc-poster-stage { align-self: center; grid-column: 1; grid-row: 2; }
+    & .cc-dialog-inner > div:not([hidden], .cc-poster-stage) { grid-column: 2; grid-row: 2; }
+    & .cc-festival-welcome cite { display: none; }
+    & .cc-reg-form .cc-answer-fields { column-gap: .5rem; }
+  }
+}
+
+dialog.cc-dialog.cc-concert-stage[open][data-corner-help] {
+  & .cc-additional-guests {
+    display: grid; gap: .35rem; min-width: 0;
+    max-height: clamp(76px, calc(var(--visible-height, 100dvh) - 37rem), 13rem);
+    padding: 3px; margin: -3px;
+    overflow-y: auto; overscroll-behavior: contain; scrollbar-gutter: stable;
+  }
+  & .cc-page-nav { display: flex; align-items: center; justify-content: space-between; gap: .25rem; }
+  & .cc-page-nav button { min-height: 44px; }
+  & .cc-page-nav span { font-size: .8rem; }
+  & .cc-answer-fields { margin: 0; padding: 0; }
+  & .cc-program-fan { max-width: 100%; min-width: 0; }
+  & .cc-poster-stage { min-width: 0; pointer-events: none; }
+  & .cc-reg-form:has(.cc-additional-guests) .cc-additional-guests .ui-field { gap: 2px; }
+  &:has(.cc-submit-slot:not(:empty)) .cc-registration > .cc-reg-back {
+    position: absolute; left: var(--sheet-pad); bottom: .5rem; margin: 0; z-index: 2;
+  }
+  &:has(.cc-dialog-inner > div:not([hidden]) .cc-reg-back) .cc-dialog-footer { padding-inline-start: calc(var(--sheet-pad) + 5rem); }
+}
+@media (orientation: landscape) and (max-height: 520px) {
+  dialog.cc-dialog.cc-concert-stage[data-presentation][data-corner-help][open] {
+    & .cc-dialog-inner > .cc-poster-stage { grid-column: 1; grid-row: 2; }
+    & .cc-dialog-inner > div:not([hidden], .cc-poster-stage) { grid-column: 2; grid-row: 2; }
+    & .cc-dialog-inner:has(> div:not([hidden]) .cc-reg-form) .cc-poster-stage { display:none; }
+    & .cc-program-fan { width: 100%; }
+  }
+}
+
+html:has(dialog.cc-festival-stage[open]), body:has(dialog.cc-festival-stage[open]) {
+  height: 100dvh;
+  overflow: clip;
+}
+
+/* The on-screen keyboard leaves room for a single heading beside Close. */
+dialog.cc-dialog.cc-concert-stage[data-corner-help][data-keyboard][open] {
+  & .cc-dialog-heading { position: absolute; z-index: 1; inset: 4px var(--sheet-pad) auto auto; }
+  & .cc-dialog-heading > :not(.cc-dialog-close) { display: none; }
+  & .cc-registration > h3 {
+    display: flex; align-items: center; min-height: 44px;
+    padding-inline-end: 47px; font-size: 1.05rem;
+  }
+  & .cc-festival-consideration { display: none; }
+}
+
+/* Recipient entry has more fields than the other routes, including optional
+   VIP details. Keep the emblem and reserve its editing space up front. */
+@media (max-height: 920px) {
+  dialog.cc-festival-stage[open]:has(.cc-dialog-inner > div:not([hidden]) [data-step="invite"]) .cc-poster-stage { display: none; }
+}
+@media (orientation: landscape) and (max-height: 520px) and (min-width: 530px) {
+  dialog.cc-dialog.cc-concert-stage[data-presentation][data-corner-help][open] .cc-reg-form .ui-field:not(.cc-party-field) {
+    grid-template-columns: minmax(6rem, .72fr) minmax(0, 1.28fr);
+    align-items: center; column-gap: .4rem;
+  }
+  dialog.cc-dialog.cc-concert-stage[data-corner-help][open] .cc-reg-row { grid-template-columns: minmax(0,1fr); }
+}

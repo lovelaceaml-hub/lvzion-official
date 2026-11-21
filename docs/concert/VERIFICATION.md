@@ -1,5 +1,15 @@
 # November 20 concert release and review
 
+## Festival registration redesign
+
+The short-phone review found 297 px of overflow on the previous single-guest screen and 201 px on member registration at 320 × 568. On the revised application the focused phone tests passed on both routes. A ten-person party keeps its additional names inside a scrollable list. WebKit also kept the focused field and submit action visible in a simulated 295 px keyboard viewport. Checks included enlarged text and Reduce Motion.
+
+The production build and TypeScript check, 16 focused Chromium browser tests and 10 concert unit tests passed. A local named invitation issued three distinct QR codes. WebKit decoded each code, checked guest and host test receipts and their attachments, switched tickets, saved images and verified both calendar formats. Ticket layouts were exercised from 320 × 460 to 844 × 390 in portrait and landscape. Synthetic registrations and email used local fixtures.
+
+The throttled Chromium profile recorded occasional long frames on question changes, up to 153 ms at four-times CPU slowdown. Physical iPhone and Android checks and the full repository suite remain unverified. agy reviewed keyboard, overflow and motion risks. Copilot CLI authentication failed during this pass.
+
+## Earlier release baseline
+
 The saved production baseline is commit `e86461e`, taken from the source shipped in `dpl_AffVBs3CUcqnjoNyMRuwMhcHGpnk`. That release was verified on the shared live invitation with a 66-second muted promo, a ticking four-unit countdown, a moving ticket outline and working member and guest entry points. Local Chromium and WebKit checks covered 320 × 460 and 390 × 844 portrait and 667 × 320 landscape, ribbon hit testing, reduced motion, keyboard-height simulation and draft restoration. The earlier end-to-end local fixture issued QR tickets, sent invitations to a fictional mail sink and exercised named-invitation verification.
 
 The annotated release tag [concert-rsvp-2026-11-20](https://github.com/lovelaceaml-hub/lvzion-official/tree/concert-rsvp-2026-11-20) identifies the deployed commit. Its annotation records the Vercel deployment ID and the production smoke check.

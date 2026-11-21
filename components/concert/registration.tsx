@@ -1,15 +1,16 @@
 'use client';
 
 import {useEffect, useEffectEvent, useLayoutEffect, useId, useRef, useState, type ReactNode} from 'react';
-import {ArrowLeft, ArrowRight, ChevronRight, Music, Heart, UserRound, UsersRound} from '../home-icons';
-import {createPortal} from 'react-dom';
+import {ArrowLeft, ChevronRight, UserRound, UsersRound} from '../home-icons';
+import {RegistrationForm, ResultPages} from './form-layout';
+import {ChoiceArt, type ChoiceArtKind} from './choice-art';
 import TicketWallet from './ticket-wallet';
 import {MAX_PARTY, type PublicEvent} from '../../lib/concert/domain';
 import {type InviteDraft, type InviteSummary, type NamedTicket} from '../../lib/concert/registration';
 import ConcertDialog from './concert-dialog';
-import {answerPulse} from './answer-motion';
+import {answerPulse, playFestivalTransition} from './answer-motion';
 import {isPeaceConcert} from '../../lib/concert/branding';
-import './festival-registration.css';
+import './festival-layout.css';
 
 type Step = 'start' | 'member' | 'identity' | 'guest' | 'sender' | 'quantity' | 'invite'
   | 'verifySender' | 'manage' | 'recover' | 'verifyRecovery' | 'tickets';
@@ -64,48 +65,34 @@ function FieldProgress() {
   </div>;
 }
 
-const choiceIcons = {member:Music, guest:Heart, ticket:UserRound, envelope:ArrowRight, both:UsersRound};
-type ChoiceArtKind = keyof typeof choiceIcons;
-
-const festivalGestures = {
-  member:'inclusiveness', guest:'greeting', ticket:'encouragement', envelope:'consideration', both:'gratitude',
-} as const;
+function Gesture({kind}: {kind: 'greeting' | 'consideration' | 'gratitude'}) {
+  return <span className="cc-festival-expression" data-gesture={kind} aria-hidden="true">
+    <img src={'/concert/festival-' + kind + '.webp'} alt="" width="26" height="26"/>
+  </span>;
+}
 
 function Choice({children, icon, festival, selected, onClick}: {
   children: ReactNode; icon: ChoiceArtKind; festival: boolean; selected: boolean;
   onClick: (button: HTMLButtonElement) => void;
 }) {
-  if (festival) {
-    const gesture = festivalGestures[icon];
-    return <button type="button" className="cc-festival-choice" data-choice={icon} data-gesture={gesture}
-      data-selected={selected || undefined} aria-description={selected ? 'Previously selected' : undefined}
-      onClick={e => onClick(e.currentTarget)}>
-      <span className="cc-festival-gesture"><img src={'/concert/festival-' + gesture + '.webp'} alt="" width="40" height="40"/></span>
-      <span>{children}</span>
-      <span className="cc-festival-check" aria-hidden="true"/>
-    </button>;
-  }
-  const Icon = choiceIcons[icon];
-  return <button type="button" data-choice={icon} className="cc-choice" onClick={e => onClick(e.currentTarget)}>
-    <span className="cc-choice-icon"><Icon size={23} aria-hidden="true"/></span>
+  const art = icon === 'member' ? <UsersRound size={23}/> : icon === 'guest' ? <UserRound size={23}/> : <ChoiceArt kind={icon}/>;
+  return <button type="button" data-choice={icon} className={festival ? 'cc-festival-choice' : 'cc-choice'}
+    data-selected={selected || undefined} aria-description={selected ? 'Previously selected' : undefined}
+    onClick={e => onClick(e.currentTarget)}>
+    <span className={festival ? 'cc-festival-gesture' : 'cc-choice-icon'}>{art}</span>
     <span>{children}</span>
-    <ChevronRight className="cc-choice-arrow" size={18} aria-hidden="true"/>
+    <ChevronRight className="cc-choice-arrow" size={18}/>
   </button>;
-}
-
-function registrationPulse(control: HTMLElement | null) {
-  if (!control?.matches('.cc-festival-choice')) return answerPulse(control);
-  if (!control.animate || matchMedia('(prefers-reduced-motion: reduce)').matches) return null;
-  return control.animate([{transform:'scale(1)'}, {transform:'scale(.988)'}, {transform:'scale(1)'}],
-    {duration:195, easing:'ease-out'});
 }
 
 function focusRegistrationStep(heading: HTMLHeadingElement | null) {
   const dialog = heading?.closest('dialog');
   if (!dialog?.open) return;
-  dialog.scrollTop = 0;
-  const body = heading?.closest('.cc-dialog-inner');
-  if (body) body.scrollTop = 0;
+  if (!dialog.classList.contains('cc-festival-stage')) {
+    dialog.scrollTop = 0;
+    const body = heading?.closest('.cc-dialog-inner');
+    if (body) body.scrollTop = 0;
+  }
   heading?.focus({preventScroll: true});
 }
 
@@ -226,8 +213,19 @@ function RegistrationFlow({festival, eventId, event, hostToken, footerSlot, pers
     return () => sheet.removeEventListener('close', onClose);
   }, []);
 
+  const success = (step === 'tickets' && !tools && !existing && tickets.length > 0) ||
+    (step === 'manage' && !manageOnly && invitations.length > 0);
+  const transition = festival && success ? 'success' : direction.current;
+  const wasActive = useRef(false);
+  useEffect(() => {
+    const opening = active && !wasActive.current;
+    wasActive.current = active;
+    if (festival && active) return playFestivalTransition(formHeading.current, opening && !success ? 'open' : transition);
+  }, [festival, active, step, inviteIndex, transition, success]);
+
   const previousHeight = useRef(0);
   function rememberHeight() {
+    if (festival) return;
     const sheet = formHeading.current?.closest<HTMLDialogElement>('.cc-concert-stage[open]');
     previousHeight.current = sheet?.getBoundingClientRect().height ?? 0;
   }
@@ -251,7 +249,7 @@ function RegistrationFlow({festival, eventId, event, hostToken, footerSlot, pers
 
   function answer(control: HTMLElement | null, action: () => void | Promise<void>) {
     void run(async () => {
-      const pulse = registrationPulse(control);
+      const pulse = answerPulse(control);
       if (pulse) {
         cue.current = pulse;
         control?.setAttribute('data-answering', '');
@@ -390,19 +388,11 @@ function RegistrationFlow({festival, eventId, event, hostToken, footerSlot, pers
 
   const confirmingParty = step === 'guest' && Boolean(personal || hostToken);
   const form = (children: ReactNode, label: string, action: () => Promise<void> | void) => {
-    const submit = <button type="submit" form={formId} className="ui-button cc-reg-next" data-festival={festival || undefined} data-confirm-attendance={confirmingParty || undefined} disabled={busy}>
-      {busy ? 'Please wait…' : <>{label}{festival && confirmingParty
-        ? <img className="cc-festival-confirm-gesture" src="/concert/festival-gratitude.webp" alt="" width="19" height="19"/>
-        : <ArrowRight size={19} aria-hidden="true"/>}</>}
-    </button>;
-    return <form id={formId} key={step} className="cc-reg-form" onSubmit={e => {
-      e.preventDefault();
-      const source = (e.nativeEvent as SubmitEvent).submitter ?? footerSlot?.querySelector('button') ?? null;
-      answer(source, action);
-    }}>
-      <FieldProgress/>
-      <fieldset className="cc-answer-fields" disabled={busy}>{children}</fieldset>
-      {footerSlot ? active && createPortal(submit, footerSlot) : submit}</form>;
+    return <RegistrationForm key={step} id={formId} active={active} busy={busy}
+      multipleGuests={step === 'guest' && names.length > 1} festival={festival} confirmAttendance={confirmingParty}
+      footer={footerSlot} progress={<FieldProgress/>} label={label} onFinish={source => answer(source, action)}>
+      {children}
+    </RegistrationForm>;
   };
 
   const inviterField = <Field label="Who invited you?">
@@ -442,9 +432,11 @@ function RegistrationFlow({festival, eventId, event, hostToken, footerSlot, pers
       case 'guest': return form(<>
         <Field label="Your full name"><input className="ui-input" required minLength={2} maxLength={120} autoComplete="name" value={names[0]} onChange={e => editName(0,e.target.value)}/></Field>
         <Quantity item="attendee" label="How many people, including you?" value={names.length} change={count => setNames(list => Array.from({length:count},(_,i) => list[i] ?? ''))}/>
-        {names.slice(1).map((name, index) => <Field key={index} label={`Attendee ${index+2} full name`}>
-          <input className="ui-input" required minLength={2} maxLength={120} value={name} onChange={e => editName(index+1,e.target.value)}/>
-        </Field>)}
+        {names.length > 1 && <div key="guests" className="cc-additional-guests" role="region" aria-label="Additional attendees" tabIndex={0}>
+          {names.slice(1).map((name, index) => <Field key={index} label={`Attendee ${index+2} full name`}>
+            <input className="ui-input" required minLength={2} maxLength={120} value={name} onChange={e => editName(index+1,e.target.value)}/>
+          </Field>)}
+        </div>}
         <Field label="Email for tickets"><input className="ui-input" type="email" required maxLength={254} autoComplete="email" value={guestEmail} onChange={e => setGuestEmail(e.target.value)}/></Field>
         {personal || hostToken ? <p className="cc-hint">{invitedBy || 'Your host'} will receive your party details and a copy of your QR ticket.</p> : inviterField}
       </>, personal || hostToken ? 'Confirm your attendance' : names.length>1?'Get tickets':'Get my ticket',
@@ -460,11 +452,9 @@ function RegistrationFlow({festival, eventId, event, hostToken, footerSlot, pers
         <Field label="Guest’s full name"><input className="ui-input" required minLength={2} maxLength={120} value={invite.name} onChange={e => editInvite({name:e.target.value})}/></Field>
         <label className="cc-vip-toggle"><input type="checkbox" checked={invite.includeVip}
           onChange={e => editInvite({includeVip:e.target.checked})}/> VIP</label>
-        {invite.includeVip && <fieldset className="cc-vip-fields"><legend>VIP details</legend>
-        <Field label="VIP title"><input className="ui-input" required maxLength={120} value={invite.vip.title} onChange={e => editInvite({vip:{...invite.vip,title:e.target.value}})}/></Field>
-        <Field label="Organization"><input className="ui-input" required maxLength={120} value={invite.vip.organization} onChange={e => editInvite({vip:{...invite.vip,organization:e.target.value}})}/></Field>
-        <Field label="Category"><input className="ui-input" required maxLength={120} value={invite.vip.category} onChange={e => editInvite({vip:{...invite.vip,category:e.target.value}})}/></Field>
-        </fieldset>}
+        {invite.includeVip && <Field label="VIP title"><input className="ui-input" required maxLength={120} value={invite.vip.title} onChange={e => editInvite({vip:{...invite.vip,title:e.target.value}})}/></Field>}
+        {invite.includeVip && <Field label="Organization"><input className="ui-input" required maxLength={120} value={invite.vip.organization} onChange={e => editInvite({vip:{...invite.vip,organization:e.target.value}})}/></Field>}
+        {invite.includeVip && <Field label="Category"><input className="ui-input" required maxLength={120} value={invite.vip.category} onChange={e => editInvite({vip:{...invite.vip,category:e.target.value}})}/></Field>}
         <Field label="Relationship"><input className="ui-input" required maxLength={120} value={invite.relationship} onChange={e => editInvite({relationship:e.target.value})}/></Field>
         <Field label="Guest’s email (optional)"><input className="ui-input" type="email" maxLength={254} value={invite.email} onChange={e => editInvite({email:e.target.value})}/></Field>
         <label className="cc-vip-toggle"><input type="checkbox" checked={invite.firstVisit} onChange={e => editInvite({firstVisit:e.target.checked})}/> First time visiting</label>
@@ -489,7 +479,8 @@ function RegistrationFlow({festival, eventId, event, hostToken, footerSlot, pers
         </>;
       }
       case 'manage': return <>
-        {invitations.length ? <ul className="cc-reg-results">{invitations.map(item => <li key={item.id}>
+        {festival && !manageOnly && invitations.length > 0 && <p className="cc-hint cc-festival-thanks"><Gesture kind="gratitude"/> Thank you for inviting your guests.</p>}
+        {invitations.length ? <ResultPages festival={festival}>{invitations.map(item => <li key={item.id}>
           <div><strong>{item.name}</strong>{item.vip?<span className="cc-vip-badge">VIP</span>:null}</div>
           <small>{item.withdrawn?'Withdrawn':item.accepted?'Registered':item.delivery==='sent'?'Email sent':item.delivery==='failed'?'Email delivery failed':item.hasEmail?'Email pending':'Personal link ready'}</small>
           {!item.withdrawn && !item.accepted ? <div className="cc-reg-tools">
@@ -500,16 +491,16 @@ function RegistrationFlow({festival, eventId, event, hostToken, footerSlot, pers
               if (window.confirm('Withdraw the invitation for '+item.name+'?')) void run(() => updateInvitations('withdraw',item.id));
             }}>Withdraw</button>
           </div> : null}
-        </li>)}</ul> : <p className="cc-hint">There are no invitations for this email.</p>}
+        </li>)}</ResultPages> : <p className="cc-hint">There are no invitations for this email.</p>}
       </>;
       case 'tickets': {
         return <>
           {tickets.length && event && tickets[0].svg ? <TicketWallet event={event} tickets={tickets} embedded/>
             : tickets.length ? <div className="cc-reg-tools">{tickets.map(t=><div key={t.id}><strong>{t.name}</strong> <a href={t.url}>Open QR ticket</a></div>)}</div> : <p className="cc-hint">{existing?'This email already has a registration or the invitation was already accepted. Verify the ticket email to retrieve the registration.':'Check the email used to register and try again.'}</p>}
           {emailed ? <p className="cc-hint">
-            {festival && tickets.length > 0 && !tools && !existing && <strong className="cc-festival-thanks">Thank you! </strong>}
+            {festival && tickets.length > 0 && !tools && !existing && <strong className="cc-festival-thanks"><Gesture kind="gratitude"/> Thank you! </strong>}
             We’ll send a copy to your email.
-          </p> : festival && tickets.length > 0 && !tools && !existing && <p className="cc-hint cc-festival-thanks">Thank you for joining us.</p>}
+          </p> : festival && tickets.length > 0 && !tools && !existing && <p className="cc-hint cc-festival-thanks"><Gesture kind="gratitude"/> Thank you for joining us.</p>}
           {existing?<button type="button" className="ui-button ui-button-secondary" onClick={e => answer(e.currentTarget, onFindTickets)}>Find my tickets</button>:null}
           {tools && <button type="button" className="ui-button ui-button-secondary" onClick={e => answer(e.currentTarget, onFindTickets)}>
             {tickets.length ? 'Find tickets for another email' : 'Try another email'}
@@ -521,16 +512,16 @@ function RegistrationFlow({festival, eventId, event, hostToken, footerSlot, pers
     }
   }
 
-  return <section key={step + inviteIndex} data-step={step} data-festival={festival || undefined} data-direction={direction.current} className="cc-registration" aria-busy={busy}>
+  return <section key={step + inviteIndex} data-step={step} data-festival={festival || undefined} data-direction={transition} className="cc-registration" aria-busy={busy}>
     {festival && step === 'start' && <p className="cc-festival-welcome" id={formId+'-welcome'}>
-      <strong>How are you?</strong> <cite>The Art of Happy Communication</cite>
+      <Gesture kind="greeting"/> <strong>How are you?</strong> <cite>The Art of Happy Communication</cite>
     </p>}
     <h3 ref={formHeading} tabIndex={-1} aria-describedby={festival && step === 'start' ? formId+'-welcome' : undefined}>
-      {festival && confirmingParty && <img className="cc-festival-party-gesture" src="/concert/festival-greeting.webp" alt="" width="26" height="26"/>}
+      {festival && confirmingParty && <Gesture kind="greeting"/>}
       {title}
     </h3>
     {festival && step === 'invite' && inviteIndex === 0 && <p className="cc-festival-consideration">
-      Consideration begins with paying attention to those around you.
+      <Gesture kind="consideration"/> Consideration begins with paying attention to those around you.
     </p>}
     {content()}
     {error?<p className="cc-error" role="alert">{error}</p>:null}

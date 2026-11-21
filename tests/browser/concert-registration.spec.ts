@@ -119,7 +119,9 @@ test('the festival Register button and its label stay centered with help visible
   }
   await register.click();
   const guest = page.getByRole('button',{name:'I am a guest.', exact:true});
-  await expect.poll(() => guest.locator('img').evaluate(image => (image as HTMLImageElement).naturalWidth)).toBeGreaterThan(0);
+  await expect(guest).toBeInViewport({ratio:1});
+  const greeting = page.locator('dialog[open] .cc-festival-welcome img');
+  await expect.poll(() => greeting.evaluate(image => (image as HTMLImageElement).naturalWidth)).toBeGreaterThan(0);
 });
 
 test('VIP details follow the recipient draft and disappear when that recipient is removed', async ({page}) => {
@@ -393,7 +395,11 @@ for (const partySize of [2,10]) test('a guest can switch between party tickets w
   await expect(second).toHaveAttribute('aria-pressed','true');
   await dialog.getByRole('button',{name:'Options',exact:true}).click();
   await expect(page.getByRole('link',{name:'Open QR ticket'})).toHaveAttribute('href','/concert/ticket/fictional-1');
+  await page.emulateMedia({reducedMotion:'no-preference'});
+  const options = page.getByRole('dialog',{name:'Ticket options',exact:true});
+  await expect.poll(() => options.evaluate(el => el.scrollHeight - el.clientHeight)).toBeLessThanOrEqual(1);
   await page.getByRole('button',{name:'Close ticket options'}).click();
+  await page.emulateMedia({reducedMotion:'reduce'});
   await expect(dialog.getByRole('button',{name:'Save all'})).toBeVisible();
   for(const viewport of [{width:320,height:568},{width:568,height:320}]) {
     await page.setViewportSize(viewport);
@@ -401,4 +407,30 @@ for (const partySize of [2,10]) test('a guest can switch between party tickets w
     await expect(dialog.getByRole('button',{name:'Share',exact:true})).toBeInViewport({ratio:1});
     await expect.poll(()=>dialog.locator('.cc-dialog-inner').evaluate(el=>el.scrollHeight-el.clientHeight)).toBeLessThanOrEqual(1);
   }
+});
+
+test('short phone keeps ordinary questions fixed and confines a large party to its name list', async ({page}) => {
+  await page.setViewportSize({width:320,height:568});
+  await page.emulateMedia({reducedMotion:'reduce'});
+  const dialog = await openRegistration(page);
+  const sheet = dialog.locator('.cc-dialog-inner');
+  const assertFit = async () => {
+    await expect.poll(() => sheet.evaluate(el => el.scrollHeight - el.clientHeight)).toBeLessThanOrEqual(1);
+    await expect(dialog.getByRole('button',{name:'Close',exact:true})).toBeInViewport({ratio:1});
+  };
+  await assertFit();
+  await dialog.getByRole('button',{name:'I am a member.'}).click();
+  await assertFit();
+  await dialog.getByRole('button',{name:'I am registering myself.'}).click();
+  await assertFit();
+  await dialog.getByRole('button',{name:'Back',exact:true}).click();
+  await dialog.getByRole('button',{name:'Back',exact:true}).click();
+  await dialog.getByRole('button',{name:'I am a guest.'}).click();
+  await assertFit();
+  await dialog.getByLabel('How many people, including you?').selectOption('10');
+  const names = dialog.getByRole('region',{name:'Additional attendees'});
+  await expect.poll(() => names.evaluate(el => el.scrollHeight - el.clientHeight)).toBeGreaterThan(0);
+  await dialog.getByLabel('Attendee 10 full name').fill('Fictional Companion');
+  await assertFit();
+  await expect(dialog.getByRole('button',{name:'Get tickets'})).toBeInViewport({ratio:1});
 });

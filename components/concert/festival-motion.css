@@ -1,0 +1,118 @@
+/* The incoming step and its poster share one cue. Keep older entrance and
+   completion effects from stacking, regardless of stylesheet chunk order. */
+.cc-dialog.cc-concert-stage[open]:has(.cc-registration[data-festival]) {
+  animation: none;
+
+  &::backdrop,
+  & .cc-program-fan img.cc-registration-poster,
+  & :is(.cc-heart-signature, .cc-poster-heart, .cc-program-sparks) {
+    animation: none;
+  }
+  & .cc-heart-flight { display: none; }
+
+
+  & .cc-registration[data-festival] {
+    animation: none;
+
+    & :is(.cc-vip-fields, .ui-field, .cc-error, .cc-choice, .cc-festival-party-gesture),
+    & [data-gesture] img,
+    & .cc-ticket-finish path { animation: none; }
+    & h3::after { content: none; }
+  }
+}
+
+/* The ribbon settles under a press immediately and lifts on release. */
+.ml-actions > button.ui-button[data-admission][data-festival-action] {
+  scale: 1;
+}
+@media (prefers-reduced-motion: no-preference) {
+  .ml-actions > button.ui-button[data-admission][data-festival-action]:not(:active),
+  dialog.cc-concert-stage.cc-festival-stage[open] button[data-festival][data-confirm-attendance]:not(:disabled):not(:active) {
+    animation: cc-invite-pulse 2.85s cubic-bezier(.25,.68,.32,1) infinite;
+  }
+  button[data-admission][data-festival-action] {
+    transition: translate 120ms ease-out;
+    &:focus-visible { translate: 0 -2px; }
+    &:active { translate: 0 2px; transition-duration: 0s; }
+  }
+}
+@media (prefers-reduced-motion: no-preference) and (hover: hover) {
+  button[data-admission][data-festival-action]:hover:not(:active) { translate: 0 -2px; }
+}
+
+.cc-festival-leaves {
+  position: absolute;
+  z-index: 6;
+  left: 23%;
+  width: 0;
+  height: 0;
+  pointer-events: none;
+}
+.cc-festival-leaves[data-direction='back'] { left: 77%; }
+.cc-festival-leaves[data-direction='success'] { left: 50%; }
+
+.cc-festival-leaves > i {
+  position: absolute;
+  top: -5px;
+  left: -10px;
+  width: 20px;
+  height: 11px;
+  border-radius: 95% 3% 90% 6%;
+  color: #478640;
+  background: linear-gradient(-23deg, transparent 43%, #fffae9 47% 52%, transparent 57%), currentColor;
+  box-shadow: inset 0 0 0 1px #10275b59, 0 1px 2px #10275b3d;
+}
+.cc-festival-leaves > i:nth-child(3n + 2) { color: #f44168; }
+.cc-festival-leaves > i:nth-child(3n) { color: #efb841; }
+.cc-festival-leaves > i:nth-child(5n) { color: #75c9ec; }
+
+@media (prefers-reduced-motion: reduce) {
+  .cc-festival-leaves { display: none; }
+}
+
+.cc-festival-leaves::before {
+  content: ""; position: absolute; pointer-events: none;
+  width: 9rem; height: 5rem; left: -4.5rem; top: -2.5rem;
+  background: radial-gradient(ellipse, color-mix(in srgb, var(--answer-pigment,#ff506c) 50%, transparent), transparent 66%);
+  animation: cc-festival-bloom 360ms ease-out both;
+}
+.cc-festival-leaves[data-direction="open"]::before {
+  width: 16rem; height: 8rem; left: -8rem; top: -4rem;
+  background: radial-gradient(ellipse at 40% 55%, #ff507b99, transparent 55%), radial-gradient(ellipse at 62% 50%, #ffc94cbb, transparent 60%);
+  animation-duration: 530ms;
+}
+.cc-festival-leaves > b {
+  position: absolute; width: 36px; height: 17px; inset: -9px auto auto -18px;
+  border-radius: 95% 4% 90% 6%;
+  background: linear-gradient(-24deg, #8ab944 44%, #fff3aa 47% 51%, #477c39 54%);
+}
+@keyframes cc-festival-bloom {
+  from { opacity: 0; transform: scale(.2); }
+  36% { opacity: .85; }
+  to { opacity: 0; transform: scale(1.4); }
+}
+@media (prefers-reduced-motion:no-preference) {
+  .cc-festival-stage :is(.cc-festival-choice,.cc-party-size button,.cc-page-nav button):active { scale:.975; }
+}
+
+.ml-invitation dialog.cc-festival-stage::backdrop { backdrop-filter: none; background: #0d153a82; }
+.cc-festival-leaves { top: min(5rem, 18%); }
+.cc-festival-leaves[data-direction="open"] { left: 50%; top: min(6rem, 22%); }
+.cc-festival-leaves[data-direction="success"] { top: 30px; }
+.cc-festival-leaves > i { animation: cc-festival-leaf 420ms ease-out both; }
+.cc-festival-leaves[data-direction="success"] > i { animation-duration: 510ms; }
+.cc-festival-leaves > b { --side: -1; animation: cc-festival-unfold 540ms ease-out both; }
+.cc-festival-leaves > b:nth-child(2) { --side: 1; }
+@keyframes cc-festival-leaf {
+  from { opacity: .3; transform: rotate(var(--leaf-turn)) scale(.25); }
+  35%, 60% { opacity: 1; }
+  to { opacity: 0; transform: translate(var(--leaf-x),var(--leaf-y)) rotate(calc(var(--leaf-turn) + 35deg)) scale(.75); }
+}
+@keyframes cc-festival-unfold {
+  from { opacity: 0; transform: scale(.18); }
+  26% { opacity: .94; }
+  to { opacity: 0; transform: translate(calc(var(--side) * 95px),-28px) rotate(calc(var(--side) * 48deg)); }
+}
+.cc-festival-stage[data-answer-choice="member"], .cc-festival-stage[data-answer-choice="ticket"] { --answer-pigment: #28bb4a; }
+.cc-festival-stage[data-answer-choice="guest"], .cc-festival-stage[data-answer-choice="envelope"] { --answer-pigment: #3db4ff; }
+.cc-festival-stage[data-answer-choice="both"] { --answer-pigment: #a768ff; }
