@@ -802,25 +802,15 @@
   .cc-wallet .cc-reg-tools { grid-column:1/-1; }
 }
 
-/* Keep the flyer's botanical engraving on the paper, behind the type and scan field. */
+/* Use the registration paper around the ticket, with a clear white scan field. */
 :is(.cc-wallet,.cc-ticket-view) .cc-ticket[data-peace-concert] {
   color-scheme: light;
-  background: linear-gradient(180deg, #fff8ef70, #fffaf4 7rem),
-    url('/concert/poster-horizon.webp') center top / 100% 8rem no-repeat #fffaf4;
-  border-color: #c9ab7a;
-}
-.cc-ticket[data-peace-concert]::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  z-index: -1;
-  pointer-events: none;
-  border: solid transparent;
-  border-width: 3.8rem 5rem;
-  border-image: url('/concert/flyer-ornament.svg') 86 100 stretch;
+  background: var(--festival-card-wash, linear-gradient(170deg,#d7e5f7,#fffaf3 60%,#fbe7d1)), var(--festival-card-art, url('/concert/peace-horizon.webp') center bottom / cover no-repeat);
+  color: #10275b;
+  border-color: #b8c5da;
 }
 :is(.cc-wallet,.cc-ticket-view) .cc-ticket[data-peace-concert] .cc-ticket-head {
-  padding: .75rem 2.5rem .55rem;
+  padding: .5rem 1rem .4rem;
   gap: .12rem;
   background: transparent;
   border: 0;
@@ -835,10 +825,17 @@
 :is(.cc-wallet,.cc-ticket-view) .cc-ticket[data-peace-concert] .cc-ticket-head .cc-kicker {
   padding: .14rem 1rem;
   margin: 0 0 .2rem;
-  clip-path: polygon(0 0, 100% 0, 96% 50%, 100% 100%, 0 100%, 4% 50%);
-  color: #fff;
-  background: #a52d4f;
+  display: flex;
+  align-items: center;
+  gap: .35rem;
+  color: #263b63;
+  background: transparent;
 }
+.cc-pass-emblem { flex: none; object-fit: contain; }
+.cc-ticket[data-peace-concert] .cc-ticket-finish { display: none; }
+:is(.cc-wallet,.cc-ticket-view) .cc-ticket[data-peace-concert] .cc-ticket-person strong,
+:is(.cc-wallet,.cc-ticket-view) .cc-ticket[data-peace-concert] .cc-ticket-facts :is(p, strong, svg),
+:is(.cc-wallet,.cc-ticket-view) .cc-ticket[data-peace-concert] .cc-ticket-instruction { color: #253e63; }
 :is(.cc-wallet,.cc-ticket-view) .cc-ticket[data-peace-concert] .cc-ticket-head :is(h1,h4) {
   color: #172f5c;
   font: 800 clamp(1.1rem, 4.2vw, 1.45rem)/1.04 var(--lvz-font-sans);

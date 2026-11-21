@@ -1,10 +1,12 @@
 # Concert release and review
 
-## One-minute Register and distinct sweep paths draft
+## One-minute Register and registration design review
 
-Register hops in pairs for six ten-second cycles. The draft uses the original breeze, canopy fall, rising curl, crossing leaves, diagonal drift and opening fan across question changes, with the original effect on opening and ticket arrival. Playable examples use the application motion code and existing concert artwork.
+Register hops in pairs for six ten-second cycles. Registration uses the original breeze, canopy fall, rising curl, crossing leaves, diagonal drift and opening fan across question changes, with the original effect on opening and ticket arrival. Playable examples use the application motion code and existing concert artwork.
 
-The production build, 11 concert unit checks and 21 focused concert browser checks passed. The six playable examples were checked at 320 × 568 and 390 × 844 for distinct paths, screen coverage, Back, the one-minute cycle, Stop and Reduce Motion. A local production build with fictional invitation data verified a named link with a saved email, a named link without email, and a reusable link with only the inviter prefilled. The named-link check also verified that edits and the second attendee's name reached the synthetic submission. Physical phone and full repository checks remain open. The draft awaits motion review before publication.
+The production build, 11 concert unit checks and 21 focused concert browser checks passed. The six playable examples were checked at 320 × 568 and 390 × 844 for distinct paths, screen coverage, Back, the one-minute cycle, Stop and Reduce Motion. A local production build with fictional invitation data verified a named link with a saved email, a named link without email, and a reusable link with only the inviter prefilled. The named-link check also verified that edits and the second attendee's name reached the synthetic submission. Physical phone and full repository checks remain open. Anthony approved the playable examples and requested the final design alignment and release.
+
+The final alignment review used the production build with fictional data. Shared, named and reusable invitations, the signed invitation status screen, and the direct ticket wallet fit at widths of 320, 390 and 768 px. The wallet, its actions and enlarged scan screen also fit in 568 × 320 landscape. QR codes from the on-screen ticket, saved pass and both email attachments decoded to their intended ticket URLs. The invitation, sender receipt, guest receipt, host receipt, verification and registration notice emails fit at all three check widths. Email layout was rendered in a browser with fictional attachment images. No live email or registration was submitted.
 
 ## iPhone keyboard stability follow-up
 

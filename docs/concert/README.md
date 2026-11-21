@@ -35,7 +35,7 @@ An open event can enforce a seat limit. The server checks capacity and registrat
 
 ## Handoff for the next review
 
-The refreshed registration draft is ready for motion review. Register makes two hops every ten seconds for one minute, with an accessible stop control. The original breeze, canopy fall, rising curl, crossing leaves, diagonal drift and opening fan follow distinct paths. The opening and ticket reveal retain the original sweep. Review the playable examples before publication.
+Register makes two hops every ten seconds for one minute, with an accessible stop control. The original breeze, canopy fall, rising curl, crossing leaves, diagonal drift and opening fan follow distinct paths. The opening and ticket reveal retain the original sweep. Public invitations, QR tickets, invitation statuses, and concert emails share the registration palette. Ticket and email QR codes use a white scan area and link to the named attendee’s ticket.
 
 The phone keyboard stability fix is live. The sender form, Continue and Help fit above a simulated keyboard on the public invitation. [Keyboard verification](VERIFICATION.md#iphone-keyboard-stability-follow-up)
 

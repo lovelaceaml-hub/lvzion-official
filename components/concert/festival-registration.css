@@ -1,5 +1,5 @@
 /* Shared ink and paper for the invitation controls, registration and ticket help. */
-[data-festival-action], .cc-festival-help, .cc-festival-stage, .cc-pass-deck:has(.cc-ticket[data-peace-concert]) {
+[data-festival-action], .cc-festival-help, .cc-festival-stage, .cc-festival-paper, .cc-pass-deck:has(.cc-ticket[data-peace-concert]) {
   --festival-navy: #10275b;
   --festival-leaf: #366444;
   --festival-coral: #f44168;
@@ -7,6 +7,9 @@
   --festival-sky: #d9f0fc;
   --festival-paper: #fcf9f4;
   --festival-line: #d7dbcf;
+  --festival-card-line: #b8c5da;
+  --festival-card-wash: linear-gradient(170deg, var(--scene-sky, #d7e5f7), #f7faffdf 30%, #fffaf375 58%, var(--scene-horizon, #fbe7d18f));
+  --festival-card-art: url('/concert/peace-horizon.webp') center bottom / cover no-repeat;
 }
 
 /* A lit threshold carries the campaign emblem into the opening scene. */
@@ -133,11 +136,9 @@ button.cc-festival-help:focus-visible {
   --lvz-surface: white;
   --lvz-sunken: #f0f4eb;
   clip-path: none;
-  border: 1px solid #b8c5da;
+  border: 1px solid var(--festival-card-line);
   border-radius: 1.3rem;
-  background:
-    linear-gradient(170deg, var(--scene-sky), #f7faffdf 30%, #fffaf375 58%, var(--scene-horizon)),
-    url('/concert/peace-horizon.webp') center bottom / cover no-repeat;
+  background: var(--festival-card-wash), var(--festival-card-art);
   box-shadow: 0 22px 55px #101e4270, 0 0 0 1px #ffedc147;
 
   &:has(.cc-dialog-inner > div:not([hidden]) [data-step="member"]) {
@@ -325,33 +326,17 @@ button.cc-festival-help:focus-visible {
   background: radial-gradient(ellipse at 50% 27%, #fff6dc, #f4f8ff 65%, #d7e5f4);
 }
 
-/* The attendee picker, wallet and enlarged QR share the registration dialog. */
-.cc-dialog.cc-festival-stage[open] .cc-registration[data-festival] .cc-pass-deck {
-  & .cc-ticket[data-peace-concert] {
-    border: 1px solid var(--festival-line);
-    background: white;
-    color: var(--festival-navy);
-    box-shadow: none;
-  }
-  & .cc-ticket::before, & .cc-ticket-head::after { content: none; }
-  & .cc-ticket-finish { display: none; }
-  & .cc-ticket .cc-ticket-head { background: #edf5e8; }
-  & .cc-ticket .cc-ticket-head .cc-kicker {
-    clip-path: none;
-    background: transparent;
-    color: var(--festival-leaf);
-  }
-  & .cc-ticket-facts { border-color: var(--festival-line); background: var(--festival-paper); }
-  & .cc-ticket-facts svg { color: var(--festival-leaf); }
-  & .cc-ticket .cc-qr { border-color: var(--festival-line); background: white; box-shadow: none; }
+/* Ticket confirmation keeps the wallet's card styling and uses the compact dialog frame. */
+.cc-dialog.cc-festival-stage[open] .cc-pass-deck .cc-ticket[data-peace-concert] {
+  box-shadow: none;
 }
 
 /* The same wallet controls appear in registration and on the direct ticket link. */
 .cc-page .cc-pass-deck:has(.cc-ticket[data-peace-concert]) {
   & .cc-pass-options[open], & .cc-ticket-scan[open] {
     color: var(--festival-navy);
-    border-color: var(--festival-line);
-    background: var(--festival-paper);
+    border-color: var(--festival-card-line);
+    background: var(--festival-card-wash), var(--festival-card-art);
   }
   & .cc-pass-options :is(h3, h4, p) { color: var(--festival-navy); }
   & .cc-reg-tools > button, & .cc-pass-options :is(button, a), & .cc-ticket-scan-controls :is(button, select),
@@ -365,9 +350,68 @@ button.cc-festival-help:focus-visible {
   & .cc-reg-tools > button { background: var(--festival-sky); border-color: #96b7cc; }
   & .cc-reg-tools > button:last-child { background: var(--festival-paper); border-color: var(--festival-line); }
   & .cc-reg-tools > button.ui-button:first-child, & .cc-pass-dots button[aria-pressed="true"] {
-    border-color: var(--festival-leaf);
-    background: var(--festival-leaf);
-    color: white;
+    border-color: #ab8960;
+    background: #263b63;
+    color: #fff7da;
   }
   & :is(button, a):focus-visible { outline: 3px solid var(--lvz-focus); outline-offset: -3px; }
+}
+
+
+.cc-page.cc-concert-receipt {
+  width: min(100%, 34rem);
+  margin-inline: auto;
+  box-sizing: border-box;
+  padding-inline: max(.6rem, env(safe-area-inset-left)) max(.6rem, env(safe-area-inset-right));
+}
+
+.cc-concert-receipt .cc-festival-paper {
+  display: grid;
+  gap: .85rem;
+  padding: clamp(.8rem, 4vw, 1.35rem);
+  color-scheme: light;
+  color: var(--festival-navy);
+  border: 1px solid var(--festival-card-line);
+  border-radius: 1.3rem;
+  background: var(--festival-card-wash), var(--festival-card-art);
+}
+
+.cc-receipt-heading {
+  display: flex;
+  align-items: center;
+  gap: .65rem;
+  padding-block-end: .65rem;
+  border-block-end: 1px solid var(--festival-card-line);
+}
+
+.cc-receipt-heading img { flex: none; object-fit: contain; }
+.cc-concert-receipt .cc-receipt-heading h1 { font-size: clamp(1.2rem, 5vw, 1.6rem); }
+.cc-receipt-note { margin: 0; line-height: 1.5; }
+
+.cc-receipt-event,
+.cc-concert-receipt .cc-status-list li {
+  padding: .7rem;
+  border: 1px solid var(--festival-card-line);
+  border-radius: .85rem;
+  background: #fffdf9;
+}
+
+.cc-concert-receipt .cc-receipt-event h2 { font-size: 1.1rem; margin-block-end: .5rem; }
+.cc-receipt-event .cc-hero-title-love { color: #b72e50; font-style: normal; }
+.cc-receipt-event .cc-event-facts { padding: 0; }
+.cc-receipt-event .cc-event-fact { color: var(--festival-navy); }
+.cc-concert-receipt .cc-status-list li { gap: .35rem; overflow-wrap: anywhere; }
+.cc-invite-status { display: flex; flex-wrap: wrap; align-items: center; gap: .35rem .65rem; font-size: .83rem; }
+.cc-invite-status [data-invite-status] { padding: .15rem .55rem; border-radius: 1rem; background: #e8eff8; }
+.cc-invite-status [data-invite-status="confirmed"] { background: #e2f0e4; color: #26492f; }
+.cc-invite-status [data-invite-status]:is([data-invite-status="withdrawn"],[data-invite-status="cancelled"],[data-invite-status="email delivery failed"]) { background: #f6e6ea; color: #733446; }
+
+.cc-concert-receipt .cc-receipt-action {
+  justify-self: start;
+  min-height: 44px;
+  padding-inline: .85rem;
+  background: #263b63;
+  color: #fff7da;
+  border: 1px solid #ab8960;
+  border-radius: .75rem;
 }
