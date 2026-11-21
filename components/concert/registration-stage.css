@@ -138,7 +138,7 @@
 .cc-dialog.cc-concert-stage[open] .cc-dialog-help { background:#fffbf8; border-color:#9c8594; color:#263551; }
 .cc-score-lines i:nth-child(even)::after { animation-direction:alternate-reverse; background:#ffd5dd; }
 .cc-dialog.cc-concert-stage[data-keyboard][open] { top:var(--visible-top); }
-@keyframes cc-running-note { from{left:17%;top:13%} 50%{top:0} to{left:83%;top:13%} }
+@keyframes cc-running-note { from{transform:translate3d(0,3px,0)} 50%{transform:translate3d(min(25vw,7rem),0,0)} to{transform:translate3d(min(50vw,14rem),3px,0)} }
 @keyframes cc-foil { 0%,47% {transform:translateX(-115%)} 81%,100% {transform:translateX(115%)} }
 @keyframes cc-page-in { from{opacity:.3; transform:translateY(8px)} to{opacity:1;transform:none} }
 @keyframes cc-unfold { from{opacity:.45;transform:translateY(22px) scale(.985)} to{opacity:1;transform:none} }
@@ -203,11 +203,11 @@
 @media (prefers-reduced-motion:no-preference) {
   .cc-concert-stage[data-opening]::backdrop { animation:cc-house-dims 420ms ease-out both; }
   .cc-dialog.cc-concert-stage[data-opening] .cc-program-fan img.cc-registration-poster {
-    animation:cc-program-turn 1450ms cubic-bezier(.36,.03,.23,1) both;
+    animation:cc-poster-appear 1000ms cubic-bezier(.36,.03,.23,1) both;
   }
   .cc-concert-stage[data-opening] .cc-program-leaf { animation:cc-program-spread 1190ms cubic-bezier(.36,.01,.21,1) both; }
   .cc-concert-stage[data-opening] .cc-program-sparks { animation:cc-spark-wake 1240ms ease-out both; }
-  .cc-concert-stage[open] .cc-program-sparks i { animation:cc-starlight 2300ms var(--delay) ease-in-out infinite alternate; }
+  .cc-concert-stage[open] .cc-program-sparks i:nth-child(3n + 1) { animation:cc-starlight 2300ms var(--delay) ease-in-out infinite alternate; }
   .cc-concert-stage[open] .cc-choice { animation:cc-choice-enters 520ms 85ms cubic-bezier(.18,.8,.26,1) backwards; }
   .cc-concert-stage[open] .cc-choice:nth-child(2) { animation-delay:155ms; }
   .cc-concert-stage[open] .cc-choice:nth-child(3) { animation-delay:205ms; }
@@ -224,11 +224,8 @@
 @keyframes cc-ticket-glint {
   0%,46% { opacity:0; left:8%; } 59%,69% { opacity:1; } 83%,100% { opacity:0; left:89%; }
 }
-@keyframes cc-program-turn {
-  0%,10% { transform:translateZ(15px) rotateY(0) scale(1.18); }
-  47% { transform:translateZ(25px) rotateY(-79deg) scale(1.08); }
-  79% { transform:translateZ(5px) rotateY(4deg); }
-  100% { transform:rotateY(-3deg); }
+@keyframes cc-poster-appear {
+  from { opacity:.65; } to { opacity:1; }
 }
 @keyframes cc-program-spread {
   0%,12% { transform:translateX(0) rotateY(0) scale(.96); }
@@ -382,17 +379,17 @@
 @media (prefers-reduced-motion:no-preference) {
   .ml-actions > button[data-admission]:not(:active),
   .cc-dialog.cc-concert-stage[open] button[data-confirm-attendance]:not(:disabled):not(:active) {
-    animation:cc-invite-pulse 3.4s cubic-bezier(.35,0,.2,1) infinite;
+    animation:cc-invite-pulse 2.85s cubic-bezier(.25,.68,.32,1) infinite;
   }
 
   .cc-admission-trails path:first-child { stroke-dasharray:30 90; animation:cc-trail-draw 3.8s ease-in-out infinite; }
   .cc-trail-star { animation:cc-trail-bloom 3.8s ease-in-out infinite; }
 }
 @keyframes cc-invite-pulse {
-  0%, 60%, 100% { transform:translateY(0) scale(1); }
-  22% { transform:translateY(-4px) scale(1.026); }
-  34% { transform:translateY(0) scale(.993); }
-  46% { transform:translateY(-2px) scale(1.012); }
+  0%, 58%, 100% { transform:none; }
+  24% { transform:translateY(-7px) scale(1.035); }
+  36% { transform:translateY(1px) scale(.988); }
+  47% { transform:translateY(-3px) scale(1.018); }
 }
 @keyframes cc-trail-draw { 0% {stroke-dashoffset:34;opacity:0} 20% {opacity:.95} 55%,100% {stroke-dashoffset:-100;opacity:0} }
 @keyframes cc-trail-bloom { 0%,28%,70%,100% {opacity:.15} 47% {opacity:1} }
@@ -481,19 +478,39 @@
 .cc-dialog[open] .cc-dialog-footer .cc-dialog-help:focus-visible { outline:2px solid #174698; outline-offset:-2px; }
 @media (orientation:landscape) and (max-height:520px) {
   .cc-dialog.cc-concert-stage[open] .cc-program-fan { width:78%; }
-  .cc-dialog.cc-concert-stage[open]:has(.cc-dialog-inner > div:not([hidden]) .cc-ticket-view .cc-qr) {
-    padding-bottom:0;
-    & .cc-dialog-footer { position:absolute; inset:auto .55rem .2rem auto; margin:0; padding:0; }
-    & .cc-registration { padding-bottom:.2rem; }
-    & .cc-reg-tools { margin-inline-end:46px; }
-    & .cc-registration > .cc-hint { margin-inline-end:46px; }
-  }
 }
 
-@media (orientation:portrait) and (max-height:610px) {
-  .cc-dialog.cc-concert-stage[open]:has(.cc-dialog-inner > div:not([hidden]) .cc-pass-deck) .cc-dialog-footer {
-    position:absolute; bottom:.35rem; right:.55rem; margin:0; padding:0;
+/* The modal help control is in the browser's top layer so the die-cut paper
+   never clips it. Its position is shared with the invitation's first frame. */
+.cc-corner-help {
+  position:fixed; z-index:12; inset:auto max(2px,env(safe-area-inset-right)) max(2px,env(safe-area-inset-bottom)) auto;
+  margin:0; padding:0; border:0; border-radius:50%; width:44px; height:44px;
+  background:radial-gradient(circle,#18386d 51%,#fff1ca 54%,#cca760 58%,transparent 61%);
+  color:#fff5d8; font:700 20px/44px Georgia,serif; text-align:center; cursor:pointer;
+}
+.cc-corner-help:focus-visible { outline:2px solid #e7b85f; outline-offset:-3px; }
+.cc-corner-help:has(+ dialog[open]) { visibility:hidden; }
+.ml-actions:has(> [data-admission]):has(> .cc-corner-help) {
+  box-sizing:border-box; padding-inline-end:32px; flex-wrap:nowrap;
+}
+.ml-actions:has(> .cc-corner-help) > .ui-button-secondary { min-width:0; max-width:36%; }
+.ml-actions > .cc-corner-help { bottom:calc(max(2px,env(safe-area-inset-bottom)) + var(--dock,0px)); }
+.cc-dialog[data-corner-help][open] .cc-dialog-footer:not(:has(button)) { display:none; }
+.cc-dialog[data-keyboard] { --corner-viewport:var(--visible-height); }
+.cc-dialog[data-keyboard] > .cc-corner-help { bottom:calc(var(--keyboard-inset,0px) + 2px); }
+.cc-dialog.cc-concert-stage[data-corner-help][open][data-presentation] {
+  --corner-gap:calc(48px + env(safe-area-inset-bottom));
+  margin-bottom:var(--corner-gap) !important; max-height:calc(var(--corner-viewport,100dvh) - var(--corner-gap) - 2px) !important;
+}
+.cc-dialog.cc-concert-stage[data-corner-help][open] .cc-dialog-inner { grid-auto-rows:max-content; align-content:start; }
+.cc-dialog.cc-concert-stage[data-corner-help][open] .cc-submit-slot:not(:empty) { flex:1; padding-block:6px; }
+.cc-dialog.cc-concert-stage[data-corner-help][open] .cc-poster-stage { flex-shrink:0; }
+@media (orientation:landscape) and (max-height:520px) {
+  .cc-dialog.cc-concert-stage[data-corner-help][open][data-presentation] {
+    --corner-gap:0px; margin:auto; max-width:calc(100vw - 94px) !important;
   }
-  .cc-dialog.cc-concert-stage[open]:has(.cc-dialog-inner > div:not([hidden]) .cc-pass-deck) .cc-reg-tools { margin-inline-end:44px; }
-  .cc-dialog.cc-concert-stage[open]:has(.cc-dialog-inner > div:not([hidden]) .cc-pass-deck) .cc-registration > .cc-hint { margin-inline-end:44px; }
+  .app-frame:has(.app-frame-nav) .ml-actions > .cc-corner-help { right:calc(64px + env(safe-area-inset-right)); }
+}
+@supports not selector(:popover-open) {
+  .cc-dialog[open] > .cc-corner-help { position:static; align-self:flex-end; }
 }

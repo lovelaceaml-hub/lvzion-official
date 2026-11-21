@@ -16,30 +16,33 @@ const leaves = [
   {lane:-1, ink:'#df9d95'}, {lane:1, ink:'#c28fac'},
 ];
 
-export default function ConcertDialog({label, title, primary = false, children, onOpen, onClose, presentation, showPoster = false, invitedBy, footer}: {
+export default function ConcertDialog({label, title, primary = false, children, onOpen, onClose, presentation, showPoster = false, invitedBy, footer, help}: {
   label: string;
   title: string;
   primary?: boolean;
   children: ReactNode;
-  onOpen?: () => void;
+  onOpen?: (fromHelp: boolean) => void;
   onClose?: () => void;
   presentation?: 'registration';
   showPoster?: boolean; invitedBy?: string;
   footer?: ReactNode;
+  help?: {active: boolean; toggle: () => void; recoveryOnly: boolean};
 }) {
   const dialog = useRef<HTMLDialogElement>(null);
+  const corner = useRef<HTMLButtonElement>(null);
   const titleId = useId();
   const frameId = useId().replace(/[^a-z0-9_-]/gi, '');
   const fieldAtFocus = useRef('');
   const themed = presentation === 'registration' && showPoster;
   const opensTicket = themed && primary;
-  function openDialog(button: HTMLButtonElement) {
+  function openDialog(button: HTMLButtonElement, fromHelp = false) {
     const sheet = dialog.current;
     if (!sheet || sheet.open) return;
     button.focus({preventScroll:true});
     sheet.showModal();
-    onOpen?.();
-    if (!opensTicket || matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    onOpen?.(fromHelp);
+    corner.current?.showPopover?.();
+    if (fromHelp || !opensTicket || matchMedia('(prefers-reduced-motion: reduce)').matches) return;
     sheet.setAttribute('data-opening', '');
     sheet.dispatchEvent(new CustomEvent('concert-heart'));
   }
@@ -63,17 +66,28 @@ export default function ConcertDialog({label, title, primary = false, children, 
     if (!sheet || !viewport) return;
     function resize() {
       if (!sheet || !viewport) return;
-      sheet.toggleAttribute('data-keyboard', window.innerHeight - viewport.height > 100 && viewport.scale < 1.1);
+      const typing = sheet.contains(document.activeElement) && document.activeElement?.matches('input:not([type=checkbox]),textarea');
+      sheet.toggleAttribute('data-keyboard', Boolean(typing && window.innerHeight - viewport.height > 100 && viewport.scale < 1.1));
+      sheet.style.setProperty('--keyboard-inset', Math.max(0, window.innerHeight - viewport.offsetTop - viewport.height) + 'px');
       sheet.style.setProperty('--visible-height', viewport.height + 'px');
       sheet.style.setProperty('--visible-top', viewport.offsetTop + 'px');
     }
     resize();
     viewport.addEventListener('resize', resize);
     viewport.addEventListener('scroll', resize);
-    return () => {viewport.removeEventListener('resize', resize);viewport.removeEventListener('scroll', resize);};
+    window.addEventListener('resize', resize);
+    sheet.addEventListener('focusin', resize);
+    sheet.addEventListener('focusout', resize);
+    return () => {
+      window.removeEventListener('resize', resize);
+      viewport.removeEventListener('resize', resize);
+      viewport.removeEventListener('scroll', resize);
+      sheet.removeEventListener('focusin', resize);
+      sheet.removeEventListener('focusout', resize);
+    };
   }, []);
   return <>
-    <button className={primary ? 'ui-button' : 'ui-button ui-button-secondary'} data-admission={opensTicket || undefined}
+    {!(themed && help?.recoveryOnly) && <button className={primary ? 'ui-button' : 'ui-button ui-button-secondary'} data-admission={opensTicket || undefined}
       onPointerMove={opensTicket ? followLight : undefined}
       onPointerDown={opensTicket ? followLight : undefined}
       type="button" aria-haspopup="dialog" onClick={e => openDialog(e.currentTarget)}>
@@ -87,12 +101,14 @@ export default function ConcertDialog({label, title, primary = false, children, 
         <span className="cc-admission-title">{invitedBy && <small>You’ve been invited by {invitedBy}</small>}{label}</span>
         <span className="cc-admission-stub" aria-hidden="true"><ArrowRight size={21}/></span>
       </> : <>{primary && invitedBy && <small>You’ve been invited by {invitedBy} · </small>}{label}</>}
-    </button>
+    </button>}
+    {themed && help && <button type="button" className="cc-corner-help" aria-label="Tickets & help"
+      aria-haspopup="dialog" onClick={e => openDialog(e.currentTarget, true)}>?</button>}
     <dialog className={themed ? 'ui-sheet cc-dialog cc-concert-stage' : 'ui-sheet cc-dialog'} data-presentation={presentation} data-has-footer={footer ? true : undefined} aria-labelledby={titleId} ref={dialog} style={themed ? {
         '--paper-cut':`url(#${frameId}-cut)`, '--ribbon-cut':`url(#${frameId}-ribbon)`,
-      } as CSSProperties : undefined} data-ticket-sheet={opensTicket || undefined}
-      onClose={e => { if (e.target === e.currentTarget) { finishOpening(); onClose?.(); } }}
-      onAnimationEnd={e => { if (e.animationName === 'cc-program-turn') finishOpening(); }}
+      } as CSSProperties : undefined} data-ticket-sheet={opensTicket || undefined} data-corner-help={themed && help ? true : undefined}
+      onClose={e => { if (e.target === e.currentTarget) { corner.current?.hidePopover?.(); finishOpening(); onClose?.(); } }}
+      onAnimationEnd={e => { if (e.animationName === 'cc-poster-appear') finishOpening(); }}
       onPointerDownCapture={finishOpening} onKeyDownCapture={finishOpening}
       onFocusCapture={e => { if (e.target instanceof HTMLInputElement) fieldAtFocus.current = e.target.value; }}
       onBlurCapture={e => {
@@ -139,6 +155,11 @@ export default function ConcertDialog({label, title, primary = false, children, 
         {children}
       </div>
       {footer ? <footer className="cc-dialog-footer">{footer}</footer> : null}
+      {themed && help && <button type="button" popover="manual" ref={corner} className="cc-corner-help"
+        aria-label={help.recoveryOnly ? 'Close ticket help' : help.active ? 'Back to registration' : 'Tickets & help'}
+        onClick={() => help.recoveryOnly ? dialog.current?.close() : help.toggle()}>
+        {help.active ? '↶' : '?'}
+      </button>}
     </dialog>
   </>;
 }

@@ -13,43 +13,41 @@ function png(canvas: HTMLCanvasElement): Promise<Blob> {
   ));
 }
 
-// Draw the flyer foliage directly so exporting a ticket only needs its own QR.
-function drawSprig(ctx: CanvasRenderingContext2D, x: number, direction: number) {
-  ctx.save();
-  ctx.translate(x, 155);
-  ctx.scale(direction, 1);
-  ctx.strokeStyle = '#527452';
-  ctx.lineWidth = 3;
-  ctx.beginPath();
-  ctx.moveTo(0, 0);
-  ctx.quadraticCurveTo(38, -37, 47, -96);
-  ctx.stroke();
-  for (let i = 0; i < 4; i++) {
-    const y = -16 - 19 * i;
-    const stem = 13 + 12 * i - i * i;
-    ctx.fillStyle = i % 2 ? '#447454' : '#80a077';
-    ctx.beginPath();
-    ctx.ellipse(stem - 4, y - 8, 6, 14, -0.45, 0, Math.PI * 2);
-    ctx.ellipse(stem + 8, y - 2, 13, 5, -0.55, 0, Math.PI * 2);
-    ctx.fill();
-  }
-  ctx.restore();
+async function loadImage(src: string) {
+  const image = new Image();
+  image.src = src;
+  await image.decode();
+  return image;
 }
 
-function drawPass(ctx: CanvasRenderingContext2D, image: HTMLImageElement, title: string, name: string, index: number, count: number) {
+async function loadFlyerArt() {
+  const [sky, ornament] = await Promise.all([
+    loadImage('/concert/poster-horizon.webp').catch(() => null),
+    loadImage('/concert/flyer-ornament.svg').catch(() => null),
+  ]);
+  return {sky, ornament};
+}
+
+function drawPass(ctx: CanvasRenderingContext2D, image: HTMLImageElement, title: string, name: string,
+  index: number, count: number, art: Awaited<ReturnType<typeof loadFlyerArt>> | null) {
   ctx.fillStyle = ivory;
   ctx.fillRect(0, 0, width, height);
-  ctx.fillStyle = navy;
-  ctx.fillRect(0, 0, width, 10);
+  if (art?.sky) {
+    ctx.drawImage(art.sky, 0, 0, width, 224);
+    const wash = ctx.createLinearGradient(0, 0, 0, 224);
+    wash.addColorStop(0, 'rgba(255,250,238,.48)');
+    wash.addColorStop(1, ivory);
+    ctx.fillStyle = wash;
+    ctx.fillRect(0, 0, width, 224);
+  }
+  if (art?.ornament) ctx.drawImage(art.ornament, 0, 0, width, height);
   ctx.textAlign = 'center';
-  drawSprig(ctx, 18, 1);
-  drawSprig(ctx, width - 18, -1);
   ctx.fillStyle = navy;
   if (title === PEACE_CONCERT_TITLE) {
     const [intro, love, peace] = PEACE_CONCERT_TITLE_LINES;
     ctx.font = '600 22px Arial, sans-serif';
     ctx.fillText(intro, center, 45);
-    ctx.fillStyle = '#c53158';
+    ctx.fillStyle = '#b72e50';
     ctx.font = 'bold 56px Arial, sans-serif';
     ctx.fillText(love, center, 100);
     ctx.fillStyle = navy;
@@ -77,9 +75,9 @@ function drawPass(ctx: CanvasRenderingContext2D, image: HTMLImageElement, title:
   ctx.fillStyle = navy;
   ctx.font = 'bold 33px Arial, sans-serif';
   ctx.fillText(name, center, 252, width - 56);
-  const qrSize = 552;
+  const qrSize = 568;
   const left = (width - qrSize) / 2;
-  ctx.fillStyle = '#c1ceba';
+  ctx.fillStyle = '#d2ba88';
   ctx.fillRect(left - 5, 269, qrSize + 10, qrSize + 10);
   ctx.fillStyle = '#ffffff';
   ctx.fillRect(left - 3, 271, qrSize + 6, qrSize + 6);
@@ -87,29 +85,23 @@ function drawPass(ctx: CanvasRenderingContext2D, image: HTMLImageElement, title:
   ctx.drawImage(image, left, 274, qrSize, qrSize);
 
   ctx.fillStyle = navy;
-  ctx.fillRect(0, 845, width, 45);
-  ctx.fillStyle = ivory;
   ctx.font = 'bold 18px Arial, sans-serif';
-  ctx.fillText('LV Zion', center, 874);
-  ctx.fillStyle = '#ec9eae';
-  ctx.font = '24px Georgia, serif';
-  ctx.fillText('♪', 246, 875);
-  ctx.fillText('♫', 394, 875);
+  ctx.fillText('LV Zion', center, 875);
 }
 
 export async function passImages(tickets: NamedTicket[], title: string) {
+  // Decoration is optional, including when a previously opened pass is saved offline.
+  const art = title === PEACE_CONCERT_TITLE ? loadFlyerArt() : null;
   const canvases = await Promise.all(tickets.map(async (ticket, index) => {
     const canvas = document.createElement('canvas');
     canvas.width = width;
     canvas.height = height;
     const ctx = canvas.getContext('2d');
     if (!ctx) throw Error('Image unavailable');
-    const image = new Image();
     const source = ticket.svg ? URL.createObjectURL(new Blob([ticket.svg], {type: 'image/svg+xml'})) : ticket.url + '/qr';
     try {
-      image.src = source;
-      await image.decode();
-      drawPass(ctx, image, title, ticket.name, index, tickets.length);
+      const [image, flyer] = await Promise.all([loadImage(source), art]);
+      drawPass(ctx, image, title, ticket.name, index, tickets.length, flyer);
     } finally {
       if (ticket.svg) URL.revokeObjectURL(source);
     }

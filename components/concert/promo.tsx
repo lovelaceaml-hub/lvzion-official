@@ -6,6 +6,23 @@ import {useEffect, useLayoutEffect, useRef, useState} from 'react';
 export type PromoMedia = {video?: string; poster?: string};
 import {PEACE_CONCERT_POSTER as artwork} from '../../lib/concert/branding';
 
+// Registration can open via showModal() and close via Escape, close(), or unmount.
+export function observeRegistrationDialog(scene: Element | null, change: (open: boolean) => void) {
+  const root = scene?.querySelector('.ml-actions') ?? scene;
+  let previous: boolean | undefined;
+  function sync() {
+    const open = !!root?.querySelector('dialog[data-presentation="registration"][open]');
+    if (open !== previous) {
+      previous = open;
+      change(open);
+    }
+  }
+  const observer = new MutationObserver(sync);
+  if (root) observer.observe(root, {subtree: true, attributeFilter: ['open'], childList: true});
+  sync();
+  return () => observer.disconnect();
+}
+
 export default function ConcertPromo({video, poster}: PromoMedia) {
   const player = useRef<HTMLVideoElement>(null);
   const retry = useRef<HTMLButtonElement>(null);
@@ -25,21 +42,49 @@ export default function ConcertPromo({video, poster}: PromoMedia) {
       setFailed(true);
       return;
     }
-    if (!matchMedia('(prefers-reduced-motion: reduce)').matches) {
-      void element.play().catch(() => { /* The native play control remains available. */ });
-    }
     const reduce = matchMedia('(prefers-reduced-motion: reduce)');
     const scene = element.closest<HTMLElement>('.ml-invitation');
+    let covered = false;
+    let playOnClose = !reduce.matches;
+    let color = '';
     function paint() {
+      if (covered || !scene) return;
       const index = Math.min(filmPalette.length - 1, Math.floor((element?.currentTime || 0) / 2));
-      scene?.style.setProperty('--film-color', filmPalette[reduce.matches ? 0 : index]);
+      const next = filmPalette[reduce.matches ? 0 : index];
+      if (color === next) return;
+      color = next;
+      scene.style.setProperty('--film-color', color);
     }
-    const onChange = () => { if (reduce.matches) element.pause(); paint(); };
+    const stopObserving = observeRegistrationDialog(scene, open => {
+      covered = open;
+      if (open) {
+        playOnClose ||= !element.paused && !element.ended;
+        element.pause();
+      } else {
+        if (playOnClose && !reduce.matches) {
+          void element.play().catch(() => { /* Native controls remain available. */ });
+        }
+        playOnClose = false;
+        paint();
+      }
+    });
+    const onChange = () => {
+      if (reduce.matches) {
+        playOnClose = false;
+        element.pause();
+      }
+      paint();
+    };
     element.addEventListener('timeupdate', paint);
     element.addEventListener('seeked', paint);
-    paint();
     reduce.addEventListener('change', onChange);
-    return () => { reduce.removeEventListener('change', onChange); element.removeEventListener('timeupdate',paint); element.removeEventListener('seeked',paint); scene?.style.removeProperty('--film-color'); };
+    return () => {
+      stopObserving();
+      reduce.removeEventListener('change', onChange);
+      element.removeEventListener('timeupdate', paint);
+      element.removeEventListener('seeked', paint);
+      scene?.style.removeProperty('--film-color');
+    };
   }, [video, failed]);
   return <div className="ml-promo">
     {video && !failed ? <video ref={player} src={video} poster={poster ?? artwork} controls

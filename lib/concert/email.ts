@@ -30,18 +30,19 @@ type EmailTicket = {name: string; url: string; qrCid: string; partySize?: number
 function emailHeader(event: PublicEvent) {
   if (!isPeaceConcert(event)) return escape(concertDisplayTitle(event));
   const [intro, love, peace] = PEACE_CONCERT_TITLE_LINES;
-  return `<span style="font-size:17px;line-height:23px">${escape(intro)}</span><br>
-<span style="color:#c53158;font-size:36px;line-height:40px">${escape(love)}</span><br>
-<span style="font-size:26px;line-height:32px">${escape(peace)}</span>`;
+  return `<span style="font-size:16px;line-height:20px;font-weight:600">${escape(intro)}</span><br>
+<span style="color:#b72e50;font-size:36px;line-height:38px;letter-spacing:-1px">${escape(love)}</span><br>
+<span style="color:#173977;font-size:25px;line-height:28px">${escape(peace)}</span>`;
 }
 
-function emailFrame(kicker: string, heading: string, rows: string) {
+function emailFrame(kicker: string, heading: string, rows: string, flyer = false) {
+  const headerPaper = flyer ? 'background:linear-gradient(160deg,#dfebf6,#fff5e5 58%,#fae7e9);' : '';
   return `<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>${escape(kicker)} · LV Zion</title></head>
 <body style="margin:0;background:#edf1e9;color:#192e51;font-family:Arial,Helvetica,sans-serif">
 <table role="presentation" width="100%" cellpadding="0" cellspacing="0" bgcolor="#edf1e9"><tr><td align="center" style="padding:16px 8px">
 <table role="presentation" width="100%" cellpadding="0" cellspacing="0" bgcolor="#fffaee" style="max-width:480px;border:1px solid #bfcab9;border-top:6px solid #193459">
-<tr><td align="center" style="padding:22px 12px 18px;border-bottom:1px solid #bfcab9">
-<p aria-hidden="true" style="margin:0 0 6px;color:#39704d;font:22px Georgia,serif">&#10087;&nbsp; &#9835; &nbsp;&#10087;</p>
+<tr><td align="center" bgcolor="#fffaee" style="${headerPaper}padding:14px 12px;border-bottom:1px solid #d2ba88">
+<p aria-hidden="true" style="margin:0 0 6px;color:#597651;font:18px Georgia,serif">&#10087;&nbsp; <span style="color:#b54d71">&#9835;</span> &nbsp;&#10087;</p>
 <h1 style="margin:0;color:#193459;font:700 27px/32px Arial,Helvetica,sans-serif">${heading}</h1>
 <table role="presentation" cellpadding="0" cellspacing="0" align="center" style="margin:14px auto 0"><tr>
 <td bgcolor="#bf3058" style="padding:6px 18px;border-left:5px solid #e76a82;border-right:5px solid #e76a82;color:#ffffff;text-align:center;font-size:13px;line-height:18px;font-weight:700;letter-spacing:.05em">${escape(kicker)}</td>
@@ -70,10 +71,10 @@ function ticketRow({name, partySize, url, qrCid}: EmailTicket, group: boolean, e
 <tr><td align="center" style="padding:14px 8px">
 <h2 style="margin:0;color:#193459;font-size:22px;line-height:28px;overflow-wrap:anywhere">${escape(name)}</h2>
 ${partySize && partySize > 1 ? `<p style="margin:4px 0;color:#45536a;font-size:14px">Party of ${partySize}</p>` : ''}
-${isPeaceConcert(event) ? `<p style="margin:6px 0;color:#365c42;font-size:14px;line-height:20px">${escape(concertDisplayTitle(event))}<br>${escape(formatDate(event.date))}</p>` : ''}
-<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:292px;margin:12px auto;table-layout:fixed"><tr>
-<td align="center" bgcolor="#ffffff" style="padding:10px;border:1px solid #ced7c9">
-<img src="cid:${escape(qrCid)}" width="268" height="268" alt="${escape('Ticket QR code for '+name)}" style="display:block;width:100%;max-width:268px;height:auto;background:#fff;color:#193459">
+${isPeaceConcert(event) ? `<p style="margin:4px 0;color:#36516b;font-size:14px;line-height:19px">${escape(concertDisplayTitle(event))}<br>${escape(formatDate(event.date))}</p>` : ''}
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:352px;margin:8px auto;table-layout:fixed"><tr>
+<td align="center" bgcolor="#ffffff" style="padding:4px;border:1px solid #d2ba88">
+<a href="${escape(url)}" style="display:block;color:#193459"><img src="cid:${escape(qrCid)}" width="342" height="342" alt="${escape('Ticket QR code for '+name)}" style="display:block;width:100%;max-width:342px;height:auto;border:0;background:#fff;color:#193459"></a>
 </td></tr></table>
 ${actionLink(url, group ? 'Open ticket for '+name : 'Open my ticket')}
 </td></tr></table></td></tr>`;
@@ -83,7 +84,7 @@ export type HostConfirmation = {name:string; email:string; additionalNames:strin
 export function hostReceiptHtml(event:PublicEvent, name:string, delivery:string, statusUrl:string) {
   return emailFrame('Your concert invitations',emailHeader(event),`
 <tr><td align="center" style="padding:20px;color:#182b48"><strong>${escape(name)}</strong><p>${escape(delivery)}</p>
-${actionLink(statusUrl,'View my invitation statuses')}</td></tr>${eventFacts(event)}`);
+${actionLink(statusUrl,'View my invitation statuses')}</td></tr>${eventFacts(event)}`, isPeaceConcert(event));
 }
 
 export function ticketGroupHtml(event: PublicEvent, tickets: EmailTicket[], host?:HostConfirmation) {
@@ -96,7 +97,7 @@ ${actionLink(host.statusUrl,'View my invitation statuses')}</td></tr>` : ''}
 <tr><td align="center" style="padding:16px;color:#182b48;font-size:15px;font-weight:700">Show ${tickets.length === 1 ? 'this QR code' : 'each attendee’s QR code'} at the door.</td></tr>
 ${tickets.map(ticket => ticketRow(ticket, tickets.length > 1, event)).join('')}
 ${eventFacts(event)}
-${calendar ? '<tr><td align="center" style="padding:16px">Add to calendar · <a href="https://lvz.app'+calendar.apple+'">Apple Calendar</a> · <a href="'+escape(calendar.google)+'">Google Calendar</a></td></tr>' : ''}`);
+${calendar ? '<tr><td align="center" style="padding:16px">Add to calendar · <a href="https://lvz.app'+calendar.apple+'">Apple Calendar</a> · <a href="'+escape(calendar.google)+'">Google Calendar</a></td></tr>' : ''}`, isPeaceConcert(event));
 }
 
 export function ticketHtml({name, partySize, event, ticketUrl}: TicketMail, qrCid: string) {
@@ -109,7 +110,7 @@ export function invitationHtml({event, name, sender, url}: {event: PublicEvent; 
 <p style="margin:0 0 6px">Hi ${escape(name)},</p>
 <p style="margin:0"><strong>${escape(sender)}</strong> invited you to the concert.</p>
 </td></tr>${eventFacts(event)}
-<tr><td align="center" style="padding:0 16px 22px">${actionLink(url, 'Open your invitation')}</td></tr>`);
+<tr><td align="center" style="padding:0 16px 22px">${actionLink(url, 'Open your invitation')}</td></tr>`, isPeaceConcert(event));
 }
 
 export function concertVerificationHtml(code: string) {

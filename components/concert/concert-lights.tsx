@@ -2,6 +2,7 @@
 
 import {useEffect, useRef} from 'react';
 import {concertCurve} from './concert-curve';
+import {observeRegistrationDialog} from './promo';
 
 const TURN = Math.PI * 2;
 const PALETTE = ['255,194,126', '255,145,173', '201,179,252', '255,233,203'];
@@ -89,9 +90,20 @@ export default function ConcertLights({startsAt}: {startsAt: string}) {
     const start = Date.parse(startsAt);
     const reduced = matchMedia('(prefers-reduced-motion: reduce)');
     const stars = makeStars(1060);
+    // Sample the heart once. The stars, wakes and conducting staff share the
+    // same displaced contour (with subpixel interpolation between samples).
+    const segments = 256;
+    const samples = Array.from({length: segments}, (_, i) => {
+      const angle = i * TURN / segments;
+      const base = concertCurve(angle, 1, 0);
+      return {angle, base, x: base.x, y: base.y, wake: 0};
+    });
+    samples.push(samples[0]); // Interpolate across the seam.
     const sparks = PALETTE.map(color => makeGlow(color, true));
     const veils = PALETTE.map(color => makeGlow(color, false));
     let width = 0, height = 0, frame = 0, last = 0, visible = false;
+
+    let covered = false, sizeChanged = true;
 
     const handles = Array.from(controls.current?.querySelectorAll('button') ?? []);
     const guides = handles.map(() => ({
@@ -113,7 +125,7 @@ export default function ConcertLights({startsAt}: {startsAt: string}) {
     }
     function resetHover() { hover.targetX = hover.targetY = 0; }
     surface?.parentElement?.addEventListener('pointermove', event => {
-      if (event.pointerType !== 'mouse' || event.buttons || Date.now() >= start || reduced.matches) return;
+      if (!width || !height || event.pointerType !== 'mouse' || event.buttons || Date.now() >= start || reduced.matches) return;
       const point = position(event);
       hover.targetX = (point.x / width - .5) * 13;
       hover.targetY = (point.y / height - .5) * 10;
@@ -123,7 +135,7 @@ export default function ConcertLights({startsAt}: {startsAt: string}) {
     handles.forEach((handle, index) => {
       const guide = guides[index];
       handle.addEventListener('pointerdown', event => {
-        if (Date.now() >= start || reduced.matches || !event.isPrimary || event.button !== 0) return;
+        if (!width || !height || Date.now() >= start || reduced.matches || !event.isPrimary || event.button !== 0) return;
         const point = position(event);
         guide.pointer = event.pointerId;
         guide.targetX = guide.baseX + guide.dx;
@@ -164,10 +176,19 @@ export default function ConcertLights({startsAt}: {startsAt: string}) {
     });
 
     function draw() {
-      if (!ctx || !width || !height) return;
+      if (!ctx || !element) return;
+      if (sizeChanged) {
+        width = element.clientWidth;
+        height = element.clientHeight;
+        const ratio = Math.min(devicePixelRatio, 2);
+        element.width = Math.round(width * ratio);
+        element.height = Math.round(height * ratio);
+        ctx.setTransform(ratio, 0, 0, ratio, 0, 0);
+        sizeChanged = false;
+      }
+      if (!width || !height) return;
       const remaining = Math.max(0, (start - Date.now()) / 1000);
       const t = reduced.matches || remaining === 0 ? 0 : elapsed.current;
-      const heart = 1, tilt = 0;
       const rx = Math.min(width * .46, height * 1.25);
       const ry = height * .43;
       const cx = width * .5;
@@ -176,7 +197,7 @@ export default function ConcertLights({startsAt}: {startsAt: string}) {
       hover.x += (hover.targetX - hover.x) * .15;
       hover.y += (hover.targetY - hover.y) * .15;
       guides.forEach((guide, index) => {
-        const base = concertCurve(lead + Math.PI * index, heart, tilt);
+        const base = concertCurve(lead + Math.PI * index, 1, 0);
         guide.baseX = cx + rx * base.x + hover.x;
         guide.baseY = cy + ry * base.y + hover.y;
         guide.dx = guide.pointer === null ? guide.dx * .89 : guide.targetX - guide.baseX;
@@ -192,18 +213,29 @@ export default function ConcertLights({startsAt}: {startsAt: string}) {
         }
         handles[index].style.transform = `translate(${guide.baseX + guide.dx}px, ${guide.baseY + guide.dy}px) translate(-50%, -50%)`;
       });
-      function curve(angle: number) {
-        const p = concertCurve(angle, heart, tilt);
-        let dx = hover.x, dy = hover.y;
-        // Move the whole adjoining arc, with the strongest pull at the held light.
-        for (let i = 0; i < guides.length; i++) {
-          const weight = ((1 + Math.cos(angle - lead - i * Math.PI)) * .5) ** 7;
-          dx += weight * guides[i].dx;
-          dy += weight * guides[i].dy;
+      for (let i = 0; i < segments; i++) {
+        const sample = samples[i];
+        const alignment = Math.cos(sample.angle - lead);
+        sample.wake = alignment ** 12;
+        sample.x = sample.base.x + hover.x / rx;
+        sample.y = sample.base.y + hover.y / ry;
+        for (let j = 0; j < guides.length; j++) {
+          const guide = guides[j];
+          if (!guide.dx && !guide.dy) continue;
+          const weight = ((1 + (j === 0 ? alignment : -alignment)) * .5) ** 7;
+          sample.x += weight * guide.dx / rx;
+          sample.y += weight * guide.dy / ry;
         }
-        p.x += dx / rx;
-        p.y += dy / ry;
-        return p;
+      }
+      function sampleIndex(angle: number) {
+        const turns = angle / TURN;
+        return (turns - Math.floor(turns)) * segments;
+      }
+      function curve(angle: number) {
+        const index = sampleIndex(angle);
+        const i = Math.floor(index), mix = index - i;
+        const a = samples[i], b = samples[i + 1];
+        return {x: a.x + (b.x - a.x) * mix, y: a.y + (b.y - a.y) * mix};
       }
       ctx.clearRect(0, 0, width, height);
       ctx.globalCompositeOperation = 'lighter';
@@ -228,19 +260,35 @@ export default function ConcertLights({startsAt}: {startsAt: string}) {
         ctx.drawImage(veils[Math.sin(angle) > 0 ? 0 : 1],
           cx + p.x * rx - radius, cy + p.y * ry - radius, radius * 2, radius * 2);
       }
+      // At phone scale the faintest dust has a subpixel core. Batch those
+      // marks by ink and opacity; keep the original glow sprites for flares.
+      const dustPaths = Array.from({length: 8}, () => new Path2D());
+      const sizeScale = Math.min(1.5, .75 + rx / 500);
       for (const star of stars) {
         const angle = star.phase + t * .15 + .085 * Math.sin(star.phase * 4 + t * .3);
-        const p = curve(angle);
-        const wake = Math.abs(Math.cos(angle - lead)) ** 12;
+        const index = sampleIndex(angle);
+        const i = Math.floor(index), mix = index - i;
+        const a = samples[i], b = samples[i + 1];
+        const wake = a.wake + (b.wake - a.wake) * mix;
         const dust = .023 + star.flare * .14;
-        const x = cx + rx * (p.x + dust * star.spread);
-        const y = cy + ry * (p.y + dust * star.depth * 1.8 + .018 * Math.sin(star.phase * 9 + t + star.drift));
-        const size = (.85 + 3.8 * star.flare + wake * 1.5) * Math.min(1.5, .75 + rx / 500);
-        ctx.globalAlpha = (.36 + star.drift * .54) * (.7 + .3 * Math.sin(angle * 3 + t * 1.4) ** 2);
-        const color = star.flare > .72 ? star.color : Math.sin(angle) > 0 ? 0 : 1;
-        ctx.drawImage(sparks[color], x - size, y - size, 2 * size, 2 * size);
+        const x = cx + rx * (a.x + (b.x - a.x) * mix + dust * star.spread);
+        const y = cy + ry * (a.y + (b.y - a.y) * mix + dust * star.depth * 1.8 + .018 * Math.sin(star.phase * 9 + t + star.drift));
+        const size = (.85 + 3.8 * star.flare + wake * 1.5) * sizeScale;
+        const alpha = (.36 + star.drift * .54) * (.7 + .3 * Math.sin(angle * 3 + t * 1.4) ** 2);
+        const color = star.flare > .72 ? star.color : index < segments / 2 ? 0 : 1;
+        if (size < 1.8 && color < 2) {
+          const bucket = color * 4 + Math.min(3, Math.floor(alpha * 4));
+          dustPaths[bucket].rect(x - size * .45, y - size * .45, size * .9, size * .9);
+        } else {
+          ctx.globalAlpha = alpha;
+          ctx.drawImage(sparks[color], x - size, y - size, 2 * size, 2 * size);
+        }
       }
       ctx.globalAlpha = 1;
+      dustPaths.forEach((path, i) => {
+        ctx.fillStyle = `rgba(${PALETTE[Math.floor(i / 4)]},${(i % 4 + .5) / 4})`;
+        ctx.fill(path);
+      });
       guides.forEach((guide, index) => {
         if (guide.beats.length < 2) return;
         const age = Math.max(0, t - guide.releaseAt);
@@ -284,39 +332,46 @@ export default function ConcertLights({startsAt}: {startsAt: string}) {
     function sync() {
       cancelAnimationFrame(frame);
       last = 0;
-      handles.forEach(handle => { handle.disabled = Date.now() >= start || reduced.matches; });
-      if (reduced.matches || Date.now() >= start) {
+      const still = reduced.matches || Date.now() >= start;
+      handles.forEach(handle => { handle.disabled = still; });
+      if (covered || !visible || document.hidden) return;
+      if (still) {
         resetHover(); hover.x = hover.y = 0;
-        guides.forEach(guide => {
+        guides.forEach((guide, i) => {
+          delete handles[i].dataset.held;
           guide.pointer = null; guide.dx = guide.dy = 0;
           guide.releaseAt = guide.sweepAt = -Infinity;
           guide.beats.length = 0;
         });
         draw();
-      }
-      if (visible && !document.hidden && Date.now() < start && !reduced.matches) frame = requestAnimationFrame(tick);
-
+      } else frame = requestAnimationFrame(tick);
     }
 
     const resize = new ResizeObserver(() => {
-      width = element.clientWidth;
-      height = element.clientHeight;
-      const ratio = Math.min(devicePixelRatio, 2);
-      element.width = Math.round(width * ratio);
-      element.height = Math.round(height * ratio);
-      ctx.setTransform(ratio, 0, 0, ratio, 0, 0);
-      draw();
+      sizeChanged = true;
+      if (!covered && visible && !document.hidden && (reduced.matches || Date.now() >= start)) draw();
     });
     resize.observe(element);
     const observer = new IntersectionObserver(([entry]) => {visible = entry.isIntersecting; sync();});
     observer.observe(element);
+    const stopObserving = observeRegistrationDialog(element.closest('.ml-invitation'), open => {
+      covered = open;
+      if (open) {
+        guides.forEach((guide, i) => {
+          if (guide.pointer !== null && handles[i].hasPointerCapture(guide.pointer)) {
+            handles[i].releasePointerCapture(guide.pointer);
+          }
+        });
+      }
+      sync();
+    });
     reduced.addEventListener('change', sync);
     document.addEventListener('visibilitychange', sync);
     return () => {
       cancelAnimationFrame(frame);
-
       listeners.abort();
       handles.forEach(handle => { delete handle.dataset.held; });
+      stopObserving();
       resize.disconnect();
       observer.disconnect();
       reduced.removeEventListener('change', sync);

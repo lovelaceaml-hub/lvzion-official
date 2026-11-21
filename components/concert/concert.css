@@ -805,8 +805,8 @@
 /* Keep the flyer's botanical engraving on the paper, behind the type and scan field. */
 :is(.cc-wallet,.cc-ticket-view) .cc-ticket[data-peace-concert] {
   color-scheme: light;
-  background: radial-gradient(ellipse at top left, #eaf2f1, transparent 54%),
-    linear-gradient(152deg, #fff8e9, #fffaf5 55%, #f9e9ec);
+  background: linear-gradient(180deg, #fff8ef70, #fffaf4 7rem),
+    url('/concert/poster-horizon.webp') center top / 100% 8rem no-repeat #fffaf4;
   border-color: #c9ab7a;
 }
 .cc-ticket[data-peace-concert]::before {
@@ -833,25 +833,37 @@
   background: linear-gradient(90deg, transparent, #b58c4e, transparent);
 }
 :is(.cc-wallet,.cc-ticket-view) .cc-ticket[data-peace-concert] .cc-ticket-head .cc-kicker {
-  color: #794953;
+  padding: .14rem 1rem;
+  margin: 0 0 .2rem;
+  clip-path: polygon(0 0, 100% 0, 96% 50%, 100% 100%, 0 100%, 4% 50%);
+  color: #fff;
+  background: #a52d4f;
 }
 :is(.cc-wallet,.cc-ticket-view) .cc-ticket[data-peace-concert] .cc-ticket-head :is(h1,h4) {
-  color: #203453;
-  font-size: clamp(1.18rem, 4.6vw, 1.62rem);
+  color: #172f5c;
+  font: 800 clamp(1.1rem, 4.2vw, 1.45rem)/1.04 var(--lvz-font-sans);
+  letter-spacing: -.035em;
+}
+:is(.cc-wallet,.cc-ticket-view) .cc-ticket[data-peace-concert] .cc-ticket-head .cc-hero-title-intro {
+  font-size: .78em;
+  font-weight: 600;
 }
 :is(.cc-wallet,.cc-ticket-view) .cc-ticket[data-peace-concert] .cc-ticket-head .cc-hero-title-love {
-  color: #a63450;
-  font-style: italic;
+  display: inline-block;
+  color: #b72e50;
+  font-size: 1.14em;
+  font-style: normal;
 }
 :is(.cc-wallet,.cc-ticket-view) .cc-ticket[data-peace-concert] .cc-ticket-head .cc-hero-title-peace {
-  color: #203453;
+  display: block;
+  color: #173977;
 }
 :is(.cc-wallet,.cc-ticket-view) .cc-ticket[data-peace-concert] .cc-ticket-facts {
   background: rgb(255 249 240 / 58%);
   padding-inline: clamp(1.25rem, 7%, 2.5rem);
 }
 .cc-pass-deck {
-  --cc-ticket-qr-size: min(100%, 39dvh, 21rem);
+  --cc-ticket-qr-size: min(100%, 42dvh, 22rem);
 }
 .cc-pass-deck .cc-ticket .cc-qr {
   position: relative;

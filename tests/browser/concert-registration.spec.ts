@@ -71,6 +71,32 @@ test('guest can retry an empty ticket lookup and return to the unfinished regist
   await expect(dialog.getByLabel('Your full name')).toHaveValue('Fictional Visitor');
 });
 
+test('corner help opens from the invitation, stays outside the card and returns to the registration', async ({page}) => {
+  await mockConcert(page);
+  await page.emulateMedia({reducedMotion:'reduce'});
+  await page.goto('/modules/concert');
+  const landingHelp = page.getByRole('button', {name:'Tickets & help', exact:true});
+  await landingHelp.click();
+  const dialog = page.getByRole('dialog');
+  await expect(dialog.getByLabel('Registration email')).toBeVisible();
+  await dialog.getByRole('button', {name:'Back to registration'}).click();
+  await expect(dialog.getByRole('button', {name:'I am a guest.'})).toBeVisible();
+  for (const viewport of [{width:390,height:844},{width:320,height:568},{width:568,height:320}]) {
+    await page.setViewportSize(viewport);
+    const help = dialog.getByRole('button', {name:'Tickets & help'});
+    await expect(help).toBeInViewport({ratio:1});
+    await expect.poll(async () => {
+      const corner = await help.boundingBox(), card = await dialog.boundingBox();
+      const visible = await page.evaluate(() => ({width:window.innerWidth, height:window.innerHeight}));
+      return Boolean(corner && card && corner.x + corner.width >= visible.width - 5 &&
+        corner.y + corner.height >= visible.height - 5 &&
+        (corner.y >= card.y + card.height - 1 || corner.x >= card.x + card.width - 1));
+    }).toBe(true);
+  }
+  await page.keyboard.press('Escape');
+  await expect(landingHelp).toBeFocused();
+});
+
 test('VIP details follow the recipient draft and disappear when that recipient is removed', async ({page}) => {
   let submitted: InviteDraft[] = [];
   await page.route('**/api/concert/registration', route => {

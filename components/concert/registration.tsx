@@ -108,9 +108,10 @@ export default function Registration({eventId, event, hostToken, personal, invit
     primary={!recoveryOnly}
     presentation="registration"
     showPoster={showPoster} invitedBy={invitedBy}
-    onOpen={() => {setShowHelp(recoveryOnly); setOpen(true);}}
+    help={{active:showHelp, toggle:() => setShowHelp(value => !value), recoveryOnly}}
+    onOpen={fromHelp => {setShowHelp(fromHelp || recoveryOnly); setOpen(true);}}
     onClose={() => setOpen(false)}
-    footer={<><div className="cc-submit-slot" ref={setFooterSlot}/>{!recoveryOnly && <button
+    footer={<><div className="cc-submit-slot" ref={setFooterSlot}/>{!showPoster && !recoveryOnly && <button
       type="button"
       className="ui-button ui-button-secondary cc-dialog-help"
       aria-label={showHelp ? 'Back to registration' : 'Tickets & help'} title={showHelp ? 'Back to registration' : 'Tickets & help'}

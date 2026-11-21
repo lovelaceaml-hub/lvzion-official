@@ -47,6 +47,13 @@ export function HeartFlight() {
     if (!canvas || !dialog || !ctx) return;
     const motion = matchMedia('(prefers-reduced-motion: reduce)');
     let frame = 0;
+    let geometryDirty = true;
+    const invalidate = () => { geometryDirty = true; };
+    const geometry = new ResizeObserver(invalidate);
+    geometry.observe(dialog);
+    const posterStage = dialog.querySelector('.cc-poster-stage');
+    if (posterStage) geometry.observe(posterStage);
+    dialog.addEventListener('scroll', invalidate, true);
     function clear() {
       cancelAnimationFrame(frame);
       ctx!.clearRect(0,0,canvas!.width,canvas!.height);
@@ -89,8 +96,10 @@ export function HeartFlight() {
       }
       const duration = source ? 920 : 1480;
       const began = performance.now();
+      geometryDirty = true;
       function paint(now:number) {
-        if (!measure()) return;
+        if (geometryDirty && !measure()) return;
+        geometryDirty = false;
         const progress = Math.min(1.23,(now-began)/duration);
         pen.clearRect(0,0,w,h);
         for (const side of [-1,1]) {
@@ -123,6 +132,7 @@ export function HeartFlight() {
     motion.addEventListener('change',clear);
     document.addEventListener('visibilitychange',clear);
     return () => {
+      geometry.disconnect(); dialog.removeEventListener('scroll',invalidate,true);
       clear(); dialog.removeEventListener('concert-heart',fly);dialog.removeEventListener('close',clear);
       motion.removeEventListener('change',clear);document.removeEventListener('visibilitychange',clear);
     };
