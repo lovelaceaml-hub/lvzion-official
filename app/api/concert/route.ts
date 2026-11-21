@@ -1,3 +1,4 @@
+import {scheduleConcertSheetSync} from '../../../lib/concert/sheet-sync';
 import {parseEvent,parseMemberCommand,parseProgramEntries,ConcertError,object,identifier,type Workspace} from '../../../lib/concert/domain';
 import {body} from '../../../lib/server/http';
 import {digest,inviteTokenFor,inviteUrl,newTicket,qrSvg,ticketTokenFor,ticketUrl} from '../../../lib/concert/server';
@@ -39,6 +40,7 @@ export async function POST(request:Request){
    const t=newTicket();
    const r=object(await call(client,'concert_member_rsvp',{p_ticket:t.id,p_digest:t.digest,p_email:command.email,p_party:command.partySize}));
    const ticketId=identifier(r.ticketId);
+   if(r.created===true)scheduleConcertSheetSync();
    const emailed=r.created===true?await sendTicket(ticketId):false;
    return json({ok:true,created:r.created===true,emailed});
   }
@@ -55,6 +57,7 @@ export async function POST(request:Request){
   }
   const r=object(await call(client,'concert_command',{p_command:command}));
   if(r.ok!==true)throw new ConcertError('The save could not be confirmed.',503,'unavailable');
+  if(command.op==='checkin'||command.op==='undo'||command.op==='cancel')scheduleConcertSheetSync();
   return json({ok:true});
  }catch(e){return failure(e);}
 }

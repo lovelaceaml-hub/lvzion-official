@@ -6,7 +6,7 @@ import {useEffect, useRef} from 'react';
 // same animated path, so the paper edge and the travelling lights coincide.
 function ticketContour(fold: number) {
   const cleft = 4.9 - fold * 2.8;
-  const shoulder = 9 - fold * 3.7;
+  const shoulder = 6 - fold * 2.7;
   const notch = 4 - fold * 2.4;
   return `M50 ${cleft}
     C42 -0.6 32 0.2 23 2 C15 3.5 14 ${shoulder} 6 ${shoulder}

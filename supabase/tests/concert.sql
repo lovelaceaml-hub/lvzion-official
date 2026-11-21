@@ -170,6 +170,16 @@ select set_config('test.registration',jsonb_build_object(
   jsonb_build_object('id','71000000-0000-4000-8000-000000000001','name','Lead Guest','digest',pg_temp.d('named-lead')),
   jsonb_build_object('id','71000000-0000-4000-8000-000000000002','name','Second Guest','digest',pg_temp.d('named-second'))
  ))::text,true);
+select pg_temp.server();
+select pg_temp.pass(public.concert_sheet_snapshot('70000000-0000-4000-8000-000000000001')='[]'::jsonb,
+  'valid empty event returns an empty sheet despite tickets in the archived event');
+select pg_temp.pass(public.concert_sheet_snapshot(gen_random_uuid()) is null,'unknown event cannot clear a workbook');
+select pg_temp.pass(not exists (
+  select 1 from unnest(array['anon','authenticated']) role_name,
+    unnest(array['public.concert_sheet_snapshot(uuid)','app_private.concert_sheet_snapshot(uuid)']) fn
+  where has_function_privilege(role_name,fn,'execute')
+), 'both sheet RPC functions are service-only');
+select pg_temp.fails('select guest_name from app_private.concert_tickets','42501','service cannot query the tickets table');
 select pg_temp.login(101);
 select pg_temp.fails($$select public.concert_register_named(current_setting('test.registration')::jsonb)$$,'42501','authenticated caller cannot issue public tickets directly');
 select pg_temp.fails($$select public.concert_register_guest_party('{}')$$,'42501','authenticated caller cannot issue a guest party ticket');
@@ -177,6 +187,24 @@ select pg_temp.fails($$select public.concert_door('{"action":"find","name":"Lead
 select pg_temp.server();
 select pg_temp.pass(jsonb_array_length(public.concert_register_named(current_setting('test.registration')::jsonb)->'tickets')=2,'named party issues two tickets');
 select pg_temp.pass(jsonb_array_length(public.concert_register_named(current_setting('test.registration')::jsonb)->'tickets')=2,'replayed request returns the same named tickets');
+savepoint sheet_states;
+select pg_temp.admin();
+update app_private.concert_tickets set created_at='2030-07-01 07:30:01Z',
+  checked_in_at='2030-12-07 07:30:02Z',checked_in_by=pg_temp.m(104)
+  where id='71000000-0000-4000-8000-000000000001';
+select pg_temp.login(104);
+select public.concert_command('{"op":"cancel","ticketId":"71000000-0000-4000-8000-000000000002"}');
+select pg_temp.server();
+select pg_temp.pass(public.concert_sheet_snapshot('70000000-0000-4000-8000-000000000001')=
+  '[{"attendee":"Lead Guest","registered":"2030-07-01 00:30:01","attendance":"Checked in","checked_in":"2030-12-06 23:30:02"}]'::jsonb,
+  'sheet returns only the four PT fields for active passes in the configured event');
+select pg_temp.login(104);
+select public.concert_command('{"op":"undo","ticketId":"71000000-0000-4000-8000-000000000001"}');
+select pg_temp.server();
+select pg_temp.pass(public.concert_sheet_snapshot('70000000-0000-4000-8000-000000000001')=
+  '[{"attendee":"Lead Guest","registered":"2030-07-01 00:30:01","attendance":"Registered","checked_in":null}]'::jsonb,
+  'sheet reflects undone check-ins');
+rollback to sheet_states;
 select pg_temp.pass((public.concert_ticket_view(pg_temp.d('named-second'))->>'partySize')::int=1,'secondary guest gets an individual ticket');
 select pg_temp.pass(jsonb_array_length(public.concert_recover_tickets('{"eventId":"70000000-0000-4000-8000-000000000001","email":"coordinator@example.invalid"}'))=2,'verified recovery can return all named tickets');
 select pg_temp.pass(jsonb_array_length(public.concert_named_invitation(jsonb_build_object(

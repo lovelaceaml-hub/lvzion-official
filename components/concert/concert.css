@@ -799,5 +799,158 @@
   }
   .cc-wallet > .cc-pass-deck { display:contents; }
   .cc-wallet .cc-pass-gesture { grid-column:1/-1; }
-  .cc-wallet .cc-wallet-secondary > .ui-button { max-width:6rem; line-height:1.1; }
+  .cc-wallet .cc-reg-tools { grid-column:1/-1; }
+}
+
+/* Keep the flyer's botanical engraving on the paper, behind the type and scan field. */
+:is(.cc-wallet,.cc-ticket-view) .cc-ticket[data-peace-concert] {
+  color-scheme: light;
+  background: radial-gradient(ellipse at top left, #eaf2f1, transparent 54%),
+    linear-gradient(152deg, #fff8e9, #fffaf5 55%, #f9e9ec);
+  border-color: #c9ab7a;
+}
+.cc-ticket[data-peace-concert]::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  border: solid transparent;
+  border-width: 3.8rem 5rem;
+  border-image: url('/concert/flyer-ornament.svg') 86 100 stretch;
+}
+:is(.cc-wallet,.cc-ticket-view) .cc-ticket[data-peace-concert] .cc-ticket-head {
+  padding: .75rem 2.5rem .55rem;
+  gap: .12rem;
+  background: transparent;
+  border: 0;
+}
+.cc-ticket[data-peace-concert] .cc-ticket-head::after {
+  content: "";
+  width: 5rem;
+  height: 1px;
+  margin-top: .23rem;
+  background: linear-gradient(90deg, transparent, #b58c4e, transparent);
+}
+:is(.cc-wallet,.cc-ticket-view) .cc-ticket[data-peace-concert] .cc-ticket-head .cc-kicker {
+  color: #794953;
+}
+:is(.cc-wallet,.cc-ticket-view) .cc-ticket[data-peace-concert] .cc-ticket-head :is(h1,h4) {
+  color: #203453;
+  font-size: clamp(1.18rem, 4.6vw, 1.62rem);
+}
+:is(.cc-wallet,.cc-ticket-view) .cc-ticket[data-peace-concert] .cc-ticket-head .cc-hero-title-love {
+  color: #a63450;
+  font-style: italic;
+}
+:is(.cc-wallet,.cc-ticket-view) .cc-ticket[data-peace-concert] .cc-ticket-head .cc-hero-title-peace {
+  color: #203453;
+}
+:is(.cc-wallet,.cc-ticket-view) .cc-ticket[data-peace-concert] .cc-ticket-facts {
+  background: rgb(255 249 240 / 58%);
+  padding-inline: clamp(1.25rem, 7%, 2.5rem);
+}
+.cc-pass-deck {
+  --cc-ticket-qr-size: min(100%, 39dvh, 21rem);
+}
+.cc-pass-deck .cc-ticket .cc-qr {
+  position: relative;
+  box-sizing: border-box;
+  /* The embedded registration sheet also supplies a landscape width. */
+  min-inline-size: var(--cc-ticket-qr-size);
+  width: var(--cc-ticket-qr-size);
+  padding: 0;
+  border: 1px solid #ceb487;
+  border-radius: 0;
+  background: white;
+}
+.cc-ticket-code, .cc-ticket .cc-qr .cc-ticket-code svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+  border-radius: 0;
+}
+.cc-ticket-enlarge {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  cursor: zoom-in;
+}
+.cc-ticket-enlarge:focus-visible { outline: 3px solid #274f7d; outline-offset: 2px; }
+
+@media (max-height: 700px) {
+  .cc-pass-deck { --cc-ticket-qr-size: min(54vw, 36dvh, 15rem); }
+  .cc-pass-deck .cc-ticket[data-peace-concert] .cc-ticket-head { padding-block: .35rem .2rem; }
+}
+@media (orientation: landscape) and (max-height: 520px) {
+  .cc-pass-deck { --cc-ticket-qr-size: min(32vw, 47dvh, 13.5rem); }
+  .cc-pass-deck .cc-ticket[data-peace-concert] .cc-ticket-head { padding-inline: 1.4rem; }
+  .cc-pass-deck .cc-ticket[data-peace-concert] .cc-ticket-head :is(h1,h4) { font-size: 1.06rem; }
+}
+
+.cc-ticket-scan[open] {
+  position: fixed;
+  inset: 0;
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr);
+  box-sizing: border-box;
+  width: 100%;
+  height: 100dvh;
+  max-width: none;
+  max-height: none;
+  padding: max(.25rem, env(safe-area-inset-top)) max(.25rem, env(safe-area-inset-right))
+    max(.25rem, env(safe-area-inset-bottom)) max(.25rem, env(safe-area-inset-left));
+  margin: 0;
+  border: 0;
+  background: #fff;
+  color: #203453;
+  color-scheme: light;
+}
+.cc-ticket-scan-controls {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: .5rem;
+  padding-inline: .5rem;
+}
+.cc-ticket-scan-controls strong { overflow-wrap: anywhere; line-height: 1.15; }
+.cc-ticket-scan-controls button {
+  min-height: 44px;
+  padding-inline: 1rem;
+  border: 1px solid #c7af8a;
+  border-radius: 2rem;
+  background: #fffaf1;
+  color: #203453;
+  cursor: pointer;
+}
+.cc-ticket-scan-area {
+  container-type: size;
+  display: grid;
+  place-items: center;
+}
+.cc-ticket-scan-area .cc-ticket-code {
+  width: min(100cqw, 100cqh);
+  height: auto;
+  aspect-ratio: 1;
+}
+.cc-ticket-scan-area svg { display: block; width: 100%; height: 100%; }
+@media (min-aspect-ratio: 4/3) {
+  .cc-ticket-scan[open] { grid-template-columns: minmax(5rem, 1fr) minmax(0, 4fr); grid-template-rows: 1fr; }
+  .cc-ticket-scan-controls { flex-direction: column; justify-content: center; text-align: center; }
+}
+
+.cc-page .cc-pass-deck .cc-reg-tools > button:first-child { background:#153569; color:white; }
+.cc-page .cc-pass-dots button[aria-pressed=true] { background:#a91648; color:white; }
+.cc-ticket-scan[open] { background:#fffcf4 url('/concert/flyer-ornament.svg') center / 100% 100% no-repeat; }
+.cc-ticket-scan-area .cc-ticket-code { background:white; }
+
+.cc-ticket-scan-area { touch-action:pan-y pinch-zoom; }
+.cc-ticket-scan-controls .cc-pass-dots { justify-content:flex-start; }
+.cc-ticket-scan-controls .cc-pass-dots button { min-height:28px; padding:0; }
+@media (min-aspect-ratio:4/3) {
+  .cc-ticket-scan-controls .cc-pass-dots { justify-content:center; }
 }

@@ -113,9 +113,10 @@ export default function Registration({eventId, event, hostToken, personal, invit
     footer={<><div className="cc-submit-slot" ref={setFooterSlot}/>{!recoveryOnly && <button
       type="button"
       className="ui-button ui-button-secondary cc-dialog-help"
+      aria-label={showHelp ? 'Back to registration' : 'Tickets & help'} title={showHelp ? 'Back to registration' : 'Tickets & help'}
       onClick={() => setShowHelp(value => !value)}
     >
-      {showHelp ? 'Back to registration' : 'Tickets & help'}
+      <span aria-hidden="true">{showHelp ? '↶' : '?'}</span>
     </button>}</>}
   >
     {!recoveryOnly ? <div hidden={showHelp}>
@@ -359,7 +360,7 @@ function RegistrationFlow({eventId, event, hostToken, footerSlot, personal, invi
   })[step];
 
   const form = (children: ReactNode, label: string, action: () => Promise<void> | void) => {
-    const submit = <button type="submit" form={formId} className="ui-button cc-reg-next" disabled={busy}>
+    const submit = <button type="submit" form={formId} className="ui-button cc-reg-next" data-confirm-attendance={step === 'guest' && Boolean(personal || hostToken) || undefined} disabled={busy}>
       {busy ? 'Please wait…' : <>{label}<ArrowRight size={19} aria-hidden="true"/></>}
     </button>;
     return <form id={formId} key={step} className="cc-reg-form" onSubmit={e => {

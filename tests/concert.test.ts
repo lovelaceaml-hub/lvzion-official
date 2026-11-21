@@ -113,3 +113,18 @@ test('program entries are validated and the public program keeps order',()=>{
  assert.deepEqual(parseProgram([{position:1,title:'A',performers:null}]),[{position:1,title:'A',performers:null}]);
  assert.throws(()=>parseProgram([{position:2,title:'A',performers:null}]));
 });
+
+test('image-blocked party email keeps each named ticket link beside its QR fallback', () => {
+  const event = {title:'Concert',date:'2026-12-06',startTime:'18:00',doorsTime:null,venue:'Main Hall',details:'',program:[]};
+  const tickets = [
+    {name:'Guest <One>', url:'https://example.invalid/ticket/one?a=1&b=2', qrCid:'qr-one'},
+    {name:'Guest "Two"', url:'https://example.invalid/ticket/two', qrCid:'qr-two'},
+  ];
+  const html = ticketGroupHtml(event, tickets);
+  const withoutImages = html.replace(/<img\b[^>]*>/gi, '');
+  assert.match(html, /src="cid:qr-one"[^>]*alt="Ticket QR code for Guest &lt;One&gt;"/);
+  assert.match(html, /src="cid:qr-two"[^>]*alt="Ticket QR code for Guest &quot;Two&quot;"/);
+  assert.match(withoutImages, /<h2[^>]*>Guest &lt;One&gt;<\/h2>.*?href="https:\/\/example.invalid\/ticket\/one\?a=1&amp;b=2"[^>]*>Open ticket for Guest &lt;One&gt;<\/a>/s);
+  assert.match(withoutImages, /<h2[^>]*>Guest &quot;Two&quot;<\/h2>.*?href="https:\/\/example.invalid\/ticket\/two"[^>]*>Open ticket for Guest &quot;Two&quot;<\/a>/s);
+  assert.match(withoutImages, /Sunday, December 6, 2026.*Starts 6:00 PM.*Main Hall/s);
+});

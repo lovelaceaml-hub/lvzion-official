@@ -19,6 +19,6 @@ export default async function Page({params}:{params:Promise<{token:string}>}){
  const passes=inactiveMessage ? [] : await Promise.all(t.passes.map(async pass=>({...pass,svg:await qrSvg(pass.url)})));
  return <main className="ui-main cc-page cc-public cc-wallet">
   {inactiveMessage ? <TicketCard event={t.event} name={t.name} partySize={t.partySize} compact inactiveMessage={inactiveMessage}/> :
-    <><TicketWallet event={t.event} tickets={passes}/><div className="cc-wallet-secondary"><ConcertInfo event={t.event}/></div></>}
+    <TicketWallet event={t.event} tickets={passes} extraOptions={<ConcertInfo event={t.event}/>}/>}
  </main>;
 }

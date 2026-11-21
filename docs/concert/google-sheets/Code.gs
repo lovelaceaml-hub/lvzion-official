@@ -6,7 +6,7 @@ function doPost(e) {
   const lock = LockService.getScriptLock();
   try {
     const request = JSON.parse(e.postData.contents);
-    if (typeof request.token !== 'string' || request.token.length > 2048) return reply(false);
+    if (typeof request.token !== 'string' || !/^v1\.\d{10}\.[A-Za-z0-9_-]{43}$/.test(request.token)) return reply(false);
     if (!lock.tryLock(8000)) return reply(false);
     const response = UrlFetchApp.fetch('https://lvz.app/api/concert/sheet-snapshot', {
       method: 'post',

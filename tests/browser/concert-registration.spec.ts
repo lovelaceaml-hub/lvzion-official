@@ -334,7 +334,11 @@ for (const partySize of [2,10]) test('a guest can switch between party tickets w
   }
   await dialog.getByRole('button',{name:'Get tickets'}).click();
   const second=dialog.getByRole('button',{name:'Ticket 2 of '+partySize+' · Guest 2'});
-  await second.click();
+  await dialog.getByRole('button',{name:'Enlarge ticket QR code for First Guest'}).click();
+  const enlarged=page.getByRole('dialog',{name:'Ticket QR code for First Guest',exact:true});
+  await expect(enlarged.getByRole('img',{name:'Enlarged ticket QR code'})).toBeVisible();
+  await enlarged.getByRole('button',{name:'Ticket 2 of '+partySize+' · Guest 2'}).click();
+  await page.getByRole('dialog',{name:'Ticket QR code for Guest 2',exact:true}).getByRole('button',{name:'Close',exact:true}).click();
   await expect(second).toHaveAttribute('aria-pressed','true');
   await dialog.getByRole('button',{name:'Options',exact:true}).click();
   await expect(page.getByRole('link',{name:'Open QR ticket'})).toHaveAttribute('href','/concert/ticket/fictional-1');

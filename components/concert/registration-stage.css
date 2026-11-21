@@ -69,14 +69,13 @@
 .cc-score-lines i:nth-child(4) { top:38%; animation-delay:-1.35s; }
 .cc-score-lines i:nth-child(5) { top:44%; animation-delay:-1.8s; }
 .cc-program-fan {
-  position:relative; isolation:isolate; width:min(54%,32dvh,16rem); aspect-ratio:16/9; perspective:620px;
+  position:relative; isolation:isolate; width:min(76%,17.5rem); aspect-ratio:16/9; perspective:620px;
 }
 .cc-dialog.cc-concert-stage[open] .cc-program-fan img.cc-registration-poster {
   position:relative; z-index:2; display:block; width:100%; height:100%; max-width:100%; max-height:none;
   object-fit:contain; margin:0; border:1px solid #efd0af; border-radius:.25rem;
   box-shadow:0 4px 16px #100d2160; transform:rotateY(-3deg);
 }
-.cc-dialog.cc-concert-stage[open]:has(.cc-dialog-inner > div:not([hidden]) > .cc-registration .cc-reg-form) .cc-program-fan { width:min(52%,19dvh,10rem); }
 .cc-program-leaf {
   position:absolute; inset:0; display:grid; place-items:center; border-radius:.26rem; border:1px solid #ffe2c5;
   color:#fff4df; background:linear-gradient(110deg,#fff3d899,transparent 37%,#42204460),var(--ink);
@@ -146,7 +145,6 @@
 @keyframes cc-followspot { from{transform:rotate(-13deg)} to{transform:rotate(14deg)} }
 @keyframes cc-score { from{transform:rotate(-11deg) translateY(-3px)} to{transform:rotate(4deg) translateY(4px)} }
 @media(max-height:610px) {
-  .cc-program-fan { width:min(50%,23dvh,9rem); }
   .cc-dialog.cc-concert-stage[open] .cc-registration h3 { font-size:1.32rem; }
   .cc-dialog.cc-concert-stage[open] .cc-choice { min-height:44px; grid-template-columns:2.45rem 1fr 1.25rem; padding:.22rem .55rem; }
   .cc-dialog.cc-concert-stage[open] .cc-choice-icon { width:2.05rem; height:2.05rem; }
@@ -154,7 +152,6 @@
 }
 @media(orientation:landscape) and (max-height:520px) {
   .cc-concert-stage .cc-poster-stage { grid-column:1; grid-row:2 / span 2; align-self:start; }
-  .cc-program-fan { width:50%; }
 }
 @media(prefers-reduced-motion:reduce) {
   .ui-button[data-admission],.ui-button[data-admission] *, .ui-button[data-admission]::before,
@@ -383,11 +380,20 @@
 .cc-admission-trails path { vector-effect:non-scaling-stroke; }
 .cc-admission-trails .cc-trail-star { fill:#fff1b6; stroke:none; }
 @media (prefers-reduced-motion:no-preference) {
-  .ml-actions > button[data-admission]:not(:active) { animation:cc-invite-pulse 3.8s ease-in-out infinite; }
+  .ml-actions > button[data-admission]:not(:active),
+  .cc-dialog.cc-concert-stage[open] button[data-confirm-attendance]:not(:disabled):not(:active) {
+    animation:cc-invite-pulse 3.4s cubic-bezier(.35,0,.2,1) infinite;
+  }
+
   .cc-admission-trails path:first-child { stroke-dasharray:30 90; animation:cc-trail-draw 3.8s ease-in-out infinite; }
   .cc-trail-star { animation:cc-trail-bloom 3.8s ease-in-out infinite; }
 }
-@keyframes cc-invite-pulse { 0%,70%,100% {transform:scale(1)} 45% {transform:scale(1.018);box-shadow:inset 0 0 0 3px #55243d,inset 0 0 0 4px #d6ac77,0 0 20px #ffcf8152} }
+@keyframes cc-invite-pulse {
+  0%, 60%, 100% { transform:translateY(0) scale(1); }
+  22% { transform:translateY(-4px) scale(1.026); }
+  34% { transform:translateY(0) scale(.993); }
+  46% { transform:translateY(-2px) scale(1.012); }
+}
 @keyframes cc-trail-draw { 0% {stroke-dashoffset:34;opacity:0} 20% {opacity:.95} 55%,100% {stroke-dashoffset:-100;opacity:0} }
 @keyframes cc-trail-bloom { 0%,28%,70%,100% {opacity:.15} 47% {opacity:1} }
 
@@ -415,9 +421,9 @@
     width:min(96vw,46rem); max-width:96vw; height:min(100dvh,21rem); max-height:100dvh;
     & .cc-ticket-view { gap:.1rem; }
 
-    & .cc-ticket-view .cc-qr { width:8rem; }
+
     & .cc-ticket-head h4 { font-size:1rem; }
-    & .cc-dialog-footer { position:absolute; right:3.2rem; top:.12rem; bottom:auto; }
+    & .cc-dialog-footer { align-self:flex-end; }
     & .cc-hint { line-height:1.2; margin:0; }
   }
 }
@@ -432,4 +438,62 @@
 
 @media (orientation:portrait) and (max-width:350px) {
   .ml-actions:not(:has(> .ui-button-secondary)) > button[data-admission] { grid-template-columns:2rem minmax(0,1fr) 2rem; }
+}
+
+/* The printed flyer surrounds the form; keep its lettering on light paper. */
+.cc-dialog.cc-concert-stage[open][data-presentation="registration"] {
+  --lvz-ink:#0d285e; --lvz-ink-quiet:#365174; --lvz-focus:#184bb1;
+  background:url('/concert/flyer-ornament.svg') center / 100% 100% no-repeat,
+    radial-gradient(ellipse at 100% 0,#c9eefe,transparent 48%),
+    radial-gradient(ellipse at 0 100%,#fff0bc,transparent 55%),#fffdfa;
+}
+.cc-dialog.cc-concert-stage[open] .cc-poster-stage {
+  background:linear-gradient(115deg,#fff2b66b,#fffdf7b8 46%,#d8f5ff69);
+}
+.cc-dialog.cc-concert-stage[open] .cc-program-fan img.cc-registration-poster {
+  inline-size:100%; block-size:100%; max-block-size:none;
+}
+.cc-dialog.cc-concert-stage[open] .cc-choice {
+  --ribbon-edge:#9a1641; --ribbon-ink:#bc194d; --ribbon-light:#d52c61;
+}
+.cc-dialog.cc-concert-stage[open] .cc-choice:is([data-choice="guest"],[data-choice="envelope"]) {
+  --ribbon-edge:#09265d; --ribbon-ink:#173d7e; --ribbon-light:#285c99;
+}
+.cc-dialog.cc-concert-stage[open] .cc-choice[data-choice="both"] {
+  --ribbon-edge:#31541d; --ribbon-ink:#3a6325; --ribbon-light:#537b32;
+}
+.cc-dialog.cc-concert-stage[open] .cc-choice-icon {
+  color:#234629; background:linear-gradient(145deg,#fffdf4,#f4efcd); border-color:#e1c577;
+}
+.ml-actions > button.ui-button[data-admission], .cc-dialog.cc-concert-stage[open] .cc-submit-slot .cc-reg-next {
+  color:#fff2bb; background:linear-gradient(105deg,#98123e,#b81c52 45%,#99153d);
+}
+.cc-dialog.cc-concert-stage[open] .cc-submit-slot .cc-reg-next { min-height:46px; }
+.cc-dialog[open] .cc-dialog-footer .cc-dialog-help {
+  position:relative; isolation:isolate; display:grid; place-items:center; flex:0 0 44px;
+  width:44px; height:44px; min-width:44px; padding:0; border:0; border-radius:50%;
+  background:transparent; color:#fff; box-shadow:none; font:bold 1.15rem/1 Georgia,serif;
+}
+.cc-dialog[open] .cc-dialog-footer .cc-dialog-help::before {
+  content:""; position:absolute; inset:5px; border-radius:50%; z-index:-1;
+  border:1px solid #c5d7e9; background:#11326b; box-shadow:0 2px 5px #10245638;
+}
+.cc-dialog[open] .cc-dialog-footer .cc-dialog-help:focus-visible { outline:2px solid #174698; outline-offset:-2px; }
+@media (orientation:landscape) and (max-height:520px) {
+  .cc-dialog.cc-concert-stage[open] .cc-program-fan { width:78%; }
+  .cc-dialog.cc-concert-stage[open]:has(.cc-dialog-inner > div:not([hidden]) .cc-ticket-view .cc-qr) {
+    padding-bottom:0;
+    & .cc-dialog-footer { position:absolute; inset:auto .55rem .2rem auto; margin:0; padding:0; }
+    & .cc-registration { padding-bottom:.2rem; }
+    & .cc-reg-tools { margin-inline-end:46px; }
+    & .cc-registration > .cc-hint { margin-inline-end:46px; }
+  }
+}
+
+@media (orientation:portrait) and (max-height:610px) {
+  .cc-dialog.cc-concert-stage[open]:has(.cc-dialog-inner > div:not([hidden]) .cc-pass-deck) .cc-dialog-footer {
+    position:absolute; bottom:.35rem; right:.55rem; margin:0; padding:0;
+  }
+  .cc-dialog.cc-concert-stage[open]:has(.cc-dialog-inner > div:not([hidden]) .cc-pass-deck) .cc-reg-tools { margin-inline-end:44px; }
+  .cc-dialog.cc-concert-stage[open]:has(.cc-dialog-inner > div:not([hidden]) .cc-pass-deck) .cc-registration > .cc-hint { margin-inline-end:44px; }
 }

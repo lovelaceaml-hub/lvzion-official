@@ -1,3 +1,4 @@
+import {scheduleConcertSheetSync} from '../../../../lib/concert/sheet-sync';
 import {after} from 'next/server';
 import {randomUUID} from 'node:crypto';
 import {body} from '../../../../lib/server/http';
@@ -120,6 +121,7 @@ async function registrationResult(result: Input) {
   const notification = typeof result.notification === 'string' ? result.notification : null;
   const delivery = typeof result.delivery === 'string' ? result.delivery : null;
   const hostParty = typeof result.hostParty === 'string' ? result.hostParty : null;
+  if (delivery) scheduleConcertSheetSync();
   if (delivery || notification || hostParty) after(async () => {
     await Promise.allSettled([
       delivery && deliverConcertMail('tickets', delivery),

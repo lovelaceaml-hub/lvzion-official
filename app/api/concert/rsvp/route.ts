@@ -1,3 +1,4 @@
+import {scheduleConcertSheetSync} from '../../../../lib/concert/sheet-sync';
 import {after} from 'next/server';
 import {deliverConcertMail} from '../../../../lib/concert/registration-server';
 import {createHmac} from 'node:crypto';
@@ -34,6 +35,7 @@ export async function POST(request:Request){
    inviterName:rsvp.inviterName,attendeeNames:rsvp.attendeeNames,
   }}));
   const ticketId=identifier(r.ticketId);
+  if (r.created===true) scheduleConcertSheetSync();
   if ('invite' in rsvp) after(async () => { await deliverConcertMail('host_party',ticketId); });
   const emailed=await sendTicket(ticketId);
   // A repeat email never reveals the existing ticket; it is re-sent to the address on file instead.

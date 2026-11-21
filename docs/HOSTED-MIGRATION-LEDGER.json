@@ -428,6 +428,17 @@
    "verified_on": "2026-11-20",
    "applied_via": "Supabase MCP apply_migration after focused concert database, browser and mail checks",
    "verification": "Hosted readback checked seat totals, individual pass migration, the party-position index, and service-only ticket reads. Disposable tests verified independent admissions, duplicate scans, historic check-ins and cancellations, and recipient-scoped QR receipts."
+  },
+  {
+   "name": "concert_sheet_snapshot",
+   "hosted_version": "20261121001938",
+   "repository_version": "20261121001605",
+   "source": "supabase/migrations/20261121001605_concert_sheet_snapshot.sql",
+   "source_blob_sha": "fb9b9d06159ea50c8bc4fabc3686ad2e2326ef24",
+   "status": "applied",
+   "verified_on": "2026-11-20",
+   "applied_via": "Supabase MCP apply_migration after focused concert database, browser and mail checks",
+   "verification": "Hosted readback verified the four attendee and attendance fields and service-only execution. Disposable tests covered cancellations, undo, both Pacific time offsets and empty rosters."
   }
  ],
  "normalization": {

@@ -1,0 +1,56 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 520" preserveAspectRatio="none" width="400" height="520" fill="none">
+  <title>Olive sprigs and a rose-gold musical staff</title>
+  <defs>
+    <linearGradient id="leaf" x2=".8" y2="1">
+      <stop stop-color="#548433"/><stop offset=".6" stop-color="#9ec955"/><stop offset="1" stop-color="#dae78b"/>
+    </linearGradient>
+    <linearGradient id="ink" gradientUnits="userSpaceOnUse" x1="6" y1="0" x2="188" y2="0">
+      <stop stop-color="#c49b51"/><stop offset=".43" stop-color="#ed6689"/>
+      <stop offset=".78" stop-color="#efaa73"/><stop offset="1" stop-color="#d0a45f" stop-opacity="0"/>
+    </linearGradient>
+    <g id="blade">
+      <path d="M0 0C-2-8 1-17 8-23C10-13 8-5 0 0Z" fill="url(#leaf)"/>
+      <path d="M0 0Q4-9 7-19" stroke="#f6e7b9" stroke-width=".65"/>
+    </g>
+    <g id="sprig">
+      <path d="M2 88C8 58 19 30 55 7M13 53Q14 35 11 25M26 31Q39 25 52 24M5 77Q12 63 22 59" stroke="#888858" stroke-width="1.45" stroke-linecap="round"/>
+      <use href="#blade" transform="translate(8 64) rotate(-38)"/>
+      <use href="#blade" transform="translate(11 58) rotate(35) scale(.83)"/>
+      <use href="#blade" transform="translate(17 43) rotate(37)"/>
+      <use href="#blade" transform="translate(14 40) rotate(-25) scale(.79)"/>
+      <use href="#blade" transform="translate(25 32) rotate(-29)"/>
+      <use href="#blade" transform="translate(33 23) rotate(-15) scale(.86)"/>
+      <use href="#blade" transform="translate(39 25) rotate(71) scale(.85)"/>
+      <use href="#blade" transform="translate(44 15) rotate(47) scale(.87)"/>
+      <use href="#blade" transform="translate(54 8) rotate(55) scale(.67)"/>
+      <g fill="#c49a60"><circle cx="23" cy="58" r="1.7"/><circle cx="26" cy="61" r="1.4"/><circle cx="54" cy="23" r="1.6"/></g>
+    </g>
+    <g id="score" stroke="url(#ink)" stroke-width="1">
+      <path d="M-8 55C26 60 54 9 96 14S157 30 190 9"/>
+      <path d="M-8 59C26 64 54 13 96 18S157 34 190 13"/>
+      <path d="M-8 63C26 68 54 17 96 22S157 38 190 17"/>
+      <path d="M-8 67C26 72 54 21 96 26S157 42 190 21"/>
+      <path d="M-8 71C26 76 54 25 96 30S157 46 190 25"/>
+    </g>
+    <g id="quavers" fill="#bc7789">
+      <ellipse rx="4" ry="2.7" transform="rotate(-23)"/>
+      <ellipse rx="4" ry="2.7" transform="translate(13 -4) rotate(-23)"/>
+      <path d="M3 -1V-18L16-22V-5" fill="none" stroke="#bc7789" stroke-width="1.4"/>
+      <path d="m3-18 13-4v3L3-15Z"/>
+    </g>
+  </defs>
+  <use href="#score" transform="translate(400 -5) scale(-1 1)"/>
+  <use href="#score" transform="translate(0 526) scale(1 -1)"/>
+  <use href="#sprig" transform="translate(1 2)"/>
+  <use href="#sprig" transform="translate(399 519) rotate(180)"/>
+  <use href="#sprig" transform="translate(400 0) scale(-.55 .55)" opacity=".8"/>
+  <use href="#sprig" transform="translate(0 520) scale(.55 -.55)" opacity=".8"/>
+  <use href="#quavers" transform="translate(299 21) rotate(9) scale(.8)"/>
+  <use href="#quavers" transform="translate(63 495) rotate(-11)"/>
+  <g fill="#c39753" stroke="#c39753">
+    <ellipse rx="3.3" ry="2.1" transform="translate(355 34) rotate(-22)"/>
+    <path d="M358 33V19q1 4 6 5" fill="none" stroke-width="1.3"/>
+    <ellipse rx="3" ry="2" transform="translate(133 501) rotate(-22)"/>
+    <path d="M136 500v-13" stroke-width="1.3"/>
+  </g>
+</svg>

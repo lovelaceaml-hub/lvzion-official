@@ -116,7 +116,7 @@ function InviteView({event,inviteUrl,invitedCount}:{event:ConcertEvent;inviteUrl
  </>;
 }
 
-type Report={invitationCount:number;invitations:{id:string;name:string;details:{title:string;organization:string;category:string}|null;registered:boolean;sender:string;relationship:string;firstVisit:boolean}[];intake:{id:string;name:string;title:string;location:string;leader:string;memberId:string|null}[]};
+type Report={sheetUrl?:string;invitationCount:number;invitations:{id:string;name:string;details:{title:string;organization:string;category:string}|null;registered:boolean;sender:string;relationship:string;firstVisit:boolean}[];intake:{id:string;name:string;title:string;location:string;leader:string;memberId:string|null}[]};
 
 function GuestsView({data}:{data:Data}){
  const [report,setReport]=useState<Report|null>(null);
@@ -140,7 +140,9 @@ function GuestsView({data}:{data:Data}){
    <StatTile label="Reserved seats" value={seats}/>
    <StatTile label="Checked in" value={arrivedSeats} tone="accent"/>
   </StatGrid>
-  <div className="cc-actions"><a className="ui-button" href="/modules/concert/scan">Scan tickets</a><a className="ui-button ui-button-secondary" href="/api/concert/attendance?format=csv">Download list</a></div>
+  <div className="cc-actions"><a className="ui-button" href="/modules/concert/scan">Scan tickets</a>
+    {report?.sheetUrl && <a className="ui-button ui-button-secondary" href={report.sheetUrl} target="_blank" rel="noreferrer">Attendance spreadsheet</a>}
+    <a className="ui-button ui-button-secondary" href="/api/concert/attendance?format=csv">Download list</a></div>
   <SearchField label="Search guests" placeholder="Search by name or email" value={query} onChange={e=>setQuery(e.target.value)}/>
   {error?<p className="cc-error" role="alert">{error}</p>:null}
   {list===null&&!error?<p className="cc-hint" role="status">Loading guests…</p>:null}
