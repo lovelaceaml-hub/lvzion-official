@@ -15,12 +15,11 @@ export default function TicketCard({event, name, partySize, svg, checkedInAt, in
   const peace = isPeaceConcert(event);
   const Title = embedded ? 'h4' : 'h1';
   return <section className="cc-ticket" data-peace-concert={peace || undefined} aria-label={'Admission ticket for '+name}>
-    {peace && <div className="cc-ticket-finish" aria-hidden="true"><svg viewBox="0 0 100 100" preserveAspectRatio="none">
-        <path pathLength="1" d="M50 99H5Q1 99 1 95V5Q1 1 5 1H50"/>
-        <path pathLength="1" d="M50 99H95Q99 99 99 95V5Q99 1 95 1H50"/>
-      </svg></div>}
     <header className="cc-ticket-head">
-      <p className="cc-kicker">Admission ticket</p>
+      <p className="cc-kicker">
+        {peace && <img className="cc-pass-emblem" src="/concert/festival-logo.webp" width="26" height="17" alt=""/>}
+        Admission ticket
+      </p>
       <Title>{peace ? <PeaceConcertTitle/> : event.title}</Title>
     </header>
     <div className="cc-ticket-body">

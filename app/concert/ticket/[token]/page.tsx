@@ -1,3 +1,4 @@
+import ConcertPublicCard from '../../../../components/concert/public-card';
 import TicketWallet from '../../../../components/concert/ticket-wallet';
 import {qrSvg} from '../../../../lib/concert/server';
 import {ticketByToken} from '../../../../lib/concert/routes';
@@ -12,9 +13,9 @@ export default async function Page({params}:{params:Promise<{token:string}>}){
  let token='';try{token=ticketToken(raw);}catch{}
  let t:Awaited<ReturnType<typeof ticketByToken>>|null=null;
  if(token){try{t=await ticketByToken(token);}catch{t=null;}}
- if(!t||!t.valid)return <main className="ui-main ui-narrow cc-page cc-public"><section className="cc-panel cc-public-head">
-  <h1>{token&&t===null?'Your ticket is unavailable right now':'This ticket link is not valid'}</h1>
-  <p className="cc-hint">{token&&t===null?'Please try again in a few minutes.':'Check the link in your ticket email.'}</p></section></main>;
+ if(!t||!t.valid)return <ConcertPublicCard title={token&&t===null?'Your ticket is unavailable right now':'This ticket link is not valid'}>
+  <p className="cc-receipt-note">{token&&t===null?'Please try again in a few minutes.':'Check the link in your ticket email.'}</p>
+ </ConcertPublicCard>;
  const inactiveMessage=t.status!=='active'?'This ticket was removed from the guest list.':t.event.archived?'This concert has ended.':undefined;
  const passes=inactiveMessage ? [] : await Promise.all(t.passes.map(async pass=>({...pass,svg:await qrSvg(pass.url)})));
  return <main className="ui-main cc-page cc-public cc-wallet">

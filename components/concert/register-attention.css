@@ -31,12 +31,12 @@
 }
 
 @media (prefers-reduced-motion: no-preference) {
-  .ml-invitation .ml-actions > button.ui-button[data-admission][data-festival-action] {
-    animation: cc-register-beckon 4s ease-in-out 1;
+  .ml-invitation .ml-actions > button.ui-button[data-admission][data-register-attention] {
+    animation: cc-register-beckon 10s ease-in-out 6;
   }
 
-  .ml-invitation .ml-actions > button.ui-button[data-admission][data-festival-action]::after {
-    animation: cc-register-halo 4s ease-in-out 1;
+  .ml-invitation .ml-actions > button.ui-button[data-admission][data-register-attention]::after {
+    animation: cc-register-halo 10s ease-in-out 6;
   }
 
   .ml-invitation .ml-actions > button.ui-button[data-admission][data-festival-action]:active {
@@ -93,14 +93,20 @@
 }
 
 @keyframes cc-register-beckon {
-  0%, 8%, 30%, 52%, 78%, 100% { transform: translateY(0); }
-  16%, 60% { transform: translateY(var(--cc-register-lift)); }
-  22%, 66% { transform: translateY(1px); }
-  26%, 72% { transform: translateY(calc(var(--cc-register-lift) * .3)); }
+  0%, 3.2%, 12%, 20.8%, 31.2%, 100% { transform: translateY(0); }
+  6.4%, 24% { transform: translateY(var(--cc-register-lift)); }
+  8.8%, 26.4% { transform: translateY(1px); }
+  10.4%, 28.8% { transform: translateY(calc(var(--cc-register-lift) * .3)); }
 }
 
 @keyframes cc-register-halo {
-  0%, 8%, 34%, 52%, 82%, 100% { opacity: 0; }
-  16%, 60% { opacity: .8; }
-  26%, 72% { opacity: .35; }
+  0%, 3.2%, 13.6%, 20.8%, 32.8%, 100% { opacity: 0; }
+  6.4%, 24% { opacity: .8; }
+  10.4%, 28.8% { opacity: .35; }
+}
+
+
+.ml-actions > .cc-stop-register {
+  inset-inline-start: max(2px, env(safe-area-inset-left));
+  inset-inline-end: auto;
 }

@@ -1,3 +1,4 @@
+import ConcertPublicCard from '../../../../components/concert/public-card';
 import {authAdminClient} from '../../../../lib/server/supabase';
 import {digest} from '../../../../lib/concert/server';
 import {identifier,inviteToken,object,parsePublicEvent,type PublicEvent} from '../../../../lib/concert/domain';
@@ -20,9 +21,7 @@ async function load(raw:string):Promise<View>{
 export default async function Page({params}:{params:Promise<{token:string}>}){
  const {token}=await params;const v=await load(token);
  if(v.state==='ok')return <ConcertRsvpPage entry={{invite:token}} hostEventId={v.eventId} event={v.event} open={v.open} full={v.full} invitedBy={v.invitedBy}/>;
- return <main className="ui-main cc-page cc-public cc-attendee"><section className="cc-panel cc-public-head">
-   <h1>{v.state==='none'?'No concert is open right now':v.state==='unavailable'?'RSVP is unavailable right now':'This invitation link is not valid'}</h1>
-   <p className="cc-hint">{v.state==='unavailable'?'Please try again in a few minutes.':'Ask the person who invited you to send their link again.'}</p>
-  </section>
- </main>;
+ return <ConcertPublicCard title={v.state==='none'?'No concert is open right now':v.state==='unavailable'?'RSVP is unavailable right now':'This invitation link is not valid'}>
+  <p className="cc-receipt-note">{v.state==='unavailable'?'Please try again in a few minutes.':'Ask the person who invited you to send their link again.'}</p>
+ </ConcertPublicCard>;
 }

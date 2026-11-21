@@ -4,8 +4,8 @@ import type {NamedTicket} from '../../lib/concert/registration';
 const width = 640;
 const height = 890;
 const center = width / 2;
-const ivory = '#fffaee';
-const navy = '#193459';
+const ivory = '#fffdf9';
+const navy = '#10275b';
 
 function png(canvas: HTMLCanvasElement): Promise<Blob> {
   return new Promise((resolve, reject) => canvas.toBlob(
@@ -35,7 +35,7 @@ function drawPass(ctx: CanvasRenderingContext2D, image: HTMLImageElement, title:
   if (art?.sky) {
     ctx.drawImage(art.sky, 0, 0, width, 224);
     const wash = ctx.createLinearGradient(0, 0, 0, 224);
-    wash.addColorStop(0, 'rgba(255,250,238,.48)');
+    wash.addColorStop(0, 'rgba(215,229,247,.42)');
     wash.addColorStop(1, ivory);
     ctx.fillStyle = wash;
     ctx.fillRect(0, 0, width, 224);
@@ -58,7 +58,7 @@ function drawPass(ctx: CanvasRenderingContext2D, image: HTMLImageElement, title:
     ctx.fillText(title, center, 99, width - 166);
   }
 
-  ctx.fillStyle = '#bf3058';
+  ctx.fillStyle = '#263b63';
   ctx.beginPath();
   ctx.moveTo(100, 164);
   ctx.lineTo(540, 164);
@@ -77,7 +77,7 @@ function drawPass(ctx: CanvasRenderingContext2D, image: HTMLImageElement, title:
   ctx.fillText(name, center, 252, width - 56);
   const qrSize = 568;
   const left = (width - qrSize) / 2;
-  ctx.fillStyle = '#d2ba88';
+  ctx.fillStyle = '#b8c5da';
   ctx.fillRect(left - 5, 269, qrSize + 10, qrSize + 10);
   ctx.fillStyle = '#ffffff';
   ctx.fillRect(left - 3, 271, qrSize + 6, qrSize + 6);

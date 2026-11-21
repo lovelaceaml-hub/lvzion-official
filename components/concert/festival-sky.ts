@@ -1,7 +1,7 @@
 import './festival-sky.css';
+import {setFestivalCurve, type FestivalSweep} from './festival-paths';
 
 export type FestivalDirection = 'open' | 'forward' | 'back' | 'success';
-export type LeafRise = 0 | 6;
 export type FestivalExpression = 'greeting' | 'inclusiveness' | 'consideration' | 'gratitude';
 export type FestivalAccent = 'original' | FestivalExpression;
 type MakeExpression = (kind: FestivalExpression) => HTMLElement;
@@ -91,7 +91,7 @@ function createExpression(kind: FestivalExpression, makeExpression: MakeExpressi
   return expression;
 }
 
-export function createFestivalSky(direction: FestivalDirection, rise: LeafRise = 0,
+export function createFestivalSky(direction: FestivalDirection, sweep: FestivalSweep = 'breeze',
   accent: FestivalAccent = 'original', makeExpression: MakeExpression = expressionImage) {
   const sky = document.createElement('span');
   sky.inert = true;
@@ -99,15 +99,20 @@ export function createFestivalSky(direction: FestivalDirection, rise: LeafRise =
   sky.className = 'cc-festival-sky';
   sky.dataset.direction = direction;
   sky.dataset.accent = accent;
-  for (const [shape, color, startX, startY, endX, endY, size, delay] of [...hearts[accent], ...starsAndLeaves]) {
-    const leafRise = shape === 'leaf' ? rise : 0;
+  sky.dataset.sweep = sweep;
+  const flights = [...hearts[accent], ...starsAndLeaves];
+  for (const [index, [shape, color, startX, startY, endX, endY, size, delay]] of flights.entries()) {
     const particle = document.createElement('i');
     particle.dataset.shape = shape;
     particle.dataset.color = color;
-    particle.style.setProperty('--particle-x', startX + '%');
-    particle.style.setProperty('--particle-y', startY + '%');
-    particle.style.setProperty('--particle-dx', (endX - startX) + 'vw');
-    particle.style.setProperty('--particle-dy', (endY - startY - leafRise) + 'dvh');
+    if (sweep === 'breeze') {
+      particle.style.setProperty('--particle-x', startX + '%');
+      particle.style.setProperty('--particle-y', startY + '%');
+      particle.style.setProperty('--particle-dx', (endX - startX) + 'vw');
+      particle.style.setProperty('--particle-dy', (endY - startY) + 'dvh');
+    } else {
+      setFestivalCurve(particle, sweep, index, 'sky');
+    }
     particle.style.setProperty('--particle-size', size + 'px');
     particle.style.setProperty('--particle-delay', delay + 'ms');
     sky.append(particle);
@@ -116,8 +121,8 @@ export function createFestivalSky(direction: FestivalDirection, rise: LeafRise =
   return sky;
 }
 
-export function openFestivalSky(dialog: HTMLDialogElement, direction: FestivalDirection, rise: LeafRise, accent: FestivalAccent) {
-  const sky = createFestivalSky(direction, rise, accent);
+export function openFestivalSky(dialog: HTMLDialogElement, direction: FestivalDirection, sweep: FestivalSweep, accent: FestivalAccent) {
+  const sky = createFestivalSky(direction, sweep, accent);
   // A manual popover covers the viewport without moving focus or intercepting taps.
   const native = typeof sky.showPopover === 'function';
   if (native) sky.popover = 'manual';
