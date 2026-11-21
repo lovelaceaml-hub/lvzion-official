@@ -87,7 +87,11 @@ test('corner help opens from the invitation, stays outside the card and returns 
     await expect(help).toBeInViewport({ratio:1});
     await expect.poll(async () => {
       const corner = await help.boundingBox(), card = await dialog.boundingBox();
-      const visible = await page.evaluate(() => ({width:window.innerWidth, height:window.innerHeight}));
+      const visible = await page.evaluate(() => {
+        const visual = window.visualViewport;
+        return {width:visual ? visual.offsetLeft + visual.width : innerWidth,
+          height:visual ? visual.offsetTop + visual.height : innerHeight};
+      });
       return Boolean(corner && card && corner.x + corner.width >= visible.width - 5 &&
         corner.y + corner.height >= visible.height - 5 &&
         (corner.y >= card.y + card.height - 1 || corner.x >= card.x + card.width - 1));
