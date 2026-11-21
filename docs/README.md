@@ -19,7 +19,7 @@ Start with [lvz.app](https://lvz.app), `AGENTS.md` and the [current handoff](HAN
 
 | Module | Guides | Boundary |
 |---|---|---|
-| Event Invitation and Registration | [Concert guide and QA handoff](concert/README.md) | Shared public RSVP, named invitations, private film playback and staff check-in. |
+| Event Invitation and Registration | [Concert guide](concert/README.md), [motion and release checks](concert/VERIFICATION.md) | Animated public RSVP, ticket help, named invitations, private film playback and staff check-in. |
 | Study Rooms | [Current operations](study-rooms/README.md) | Open to every signed-in member after the October 24 migration; booking enabled; optional, explicitly configured restrictions; private history and conflict protection. |
 | Contacts | [Scope](contacts/README.md), [owner guide](contacts/USER-GUIDE.md), [operations](contacts/OPERATIONS.md), [verification](contacts/VERIFICATION.md) | Private owner workspace; sharing, export and communications remain separately controlled. |
 | Groups & Gospel Planning | [Status and approvals](gospel-planning/README.md) | Live and approved for signed-in members since migration `20261024170000_open_access_group_placement` (October 24); places and Gospel roles still to be set up. |

@@ -1,118 +1,186 @@
-/* The incoming step and its poster share one cue. Keep older entrance and
-   completion effects from stacking, regardless of stylesheet chunk order. */
+/* One scene transition owns this dialog, including the poster and the foreground leaves. */
 .cc-dialog.cc-concert-stage[open]:has(.cc-registration[data-festival]) {
   animation: none;
 
-  &::backdrop,
   & .cc-program-fan img.cc-registration-poster,
-  & :is(.cc-heart-signature, .cc-poster-heart, .cc-program-sparks) {
-    animation: none;
-  }
+  & :is(.cc-heart-signature, .cc-poster-heart, .cc-program-sparks),
+  & .cc-registration[data-festival],
+  & .cc-registration[data-festival] :is(.cc-vip-fields, .ui-field, .cc-error, .cc-choice, .cc-festival-party-gesture),
+  & .cc-registration[data-festival] [data-gesture] img,
+  & .cc-registration[data-festival] .cc-ticket-finish path { animation: none; }
   & .cc-heart-flight { display: none; }
-
-
-  & .cc-registration[data-festival] {
-    animation: none;
-
-    & :is(.cc-vip-fields, .ui-field, .cc-error, .cc-choice, .cc-festival-party-gesture),
-    & [data-gesture] img,
-    & .cc-ticket-finish path { animation: none; }
-    & h3::after { content: none; }
-  }
+  & .cc-registration[data-festival] h3::after { content: none; }
+  & button[data-confirm-attendance] { animation: none; }
 }
 
-/* The ribbon settles under a press immediately and lifts on release. */
-.ml-actions > button.ui-button[data-admission][data-festival-action] {
-  scale: 1;
-}
-@media (prefers-reduced-motion: no-preference) {
-  .ml-actions > button.ui-button[data-admission][data-festival-action]:not(:active),
-  dialog.cc-concert-stage.cc-festival-stage[open] button[data-festival][data-confirm-attendance]:not(:disabled):not(:active) {
-    animation: cc-invite-pulse 2.85s cubic-bezier(.25,.68,.32,1) infinite;
-  }
-  button[data-admission][data-festival-action] {
-    transition: translate 120ms ease-out;
-    &:focus-visible { translate: 0 -2px; }
-    &:active { translate: 0 2px; transition-duration: 0s; }
-  }
-}
-@media (prefers-reduced-motion: no-preference) and (hover: hover) {
-  button[data-admission][data-festival-action]:hover:not(:active) { translate: 0 -2px; }
+dialog.cc-festival-stage[open]::backdrop {
+  backdrop-filter: none;
+  background: #121d3ac2;
 }
 
 .cc-festival-leaves {
   position: absolute;
   z-index: 6;
-  left: 23%;
-  width: 0;
-  height: 0;
+  inset: 0;
+  overflow: hidden;
+  border-radius: inherit;
+  container-type: inline-size;
   pointer-events: none;
 }
-.cc-festival-leaves[data-direction='back'] { left: 77%; }
-.cc-festival-leaves[data-direction='success'] { left: 50%; }
 
-.cc-festival-leaves > i {
+.cc-festival-leaves[data-direction="back"] { transform: scaleX(-1); }
+
+.cc-leaf-flight {
+  --flight-duration: 440ms;
+  --flight-start: -64%;
+  --flight-finish: 67%;
   position: absolute;
-  top: -5px;
-  left: -10px;
-  width: 20px;
-  height: 11px;
-  border-radius: 95% 3% 90% 6%;
-  color: #478640;
-  background: linear-gradient(-23deg, transparent 43%, #fffae9 47% 52%, transparent 57%), currentColor;
-  box-shadow: inset 0 0 0 1px #10275b59, 0 1px 2px #10275b3d;
-}
-.cc-festival-leaves > i:nth-child(3n + 2) { color: #f44168; }
-.cc-festival-leaves > i:nth-child(3n) { color: #efb841; }
-.cc-festival-leaves > i:nth-child(5n) { color: #75c9ec; }
-
-@media (prefers-reduced-motion: reduce) {
-  .cc-festival-leaves { display: none; }
+  z-index: 3;
+  inset: 0;
+  color: #4b765c;
 }
 
-.cc-festival-leaves::before {
-  content: ""; position: absolute; pointer-events: none;
-  width: 9rem; height: 5rem; left: -4.5rem; top: -2.5rem;
-  background: radial-gradient(ellipse, color-mix(in srgb, var(--answer-pigment,#ff506c) 50%, transparent), transparent 66%);
-  animation: cc-festival-bloom 360ms ease-out both;
-}
-.cc-festival-leaves[data-direction="open"]::before {
-  width: 16rem; height: 8rem; left: -8rem; top: -4rem;
-  background: radial-gradient(ellipse at 40% 55%, #ff507b99, transparent 55%), radial-gradient(ellipse at 62% 50%, #ffc94cbb, transparent 60%);
-  animation-duration: 530ms;
-}
-.cc-festival-leaves > b {
-  position: absolute; width: 36px; height: 17px; inset: -9px auto auto -18px;
-  border-radius: 95% 4% 90% 6%;
-  background: linear-gradient(-24deg, #8ab944 44%, #fff3aa 47% 51%, #477c39 54%);
-}
-@keyframes cc-festival-bloom {
-  from { opacity: 0; transform: scale(.2); }
-  36% { opacity: .85; }
-  to { opacity: 0; transform: scale(1.4); }
-}
-@media (prefers-reduced-motion:no-preference) {
-  .cc-festival-stage :is(.cc-festival-choice,.cc-party-size button,.cc-page-nav button):active { scale:.975; }
+.cc-leaf-flight:nth-child(n + 5) {
+  --flight-duration: 660ms;
+  --flight-start: -59%;
+  --flight-finish: 59%;
+  z-index: 2;
 }
 
-.ml-invitation dialog.cc-festival-stage::backdrop { backdrop-filter: none; background: #0d153a82; }
-.cc-festival-leaves { top: min(5rem, 18%); }
-.cc-festival-leaves[data-direction="open"] { left: 50%; top: min(6rem, 22%); }
-.cc-festival-leaves[data-direction="success"] { top: 30px; }
-.cc-festival-leaves > i { animation: cc-festival-leaf 420ms ease-out both; }
-.cc-festival-leaves[data-direction="success"] > i { animation-duration: 510ms; }
-.cc-festival-leaves > b { --side: -1; animation: cc-festival-unfold 540ms ease-out both; }
-.cc-festival-leaves > b:nth-child(2) { --side: 1; }
-@keyframes cc-festival-leaf {
-  from { opacity: .3; transform: rotate(var(--leaf-turn)) scale(.25); }
-  35%, 60% { opacity: 1; }
-  to { opacity: 0; transform: translate(var(--leaf-x),var(--leaf-y)) rotate(calc(var(--leaf-turn) + 35deg)) scale(.75); }
+.cc-leaf-flight:nth-child(n + 8) {
+  --flight-duration: 930ms;
+  --flight-start: -55%;
+  --flight-finish: 48%;
+  z-index: 1;
 }
-@keyframes cc-festival-unfold {
-  from { opacity: 0; transform: scale(.18); }
+
+.cc-leaf-flight[data-color="sage"] { color: #819b6d; }
+.cc-leaf-flight[data-color="gold"] { color: #c69d50; }
+.cc-leaf-flight[data-color="rose"] { color: #cf8d88; }
+
+.cc-leaf-flight > i {
+  position: absolute;
+  top: var(--flight-from);
+  left: 50%;
+  width: var(--leaf-size);
+  max-width: 7rem;
+  height: auto;
+  aspect-ratio: 2.15;
+  border-radius: 100% 2% 100% 3%;
+  background:
+    linear-gradient(-23deg, #15293926, transparent 46%, #fff6ccaa 49% 50.5%, transparent 52%, #fff6cc42),
+    currentColor;
+  box-shadow: inset 0 0 0 1px #2d4c422e;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .cc-festival-stage[data-scene] .cc-registration[data-festival]:not([data-step="tickets"]) > h3:focus-visible {
+    position: relative;
+    z-index: 7;
+  }
+
+  button[data-admission][data-festival-action] .cc-admission-stamp::after {
+    content: "";
+    position: absolute;
+    inset: -.38rem;
+    opacity: 0;
+    pointer-events: none;
+    background: radial-gradient(ellipse at 50% 74%, #ffe5a893, transparent 66%);
+    animation: cc-heaven-rays 950ms 120ms ease-out both;
+  }
+
+  .cc-festival-stage :is(.cc-festival-choice, .cc-party-size button, .cc-page-nav button):active {
+    scale: .982;
+  }
+
+  dialog.cc-festival-stage[open][data-scene="open"]::backdrop {
+    animation: cc-heaven-shade 590ms ease-out both;
+  }
+
+  .cc-festival-leaves::before, .cc-festival-leaves::after {
+    content: "";
+    position: absolute;
+    inset: -18% -35%;
+    pointer-events: none;
+  }
+
+  .cc-festival-leaves::before {
+    background: linear-gradient(125deg, transparent 22%, #a7ba92aa 35%, #f7dfae 46%,
+      #fff3d5 50%, #a4beb1ee 56%, #577b7477 67%, transparent 77%);
+    animation: cc-heaven-wind 500ms cubic-bezier(.33,.06,.28,1) both;
+  }
+
+  .cc-festival-leaves[data-direction="open"]::before {
+    background: radial-gradient(ellipse at 50% 76%, #fff4cb, #e8b599 26%, #8f9dbf 60%, #344b7a 84%);
+    animation: cc-heaven-bloom 640ms cubic-bezier(.22,.68,.32,1) both;
+  }
+
+  .cc-festival-leaves:is([data-direction="open"], [data-direction="success"])::after {
+    inset: -20%;
+    background: conic-gradient(from -70deg at 50% 76%, transparent, #fff0b244, transparent 25%,
+      #fff4c388 30%, transparent 38%);
+    animation: cc-heaven-rays 670ms ease-out both;
+  }
+
+  .cc-festival-leaves[data-direction="success"]::before {
+    background: radial-gradient(ellipse at 50% 76%, #fff5cc, #efd29d 35%, #f4d9af7a 63%, transparent 79%);
+    animation: cc-heaven-arrival 690ms ease-out both;
+  }
+
+  .cc-leaf-flight {
+    animation: cc-heaven-flight var(--flight-duration) var(--leaf-delay) cubic-bezier(.37,.06,.27,1) both;
+  }
+
+  .cc-leaf-flight > i {
+    animation: cc-heaven-turn var(--flight-duration) var(--leaf-delay) ease-in-out both;
+  }
+
+  .cc-leaf-flight:nth-child(even) > i {
+    animation-direction: reverse;
+  }
+}
+
+@keyframes cc-heaven-shade {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes cc-heaven-wind {
+  0% { transform: translate3d(-55%, 12%, 0); opacity: .4; }
   26% { opacity: .94; }
-  to { opacity: 0; transform: translate(calc(var(--side) * 95px),-28px) rotate(calc(var(--side) * 48deg)); }
+  55% { opacity: .76; }
+  100% { transform: translate3d(68%, -15%, 0); opacity: 0; }
 }
-.cc-festival-stage[data-answer-choice="member"], .cc-festival-stage[data-answer-choice="ticket"] { --answer-pigment: #28bb4a; }
-.cc-festival-stage[data-answer-choice="guest"], .cc-festival-stage[data-answer-choice="envelope"] { --answer-pigment: #3db4ff; }
-.cc-festival-stage[data-answer-choice="both"] { --answer-pigment: #a768ff; }
+
+@keyframes cc-heaven-bloom {
+  0% { opacity: 1; transform: scale(1) translateY(7%); }
+  23% { opacity: .95; }
+  100% { opacity: 0; transform: scale(1.26) translateY(-8%); }
+}
+
+@keyframes cc-heaven-arrival {
+  0% { opacity: 0; transform: scale(.82) translateY(10%); }
+  28% { opacity: .87; }
+  100% { opacity: 0; transform: scale(1.28) translateY(-8%); }
+}
+
+@keyframes cc-heaven-rays {
+  0%, 100% { opacity: 0; }
+  34% { opacity: .82; }
+  from { transform: scale(.72) rotate(-11deg); }
+  to { transform: scale(1.35) rotate(6deg); }
+}
+
+@keyframes cc-heaven-flight {
+  0% { opacity: 0; transform: translate3d(var(--flight-start), 5%, 0); }
+  26% { opacity: .86; }
+  70% { opacity: .78; }
+  100% { opacity: 0; transform: translate3d(var(--flight-finish), calc(var(--flight-to) - var(--flight-from)), 0); }
+}
+
+@keyframes cc-heaven-turn {
+  from { transform: rotate(27deg) scale(.7, .48); }
+  37% { transform: rotate(-37deg) scale(1, 1); }
+  70% { transform: rotate(-91deg) scale(.9, .57); }
+  to { transform: rotate(-131deg) scale(.72, .8); }
+}

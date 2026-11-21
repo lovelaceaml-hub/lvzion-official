@@ -10,7 +10,7 @@ Keep compact module headers and the prominent center Apps launcher. The launcher
 
 ## Event Invitation and Registration · November 20, 2026
 
-The festival registration redesign is live on the shared invitation from commit `7a8911b`. Start the next session with the concert guide’s device checks. It links the production release, synthetic phone walkthrough, focused test commands and pending Google Sheets receiver setup. [Resume concert work](concert/README.md#handoff-for-the-next-review)
+The full-screen registration update adds a bouncing Register button, hearts, sparkles and leaves, and a smaller Help badge with its original touch target. The concert guide tracks the release, focused test commands, physical device checks and Google Sheets receiver setup. [Resume concert work](concert/README.md#handoff-for-the-next-review)
 
 ## Church Display: pictures, videos and study rooms (released November 13, 2026)
 

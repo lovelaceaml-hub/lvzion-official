@@ -9,86 +9,90 @@
   --festival-line: #d7dbcf;
 }
 
-/* The notched tails sit behind a raised face. The two dark triangles are
-   the reverse side of the fold, visible at the lower corners. */
+/* A lit threshold carries the campaign emblem into the opening scene. */
 button.ui-button[data-admission][data-festival-action],
-.ml-actions > button.ui-button[data-admission][data-festival-action],
-.cc-dialog.cc-festival-stage[open] :is(.cc-reg-form, .cc-submit-slot) button.cc-reg-next[data-festival] {
-  --tail: .7rem;
-  --fold: .4rem;
+.ml-actions > button.ui-button[data-admission][data-festival-action] {
   position: relative;
   isolation: isolate;
+  display: grid;
+  grid-template-columns: clamp(2.05rem, 8vw, 2.6rem) minmax(0, 1fr) clamp(2.05rem, 8vw, 2.6rem);
+  align-items: center;
+  min-height: 51px;
+  padding: .28rem .7rem;
   overflow: visible;
-  border: 0;
-  border-radius: 0;
   clip-path: none;
-  background: transparent;
-  color: var(--festival-gold);
-  box-shadow: none;
-  filter: drop-shadow(0 3px 0 var(--festival-navy)) drop-shadow(0 3px 4px #10275b35);
-  font: 800 1rem/1.18 var(--lvz-font-sans);
-  text-shadow: 0 1px var(--festival-navy);
-  -webkit-text-stroke: 2.6px var(--festival-navy);
-  paint-order: stroke fill;
+  border: 1px solid #ac8e61;
+  border-radius: 1.05rem;
+  background:
+    radial-gradient(ellipse at 50% 123%, #ad7b79, #695d82 35%, transparent 70%),
+    linear-gradient(155deg, #31486f, #1a2b51 60%, #22365a);
+  box-shadow: inset 0 1px #fff0b469, inset 0 -1px #fff0b425, 0 4px 12px #24355566;
+  color: #fff7dc;
+  text-shadow: none;
+  -webkit-text-stroke: 0;
+  filter: none;
 
-  &::before, &::after {
+  &::before {
     content: "";
     position: absolute;
     z-index: -1;
-    inset: var(--fold) 0 0;
+    inset: 3px 4px;
     width: auto;
     height: auto;
-    pointer-events: none;
-    opacity: 1;
+    border: 1px solid #efd69b46;
+    border-radius: .8rem;
+    background: none;
     transform: none;
+    opacity: 1;
     animation: none;
+    pointer-events: none;
   }
-  &::before {
-    background: linear-gradient(36deg, transparent 49%, var(--festival-navy) 50%) var(--tail) bottom / var(--tail) var(--fold) no-repeat,
-      linear-gradient(-36deg, transparent 49%, var(--festival-navy) 50%) right var(--tail) bottom / var(--tail) var(--fold) no-repeat,
-      #d72e56;
-    clip-path: polygon(0 0, 100% 0, calc(100% - var(--tail)) 50%, 100% 100%, 0 100%, var(--tail) 50%);
-  }
-  &::after {
-    inset: 0 calc(2 * var(--tail)) var(--fold);
-    border-block: 1px solid #ffa5ae;
-    border-radius: .17rem;
-    background: var(--festival-coral);
-  }
-  &:focus-visible { outline: 3px solid #298ac1; outline-offset: 3px; }
-  &:active { filter: drop-shadow(0 1px 0 var(--festival-navy)); }
-}
-button.ui-button[data-admission][data-festival-action],
-.ml-actions > button.ui-button[data-admission][data-festival-action] {
-  display: grid;
-  grid-template-columns: clamp(1.6rem, 6vw, 2.4rem) minmax(0, 1fr) clamp(1.6rem, 6vw, 2.4rem);
-  align-items: center;
-  padding: .27rem calc(2 * var(--tail)) calc(.27rem + var(--fold));
+
+  &::after { content: none; }
+
   & .cc-admission-title {
+    min-width: 0;
+    padding: .2rem 0;
     color: inherit;
-    font: 800 clamp(1rem, 4.4vw, 1.28rem)/1.12 var(--lvz-font-sans);
-    letter-spacing: -.02em;
+    font: 750 clamp(1rem, 4.4vw, 1.24rem)/1.12 var(--lvz-font-sans);
+    letter-spacing: -.015em;
     text-align: center;
-    text-shadow: inherit;
+    text-shadow: 0 1px 2px #192745;
   }
-  & .cc-admission-title small { color: white; -webkit-text-stroke-width: 2px; }
+
+  & .cc-admission-title small { color: #fff4d5; font-size: clamp(.75rem, 3vw, .84rem); }
   & .cc-admission-stamp, & .cc-admission-stub {
     justify-self: center;
     display: grid;
     place-items: center;
-    border: 0;
     transform: none;
   }
+
   & .cc-admission-stamp {
-    width: 100%;
-    height: 1.7rem;
-    padding: .12rem;
-    border-radius: 50%;
-    background: var(--festival-paper);
+    position: relative;
+    width: 2.18rem;
+    height: 2.3rem;
+    padding: .18rem;
+    border: 1px solid #e5c585;
+    border-radius: 1rem 1rem .35rem .35rem;
+    background: radial-gradient(ellipse at 50% 80%, #fff9da, #ceb18b 57%, #573c62);
+    box-shadow: 0 0 .65rem #ffdfa15c;
   }
+
   & .cc-admission-stamp img { width: 100%; height: 100%; object-fit: contain; }
-  & .cc-admission-stub { width: 1.6rem; height: 1.6rem; border-radius: 50%; background: var(--festival-navy); color: var(--festival-gold); }
+  & .cc-admission-stub {
+    width: 1.65rem;
+    height: 1.65rem;
+    border: 1px solid #e6c98480;
+    border-radius: 50%;
+    background: #1829459e;
+    color: #ffe4a1;
+  }
+
+  &:focus-visible { outline: 3px solid #365f9b; outline-offset: 3px; }
+  &:active { box-shadow: inset 0 2px 6px #131b37bf, 0 1px 3px #26375a66; }
 }
+
 .ml-actions:has(> [data-festival-action]) > button.ui-button-secondary {
   border: 1px solid white;
   color: #10275b;
@@ -96,18 +100,32 @@ button.ui-button[data-admission][data-festival-action],
   box-shadow: 0 2px 0 #10275b;
 }
 button.cc-corner-help.cc-festival-help {
-  border: 2px solid white;
-  background: var(--festival-leaf);
-  color: white;
-  box-shadow: 0 2px 6px #173a262b;
-  font: 750 1.2rem/1 var(--lvz-font-sans);
+  border: 0;
+  background: transparent;
+  color: #fff5d8;
+  box-shadow: none;
+  font: 700 16px/44px var(--lvz-font-sans);
+}
+.cc-festival-help > .cc-help-badge {
+  display: inline-grid;
+  place-items: center;
+  box-sizing: border-box;
+  width: 28px;
+  height: 28px;
+  vertical-align: middle;
+  border: 1px solid #78869e;
+  border-radius: 50%;
+  background: #344563;
+  line-height: 1;
 }
 button.cc-festival-help:focus-visible {
-  outline: 3px solid #4489c4;
+  outline: 3px solid var(--festival-gold);
   outline-offset: -4px;
 }
 
 .cc-dialog.cc-concert-stage.cc-festival-stage[open][data-presentation="registration"] {
+  --scene-sky: #d7e5f7;
+  --scene-horizon: #fbe7d18f;
   --lvz-ink: var(--festival-navy);
   --lvz-ink-quiet: #485c64;
   --lvz-focus: #315f89;
@@ -115,70 +133,43 @@ button.cc-festival-help:focus-visible {
   --lvz-surface: white;
   --lvz-sunken: #f0f4eb;
   clip-path: none;
-  border: 1px solid var(--festival-line);
+  border: 1px solid #b8c5da;
   border-radius: 1.3rem;
   background:
-    linear-gradient(90deg, transparent, #fcf9f4bf 18% 82%, transparent),
-    url('/concert/flyer-ornament.svg') center / 100% 100% no-repeat,
-    radial-gradient(ellipse at 100% 0%, #cdeaf9, transparent 43%),
-    radial-gradient(ellipse at 0% 100%, #ffe7a6, transparent 40%),
-    var(--festival-paper);
-  box-shadow: 0 10px 36px #162d422e;
+    linear-gradient(170deg, var(--scene-sky), #f7faffdf 30%, #fffaf375 58%, var(--scene-horizon)),
+    url('/concert/peace-horizon.webp') center bottom / cover no-repeat;
+  box-shadow: 0 22px 55px #101e4270, 0 0 0 1px #ffedc147;
 
-  & .cc-dialog-heading h2 { color: var(--festival-navy); }
-  & .cc-host-signature { color: var(--festival-leaf); }
-  & .cc-dialog-close { color: var(--festival-navy); border-color: var(--festival-line); background: white; }
+  &:has(.cc-dialog-inner > div:not([hidden]) [data-step="member"]) {
+    --scene-sky: #e5d9f0;
+    --scene-horizon: #f6ddd083;
+  }
+  &:has(.cc-dialog-inner > div:not([hidden]) :is([data-step="guest"], [data-step="identity"], [data-step="sender"])) {
+    --scene-sky: #cedfe9;
+    --scene-horizon: #f2e7bc74;
+  }
+  &:has(.cc-dialog-inner > div:not([hidden]) :is([data-step="quantity"], [data-step="invite"])) {
+    --scene-sky: #e4deed;
+    --scene-horizon: #f7dd9497;
+  }
+  & .cc-dialog-heading {
+    border-block-end: 1px solid #8195b341;
+  }
+  & .cc-dialog-heading h2 { color: #253e63; }
+  & .cc-host-signature { color: #385c58; }
+  & .cc-dialog-close { color: #253e63; border-color: #8a9bb4; background: #f7faff; }
   & .cc-poster-stage {
-    border: 1px solid #cdddc6;
+    border: 1px solid #dfd2ad;
     border-radius: 1rem;
-    background: linear-gradient(155deg, var(--festival-sky), #eff9f3 56%, #dfedcf);
-    box-shadow: none;
+    background: linear-gradient(165deg, #26385c35, #fff1c529 64%, #fde5ad4a),
+      url('/concert/peace-horizon.webp') center 66% / cover;
+    box-shadow: inset 0 0 0 1px #fff9e7;
   }
   & .cc-poster-stage::before, & .cc-poster-stage::after { content: none; }
   & .cc-program-fan img.cc-registration-poster {
-    border: 2px solid white;
+    border: 1px solid #fff4cf;
     border-radius: .5rem;
     box-shadow: 0 2px 7px #24462b26;
-  }
-}
-
-/* Two sprigs sit in the poster margins, behind the full concert artwork. */
-.cc-festival-foliage {
-  position: absolute;
-  inset: 0;
-  overflow: hidden;
-  pointer-events: none;
-  & span {
-    position: absolute;
-    bottom: -12%;
-    left: -1%;
-    width: 12%;
-    height: 96%;
-    border-right: 2px solid #76a378;
-    border-radius: 50%;
-    transform: rotate(14deg);
-  }
-  & span:last-child {
-    left: auto;
-    right: -1%;
-    transform: rotate(180deg) translateY(18%);
-  }
-  & span::before, & span::after {
-    content: "";
-    position: absolute;
-    left: 44%;
-    top: 26%;
-    width: 52%;
-    height: 23%;
-    border-radius: 0 95% 0 95%;
-    background: #98bc89;
-    box-shadow: -.35em 1.55em #b5cf99;
-  }
-  & span::after {
-    left: 98%;
-    top: 41%;
-    transform: scaleX(-1);
-    background: #7fae88;
   }
 }
 
@@ -224,7 +215,7 @@ button.cc-festival-help:focus-visible {
   & .cc-festival-thanks { color: var(--festival-leaf); }
   & .cc-choices { gap: .45rem; }
   & .cc-festival-choice {
-    --gesture-accent: #28bb4a;
+    --gesture-accent: #b1c7a5;
     --gesture-size: clamp(2.5rem, 6.2dvh, 3.25rem);
     display: grid;
     grid-template-columns: var(--gesture-size) minmax(0, 1fr) 1.1rem;
@@ -234,24 +225,23 @@ button.cc-festival-help:focus-visible {
     min-height: 48px;
     padding: .3rem .9rem .3rem .35rem;
     border: 1px solid color-mix(in srgb, var(--gesture-accent) 26%, #cdd6ca);
-    border-inline-start: 4px solid var(--gesture-accent);
-    border-radius: .5rem 1.2rem 1.2rem .5rem;
-    background: linear-gradient(100deg, color-mix(in srgb, var(--gesture-accent) 14%, white), white 62%);
-    box-shadow: 0 2px 0 #10275b1f;
+    border-radius: .9rem;
+    background: linear-gradient(108deg, color-mix(in srgb, var(--gesture-accent) 27%, #fffbf2), #fffcf8 65%);
+    box-shadow: 0 3px 8px #31486e15;
     color: var(--festival-navy);
     font: 650 clamp(.96rem, 4vw, 1.08rem)/1.2 var(--lvz-font-sans);
     text-align: start;
     cursor: pointer;
   }
-  & [data-choice="guest"], & [data-choice="envelope"] { --gesture-accent: #3db4ff; }
-  & [data-choice="both"] { --gesture-accent: #a768ff; }
+  & [data-choice="guest"], & [data-choice="envelope"] { --gesture-accent: #bbcbe6; }
+  & [data-choice="both"] { --gesture-accent: #d2bfdf; }
   & .cc-festival-gesture {
     display: grid;
     place-items: center;
     width: var(--gesture-size);
     height: var(--gesture-size);
     border-radius: 50%;
-    background: var(--gesture-accent);
+    background: radial-gradient(circle at 54% 21%, #fff9e2, var(--gesture-accent) 90%);
     color: var(--festival-navy);
   }
   & .cc-festival-gesture svg { width: 58%; height: 58%; }
@@ -265,13 +255,17 @@ button.cc-festival-help:focus-visible {
     background: color-mix(in srgb, var(--gesture-accent) 5%, white);
   }
   & .cc-festival-choice:is([data-selected], [data-answering]) .cc-festival-gesture {
-    box-shadow: 0 0 0 2px white, 0 0 0 3px var(--festival-leaf);
+    box-shadow: 0 0 0 2px #fff8e3, 0 0 0 3px #9b7440;
+  }
+  & .cc-festival-choice[data-answering] {
+    border-color: #9b7440;
+    background: linear-gradient(105deg, #f4deb4, #fff8e9 75%);
   }
   & .cc-reg-form, & .cc-reg-results > li {
     padding: clamp(.5rem, 2vw, .8rem);
-    border: 1px solid #d6d8cf;
+    border: 1px solid #c4cddd;
     border-radius: 1rem;
-    background: white;
+    background: #fffdf9;
   }
   & .cc-field-progress { color: #425971; }
   & .cc-field-progress progress { accent-color: var(--festival-leaf); }
@@ -306,7 +300,18 @@ button.cc-festival-help:focus-visible {
 /* The primary form action is portaled into the footer. */
 .cc-dialog.cc-festival-stage[open] :is(.cc-reg-form, .cc-submit-slot) button.cc-reg-next[data-festival] {
   min-height: 46px;
-  padding: .5rem 1.6rem calc(.5rem + var(--fold));
+  padding: .5rem 1.05rem;
+  clip-path: none;
+  border: 1px solid #ab8960;
+  border-radius: .85rem;
+  background: radial-gradient(ellipse at 50% 115%, #75617a, transparent 64%), #263b63;
+  color: #fff7da;
+  filter: none;
+  text-shadow: none;
+  -webkit-text-stroke: 0;
+  box-shadow: inset 0 1px #fbe3b056, 0 2px 4px #223c632e;
+  &::before, &::after { content: none; }
+  &:active { filter: none; }
 }
 @media (max-height: 610px) {
   .cc-dialog.cc-concert-stage[open] .cc-registration[data-festival] {
@@ -317,7 +322,7 @@ button.cc-festival-help:focus-visible {
 
 .cc-dialog.cc-festival-stage[open][data-presentation]:has(.cc-dialog-inner > div:not([hidden]) .cc-ticket-view .cc-qr) {
   border-color: var(--festival-line);
-  background: var(--festival-paper);
+  background: radial-gradient(ellipse at 50% 27%, #fff6dc, #f4f8ff 65%, #d7e5f4);
 }
 
 /* The attendee picker, wallet and enlarged QR share the registration dialog. */
