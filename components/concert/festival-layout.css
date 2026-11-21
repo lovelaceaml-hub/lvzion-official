@@ -1,5 +1,4 @@
-/* The dialog owns the viewport budget. Only the list of additional names
-   can consume and scroll the space left by its neighbouring fields. */
+/* The sheet owns the viewport budget. Its body can scroll while typing. */
 dialog.cc-dialog.cc-concert-stage[data-presentation][data-corner-help][open] {
   --sheet-pad: clamp(10px, 3.5vw, 20px);
   --corner-gap: max(48px, calc(44px + env(safe-area-inset-bottom)));
@@ -58,11 +57,29 @@ dialog.cc-dialog.cc-concert-stage[data-presentation][data-corner-help][open] {
 @media (max-height: 660px) {
   dialog.cc-dialog.cc-concert-stage[data-corner-help][open]:has(.cc-dialog-inner > div:not([hidden]) .cc-registration:not([data-step="start"]):not([data-step="member"])) .cc-poster-stage { display: none; }
 }
+/* The same top edge and poster layout apply before, during and after focus. */
+@media (pointer: coarse), (max-width: 600px) {
+  dialog.cc-dialog.cc-concert-stage[data-corner-help][open]:where(:has(.cc-dialog-inner > div:not([hidden]) input:not([type="checkbox"]))) {
+    inset-block-start: max(2px, env(safe-area-inset-top));
+    inset-block-end: auto;
+    margin-block-start: 0;
+    & .cc-poster-stage { display: none; }
+  }
+}
 dialog.cc-dialog.cc-concert-stage[data-corner-help][open][data-keyboard] {
-  inset-block-start: var(--visible-top, 0px);
+  inset-block-start: calc(var(--visible-top, 0px) + max(2px, env(safe-area-inset-top)));
   inset-block-end: auto;
-  margin-block-start: 2px;
-  & .cc-poster-stage, & .cc-field-progress { display: none; }
+  margin-block-start: 0;
+  & > .cc-dialog-inner {
+    overflow-y: auto;
+    overscroll-behavior-y: contain;
+    overflow-anchor: none;
+    scroll-behavior: auto;
+  }
+  & .cc-poster-stage { display: none; }
+}
+dialog.cc-festival-stage[open] .cc-reg-form .ui-input:not([type="checkbox"]) {
+  font-size: max(1em, 16px);
 }
 @media (orientation: landscape) and (max-height: 520px) {
   dialog.cc-dialog.cc-concert-stage[data-corner-help][data-presentation][open] {
@@ -113,17 +130,6 @@ dialog.cc-dialog.cc-concert-stage[open][data-corner-help] {
 html:has(dialog.cc-festival-stage[open]), body:has(dialog.cc-festival-stage[open]) {
   height: 100dvh;
   overflow: clip;
-}
-
-/* The on-screen keyboard leaves room for a single heading beside Close. */
-dialog.cc-dialog.cc-concert-stage[data-corner-help][data-keyboard][open] {
-  & .cc-dialog-heading { position: absolute; z-index: 1; inset: 4px var(--sheet-pad) auto auto; }
-  & .cc-dialog-heading > :not(.cc-dialog-close) { display: none; }
-  & .cc-registration > h3 {
-    display: flex; align-items: center; min-height: 44px;
-    padding-inline-end: 47px; font-size: 1.05rem;
-  }
-  & .cc-festival-consideration { display: none; }
 }
 
 /* Recipient entry has more fields than the other routes, including optional

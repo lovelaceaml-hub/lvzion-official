@@ -31,9 +31,10 @@ export function RegistrationForm({id, active, busy, multipleGuests, festival, co
     const group = fields.current;
     const pager = nav.current;
     const body = group?.closest<HTMLElement>('.cc-dialog-inner');
-    if (!festival || !active || !group || !pager || !body) return;
+    const sheet = body?.closest('dialog');
+    if (!festival || !active || !group || !pager || !body || !sheet) return;
     function measure() {
-      if (!group || !pager || !body || !body.clientHeight) return;
+      if (!group || !pager || !body || !body.clientHeight || sheet?.hasAttribute('data-keyboard')) return;
       // Reveal the mounted rows for one layout read. The browser lays out the real
       // labels, progress, poster, footer and any messages at the current zoom.
       const rows = Array.from(group.children) as HTMLElement[];
@@ -70,23 +71,24 @@ export function RegistrationForm({id, active, busy, multipleGuests, festival, co
     measure();
     const resize = new ResizeObserver(measure);
     resize.observe(body);
-    resize.observe(body.closest('dialog')!);
+    resize.observe(sheet);
     resize.observe(group);
     for (const row of group.children) resize.observe(row);
     for (const child of body.children) resize.observe(child);
     if (footer) resize.observe(footer);
-    window.visualViewport?.addEventListener('resize', measure);
+    const keyboard = new MutationObserver(measure);
+    keyboard.observe(sheet, {attributes:true, attributeFilter:['data-keyboard']});
     window.addEventListener('resize', measure);
     return () => {
       resize.disconnect();
-      window.visualViewport?.removeEventListener('resize', measure);
+      keyboard.disconnect();
       window.removeEventListener('resize', measure);
     };
   }, [festival, active, units.length, footer]);
 
   function showPage(index: number, animate = true) {
     flushSync(() => setLayout(current => ({...current, anchor: starts[index]})));
-    position.current?.focus();
+    position.current?.focus({preventScroll: true});
     if (animate) onPageTurn(position.current, index < page ? 'back' : 'forward', index);
   }
 
@@ -116,6 +118,8 @@ export function RegistrationForm({id, active, busy, multipleGuests, festival, co
           return;
         }
       }
+      const focused = document.activeElement;
+      if (fields.current.contains(focused) && (focused instanceof HTMLInputElement || focused instanceof HTMLTextAreaElement)) focused.blur();
       if (!last) showPage(page + 1);
       else onFinish((event.nativeEvent as SubmitEvent).submitter);
     }}>
@@ -141,7 +145,7 @@ export function ResultPages({children, festival, onPageTurn}: {children: ReactNo
   const position = useRef<HTMLSpanElement>(null);
   function go(next: number) {
     flushSync(() => setIndex(next));
-    position.current?.focus();
+    position.current?.focus({preventScroll: true});
     onPageTurn(position.current, next < current ? 'back' : 'forward', next);
   }
   if (!festival) return <ul className="cc-reg-results">{children}</ul>;

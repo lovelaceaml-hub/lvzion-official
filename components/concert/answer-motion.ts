@@ -45,7 +45,7 @@ export function playFestivalTransition(target: HTMLElement | null, stepDirection
   sheet.removeAttribute('data-opening-scene');
   activeTransitions.get(sheet)?.();
   const preference = matchMedia(reducedMotion);
-  if (!section.animate || preference.matches || document.hidden) return;
+  if (!section.animate || preference.matches || document.hidden || sheet.hasAttribute('data-keyboard')) return;
 
   const direction = opening ? 'open' : stepDirection;
   const pager = target?.closest<HTMLElement>('.cc-page-nav');
@@ -147,7 +147,7 @@ export function acknowledgeField(control: HTMLElement) {
   if (!form) return;
   const target = control.closest<HTMLElement>('.cc-vip-toggle') ?? control;
   if (target.closest('.cc-festival-stage')) {
-    if (matchMedia(reducedMotion).matches) return;
+    if (matchMedia(reducedMotion).matches || target.closest('[data-keyboard]')) return;
     const field = target.closest<HTMLElement>('.ui-field, .cc-vip-toggle');
     if (!field?.animate) return;
     for (const previous of field.getAnimations()) {
