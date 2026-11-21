@@ -4,6 +4,8 @@ dialog.cc-dialog.cc-concert-stage[data-presentation][data-corner-help][open] {
   --corner-gap: max(48px, calc(44px + env(safe-area-inset-bottom)));
   --sheet-room: calc(var(--visible-height, 100dvh) - var(--corner-gap) - max(6px, env(safe-area-inset-top)));
   box-sizing: border-box;
+  top: auto;
+  bottom: 0;
   width: min(calc(100% - 12px), 32rem);
   max-height: var(--sheet-room) !important;
   padding: 0;
@@ -57,18 +59,16 @@ dialog.cc-dialog.cc-concert-stage[data-presentation][data-corner-help][open] {
 @media (max-height: 660px) {
   dialog.cc-dialog.cc-concert-stage[data-corner-help][open]:has(.cc-dialog-inner > div:not([hidden]) .cc-registration:not([data-step="start"]):not([data-step="member"])) .cc-poster-stage { display: none; }
 }
-/* The same top edge and poster layout apply before, during and after focus. */
+/* Keep the emblem visible and leave room for inputs on compact touch screens. */
 @media (pointer: coarse), (max-width: 600px) {
   dialog.cc-dialog.cc-concert-stage[data-corner-help][open]:where(:has(.cc-dialog-inner > div:not([hidden]) input:not([type="checkbox"]))) {
-    inset-block-start: max(2px, env(safe-area-inset-top));
-    inset-block-end: auto;
-    margin-block-start: 0;
     & .cc-poster-stage { display: none; }
   }
 }
-dialog.cc-dialog.cc-concert-stage[data-corner-help][open][data-keyboard] {
-  inset-block-start: calc(var(--visible-top, 0px) + max(2px, env(safe-area-inset-top)));
-  inset-block-end: auto;
+/* Lift the same bottom anchor by the portion covered by the keyboard. */
+dialog.cc-dialog.cc-concert-stage[data-presentation][data-corner-help][open][data-keyboard] {
+  top: auto;
+  bottom: var(--keyboard-inset, 0px);
   margin-block-start: 0;
   & > .cc-dialog-inner {
     overflow-y: auto;
