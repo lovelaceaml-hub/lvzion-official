@@ -33,10 +33,21 @@ An open event can enforce a seat limit. The server checks capacity and registrat
 
 ## Handoff for the next review
 
-The November 20 live design baseline is Vercel deployment `dpl_AffVBs3CUcqnjoNyMRuwMhcHGpnk` in `lvzion/lvzion-official`. Git-based release and test results are recorded in [the verification record](VERIFICATION.md). The release target is the existing shared route. Keep the current registration backend and public plus personal entry points.
+The festival redesign shipped from `7a8911b760699d69928c8cfcf1ad02627ce661c6` on `main`. Vercel production deployment `dpl_9qKuBbbxNipxAL7d7sUmPwxpi3or` in `lvzion/lvzion-official` serves the shared invitation. The release smoke check covered the centered ribbon, greeting, guest form, return from Help and opening leaves. [Live invitation](https://lvz.app/concert/rsvp) · [Release checks and limitations](VERIFICATION.md#festival-registration-redesign) · [Download the synthetic phone walkthrough](qa/mobile-registration.mp4)
 
-1. Start with repository instructions and the verification record. Use Node 24 and the lockfile. Review the shipped source against both the shared invitation and a fictional host link.
-2. Exercise short portrait, landscape, an open keyboard, enlarged type, keyboard-only input and Reduce Motion. Watch the opening and answer transitions while the phone is still. Verify the ribbon cutouts, hit targets, focus restoration, help and draft retention. Also check private playback failure and the countdown boundary in Pacific time.
-3. Trace member, guest, both, and invitation-only paths through verification, optional email, first visits, VIP details, multi-attendee tickets and retrieval. Check duplication, capacity and repeated door scans with disposable data. Live smoke tests should be read-only.
-4. Refactor where a reproducible defect or duplicated behavior warrants a change. Keep interactive geometry, registration state and email delivery semantics covered with focused regressions. Follow the repository’s per-run authorization for a full suite.
-5. A physical iPhone playback, keyboard and camera scan remain separate device checks. Record observed results and distinguish local browser emulation, hosted smoke checks and real-device acceptance.
+**Pick up with a physical iPhone and Android phone.** Open the shared invitation in Safari and Chrome. Rotate the phone, open the guest form, bring up the keyboard and return from Help. Check that the focused field, action and help control stay reachable and that only an overflowing list of additional names scrolls. Repeat with Reduce Motion. Profile the first tap and question changes on-device. The largest observed transition frame in the four-times CPU slowdown test was 153 ms.
+
+Use disposable registrations and a test mailbox for submission, receipt, photo saving, calendar and door-scanning checks. Follow a named invitation directly to editable guest details, confirm a party, swipe and decode each QR, then verify the guest and host receipts. Verify self-registration and invitation creation without an email code. Record the phone, OS, browser, viewport and observed result in the verification record. Keep live smoke checks read-only.
+
+### Repeat the focused checks
+
+From the repository root, use Node 24 and the committed lockfile. Install the Playwright Chromium build if it is missing. The browser spec starts its own loopback server and uses fictional attendees.
+
+```sh
+npm ci --ignore-scripts
+npm run build
+node --experimental-strip-types --test tests/concert.test.ts
+npm run test:browser -- tests/browser/concert-registration.spec.ts tests/browser/concert.spec.ts --workers=2
+```
+
+The attendance spreadsheet is a separate follow-up. Door check-in records attendance in LV Zion. Resume the receiver setup with the sheet owner, then verify that one synthetic registration and scan update the sheet without polling. [Google Sheets setup and verification](google-sheets/README.md)

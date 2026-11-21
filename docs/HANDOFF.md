@@ -10,7 +10,7 @@ Keep compact module headers and the prominent center Apps launcher. The launcher
 
 ## Event Invitation and Registration · November 20, 2026
 
-The public concert invitation, member and guest registration, private film playback and QR tickets are in the application. The November 12 entries below describe the original launch. The concert guide records the current guest experience, release baseline and instructions for the next quality review. [Concert handoff](concert/README.md)
+The festival registration redesign is live on the shared invitation from commit `7a8911b`. Start the next session with the concert guide’s device checks. It links the production release, synthetic phone walkthrough, focused test commands and pending Google Sheets receiver setup. [Resume concert work](concert/README.md#handoff-for-the-next-review)
 
 ## Church Display: pictures, videos and study rooms (released November 13, 2026)
 

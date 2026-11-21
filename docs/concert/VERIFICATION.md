@@ -2,6 +2,8 @@
 
 ## Festival registration redesign
 
+The release under review is commit `7a8911b`, Vercel deployment `dpl_9qKuBbbxNipxAL7d7sUmPwxpi3or`. The 390 × 844 walkthrough records a local guest registration from the shared entry through ticket options, using fictional details and a fixture QR. The promo player is empty in this fixture. [Phone walkthrough](qa/mobile-registration.mp4) · [Handoff and focused test commands](README.md#handoff-for-the-next-review)
+
 The short-phone review found 297 px of overflow on the previous single-guest screen and 201 px on member registration at 320 × 568. On the revised application the focused phone tests passed on both routes. A ten-person party keeps its additional names inside a scrollable list. WebKit also kept the focused field and submit action visible in a simulated 295 px keyboard viewport. Checks included enlarged text and Reduce Motion.
 
 The production build and TypeScript check, 16 focused Chromium browser tests and 10 concert unit tests passed. A local named invitation issued three distinct QR codes. WebKit decoded each code, checked guest and host test receipts and their attachments, switched tickets, saved images and verified both calendar formats. Ticket layouts were exercised from 320 × 460 to 844 × 390 in portrait and landscape. Synthetic registrations and email used local fixtures.
