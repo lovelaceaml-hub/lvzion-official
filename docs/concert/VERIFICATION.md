@@ -1,5 +1,11 @@
 # Concert release and review
 
+## One-minute Register and distinct sweep paths draft
+
+Register hops in pairs for six ten-second cycles. The draft uses the original breeze, canopy fall, rising curl, crossing leaves, diagonal drift and opening fan across question changes, with the original effect on opening and ticket arrival. Playable examples use the application motion code and existing concert artwork.
+
+The production build, 11 concert unit checks and 21 focused concert browser checks passed. The six playable examples were checked at 320 × 568 and 390 × 844 for distinct paths, screen coverage, Back, the one-minute cycle, Stop and Reduce Motion. A local production build with fictional invitation data verified a named link with a saved email, a named link without email, and a reusable link with only the inviter prefilled. The named-link check also verified that edits and the second attendee's name reached the synthetic submission. Physical phone and full repository checks remain open. The draft awaits motion review before publication.
+
 ## iPhone keyboard stability follow-up
 
 The phone layout reserves space for text entry before focus. While the keyboard is visible, the form scrolls inside the card, page boundaries stay fixed and transition effects pause. Back and valid form navigation dismiss the keyboard while the viewport catches up. The poster and motion resume on the appropriate steps after the viewport recovers.

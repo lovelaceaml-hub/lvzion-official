@@ -1,3 +1,4 @@
+import {memberDetails} from '../lib/concert/registration.ts';
 import test from 'node:test';import assert from 'node:assert/strict';
 import {attendanceCsv,parseProgram,parseProgramEntries,parseGuestRsvp,parseMemberCommand,parseScan,tokenFromScan,whenLine,databaseError} from '../lib/concert/domain.ts';
 import {hostReceiptHtml,invitationHtml,ticketGroupHtml,ticketHtml,ticketText,ticketSubject} from '../lib/concert/email.ts';
@@ -127,4 +128,14 @@ test('image-blocked party email keeps each named ticket link beside its QR fallb
   assert.match(withoutImages, /<h2[^>]*>Guest &lt;One&gt;<\/h2>.*?href="https:\/\/example.invalid\/ticket\/one\?a=1&amp;b=2"[^>]*>Open ticket for Guest &lt;One&gt;<\/a>/s);
   assert.match(withoutImages, /<h2[^>]*>Guest &quot;Two&quot;<\/h2>.*?href="https:\/\/example.invalid\/ticket\/two"[^>]*>Open ticket for Guest &quot;Two&quot;<\/a>/s);
   assert.match(withoutImages, /Sunday, December 6, 2026.*Starts 6:00 PM.*Main Hall/s);
+});
+
+
+test('member concert intake accepts one full name and still accepts legacy fields', () => {
+ const leader = 'Fictional Leader';
+ const singleField = memberDetails({fullName:'  María   Elena Cruz  ',leader});
+ const legacy = memberDetails({firstName:'María Elena',lastName:'Cruz',leader});
+ assert.deepEqual(singleField,legacy);
+ assert.equal(singleField.name,'María Elena Cruz');
+ assert.throws(() => memberDetails({fullName:'María',leader}), /valid full name/);
 });

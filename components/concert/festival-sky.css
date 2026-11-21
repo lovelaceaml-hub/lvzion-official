@@ -217,3 +217,71 @@
 @media (prefers-reduced-motion: reduce) {
   .cc-festival-sky { display: none; }
 }
+
+.cc-festival-sky[data-sweep="canopy"] .cc-sky-expression[data-expression] {
+  left: auto;
+  right: 15%;
+  top: 25%;
+  --expression-dx: 6vw;
+  --expression-dy: 15dvh;
+}
+
+.cc-festival-sky[data-sweep="updraft"] .cc-sky-expression[data-expression] {
+  left: 9%;
+  right: auto;
+  top: 72%;
+  --expression-dx: 10vw;
+  --expression-dy: -22dvh;
+}
+
+.cc-festival-sky[data-sweep="crossing"] .cc-sky-expression[data-expression] {
+  left: auto;
+  right: 8%;
+  top: 42%;
+  --expression-dx: -15vw;
+  --expression-dy: -7dvh;
+}
+
+.cc-festival-sky[data-sweep="diagonal"] .cc-sky-expression[data-expression] {
+  left: auto;
+  right: 18%;
+  top: 22%;
+  --expression-dx: -17vw;
+  --expression-dy: 21dvh;
+}
+
+.cc-festival-sky[data-sweep="fan"] .cc-sky-expression[data-expression] {
+  left: 30%;
+  right: auto;
+  top: 75%;
+  --expression-dx: -13vw;
+  --expression-dy: -19dvh;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .cc-festival-sky:not([data-sweep="breeze"])::before { content: none; }
+
+  .cc-festival-sky:not([data-sweep="breeze"]) > i {
+    animation-name: cc-sky-curve;
+    animation-timing-function: cubic-bezier(.38,.12,.55,.9);
+  }
+}
+
+@keyframes cc-sky-curve {
+  0% {
+    opacity: 0;
+    transform: translate3d(0, 0, 0) rotate(var(--particle-turn)) scale(.53);
+  }
+  30% {
+    opacity: .93;
+    transform: translate3d(var(--curve-x1), var(--curve-y1), 0) rotate(5deg) scale(.94);
+  }
+  66% {
+    opacity: .82;
+    transform: translate3d(var(--curve-x2), var(--curve-y2), 0) rotate(-20deg) scale(1);
+  }
+  100% {
+    opacity: 0;
+    transform: translate3d(var(--curve-x3), var(--curve-y3), 0) rotate(var(--particle-turn-end)) scale(.83);
+  }
+}

@@ -1,6 +1,6 @@
 'use client';
 
-import {useEffect, useId, useRef, type ReactNode} from 'react';
+import {useEffect, useId, useRef, useState, type ReactNode} from 'react';
 import Image from 'next/image';
 import {PEACE_CONCERT_POSTER, PEACE_CONCERT_TITLE} from '../../lib/concert/branding';
 import './registration-stage.css';
@@ -21,12 +21,28 @@ export default function ConcertDialog({label, title, primary = false, children, 
   help?: {active: boolean; toggle: () => void; recoveryOnly: boolean};
 }) {
   const dialog = useRef<HTMLDialogElement>(null);
+  const registerButton = useRef<HTMLButtonElement>(null);
+  const [attention, setAttention] = useState(false);
   const corner = useRef<HTMLButtonElement>(null);
   const syncViewport = useRef<(() => void) | null>(null);
   const titleId = useId();
   const fieldAtFocus = useRef('');
   const themed = presentation === 'registration' && showPoster;
   const opensTicket = themed && primary;
+
+  useEffect(() => {
+    if (!opensTicket) return;
+    const preference = matchMedia('(prefers-reduced-motion: reduce)');
+    if (preference.matches) return;
+    setAttention(true);
+    const stop = () => setAttention(false);
+    const timer = window.setTimeout(stop, 60_000);
+    preference.addEventListener('change', stop);
+    return () => {
+      window.clearTimeout(timer);
+      preference.removeEventListener('change', stop);
+    };
+  }, [opensTicket]);
   function openDialog(button: HTMLButtonElement, fromHelp = false) {
     const sheet = dialog.current;
     if (!sheet || sheet.open) return;
@@ -36,6 +52,7 @@ export default function ConcertDialog({label, title, primary = false, children, 
       sheet.style.setProperty('--sky-x', bounds.left + bounds.width / 2 + 'px');
       sheet.style.setProperty('--sky-y', bounds.top + bounds.height / 2 + 'px');
     }
+    setAttention(false);
     button.focus({preventScroll:true});
     sheet.toggleAttribute('data-opening-scene', opensScene);
     sheet.removeAttribute('data-keyboard');
@@ -103,12 +120,19 @@ export default function ConcertDialog({label, title, primary = false, children, 
   }, []);
   return <>
     {!(themed && help?.recoveryOnly) && <button className={primary ? 'ui-button' : 'ui-button ui-button-secondary'} data-admission={opensTicket || undefined} data-festival-action={opensTicket || undefined}
+      ref={registerButton} data-register-attention={attention || undefined}
+      onFocus={e => { if (e.currentTarget.matches(':focus-visible')) setAttention(false); }}
+      onPointerEnter={e => { if (e.pointerType === 'mouse') setAttention(false); }}
       type="button" aria-haspopup="dialog" aria-label={!primary && !presentation ? label : undefined} onClick={e => openDialog(e.currentTarget)}>
       {opensTicket ? <>
         <span className="cc-admission-stamp" aria-hidden="true"><img src="/concert/festival-logo.webp" width="45" height="29" alt=""/></span>
         <span className="cc-admission-title">{invitedBy && <small>You’ve been invited by {invitedBy}</small>}{label}</span>
         <span className="cc-admission-stub" aria-hidden="true"><ArrowRight size={21}/></span>
       </> : <>{primary && invitedBy && <small>You’ve been invited by {invitedBy} · </small>}{label}</>}
+    </button>}
+    {attention && <button type="button" className="cc-corner-help cc-festival-help cc-stop-register" aria-label="Stop button animation"
+      onClick={() => {setAttention(false); registerButton.current?.focus({preventScroll:true});}}>
+      <span className="cc-help-badge" aria-hidden="true">Ⅱ</span>
     </button>}
     {themed && help && <button type="button" className="cc-corner-help cc-festival-help" aria-label="Tickets & help"
       aria-haspopup="dialog" onClick={e => openDialog(e.currentTarget, true)}><span className="cc-help-badge" aria-hidden="true">?</span></button>}

@@ -1,4 +1,5 @@
 import {expect, test, type Locator, type Page} from '@playwright/test';
+import type {FestivalSweep} from '../../components/concert/festival-paths';
 import type {InviteDraft} from '../../lib/concert/registration';
 import {readFile} from 'node:fs/promises';
 import type {Workspace} from '../../lib/concert/domain';
@@ -49,7 +50,7 @@ test('guest can retry an empty ticket lookup and return to the unfinished regist
   });
   const dialog = await openRegistration(page);
   await dialog.getByRole('button', {name:'I am a guest.'}).click();
-  await dialog.getByLabel('Your full name').fill('Fictional Visitor');
+  await dialog.getByLabel('Full Name', {exact:true}).fill('Fictional Visitor');
   await dialog.getByRole('button', {name:'Tickets & help'}).click();
   const email = dialog.getByLabel('Registration email');
   const code = dialog.getByLabel('Eight-digit email code');
@@ -68,7 +69,7 @@ test('guest can retry an empty ticket lookup and return to the unfinished regist
   await expect(dialog.getByText('Fictional Attendee', {exact:true})).toBeVisible();
   expect(emails).toEqual(['missing@example.invalid','attendee@example.invalid']);
   await dialog.getByRole('button', {name:'Back to registration'}).click();
-  await expect(dialog.getByLabel('Your full name')).toHaveValue('Fictional Visitor');
+  await expect(dialog.getByLabel('Full Name', {exact:true})).toHaveValue('Fictional Visitor');
 });
 
 test('corner help opens from the invitation, stays outside the card and returns to the registration', async ({page}) => {
@@ -132,63 +133,56 @@ test('the festival Register button and its label stay centered with help visible
   await expect.poll(() => greeting.evaluate(image => (image as HTMLImageElement).naturalWidth)).toBeGreaterThan(0);
 });
 
-test('Register hops twice and remains steady for keyboard and reduced motion', async ({page}) => {
+test('Register hops in pairs for one minute and stops when asked', async ({page}) => {
   await mockConcert(page);
   await page.emulateMedia({reducedMotion:'no-preference'});
   await page.goto('/modules/concert');
   const register = page.getByRole('button', {name:'Tap here to register', exact:true});
+  const stop = page.getByRole('button', {name:'Stop button animation'});
   await expect(register).toHaveCSS('animation-name', 'cc-register-beckon');
-  await expect(register).toHaveCSS('animation-iteration-count', '1');
+  await expect(register).toHaveCSS('animation-iteration-count', '6');
+  await expect(stop).toBeInViewport({ratio:1});
   const lifts = await register.evaluate(button => {
     const hop = button.getAnimations().find(animation =>
       animation instanceof CSSAnimation && animation.animationName === 'cc-register-beckon');
     if (!hop) return [];
     hop.pause();
-    return [640, 2400].map(time => {
+    return [640, 2400, 5000, 50640, 52400, 59900, 60000].map(time => {
       hop.currentTime = time;
       return new DOMMatrix(getComputedStyle(button).transform).m42;
     });
   });
-  expect(lifts).toEqual([-12, -12]);
-  await register.focus();
+  expect(lifts).toEqual([-12, -12, 0, -12, -12, 0, 0]);
+  await stop.click();
   await expect(register).toBeFocused();
   await expect(register).toHaveCSS('animation-name', 'none');
-  await expect.poll(() => register.evaluate(button => {
-    const transform = getComputedStyle(button).transform;
-    return transform === 'none' || new DOMMatrixReadOnly(transform).isIdentity;
-  })).toBe(true);
+  await expect(stop).toHaveCount(0);
   await register.press('Enter');
   await expect(page.getByRole('dialog')).toBeVisible();
   await page.keyboard.press('Escape');
   await expect(page.getByRole('dialog')).toBeHidden();
-
   await register.blur();
+  await expect(register).toHaveCSS('animation-name', 'none');
+
+  await page.reload();
   await expect(register).toHaveCSS('animation-name', 'cc-register-beckon');
   await page.emulateMedia({reducedMotion:'reduce'});
   await expect(register).toHaveCSS('animation-name', 'none');
+  await expect(stop).toHaveCount(0);
 });
 
-async function expectLeafSweep(dialog: Locator, direction: 'open' | 'forward' | 'back' | 'success', rise: 0 | 6) {
-  await expect.poll(() => dialog.evaluate(sheet => {
-    const card = sheet.querySelector<HTMLElement>('.cc-festival-leaves');
-    const sky = sheet.querySelector<HTMLElement>('.cc-festival-sky');
-    const flights = card?.querySelectorAll<HTMLElement>('.cc-leaf-flight');
-    const leaves = sky?.querySelectorAll<HTMLElement>('[data-shape="leaf"]');
-    if (!card || !sky || flights?.length !== 10 || leaves?.length !== 6) return null;
-    return {
-      directions:[card.dataset.direction, sky.dataset.direction],
-      mirrored:[card, sky].map(layer => getComputedStyle(layer).transform === 'matrix(-1, 0, 0, 1, 0, 0)'),
-      cardEnds:Array.from(flights, leaf => parseFloat(leaf.style.getPropertyValue('--flight-to'))),
-      skyRises:Array.from(leaves, leaf => parseFloat(leaf.style.getPropertyValue('--particle-dy'))),
-      depths:[0, 4, 7].map(index => getComputedStyle(flights[index]).animationDuration),
-      ornaments:sky.querySelectorAll(':scope > i').length,
-    };
-  })).toEqual({
-    directions:[direction, direction], mirrored:[direction === 'back', direction === 'back'],
-    cardEnds:[25, 31, 12, 19, 3, 25, 43, 9, 12, 20].map(end => end - rise),
-    skyRises:[-48, -42, -47, -44, -56, -51].map(end => end - rise),
-    depths:['0.44s', '0.66s', '0.93s'], ornaments:18,
-  });
+async function expectLeafSweep(dialog: Locator, direction: 'open' | 'forward' | 'back' | 'success', sweep: FestivalSweep) {
+  const card = dialog.locator('.cc-festival-leaves');
+  const sky = dialog.locator('.cc-festival-sky');
+  await expect(card).toHaveAttribute('data-sweep', sweep);
+  await expect(sky).toHaveAttribute('data-sweep', sweep);
+  await expect(card).toHaveAttribute('data-direction', direction);
+  await expect(sky).toHaveAttribute('data-direction', direction);
+  await expect(sky).toHaveCSS('transform', direction === 'back' ? 'matrix(-1, 0, 0, 1, 0, 0)' : 'none');
+  await expect(card.locator('.cc-leaf-flight').first()).toHaveCSS('animation-name',
+    sweep === 'breeze' ? 'cc-heaven-flight' : 'cc-leaf-curve');
+  await expect(sky.locator('[data-shape="leaf"]').first()).toHaveCSS('animation-name',
+    sweep === 'breeze' ? 'cc-sky-rise' : 'cc-sky-curve');
 }
 
 async function expectAccent(sky: Locator, kind: string, colors: string[], glintCount: number) {
@@ -221,7 +215,7 @@ async function sampleSkyFrame(dialog: Locator) {
   });
 }
 
-test('original leaf sweeps alternate height, mirror Back and respect reduced motion', async ({page}) => {
+test('leaf sweeps travel from different edges, mirror Back and respect reduced motion', async ({page}) => {
   await page.emulateMedia({reducedMotion:'no-preference'});
   const dialog = await openRegistration(page);
   const scene = dialog.locator('.cc-festival-leaves');
@@ -240,7 +234,7 @@ test('original leaf sweeps alternate height, mirror Back and respect reduced mot
   });
   expect(coverage).toEqual({fillsScreen:true, active:true, acceptsInput:false, shapes:['expression', 'heart', 'leaf', 'star']});
   await expect(sky).toHaveAttribute('aria-hidden', 'true');
-  await expectLeafSweep(dialog, 'open', 0);
+  await expectLeafSweep(dialog, 'open', 'breeze');
   await expectAccent(sky, 'greeting', ['rose', 'blush'], 3);
   await expect(scene.locator('.cc-leaf-flight')).toHaveCount(10);
   await expect(scene).toHaveCSS('pointer-events', 'none');
@@ -250,38 +244,38 @@ test('original leaf sweeps alternate height, mirror Back and respect reduced mot
   await expect(sky).toHaveCount(0);
 
   await dialog.getByRole('button', {name:'Tickets & help'}).click();
-  await expectLeafSweep(dialog, 'forward', 0);
+  await expectLeafSweep(dialog, 'forward', 'breeze');
   await dialog.getByRole('button', {name:'Back to registration'}).click();
-  await expectLeafSweep(dialog, 'forward', 0);
+  await expectLeafSweep(dialog, 'forward', 'breeze');
   await expect(sky).toHaveCount(0);
 
   await dialog.getByRole('button', {name:'I am a member.'}).click();
-  await expectLeafSweep(dialog, 'forward', 6);
-  const higherFrame = await sampleSkyFrame(dialog);
+  await expectLeafSweep(dialog, 'forward', 'canopy');
+  const canopyFrame = await sampleSkyFrame(dialog);
   const heading = dialog.getByRole('heading', {level:3});
   await expect(heading).toBeFocused();
   await expect(heading).toHaveCSS('opacity', '1');
   await expect(heading).toHaveCSS('transform', 'none');
   await expect(sky).toHaveCount(0);
 
-  await dialog.getByRole('button', {name:'I am registering myself.'}).click();
-  await expectLeafSweep(dialog, 'forward', 0);
-  const originalFrame = await sampleSkyFrame(dialog);
-  expect(higherFrame[0][0]).toEqual(originalFrame[0][0]);
-  expect(higherFrame[0][1]).toBeLessThan(originalFrame[0][1]);
-  expect(higherFrame.slice(1)).toEqual(originalFrame.slice(1));
+  await dialog.getByRole('button', {name:'I’m registering myself.'}).click();
+  await expectLeafSweep(dialog, 'forward', 'updraft');
+  const updraftFrame = await sampleSkyFrame(dialog);
+  expect(canopyFrame[0][1]).toBeGreaterThan(0);
+  expect(updraftFrame[0][1]).toBeLessThan(0);
+  expect(canopyFrame.slice(1)).not.toEqual(updraftFrame.slice(1));
   await expect(sky).toHaveCount(0);
   await dialog.getByRole('button', {name:'Back', exact:true}).click();
-  await expectLeafSweep(dialog, 'back', 6);
+  await expectLeafSweep(dialog, 'back', 'canopy');
   await expect(sky).toHaveCount(0);
 
   await dialog.getByRole('button', {name:'Back', exact:true}).click();
-  await expectLeafSweep(dialog, 'back', 0);
+  await expectLeafSweep(dialog, 'back', 'breeze');
   await expect(sky).toHaveCount(0);
   await dialog.getByRole('button', {name:'I am a guest.'}).click();
-  await expectLeafSweep(dialog, 'forward', 6);
+  await expectLeafSweep(dialog, 'forward', 'diagonal');
   await expectAccent(sky, 'inclusiveness', ['coral', 'lilac'], 3);
-  const name = dialog.getByLabel('Your full name');
+  const name = dialog.getByLabel('Full Name', {exact:true});
   const directlyTappable = await name.evaluate(field => {
     const box = field.getBoundingClientRect();
     return document.elementFromPoint(box.x + box.width / 2, box.y + box.height / 2) === field;
@@ -290,16 +284,16 @@ test('original leaf sweeps alternate height, mirror Back and respect reduced mot
   await name.fill('Fictional Visitor');
   await expect(sky).toHaveCount(0);
   await dialog.getByRole('button', {name:'Tickets & help'}).click();
-  await expectLeafSweep(dialog, 'forward', 0);
+  await expectLeafSweep(dialog, 'forward', 'breeze');
   await dialog.getByRole('button', {name:'Back to registration'}).click();
-  await expectLeafSweep(dialog, 'forward', 6);
+  await expectLeafSweep(dialog, 'forward', 'diagonal');
   await expect(name).toHaveValue('Fictional Visitor');
   await page.emulateMedia({reducedMotion:'reduce'});
   await expect(scene).toHaveCount(0);
   await expect(sky).toHaveCount(0);
   await dialog.getByRole('button', {name:'Back', exact:true}).click();
   await dialog.getByRole('button', {name:'I am a guest.'}).click();
-  await expect(dialog.getByLabel('Your full name')).toBeVisible();
+  await expect(dialog.getByLabel('Full Name', {exact:true})).toBeVisible();
   await expect(dialog).not.toHaveAttribute('data-scene');
 
   await page.keyboard.press('Escape');
@@ -314,7 +308,7 @@ test('original leaf sweeps alternate height, mirror Back and respect reduced mot
   await expect(sky.locator('i').first()).toHaveCSS('animation-name', 'cc-sky-rise');
   await expect(sky).toHaveCount(0);
   await dialog.getByRole('button', {name:'Back', exact:true}).click();
-  await expectLeafSweep(dialog, 'back', 0);
+  await expectLeafSweep(dialog, 'back', 'breeze');
   await page.keyboard.press('Escape');
   await expect(sky).toHaveCount(0);
 });
@@ -325,7 +319,7 @@ test('adaptive form paging alternates the leaves and preserves focus and field p
   const dialog = await openRegistration(page);
   await dialog.getByRole('button', {name:'I am a guest.'}).click();
   const sky = dialog.locator('.cc-festival-sky');
-  await expectLeafSweep(dialog, 'forward', 6);
+  await expectLeafSweep(dialog, 'forward', 'diagonal');
   await page.setViewportSize({width:320,height:360});
   const form = dialog.locator('.cc-reg-form:visible');
   await expect(form).toHaveAttribute('data-layout', 'paged');
@@ -334,7 +328,7 @@ test('adaptive form paging alternates the leaves and preserves focus and field p
     await input.fill(await input.getAttribute('type') === 'email' ? 'visitor@example.invalid' : 'Fictional Visitor');
   }
   await dialog.getByRole('button', {name:'Next', exact:true}).click();
-  await expectLeafSweep(dialog, 'forward', 0);
+  await expectLeafSweep(dialog, 'forward', 'updraft');
   const position = form.locator('.cc-page-nav span');
   await expect(position).toBeFocused();
   await expect(position).toHaveCSS('transform', 'none');
@@ -343,19 +337,19 @@ test('adaptive form paging alternates the leaves and preserves focus and field p
   expect(await firstField.evaluate(unit =>
     unit.getAnimations().some(animation => animation.id === 'festival-step'))).toBe(true);
   await form.getByRole('button', {name:'Previous page'}).click();
-  await expectLeafSweep(dialog, 'back', 6);
+  await expectLeafSweep(dialog, 'back', 'diagonal');
   await expect(position).toBeFocused();
   await expect(sky).toHaveCount(0);
-  await expect(dialog.getByLabel('Your full name')).toHaveValue('Fictional Visitor');
+  await expect(dialog.getByLabel('Full Name', {exact:true})).toHaveValue('Fictional Visitor');
 });
 
 test('sender fields stay in place through the iPhone keyboard lifecycle', async ({page}) => {
   await page.setViewportSize({width:390, height:844});
   const dialog = await openRegistration(page);
   await dialog.getByRole('button', {name:'I am a member.'}).click();
-  await dialog.getByRole('button', {name:'I am sending an invitation.'}).click();
-  const name = dialog.getByLabel('Your full name');
-  const email = dialog.getByLabel('Your email address');
+  await dialog.getByRole('button', {name:'I’m inviting someone.'}).click();
+  const name = dialog.getByLabel('Full Name', {exact:true});
+  const email = dialog.getByLabel('Email', {exact:true});
   const poster = dialog.locator('.cc-poster-stage');
   await expect(name).toBeVisible();
   await expect(poster).toBeHidden();
@@ -403,7 +397,7 @@ test('sender fields stay in place through the iPhone keyboard lifecycle', async 
   await expectAboveKeyboard(dialog.getByRole('button', {name:'Tickets & help'}));
 
   await dialog.getByRole('button', {name:'Back', exact:true}).click();
-  await expect(dialog.getByRole('button', {name:'I am sending an invitation.'})).toBeVisible();
+  await expect(dialog.getByRole('button', {name:'I’m inviting someone.'})).toBeVisible();
   await expect(dialog).toHaveAttribute('data-keyboard', '');
   await expect(poster).toBeHidden();
   await expect(dialog.locator('.cc-festival-sky')).toHaveCount(0);
@@ -411,7 +405,7 @@ test('sender fields stay in place through the iPhone keyboard lifecycle', async 
   await resizeKeyboard(viewportHeight);
   await expect(dialog).not.toHaveAttribute('data-keyboard', '');
   await expect(poster).toBeVisible();
-  await dialog.getByRole('button', {name:'I am sending an invitation.'}).click();
+  await dialog.getByRole('button', {name:'I’m inviting someone.'}).click();
   await expect(name).toHaveValue('Fictional Sender');
   await expect(email).toHaveValue('sender@example.invalid');
 });
@@ -438,55 +432,55 @@ test('invitation, verification and paged results follow the same leaf sequence',
   await expect(dialog).toBeVisible();
   await expect(sky).toHaveCount(0);
   await dialog.getByRole('button', {name:'I am a member.'}).click();
-  await expectLeafSweep(dialog, 'forward', 6);
-  await dialog.getByRole('button', {name:'I am sending an invitation.'}).click();
-  await expectLeafSweep(dialog, 'forward', 0);
-  await dialog.getByLabel('Your full name').fill('Fictional Sender');
-  await dialog.getByLabel('Your email address').fill('sender@example.invalid');
+  await expectLeafSweep(dialog, 'forward', 'canopy');
+  await dialog.getByRole('button', {name:'I’m inviting someone.'}).click();
+  await expectLeafSweep(dialog, 'forward', 'updraft');
+  await dialog.getByLabel('Full Name', {exact:true}).fill('Fictional Sender');
+  await dialog.getByLabel('Email', {exact:true}).fill('sender@example.invalid');
   await dialog.getByRole('button', {name:'Continue', exact:true}).click();
-  await expectLeafSweep(dialog, 'forward', 6);
+  await expectLeafSweep(dialog, 'forward', 'crossing');
   await dialog.getByLabel('Number of invitations').selectOption('2');
   await dialog.getByRole('button', {name:'Add recipients'}).click();
-  await expectLeafSweep(dialog, 'forward', 0);
+  await expectLeafSweep(dialog, 'forward', 'diagonal');
   await expect(sky.locator('[data-shape="leaf"]')).toHaveCount(6);
   await expectAccent(sky, 'consideration', ['blush', 'lavender'], 3);
   await dialog.getByLabel('Guest’s full name').fill('Fictional First');
   await dialog.getByLabel('Relationship').fill('Friend');
   await dialog.getByRole('button', {name:'Next recipient'}).click();
-  await expectLeafSweep(dialog, 'forward', 6);
+  await expectLeafSweep(dialog, 'forward', 'fan');
   await dialog.getByLabel('Guest’s full name').fill('Fictional Second');
   await dialog.getByLabel('Relationship').fill('Friend');
   await dialog.getByRole('button', {name:'Create invitations', exact:true}).click();
-  await expectLeafSweep(dialog, 'success', 0);
+  await expectLeafSweep(dialog, 'success', 'breeze');
   await expectAccent(sky, 'gratitude', ['honey', 'champagne'], 5);
   const star = sky.locator('[data-shape="star"]').first();
   expect(await star.evaluate(node => getComputedStyle(node).clipPath)).toContain('78% 16%');
   await dialog.getByRole('button', {name:'Next invitation', exact:true}).click();
-  await expectLeafSweep(dialog, 'forward', 6);
+  await expectLeafSweep(dialog, 'forward', 'canopy');
   await dialog.getByRole('button', {name:'Tickets & help'}).click();
-  await expectLeafSweep(dialog, 'forward', 0);
+  await expectLeafSweep(dialog, 'forward', 'breeze');
   await dialog.getByRole('button', {name:'Manage invitations I sent'}).click();
-  await expectLeafSweep(dialog, 'forward', 6);
-  await dialog.getByLabel('Your email address').fill('sender@example.invalid');
+  await expectLeafSweep(dialog, 'forward', 'canopy');
+  await dialog.getByLabel('Email', {exact:true}).fill('sender@example.invalid');
   await dialog.getByRole('button', {name:'Send verification code'}).click();
-  await expectLeafSweep(dialog, 'forward', 0);
+  await expectLeafSweep(dialog, 'forward', 'updraft');
   await dialog.getByRole('button', {name:'Back', exact:true}).click();
   await dialog.getByRole('button', {name:'Back', exact:true}).click();
   await dialog.getByLabel('Registration email').fill('guest@example.invalid');
   await dialog.getByRole('button', {name:'Send verification code'}).click();
-  await expectLeafSweep(dialog, 'forward', 6);
+  await expectLeafSweep(dialog, 'forward', 'canopy');
   await dialog.getByLabel('Eight-digit email code').fill('12345678');
   await dialog.getByRole('button', {name:'Verify email'}).click();
-  await expectLeafSweep(dialog, 'forward', 0);
+  await expectLeafSweep(dialog, 'forward', 'updraft');
   await page.keyboard.press('Escape');
   await expect(sky).toHaveCount(0);
   await page.getByRole('button', {name:'Tap here to register', exact:true}).click();
   await dialog.getByRole('button', {name:'I am a guest.'}).click();
-  await dialog.getByLabel('Your full name').fill('Fictional Guest');
-  await dialog.getByLabel('Email for tickets').fill('guest@example.invalid');
+  await dialog.getByLabel('Full Name', {exact:true}).fill('Fictional Guest');
+  await dialog.getByLabel('Email', {exact:true}).fill('guest@example.invalid');
   await dialog.getByLabel('Who invited you?').fill('Fictional Host');
   await dialog.getByRole('button', {name:'Get my ticket'}).click();
-  await expectLeafSweep(dialog, 'success', 0);
+  await expectLeafSweep(dialog, 'success', 'breeze');
   await expect(dialog.getByRole('heading', {level:3})).toBeFocused();
 });
 
@@ -504,9 +498,9 @@ test('VIP details follow the recipient draft and disappear when that recipient i
   });
   const dialog = await openRegistration(page);
   await dialog.getByRole('button', {name:'I am a member.'}).click();
-  await dialog.getByRole('button', {name:'I am sending an invitation.'}).click();
-  await dialog.getByLabel('Your full name').fill('Fictional Sender');
-  await dialog.getByLabel('Your email address').fill('sender@example.invalid');
+  await dialog.getByRole('button', {name:'I’m inviting someone.'}).click();
+  await dialog.getByLabel('Full Name', {exact:true}).fill('Fictional Sender');
+  await dialog.getByLabel('Email', {exact:true}).fill('sender@example.invalid');
   await dialog.getByRole('button', {name:'Continue',exact:true}).click();
   const count = dialog.getByLabel('Number of invitations');
   await count.selectOption('2');
@@ -546,7 +540,7 @@ test('VIP details follow the recipient draft and disappear when that recipient i
   ]);
 });
 
-test('a member can return from duplicate-ticket recovery and continue to invitations', async ({page}) => {
+test('a member can register with one name field and return from duplicate-ticket recovery', async ({page}) => {
   await page.emulateMedia({reducedMotion:'reduce'});
   await page.setViewportSize({width:320,height:568});
   let registrations = 0;
@@ -555,6 +549,7 @@ test('a member can return from duplicate-ticket recovery and continue to invitat
     switch (input.op) {
       case 'register':
         registrations++;
+        expect(input.member).toEqual({fullName:'Fictional Middle Member',leader:'Fictional Leader'});
         return route.fulfill({json:{existing:true,tickets:[]}});
       case 'requestCode': return route.fulfill({json:{challenge:'fictional-member-lookup'}});
       case 'verifyCode': return route.fulfill({json:{tickets:[
@@ -571,11 +566,12 @@ test('a member can return from duplicate-ticket recovery and continue to invitat
   expect(await page.evaluate(() => document.documentElement.scrollHeight)).toBeLessThanOrEqual(568);
   await register.press('Enter');
   await dialog.getByRole('button', {name:'I am a member.'}).click();
-  await dialog.getByRole('button', {name:'Both.'}).click();
-  await dialog.getByLabel('First name').fill('Fictional');
-  await dialog.getByLabel('Last name').fill('Member');
-  await dialog.getByLabel('Email address').fill('member@example.invalid');
-  await dialog.getByLabel('Group leader’s name').fill('Fictional Leader');
+  const choices = dialog.locator('[data-step="member"] .cc-festival-choice');
+  await expect(choices).toHaveText(['I’m registering myself.', 'I’m inviting someone.']);
+  await choices.first().click();
+  await dialog.getByLabel('Full Name', {exact:true}).fill('Fictional Middle Member');
+  await dialog.getByLabel('Email', {exact:true}).fill('member@example.invalid');
+  await dialog.getByLabel('Group Leader').fill('Fictional Leader');
   await dialog.getByRole('button', {name:'Register me'}).click();
   await dialog.getByRole('button', {name:'Find my tickets'}).click();
   await dialog.getByLabel('Registration email').fill('member@example.invalid');
@@ -585,18 +581,12 @@ test('a member can return from duplicate-ticket recovery and continue to invitat
   await expect(dialog.getByRole('link', {name:'Open QR ticket'})).toBeVisible();
   await dialog.getByRole('button', {name:'Back to registration'}).click();
   await expect(dialog.getByRole('heading', {name:'Check your registration'})).toBeFocused();
-  await dialog.getByRole('button', {name:'Continue to invitations'}).click();
-  await expect(dialog.getByLabel('Number of invitations')).toHaveValue('1');
-  await dialog.getByRole('button', {name:'Add recipients'}).click();
-  await dialog.getByLabel('Guest’s full name').fill('Fictional Invitee');
+  await expect(dialog.getByRole('button', {name:'Continue to invitations'})).toHaveCount(0);
   await page.keyboard.press('Escape');
   await register.click();
-  await expect(dialog.getByLabel('Guest’s full name')).toHaveValue('Fictional Invitee');
-  await dialog.getByRole('button', {name:'Back',exact:true}).click();
-  await expect(dialog.getByLabel('Number of invitations')).toHaveValue('1');
-  await expect(dialog.getByRole('button', {name:'Back',exact:true})).toHaveCount(0);
-  await dialog.getByRole('button', {name:'Tickets & help'}).click();
-  await expect(dialog.getByLabel('Registration email')).toHaveValue('');
+  await dialog.getByRole('button', {name:'I am a member.'}).click();
+  await dialog.getByRole('button', {name:'I’m inviting someone.'}).click();
+  await expect(dialog.getByLabel('Full Name', {exact:true})).toBeVisible();
   expect(registrations).toBe(1);
 });
 
@@ -611,7 +601,7 @@ test('closing preserves a guest draft but clears completed tickets and a new reg
   const dialog = await openRegistration(page);
   const register = page.getByRole('button', {name:'Tap here to register',exact:true});
   const guest = dialog.getByRole('button', {name:'I am a guest.'});
-  const name = dialog.getByLabel('Your full name');
+  const name = dialog.getByLabel('Full Name', {exact:true});
   await guest.click();
   await name.fill('Fictional First');
   await page.keyboard.press('Escape');
@@ -623,7 +613,7 @@ test('closing preserves a guest draft but clears completed tickets and a new reg
       await expect(name).toHaveValue('');
       await name.fill('Fictional Second');
     }
-    await dialog.getByLabel('Email for tickets').fill(person.toLowerCase()+'@example.invalid');
+    await dialog.getByLabel('Email', {exact:true}).fill(person.toLowerCase()+'@example.invalid');
     await dialog.getByLabel('Who invited you?').fill('Fictional Host');
     await dialog.getByRole('button', {name:'Get my ticket'}).click();
     await expect(dialog.getByRole('link', {name:'Open QR ticket'})).toBeVisible();
@@ -744,8 +734,8 @@ for (const partySize of [2,10]) test('a guest can switch between party tickets w
   await page.route('**/api/concert/registration',route => route.fulfill({json:{tickets,emailed:true}}));
   const dialog=await openRegistration(page);
   await dialog.getByRole('button',{name:'I am a guest.'}).click();
-  await dialog.getByLabel('Your full name').fill('First Guest');
-  await dialog.getByLabel('Email for tickets').fill('family@example.invalid');
+  await dialog.getByLabel('Full Name', {exact:true}).fill('First Guest');
+  await dialog.getByLabel('Email', {exact:true}).fill('family@example.invalid');
   await dialog.getByLabel('Who invited you?').fill('Fictional Host');
   for(let i=1;i<partySize;i++){
     await dialog.getByRole('button',{name:'Add one attendee'}).click();
@@ -787,13 +777,13 @@ test('short phone keeps ordinary questions fixed and confines a large party to i
   await assertFit();
   await dialog.getByRole('button',{name:'I am a member.'}).click();
   await assertFit();
-  await dialog.getByRole('button',{name:'I am registering myself.'}).click();
+  await dialog.getByRole('button',{name:'I’m registering myself.'}).click();
   await assertFit();
   await dialog.getByRole('button',{name:'Back',exact:true}).click();
   await dialog.getByRole('button',{name:'Back',exact:true}).click();
   await dialog.getByRole('button',{name:'I am a guest.'}).click();
   await assertFit();
-  await dialog.getByLabel('How many people, including you?').selectOption('10');
+  await dialog.getByLabel('Party size (including you)').selectOption('10');
   const names = dialog.getByRole('region',{name:'Additional attendees'});
   await expect.poll(() => names.evaluate(el => el.scrollHeight - el.clientHeight)).toBeGreaterThan(0);
   await dialog.getByLabel('Attendee 10 full name').fill('Fictional Companion');

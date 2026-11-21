@@ -184,3 +184,21 @@ dialog.cc-festival-stage[open]::backdrop {
   70% { transform: rotate(-91deg) scale(.9, .57); }
   to { transform: rotate(-131deg) scale(.72, .8); }
 }
+
+.cc-festival-leaves:not([data-sweep="breeze"]) .cc-leaf-flight > i { top: 50%; }
+
+@media (prefers-reduced-motion: no-preference) {
+  .cc-festival-leaves:not([data-sweep="breeze"])::before { content: none; }
+
+  .cc-festival-leaves:not([data-sweep="breeze"]) .cc-leaf-flight {
+    animation-name: cc-leaf-curve;
+    animation-timing-function: cubic-bezier(.39,.12,.58,.93);
+  }
+}
+
+@keyframes cc-leaf-curve {
+  0% { opacity: 0; transform: translate3d(var(--curve-x0), var(--curve-y0), 0); }
+  28% { opacity: .84; transform: translate3d(var(--curve-x1), var(--curve-y1), 0); }
+  64% { opacity: .8; transform: translate3d(var(--curve-x2), var(--curve-y2), 0); }
+  100% { opacity: 0; transform: translate3d(var(--curve-x3), var(--curve-y3), 0); }
+}

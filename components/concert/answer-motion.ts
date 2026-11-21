@@ -1,4 +1,5 @@
-import {openFestivalSky, type FestivalAccent, type FestivalDirection, type LeafRise} from './festival-sky';
+import {setFestivalCurve, type FestivalSweep} from './festival-paths';
+import {openFestivalSky, type FestivalAccent, type FestivalDirection} from './festival-sky';
 import './festival-motion.css';
 import './register-attention.css';
 
@@ -14,17 +15,22 @@ const leafFlights = [
   [86, 12, 8, 137, 'sage'], [54, 20, 7, 152, 'fern'],
 ] as const;
 
-export function createFestivalLeaves(direction: FestivalDirection, rise: LeafRise = 0) {
+export function createFestivalLeaves(direction: FestivalDirection, sweep: FestivalSweep = 'breeze') {
   const scene = document.createElement('span');
   scene.className = 'cc-festival-leaves';
   scene.inert = true;
   scene.setAttribute('aria-hidden', 'true');
   scene.dataset.direction = direction;
-  for (const [start, end, size, delay, color] of leafFlights) {
+  scene.dataset.sweep = sweep;
+  for (const [index, [start, end, size, delay, color]] of leafFlights.entries()) {
     const flight = document.createElement('span');
     flight.className = 'cc-leaf-flight';
-    flight.style.setProperty('--flight-from', start+'%');
-    flight.style.setProperty('--flight-to', (end - rise)+'%');
+    if (sweep === 'breeze') {
+      flight.style.setProperty('--flight-from', start+'%');
+      flight.style.setProperty('--flight-to', end+'%');
+    } else {
+      setFestivalCurve(flight, sweep, index, 'card');
+    }
     flight.style.setProperty('--leaf-size', size+'cqi');
     flight.style.setProperty('--leaf-delay', delay+'ms');
     flight.dataset.color = color;
@@ -36,7 +42,7 @@ export function createFestivalLeaves(direction: FestivalDirection, rise: LeafRis
 
 // Shared by opening, route changes and the adaptive form pager.
 export function playFestivalTransition(target: HTMLElement | null, stepDirection: Exclude<FestivalDirection, 'open'>,
-  pathRise: LeafRise) {
+  path: FestivalSweep) {
   const section = target?.closest<HTMLElement>('.cc-registration[data-festival]');
   const sheet = section?.closest<HTMLDialogElement>('.cc-concert-stage[open]');
   if (!section || !sheet || target?.closest('[hidden]')) return;
@@ -49,7 +55,7 @@ export function playFestivalTransition(target: HTMLElement | null, stepDirection
 
   const direction = opening ? 'open' : stepDirection;
   const pager = target?.closest<HTMLElement>('.cc-page-nav');
-  const rise = opening || success ? 0 : pathRise;
+  const sweep = opening || success ? 'breeze' : path;
   const form = section.querySelector('.cc-reg-form');
   const content = (pager?.dataset.for === 'results'
     ? Array.from(section.querySelectorAll<HTMLElement>('.cc-reg-results'))
@@ -81,7 +87,7 @@ export function playFestivalTransition(target: HTMLElement | null, stepDirection
     ));
   }
 
-  const scene = createFestivalLeaves(direction, rise);
+  const scene = createFestivalLeaves(direction, sweep);
   sheet.dataset.scene = direction;
   sheet.append(scene);
   const step = section.dataset.step;
@@ -90,7 +96,7 @@ export function playFestivalTransition(target: HTMLElement | null, stepDirection
   else if (opening || step === 'start') accent = 'greeting';
   else if (step === 'guest') accent = 'inclusiveness';
   else if (step === 'invite' || step === 'sender') accent = 'consideration';
-  const sky = openFestivalSky(sheet, direction, rise, accent);
+  const sky = openFestivalSky(sheet, direction, sweep, accent);
 
   const stopForFocus = (event: FocusEvent) => {
     if (!(event.target instanceof HTMLElement)) return;

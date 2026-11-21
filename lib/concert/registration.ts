@@ -48,8 +48,18 @@ export function memberDetails(value: unknown) {
   const title = input.title ? CHURCH_TITLES.find(item => item === input.title) : '';
   if (title === undefined) throw new ConcertError('Choose a church title.');
   let names;
-  try { names = signupNames(input); }
-  catch { throw new ConcertError('Enter a valid first and last name.'); }
+  try {
+    if ('fullName' in input) {
+      const fullName = field(input.fullName, 'your full name').replace(/\s+/gu, ' ');
+      const split = fullName.lastIndexOf(' ');
+      if (split < 0) throw new ConcertError('Enter your first and last name.');
+      names = signupNames({firstName: fullName.slice(0, split), lastName: fullName.slice(split + 1)});
+    } else {
+      names = signupNames(input);
+    }
+  } catch {
+    throw new ConcertError('Enter a valid full name with a first and last name.');
+  }
   return {...names, title, location: input.location ? field(input.location, 'your Zion location') : '', leader: field(input.leader, 'your group leader’s name')};
 }
 

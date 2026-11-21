@@ -8,6 +8,7 @@ import TicketWallet from './ticket-wallet';
 import {MAX_PARTY, type PublicEvent} from '../../lib/concert/domain';
 import {type InviteDraft, type InviteSummary, type NamedTicket} from '../../lib/concert/registration';
 import ConcertDialog from './concert-dialog';
+import {festivalSweeps} from './festival-paths';
 import {answerPulse, playFestivalTransition} from './answer-motion';
 import {isPeaceConcert} from '../../lib/concert/branding';
 import './festival-layout.css';
@@ -20,7 +21,7 @@ type RecipientDraft = Omit<InviteDraft, 'vip'> & {includeVip: boolean; vip: NonN
 const emptyInvite: RecipientDraft = {
   name:'', relationship:'', email:'', firstVisit:false, includeVip:false, vip:{title:'',organization:'',category:''},
 };
-const emptyMember = {firstName:'', lastName:'', leader:''};
+const emptyMember = {fullName:'', leader:''};
 
 async function api(data: Record<string, unknown>): Promise<ApiResult> {
   const response = await fetch('/api/concert/registration', {
@@ -162,7 +163,6 @@ function RegistrationFlow({festival, eventId, event, hostToken, footerSlot, pers
   const [recoveryEmail, setRecoveryEmail] = useState('');
   const [member, setMember] = useState(emptyMember);
   const [senderName, setSenderName] = useState('');
-  const [both, setBoth] = useState(false);
   const [memberRegistration, setMemberRegistration] = useState(false);
   const [names, setNames] = useState([personal?.name ?? '']);
   const [recipients, setRecipients] = useState([emptyInvite]);
@@ -192,16 +192,7 @@ function RegistrationFlow({festival, eventId, event, hostToken, footerSlot, pers
       onReset();
       return;
     }
-    // In “Both”, the invitation draft can outlive the completed seat reservation.
-    const ticketStep = steps.indexOf('tickets');
-    if (ticketStep >= 0) {
-      setSteps(steps.slice(ticketStep + 1));
-      setTickets([]);
-      setMember(emptyMember);
-      setMemberRegistration(false);
-      setExisting(false);
-      setEmailed(false);
-    }
+
   });
   useEffect(() => {
     const sheet = formHeading.current?.closest('dialog');
@@ -224,8 +215,10 @@ function RegistrationFlow({festival, eventId, event, hostToken, footerSlot, pers
     const previous = path.findIndex(point => point.route === route && point.page === currentPage);
     if (previous < 0) path.push({route, page:currentPage});
     else path.length = previous + 1;
-    return playFestivalTransition(target, direction, path.length % 2 === 0 ? 6 : 0);
-  }, [route]);
+    const sweep = step === 'guest' && currentPage === 0
+      ? 'diagonal' : festivalSweeps[(path.length - 1) % festivalSweeps.length];
+    return playFestivalTransition(target, direction, sweep);
+  }, [route, step]);
   useLayoutEffect(() => {
     if (festival && active) return playStep(formHeading.current, transition);
   }, [festival, active, playStep, transition]);
@@ -384,7 +377,7 @@ function RegistrationFlow({festival, eventId, event, hostToken, footerSlot, pers
 
   const title = ({
     start:'Are you a member of the Church of God?',
-    member:'Are you registering yourself or are you sending an invitation?',
+    member:'How would you like to register?',
     identity:'Reserve your seat', guest:personal || hostToken ? 'Confirm your party' : 'Your registration',
     sender:manageOnly?'Find your invitations':'Who is sending the invitations?',
     quantity:'How many invitations are you sending?', invite:`Invitation ${inviteIndex+1} of ${recipients.length}`,
@@ -402,8 +395,10 @@ function RegistrationFlow({festival, eventId, event, hostToken, footerSlot, pers
     </RegistrationForm>;
   };
 
+  const linkedInviter = Boolean((personal || hostToken) && invitedBy?.trim());
   const inviterField = <Field label="Who invited you?">
-    <input className="ui-input" name="inviterName" required pattern=".*\S.*" maxLength={120} value={inviterName} onChange={e => setInviterName(e.target.value)}/>
+    <input className="ui-input" name="inviterName" required={!linkedInviter} readOnly={linkedInviter}
+      pattern=".*\S.*" maxLength={120} value={inviterName} onChange={e => setInviterName(e.target.value)}/>
   </Field>;
 
   function choice(page: 'start' | 'member', icon: ChoiceArtKind, label: string, advance: () => void) {
@@ -418,39 +413,35 @@ function RegistrationFlow({festival, eventId, event, hostToken, footerSlot, pers
     switch (step) {
       case 'start': return <div className="cc-choices">
         {choice('start', 'member', 'I am a member.', () => next('member'))}
-        {choice('start', 'guest', 'I am a guest.', () => {setBoth(false); next('guest');})}
+        {choice('start', 'guest', 'I am a guest.', () => next('guest'))}
       </div>;
       case 'member': return <div className="cc-choices">
-        {choice('member', 'ticket', 'I am registering myself.', () => {setBoth(false); next('identity');})}
-        {choice('member', 'envelope', 'I am sending an invitation.', () => {setBoth(false); setManageOnly(false); next('sender');})}
-        {choice('member', 'both', 'Both.', () => {setBoth(true); setManageOnly(false); next('identity');})}
+        {choice('member', 'ticket', 'I’m registering myself.', () => next('identity'))}
+        {choice('member', 'envelope', 'I’m inviting someone.', () => {setManageOnly(false); next('sender');})}
       </div>;
       case 'identity': return form(<>
-        <div className="cc-reg-row">
-          <Field label="First name"><input className="ui-input" required maxLength={60} autoComplete="given-name" value={member.firstName} onChange={e => setMember({...member,firstName:e.target.value})}/></Field>
-          <Field label="Last name"><input className="ui-input" required maxLength={60} autoComplete="family-name" value={member.lastName} onChange={e => setMember({...member,lastName:e.target.value})}/></Field>
-        </div>
-        <Field label="Email address"><input className="ui-input" type="email" required maxLength={254} autoComplete="email" value={email} onChange={e => setEmail(e.target.value)}/></Field>
-        <Field label="Group leader’s name"><input className="ui-input" required maxLength={120} value={member.leader} onChange={e => setMember({...member,leader:e.target.value})}/></Field>
+        <Field label="Full Name"><input className="ui-input" required maxLength={120} autoComplete="name" value={member.fullName} onChange={e => setMember({...member,fullName:e.target.value})}/></Field>
+        <Field label="Email"><input className="ui-input" type="email" required maxLength={254} autoComplete="email" value={email} onChange={e => setEmail(e.target.value)}/></Field>
+        <Field label="Group Leader"><input className="ui-input" required maxLength={120} value={member.leader} onChange={e => setMember({...member,leader:e.target.value})}/></Field>
       </>, 'Register me', async () => {
-        setSenderName(member.firstName+' '+member.lastName);
         await register({email, member});
       });
       case 'guest': return form(<>
-        <Field label="Your full name"><input className="ui-input" required minLength={2} maxLength={120} autoComplete="name" value={names[0]} onChange={e => editName(0,e.target.value)}/></Field>
-        <Quantity item="attendee" label="How many people, including you?" value={names.length} change={count => setNames(list => Array.from({length:count},(_,i) => list[i] ?? ''))}/>
+        <Field label="Full Name"><input className="ui-input" required minLength={2} maxLength={120} autoComplete="name" value={names[0]} onChange={e => editName(0,e.target.value)}/></Field>
+        <Quantity item="attendee" label="Party size (including you)" value={names.length} change={count => setNames(list => Array.from({length:count},(_,i) => list[i] ?? ''))}/>
         {names.length > 1 && <div key="guests" className="cc-additional-guests" role="region" aria-label="Additional attendees" tabIndex={0}>
           {names.slice(1).map((name, index) => <Field key={index} label={`Attendee ${index+2} full name`}>
             <input className="ui-input" required minLength={2} maxLength={120} value={name} onChange={e => editName(index+1,e.target.value)}/>
           </Field>)}
         </div>}
-        <Field label="Email for tickets"><input className="ui-input" type="email" required maxLength={254} autoComplete="email" value={guestEmail} onChange={e => setGuestEmail(e.target.value)}/></Field>
-        {personal || hostToken ? <p className="cc-hint">{invitedBy || 'Your host'} will receive your party details and a copy of your QR ticket.</p> : inviterField}
+        <Field label="Email"><input className="ui-input" type="email" required maxLength={254} autoComplete="email" value={guestEmail} onChange={e => setGuestEmail(e.target.value)}/></Field>
+        {inviterField}
+        {(personal || hostToken) && <p className="cc-hint">{invitedBy || 'Your host'} will receive your party details and a copy of your QR ticket.</p>}
       </>, personal || hostToken ? 'Confirm your attendance' : names.length>1?'Get tickets':'Get my ticket',
         () => register({email:guestEmail,names, ...(personal ? {invitation:personal.token} : {})}));
       case 'sender': return form(<>
-        {manageOnly?null:<Field label="Your full name"><input className="ui-input" required minLength={2} maxLength={120} autoComplete="name" value={senderName} onChange={e => setSenderName(e.target.value)}/></Field>}
-        <Field label="Your email address"><input className="ui-input" type="email" required maxLength={254} autoComplete="email" value={email} onChange={e => setEmail(e.target.value)}/></Field>
+        {manageOnly?null:<Field label="Full Name"><input className="ui-input" required minLength={2} maxLength={120} autoComplete="name" value={senderName} onChange={e => setSenderName(e.target.value)}/></Field>}
+        <Field label="Email"><input className="ui-input" type="email" required maxLength={254} autoComplete="email" value={email} onChange={e => setEmail(e.target.value)}/></Field>
       </>, manageOnly?'Send verification code':'Continue', async () => {if (manageOnly) await requestCode('sender'); else next('quantity');});
       case 'quantity': return form(
         <Quantity item="invitation" label="Number of invitations" value={recipients.length} change={count => setRecipients(list => Array.from({length:count},(_,i) => list[i] ?? emptyInvite))}/>,
@@ -512,8 +503,7 @@ function RegistrationFlow({festival, eventId, event, hostToken, footerSlot, pers
           {tools && <button type="button" className="ui-button ui-button-secondary" onClick={e => answer(e.currentTarget, onFindTickets)}>
             {tickets.length ? 'Find tickets for another email' : 'Try another email'}
           </button>}
-          {both&&memberRegistration?<button type="button" className="ui-button" onClick={e => answer(e.currentTarget, () => next('quantity'))}>Continue to invitations</button>:null}
-          {memberRegistration&&!both?<a className="cc-reg-link" href="/concert/setup">Set up your LV Zion account</a>:null}
+          {memberRegistration?<a className="cc-reg-link" href="/concert/setup">Set up your LV Zion account</a>:null}
         </>;
       }
     }
