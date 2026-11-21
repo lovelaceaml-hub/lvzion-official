@@ -16,6 +16,8 @@ The mobile sender form jumped to the top as soon as it appeared because its text
 
 A 390 × 844 regression reproduced a 452 px change in the bottom edge before the fix. On the updated production build it verified the opening, member choice and sender form share an anchor, then tested focus before the keyboard opens, simulated keyboard heights, dismissal and Back. The build and all 18 focused registration browser checks passed. A physical iPhone was not used for this check.
 
+[PR #96](https://github.com/lovelaceaml-hub/lvzion-official/pull/96) merged as `83f15e978b7534b0137edbd0214112b2ba279466` and is live as `dpl_6arQi3d6peBLRu5DsohLbthD5PAS`. A read-only phone-size check on lvz.app confirmed the same bottom edge during navigation and focus, clearance above a simulated keyboard, and return to the resting position on dismissal and Back.
+
 ## iPhone keyboard stability follow-up
 
 The phone layout reserves space for text entry before focus. While the keyboard is visible, the form scrolls inside the card, page boundaries stay fixed and transition effects pause. Back and valid form navigation dismiss the keyboard while the viewport catches up. The poster and motion resume on the appropriate steps after the viewport recovers.
