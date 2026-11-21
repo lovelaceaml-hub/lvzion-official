@@ -135,8 +135,10 @@ test('registration scenes sweep forward and back, then clear and respect reduced
 
   await dialog.getByRole('button', {name:'I am a member.'}).click();
   await expect(scene).toHaveAttribute('data-direction', 'forward');
+  const heading = dialog.getByRole('heading', {level:3});
+  await expect(heading).toBeFocused();
+  await expect(heading).toHaveCSS('opacity', '1');
   await expect(scene).toHaveCount(0);
-  await expect(dialog.getByRole('heading', {level:3})).toBeFocused();
 
   await dialog.getByRole('button', {name:'Back', exact:true}).click();
   await expect(scene).toHaveAttribute('data-direction', 'back');

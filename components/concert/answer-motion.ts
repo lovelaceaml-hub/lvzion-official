@@ -28,10 +28,10 @@ export function playFestivalTransition(target: HTMLElement | null, direction: Fe
   const pager = target?.closest<HTMLElement>('.cc-page-nav');
   const content = pager?.dataset.for === 'form'
     ? Array.from(section.querySelectorAll<HTMLElement>('[data-form-unit]:not([hidden])'))
-    : Array.from(section.querySelectorAll<HTMLElement>(':scope > :not(.cc-reg-back, [hidden])'));
+    : Array.from(section.querySelectorAll<HTMLElement>(':scope > :not(h3, .cc-reg-back, [hidden])'));
   const entry = opening || success ? 'translateY(12px)' : `translateX(${direction === 'back' ? -24 : 24}px)`;
-  // Leave the heading focused through the reveal. Animate direct children so
-  // the section does not become a containing block for the floating Back button.
+  // Keep the focused heading visible. Animate direct children so the section
+  // does not become a containing block for the floating Back button.
   const animations = content.map((element, index) => element.animate(
     [{transform:entry, opacity:0}, {transform:'none', opacity:1}],
     {id:'festival-step', delay:(opening ? 220 : 145) + Math.min(index, 3)*30,

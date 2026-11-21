@@ -56,6 +56,11 @@ dialog.cc-festival-stage[open]::backdrop {
 }
 
 @media (prefers-reduced-motion: no-preference) {
+  .cc-festival-stage[data-scene] .cc-registration[data-festival]:not([data-step="tickets"]) > h3:focus-visible {
+    position: relative;
+    z-index: 7;
+  }
+
   .ml-actions > button.ui-button[data-admission][data-festival-action] {
     animation: cc-threshold-arrives 780ms cubic-bezier(.22,.76,.31,1);
     transition: translate 160ms ease-out, scale 140ms ease-out;
