@@ -1,16 +1,18 @@
 # Concert release and review
 
-## Heart, expression and gold sparkle draft
+## Heart, expression and gold sparkle release
 
-The follow-up draft adds four accent combinations to the restored leaf sweep. The welcoming wave, inclusion gesture, consideration gesture and gratitude bow use the existing concert illustrations. Paired rose and lavender hearts mark the invitation. The ticket reveal uses champagne hearts and five gold glints. Both leaf heights, timing and the artwork files are unchanged.
+The update adds four accent combinations to the restored leaf sweep. The welcoming wave, inclusion gesture, consideration gesture and gratitude bow use the existing concert illustrations. Paired rose and lavender hearts mark the invitation. The ticket reveal uses champagne hearts and five gold glints. Both leaf heights, timing and the artwork files are unchanged.
 
-On `8f6b53a`, type checking and the three focused registration browser checks passed. The four playable examples were checked at phone width for artwork, different heart paths, gold glints, viewport coverage, Hold mid-sweep and Reduce Motion. The draft is ready for visual review before publication.
+On `8f6b53a`, type checking and the three focused registration browser checks passed. The four playable examples were checked at phone width for artwork, different heart paths, gold glints, viewport coverage, Hold mid-sweep and Reduce Motion. Anthony approved publication. The exact release branch `aca7e5aafbe742385ef87d2801b5962fcb27f5ec` passed the cloud production build and all 20 tests in the two focused concert browser specs. The identical tree merged as `dbea0dc7e5eae6d61dd4fc2a43578c80661eb7f6` and went live in `dpl_7jymMSmvLs8Ms5JV9NSci1ChZscS`. [PR #93](https://github.com/lovelaceaml-hub/lvzion-official/pull/93)
+
+A read-only 390 × 844 browser check on the public invitation showed ten opening leaves, the full-screen greeting with gold glints, guest welcome with coral and lilac hearts, the consideration accent on the invitation sender step, and the return from Help. Escape closed the form and reopening preserved the guest draft. Ticket gratitude and Reduce Motion passed the focused tests. The public invitation returned HTTP 200 and the signed-out member API returned HTTP 401. No live RSVP or invitation was submitted. [Live invitation](https://lvz.app/concert/rsvp)
 
 ## Original leaf sweep draft
 
 The November 21 draft restores the PR 91 leaf sweep. Alternate questions raise the same leaf endpoints six percentage points. Opening and completion use the original path. Back mirrors the destination's earlier path. The original timings, colors and supplied concert artwork are preserved. Fable and Argon challenged the plan before Astra implemented and reviewed it.
 
-The cloud built `8061e6f` and passed all 20 tests across the two focused concert browser specs. The two playable samples passed a 390 px browser comparison with identical timings, hearts and sparkles. At 320 px, Reduce Motion skipped the sweep. Publication awaits Anthony's visual review and approval.
+The cloud built `8061e6f` and passed all 20 tests across the two focused concert browser specs. The two playable samples passed a 390 px browser comparison with identical timings, hearts and sparkles. At 320 px, Reduce Motion skipped the sweep. The restored sweep shipped with the four expression combinations on November 21.
 
 ## Distinct scene update
 

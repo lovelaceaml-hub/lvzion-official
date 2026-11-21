@@ -10,9 +10,7 @@ Keep compact module headers and the prominent center Apps launcher. The launcher
 
 ## Event Invitation and Registration · November 21, 2026
 
-The concert invitation is live with a different scene for each registration destination, beginning with the original sunrise. Form fields stay steady during the scene. Register hops and the muted Help circle keeps its 44 px tap area. The update merged in [PR #92](https://github.com/lovelaceaml-hub/lvzion-official/pull/92) and deployed from `48892292421ac9ce78849abf2268a2206fcc43aa` in `dpl_AuooTFSa66S2cjB8AUgEUJmZ37Xp`. The concert guide tracks focused checks, physical device verification and Google Sheets receiver setup. [Resume concert work](concert/README.md#handoff-for-the-next-review)
-
-A local draft restores the original leaf sweep with a slightly higher path on alternating questions and adds four combinations of hearts, supplied expressions and gold sparkles. The draft passed focused checks and awaits visual review. [Draft verification](concert/VERIFICATION.md#heart-expression-and-gold-sparkle-draft)
+The concert invitation is live with the original leaf sweep, a slightly higher path on alternating questions, and four combinations of hearts, supplied expressions and gold sparkles. The update merged in [PR #93](https://github.com/lovelaceaml-hub/lvzion-official/pull/93) and deployed from `dbea0dc7e5eae6d61dd4fc2a43578c80661eb7f6` in `dpl_7jymMSmvLs8Ms5JV9NSci1ChZscS`. The console and public phone-size check verified the opening, guest and invitation accents. The concert guide tracks focused checks, physical device verification and Google Sheets receiver setup. [Resume concert work](concert/README.md#handoff-for-the-next-review)
 
 ## Church Display: pictures, videos and study rooms (released November 13, 2026)
 
