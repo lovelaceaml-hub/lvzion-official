@@ -10,7 +10,7 @@ Keep compact module headers and the prominent center Apps launcher. The launcher
 
 ## Event Invitation and Registration · November 20, 2026
 
-The full-screen registration update adds a bouncing Register button, hearts, sparkles and leaves, and a smaller Help badge with its original touch target. The concert guide tracks the release, focused test commands, physical device checks and Google Sheets receiver setup. [Resume concert work](concert/README.md#handoff-for-the-next-review)
+The full-screen registration update is live. Register hops, hearts, sparkles and leaves sweep across the screen, and the muted 28 px Help circle keeps its 44 px tap area on the invitation and in the form. The release was merged in [PR #91](https://github.com/lovelaceaml-hub/lvzion-official/pull/91) and deployed from `674ddda945d6dda538ed87753b3f2e6a40a4960d` in `dpl_AwrcaQJzMznqy2AbfSE7eUdGrdCN`. The concert guide tracks focused checks, physical device verification and Google Sheets receiver setup. [Resume concert work](concert/README.md#handoff-for-the-next-review)
 
 ## Church Display: pictures, videos and study rooms (released November 13, 2026)
 

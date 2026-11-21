@@ -2,9 +2,11 @@
 
 ## Full-screen registration motion
 
-Register makes two hops with a gold halo. The form rises from the invitation, and hearts, sparkles and leaves cross the viewport on opening, question changes, Back and ticket arrival. The effects clear after the scene, when a control takes focus, or when the form closes. Reduce Motion keeps Register still and skips both layers of the scene. The Help circle is visually smaller, with a 44 × 44 px button on the invitation and the form.
+Register makes two hops with a gold halo. The form rises from the invitation, and hearts, sparkles and leaves cross the viewport on opening, question changes, Back and ticket arrival. The effects clear after the scene, when a control takes focus, or when the form closes. Reduce Motion keeps Register still and skips both layers of the scene. The muted Help circle measures 28 × 28 px inside a 44 × 44 px button on both the invitation and the form.
 
-The cloud built the candidate on Next.js 16.4.5 and passed the focused Chromium concert checks. Seventeen of 18 passed on the first run. The Register focus assertion accepted only one CSS spelling for a stationary button. The corrected test verified both hops, keyboard focus and activation, Escape and Reduce Motion on its rerun. The viewport test confirmed the effects reach the screen edges and let input through. The 10 concert unit tests also passed. Physical phone checks remain open.
+All 18 focused Chromium concert tests and 10 concert unit tests passed on `c40a892`. Vercel built the identical source tree from merge commit `674ddda945d6dda538ed87753b3f2e6a40a4960d` on Next.js 16.4.5 and is serving it on lvz.app from `dpl_AwrcaQJzMznqy2AbfSE7eUdGrdCN`. [Merged pull request](https://github.com/lovelaceaml-hub/lvzion-official/pull/91)
+
+A read-only 390 × 844 Chromium check on the live invitation verified both Help sizes, Help return, Register motion, full-screen shapes, forward and Back sweeps, Escape and Reduce Motion. The invitation returned HTTP 200 and the signed-out member API returned HTTP 401. Physical phone checks remain open. [Live invitation](https://lvz.app/concert/rsvp)
 
 At 390 × 844, the opening sample showed hearts, sparkles and leaves above and across the card. The member choice remained tappable and the next settled frame was clear.
 
