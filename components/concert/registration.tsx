@@ -8,6 +8,8 @@ import {MAX_PARTY, type PublicEvent} from '../../lib/concert/domain';
 import {type InviteDraft, type InviteSummary, type NamedTicket} from '../../lib/concert/registration';
 import ConcertDialog from './concert-dialog';
 import {answerPulse} from './answer-motion';
+import {isPeaceConcert} from '../../lib/concert/branding';
+import './festival-registration.css';
 
 type Step = 'start' | 'member' | 'identity' | 'guest' | 'sender' | 'quantity' | 'invite'
   | 'verifySender' | 'manage' | 'recover' | 'verifyRecovery' | 'tickets';
@@ -65,13 +67,37 @@ function FieldProgress() {
 const choiceIcons = {member:Music, guest:Heart, ticket:UserRound, envelope:ArrowRight, both:UsersRound};
 type ChoiceArtKind = keyof typeof choiceIcons;
 
-function Choice({children, icon, onClick}: {children: ReactNode; icon: ChoiceArtKind; onClick: (button: HTMLButtonElement) => void}) {
+const festivalGestures = {
+  member:'inclusiveness', guest:'greeting', ticket:'encouragement', envelope:'consideration', both:'gratitude',
+} as const;
+
+function Choice({children, icon, festival, selected, onClick}: {
+  children: ReactNode; icon: ChoiceArtKind; festival: boolean; selected: boolean;
+  onClick: (button: HTMLButtonElement) => void;
+}) {
+  if (festival) {
+    const gesture = festivalGestures[icon];
+    return <button type="button" className="cc-festival-choice" data-choice={icon} data-gesture={gesture}
+      data-selected={selected || undefined} aria-description={selected ? 'Previously selected' : undefined}
+      onClick={e => onClick(e.currentTarget)}>
+      <span className="cc-festival-gesture"><img src={'/concert/festival-' + gesture + '.webp'} alt="" width="40" height="40"/></span>
+      <span>{children}</span>
+      <span className="cc-festival-check" aria-hidden="true"/>
+    </button>;
+  }
   const Icon = choiceIcons[icon];
   return <button type="button" data-choice={icon} className="cc-choice" onClick={e => onClick(e.currentTarget)}>
     <span className="cc-choice-icon"><Icon size={23} aria-hidden="true"/></span>
     <span>{children}</span>
     <ChevronRight className="cc-choice-arrow" size={18} aria-hidden="true"/>
   </button>;
+}
+
+function registrationPulse(control: HTMLElement | null) {
+  if (!control?.matches('.cc-festival-choice')) return answerPulse(control);
+  if (!control.animate || matchMedia('(prefers-reduced-motion: reduce)').matches) return null;
+  return control.animate([{transform:'scale(1)'}, {transform:'scale(.988)'}, {transform:'scale(1)'}],
+    {duration:195, easing:'ease-out'});
 }
 
 function focusRegistrationStep(heading: HTMLHeadingElement | null) {
@@ -91,6 +117,7 @@ export default function Registration({eventId, event, hostToken, personal, invit
   mode?: 'invite';
   showPoster?: boolean;
 }) {
+  const festival = Boolean(showPoster && event && isPeaceConcert(event));
   const [open, setOpen] = useState(false);
   const [showHelp, setShowHelp] = useState(recoveryOnly);
 
@@ -121,16 +148,16 @@ export default function Registration({eventId, event, hostToken, personal, invit
     </button>}</>}
   >
     {!recoveryOnly ? <div hidden={showHelp}>
-      <RegistrationFlow key={registrationId} onReset={() => setRegistrationId(id => id+1)} event={event} hostToken={hostToken} footerSlot={footerSlot} eventId={eventId} personal={personal} invitedBy={invitedBy} onFindTickets={startLookup} sendingInvitation={mode === 'invite'} active={open && !showHelp}/>
+      <RegistrationFlow festival={festival} key={registrationId} onReset={() => setRegistrationId(id => id+1)} event={event} hostToken={hostToken} footerSlot={footerSlot} eventId={eventId} personal={personal} invitedBy={invitedBy} onFindTickets={startLookup} sendingInvitation={mode === 'invite'} active={open && !showHelp}/>
     </div> : null}
     <div hidden={!showHelp}>
-      <RegistrationFlow key={lookupId} onReset={() => setLookupId(id => id+1)} event={event} footerSlot={footerSlot} eventId={eventId} onFindTickets={startLookup} tools active={open && showHelp}/>
+      <RegistrationFlow festival={festival} key={lookupId} onReset={() => setLookupId(id => id+1)} event={event} footerSlot={footerSlot} eventId={eventId} onFindTickets={startLookup} tools active={open && showHelp}/>
     </div>
   </ConcertDialog>;
 }
 
-function RegistrationFlow({eventId, event, hostToken, footerSlot, personal, invitedBy, tools = false, sendingInvitation = false, onFindTickets, onReset, active}: {
-  eventId: string; event?: PublicEvent; hostToken?: string; footerSlot: HTMLDivElement | null;
+function RegistrationFlow({festival, eventId, event, hostToken, footerSlot, personal, invitedBy, tools = false, sendingInvitation = false, onFindTickets, onReset, active}: {
+  festival: boolean; eventId: string; event?: PublicEvent; hostToken?: string; footerSlot: HTMLDivElement | null;
   personal?: PersonalInvite;
   invitedBy?: string;
   tools?: boolean;
@@ -143,6 +170,7 @@ function RegistrationFlow({eventId, event, hostToken, footerSlot, personal, invi
   const initial = tools ? 'recover' : sendingInvitation ? 'sender' : personal || hostToken ? 'guest' : 'start';
   const [steps, setSteps] = useState<Step[]>([initial]);
   const step = steps[steps.length-1];
+  const [chosen, setChosen] = useState<Partial<Record<'start' | 'member', ChoiceArtKind>>>({});
   const [email, setEmail] = useState('');
   const [guestEmail, setGuestEmail] = useState(personal?.email ?? '');
   const [inviterName, setInviterName] = useState(invitedBy ?? '');
@@ -223,7 +251,7 @@ function RegistrationFlow({eventId, event, hostToken, footerSlot, personal, invi
 
   function answer(control: HTMLElement | null, action: () => void | Promise<void>) {
     void run(async () => {
-      const pulse = answerPulse(control);
+      const pulse = registrationPulse(control);
       if (pulse) {
         cue.current = pulse;
         control?.setAttribute('data-answering', '');
@@ -360,9 +388,12 @@ function RegistrationFlow({eventId, event, hostToken, footerSlot, personal, invi
     verifyRecovery:'Verify your email', tickets:tickets.length?'Your tickets':existing?'Check your registration':'No tickets found',
   })[step];
 
+  const confirmingParty = step === 'guest' && Boolean(personal || hostToken);
   const form = (children: ReactNode, label: string, action: () => Promise<void> | void) => {
-    const submit = <button type="submit" form={formId} className="ui-button cc-reg-next" data-confirm-attendance={step === 'guest' && Boolean(personal || hostToken) || undefined} disabled={busy}>
-      {busy ? 'Please wait…' : <>{label}<ArrowRight size={19} aria-hidden="true"/></>}
+    const submit = <button type="submit" form={formId} className="ui-button cc-reg-next" data-festival={festival || undefined} data-confirm-attendance={confirmingParty || undefined} disabled={busy}>
+      {busy ? 'Please wait…' : <>{label}{festival && confirmingParty
+        ? <img className="cc-festival-confirm-gesture" src="/concert/festival-gratitude.webp" alt="" width="19" height="19"/>
+        : <ArrowRight size={19} aria-hidden="true"/>}</>}
     </button>;
     return <form id={formId} key={step} className="cc-reg-form" onSubmit={e => {
       e.preventDefault();
@@ -378,16 +409,24 @@ function RegistrationFlow({eventId, event, hostToken, footerSlot, personal, invi
     <input className="ui-input" name="inviterName" required pattern=".*\S.*" maxLength={120} value={inviterName} onChange={e => setInviterName(e.target.value)}/>
   </Field>;
 
+  function choice(page: 'start' | 'member', icon: ChoiceArtKind, label: string, advance: () => void) {
+    return <Choice icon={icon} festival={festival} selected={chosen[page] === icon}
+      onClick={button => answer(button, () => {
+        if (festival) setChosen(previous => ({...previous, [page]:icon}));
+        advance();
+      })}>{label}</Choice>;
+  }
+
   function content() {
     switch (step) {
       case 'start': return <div className="cc-choices">
-        <Choice icon="member" onClick={button => answer(button, () => next('member'))}>I am a member.</Choice>
-        <Choice icon="guest" onClick={button => answer(button, () => {setBoth(false); next('guest');})}>I am a guest.</Choice>
+        {choice('start', 'member', 'I am a member.', () => next('member'))}
+        {choice('start', 'guest', 'I am a guest.', () => {setBoth(false); next('guest');})}
       </div>;
       case 'member': return <div className="cc-choices">
-        <Choice icon="ticket" onClick={button => answer(button, () => {setBoth(false); next('identity');})}>I am registering myself.</Choice>
-        <Choice icon="envelope" onClick={button => answer(button, () => {setBoth(false); setManageOnly(false); next('sender');})}>I am sending an invitation.</Choice>
-        <Choice icon="both" onClick={button => answer(button, () => {setBoth(true); setManageOnly(false); next('identity');})}>Both.</Choice>
+        {choice('member', 'ticket', 'I am registering myself.', () => {setBoth(false); next('identity');})}
+        {choice('member', 'envelope', 'I am sending an invitation.', () => {setBoth(false); setManageOnly(false); next('sender');})}
+        {choice('member', 'both', 'Both.', () => {setBoth(true); setManageOnly(false); next('identity');})}
       </div>;
       case 'identity': return form(<>
         <div className="cc-reg-row">
@@ -467,7 +506,10 @@ function RegistrationFlow({eventId, event, hostToken, footerSlot, personal, invi
         return <>
           {tickets.length && event && tickets[0].svg ? <TicketWallet event={event} tickets={tickets} embedded/>
             : tickets.length ? <div className="cc-reg-tools">{tickets.map(t=><div key={t.id}><strong>{t.name}</strong> <a href={t.url}>Open QR ticket</a></div>)}</div> : <p className="cc-hint">{existing?'This email already has a registration or the invitation was already accepted. Verify the ticket email to retrieve the registration.':'Check the email used to register and try again.'}</p>}
-          {emailed?<p className="cc-hint">We’ll send a copy to your email.</p>:null}
+          {emailed ? <p className="cc-hint">
+            {festival && tickets.length > 0 && !tools && !existing && <strong className="cc-festival-thanks">Thank you! </strong>}
+            We’ll send a copy to your email.
+          </p> : festival && tickets.length > 0 && !tools && !existing && <p className="cc-hint cc-festival-thanks">Thank you for joining us.</p>}
           {existing?<button type="button" className="ui-button ui-button-secondary" onClick={e => answer(e.currentTarget, onFindTickets)}>Find my tickets</button>:null}
           {tools && <button type="button" className="ui-button ui-button-secondary" onClick={e => answer(e.currentTarget, onFindTickets)}>
             {tickets.length ? 'Find tickets for another email' : 'Try another email'}
@@ -479,8 +521,17 @@ function RegistrationFlow({eventId, event, hostToken, footerSlot, personal, invi
     }
   }
 
-  return <section key={step + inviteIndex} data-step={step} data-direction={direction.current} className="cc-registration" aria-busy={busy}>
-    <h3 ref={formHeading} tabIndex={-1}>{title}</h3>
+  return <section key={step + inviteIndex} data-step={step} data-festival={festival || undefined} data-direction={direction.current} className="cc-registration" aria-busy={busy}>
+    {festival && step === 'start' && <p className="cc-festival-welcome" id={formId+'-welcome'}>
+      <strong>How are you?</strong> <cite>The Art of Happy Communication</cite>
+    </p>}
+    <h3 ref={formHeading} tabIndex={-1} aria-describedby={festival && step === 'start' ? formId+'-welcome' : undefined}>
+      {festival && confirmingParty && <img className="cc-festival-party-gesture" src="/concert/festival-greeting.webp" alt="" width="26" height="26"/>}
+      {title}
+    </h3>
+    {festival && step === 'invite' && inviteIndex === 0 && <p className="cc-festival-consideration">
+      Consideration begins with paying attention to those around you.
+    </p>}
     {content()}
     {error?<p className="cc-error" role="alert">{error}</p>:null}
     {notice?<p className="cc-hint" role="status">{notice}</p>:null}

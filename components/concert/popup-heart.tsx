@@ -4,7 +4,6 @@ import {useEffect, useRef} from 'react';
 import {concertCurve} from './concert-curve';
 
 const turn = Math.PI * 2;
-const tones = ['#e85674','#be842e','#9367a2'];
 const points = Array.from({length:84}, (_, i) => {
   const {x,y} = concertCurve(turn*i/84, 1, 0);
   return {x:32+26*x,y:22+20*y};
@@ -17,15 +16,6 @@ export function PosterHeart() {
     <path d={outline} className="cc-heart-thread" fill="none" pathLength="100" stroke="#ffe6b5" strokeWidth="1.65"
       vectorEffect="non-scaling-stroke" strokeDasharray="4 46" strokeLinecap="round"/>
     {points.filter((_,i)=>i%3===0).map(({x,y},i)=><circle key={i} cx={x} cy={y} r={i%4===0?.35:.17} fill={i%2?'#fff0ce':'#ce7087'}/>)}
-  </svg>;
-}
-
-export function HeartSignature() {
-  return <svg className="cc-heart-signature" viewBox="0 0 64 46" aria-hidden="true">
-    <path d={outline} fill="none" stroke="#bc727b" strokeWidth=".75"/>
-    {points.map(({x,y},i)=><circle key={i} cx={x} cy={y} r={i%4===0?1.3:.7} fill={tones[i%3]}/>)}
-    <path className="cc-heart-thread" d={outline} pathLength="100" fill="none" stroke="#fff9d9" strokeWidth="2.5" strokeLinecap="round" strokeDasharray="7 43"/>
-    {[9,28,54,66].map(i=><path key={i} transform={`translate(${points[i].x} ${points[i].y})`} fill="#fff3c9" stroke="#bd844b" strokeWidth=".4" d="M0-4 .8-.8 4 0 .8.8 0 4-.8.8-4 0-.8-.8Z"/>)}
   </svg>;
 }
 
@@ -65,7 +55,7 @@ export function HeartFlight() {
       const ratio = Math.min(2,window.devicePixelRatio || 1);
       const source = (event as CustomEvent<HTMLElement | undefined>).detail?.getBoundingClientRect();
       const poster = dialog!.querySelector<HTMLElement>('.cc-poster-stage')!;
-      const badge = dialog!.querySelector<SVGSVGElement>('.cc-heart-signature')!;
+      const badge = dialog!.querySelector<HTMLImageElement>('.cc-heart-signature')!;
       let w = 0, h = 0, rx = 0, ry = 0;
       let viablePoster = true;
       let center:Point, start:Point, dest:Point;

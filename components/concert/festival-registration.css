@@ -1,0 +1,205 @@
+/* The festival uses the campaign's illustrated white message cards. */
+.cc-dialog.cc-concert-stage[open] .cc-registration[data-festival] {
+  --festival-navy: #19365a;
+  --festival-leaf: #366444;
+  --festival-coral: #ad3746;
+  color: var(--festival-navy);
+
+  & .cc-festival-welcome {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: .1rem .55rem;
+    margin: 0;
+    color: var(--festival-leaf);
+  }
+  & .cc-festival-party-gesture {
+    display: inline-block;
+    width: .98em;
+    height: .98em;
+    vertical-align: -.1em;
+    margin-inline-end: .3em;
+    border-radius: 50%;
+    background: #ffded9;
+    object-fit: contain;
+  }
+  & .cc-festival-welcome strong { font: 700 1.25rem/1.15 Georgia, serif; }
+  & .cc-festival-welcome cite { font: italic .78rem/1.3 Georgia, serif; }
+  & > h3 { color: var(--festival-navy); }
+  & > h3::after { content: none; }
+  & .cc-festival-consideration {
+    margin: 0;
+    padding: .25rem .65rem;
+    border-inline-start: 3px solid #94b778;
+    color: var(--festival-leaf);
+    font: italic .92rem/1.3 Georgia, serif;
+  }
+  & .cc-festival-thanks { color: var(--festival-leaf); }
+  & .cc-choices { gap: .45rem; }
+  & .cc-festival-choice {
+    --gesture-accent: #28bb4a;
+    --gesture-size: clamp(2.5rem, 6.2dvh, 3.25rem);
+    display: grid;
+    grid-template-columns: var(--gesture-size) minmax(0, 1fr) 1.1rem;
+    align-items: center;
+    gap: .7rem;
+    width: 100%;
+    min-height: 48px;
+    padding: .3rem .9rem .3rem .35rem;
+    border: 1px solid #cccec3;
+    border-radius: 2.2rem;
+    background: #fffefa;
+    box-shadow: 0 2px 5px #2837280e;
+    color: var(--festival-navy);
+    font: 650 clamp(.96rem, 4vw, 1.08rem)/1.2 var(--lvz-font-sans);
+    text-align: start;
+    cursor: pointer;
+  }
+  & [data-gesture="greeting"] { --gesture-accent: #ff4b5a; }
+  & [data-gesture="encouragement"] { --gesture-accent: #a768ff; }
+  & [data-gesture="consideration"] { --gesture-accent: #ff56aa; }
+  & [data-gesture="gratitude"] { --gesture-accent: #ffaf4c; }
+  & .cc-festival-gesture {
+    display: grid;
+    place-items: center;
+    width: var(--gesture-size);
+    height: var(--gesture-size);
+    border-radius: 50%;
+    background: color-mix(in srgb, var(--gesture-accent) 30%, white);
+    box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--gesture-accent) 55%, white);
+  }
+  & .cc-festival-gesture img { width: 78%; height: 78%; object-fit: contain; }
+  & .cc-festival-check {
+    position: relative;
+    display: grid;
+    place-items: center;
+    width: 1.1rem;
+    height: 1.1rem;
+    border: 1.5px solid color-mix(in srgb, var(--gesture-accent) 56%, #7e8a90);
+    border-radius: 50%;
+  }
+  & .cc-festival-check::before, & .cc-festival-check::after {
+    content: "";
+    grid-area: 1 / 1;
+    opacity: 0;
+  }
+  & .cc-festival-check::before {
+    position: absolute;
+    inset: -1px;
+    border-radius: inherit;
+    background: var(--gesture-accent);
+    transform: scale(.35);
+  }
+  & .cc-festival-check::after {
+    width: .32rem;
+    height: .56rem;
+    border: solid #15253c;
+    border-width: 0 2px 2px 0;
+    transform: translateY(-1px) rotate(42deg) scale(.6);
+  }
+  & .cc-festival-choice:is(:hover, :focus-visible, :active, [data-selected], [data-answering]) {
+    border-color: color-mix(in srgb, var(--gesture-accent) 64%, #525968);
+    background: color-mix(in srgb, var(--gesture-accent) 5%, white);
+  }
+  & .cc-festival-choice:is(:active, [data-selected], [data-answering]) .cc-festival-check::before {
+    opacity: 1;
+    transform: scale(1);
+  }
+  & .cc-festival-choice:is(:active, [data-selected], [data-answering]) .cc-festival-check::after {
+    opacity: 1;
+    transform: translateY(-1px) rotate(42deg) scale(1);
+  }
+  & .cc-reg-form, & .cc-reg-results > li {
+    padding: clamp(.5rem, 2vw, .8rem);
+    border: 1px solid #d6d8cf;
+    border-radius: 1rem;
+    background: linear-gradient(150deg, #fff, #fffcf6);
+  }
+  & .cc-field-progress { color: #425971; }
+  & .cc-field-progress progress { accent-color: var(--festival-leaf); }
+  & .cc-field-progress progress::-webkit-progress-bar { background: #e6eddc; }
+  & .cc-field-progress progress::-webkit-progress-value { background: var(--festival-leaf); }
+  & .cc-field-progress progress::-moz-progress-bar { background: var(--festival-leaf); }
+  & .ui-field > span, & .cc-party-field > label { color: var(--festival-navy); }
+  & .cc-reg-form .ui-input { background: #fff; color: var(--festival-navy); border-color: #95a7ae; }
+  & .cc-vip-toggle input { accent-color: var(--festival-leaf); }
+  & .cc-vip-fields { background: #f3f7ee; border-color: #bfceb4; }
+  & .cc-party-size button { background: #e7f1f5; color: var(--festival-navy); border: 1px solid #8da7b5; }
+  & > :is(.cc-reg-link, .ui-button), & .cc-reg-results .cc-reg-link, & > .cc-reg-tools a {
+    display: inline-flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 44px;
+    padding: .4rem .85rem;
+    border: 1px solid #9cb0b6;
+    border-radius: 1.2rem;
+    background: #eef6f8;
+    color: var(--festival-navy);
+    font: 650 .9rem/1.2 var(--lvz-font-sans);
+  }
+  & > .ui-button:not(.ui-button-secondary) { background: var(--festival-navy); color: #fff; }
+  & > .cc-reg-back { justify-self: start; background: #fffcf2; }
+  & .cc-festival-choice:focus-visible, & .cc-reg-form .ui-input:focus-visible {
+    outline: 3px solid #315f89;
+    outline-offset: 2px;
+  }
+}
+
+.cc-reg-next[data-festival] .cc-festival-confirm-gesture {
+  width: 19px;
+  height: 19px;
+  flex: none;
+  border-radius: 50%;
+  background: #ffe4a9;
+  object-fit: contain;
+}
+
+/* The submit button is portaled into the dialog footer, outside its form. */
+.cc-dialog.cc-concert-stage[open] .cc-reg-form button.cc-reg-next[data-festival],
+.cc-dialog.cc-concert-stage[open] .cc-submit-slot button.cc-reg-next[data-festival] {
+  min-height: 46px;
+  padding: .55rem 1.1rem;
+  clip-path: none;
+  border: 1px solid #9a3140;
+  border-radius: 1.5rem;
+  background: #ad3746;
+  color: white;
+  font: 700 1rem/1.2 var(--lvz-font-sans);
+  box-shadow: 0 2px 0 #812d3a;
+}
+.cc-dialog.cc-concert-stage[open] button.cc-reg-next[data-festival]::after { content: none; }
+.cc-dialog.cc-concert-stage[open] button.cc-reg-next[data-festival]:focus-visible {
+  outline: 3px solid #254f78;
+  outline-offset: 2px;
+}
+@media (max-height: 610px) {
+  .cc-dialog.cc-concert-stage[open] .cc-registration[data-festival] {
+    & .cc-festival-choice { --gesture-size: 2.25rem; min-height: 44px; }
+    & .cc-reg-form { padding: .4rem .5rem; }
+    & .cc-festival-thanks { display: none; }
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .cc-dialog.cc-concert-stage[open] .cc-registration[data-festival] {
+    & [data-gesture="greeting"] img, & .cc-festival-party-gesture {
+      transform-origin: 55% 82%;
+      animation: cc-festival-wave 640ms 90ms ease-in-out;
+    }
+    & [data-gesture="consideration"][data-answering] img {
+      animation: cc-festival-lift 190ms ease-in-out;
+    }
+    & .cc-festival-check::before { transition: transform 145ms ease-out, opacity 100ms; }
+    & .cc-festival-check::after { transition: transform 120ms 30ms ease-out, opacity 100ms 30ms; }
+  }
+}
+@keyframes cc-festival-wave {
+  0%, 100% { transform: rotate(0); }
+  24% { transform: rotate(-13deg); }
+  52% { transform: rotate(10deg); }
+  76% { transform: rotate(-5deg); }
+}
+@keyframes cc-festival-lift {
+  0%, 100% { transform: translateY(0) scale(1); }
+  58% { transform: translateY(-4px) scale(1.07); }
+}

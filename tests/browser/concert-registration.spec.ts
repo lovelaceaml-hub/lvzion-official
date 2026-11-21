@@ -101,6 +101,27 @@ test('corner help opens from the invitation, stays outside the card and returns 
   await expect(landingHelp).toBeFocused();
 });
 
+test('the festival Register button and its label stay centered with help visible', async ({page}) => {
+  await mockConcert(page);
+  await page.emulateMedia({reducedMotion:'reduce'});
+  await page.goto('/modules/concert');
+  const register = page.getByRole('button',{name:'Tap here to register',exact:true});
+  for (const width of [320,390,430]) {
+    await page.setViewportSize({width,height:700});
+    await expect(page.getByRole('button',{name:'Tickets & help',exact:true})).toBeInViewport({ratio:1});
+    await expect.poll(() => register.evaluate(button => {
+      const midpointError = (element: Element) => {
+        const box = element.getBoundingClientRect();
+        return Math.abs(box.left + box.width / 2 - window.innerWidth / 2);
+      };
+      return Math.max(midpointError(button), midpointError(button.querySelector('.cc-admission-title')!));
+    })).toBeLessThanOrEqual(1);
+  }
+  await register.click();
+  const guest = page.getByRole('button',{name:'I am a guest.', exact:true});
+  await expect.poll(() => guest.locator('img').evaluate(image => (image as HTMLImageElement).naturalWidth)).toBeGreaterThan(0);
+});
+
 test('VIP details follow the recipient draft and disappear when that recipient is removed', async ({page}) => {
   let submitted: InviteDraft[] = [];
   await page.route('**/api/concert/registration', route => {
