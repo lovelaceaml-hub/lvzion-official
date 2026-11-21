@@ -1,6 +1,6 @@
 # LV Zion Official — current handoff
 
-Updated November 20, 2026. This handoff and `AGENTS.md` describe the application to build and operate now. Milestone-specific release records are evidence, not additional product requirements.
+Updated November 21, 2026. This handoff and `AGENTS.md` describe the application to build and operate now. Milestone-specific release records are evidence, not additional product requirements.
 
 ## Authoritative requirements
 
@@ -8,11 +8,9 @@ LV Zion Official is a self-contained, phone-first application at https://lvz.app
 
 Keep compact module headers and the prominent center Apps launcher. The launcher shows only server-authorized modules (after the October 24 decisions: every approved module for every signed-in member). Continue the approved [Day Sheet design contract](design/LVZ-DESIGN-CONTRACT.md), shared tokens, accessible controls and phone-first layouts.
 
-## Event Invitation and Registration · November 20, 2026
+## Event Invitation and Registration · November 21, 2026
 
-The full-screen registration update is live. Register hops, hearts, sparkles and leaves sweep across the screen, and the muted 28 px Help circle keeps its 44 px tap area on the invitation and in the form. The release was merged in [PR #91](https://github.com/lovelaceaml-hub/lvzion-official/pull/91) and deployed from `674ddda945d6dda538ed87753b3f2e6a40a4960d` in `dpl_AwrcaQJzMznqy2AbfSE7eUdGrdCN`. The concert guide tracks focused checks, physical device verification and Google Sheets receiver setup. [Resume concert work](concert/README.md#handoff-for-the-next-review)
-
-A follow-up draft gives each registration destination its own transition and keeps form fields steady during the effects. The draft passed focused browser checks and awaits publication approval. [Draft verification](concert/VERIFICATION.md#distinct-scene-update)
+The concert invitation is live with a different scene for each registration destination, beginning with the original sunrise. Form fields stay steady during the scene. Register hops and the muted Help circle keeps its 44 px tap area. The update merged in [PR #92](https://github.com/lovelaceaml-hub/lvzion-official/pull/92) and deployed from `48892292421ac9ce78849abf2268a2206fcc43aa` in `dpl_AuooTFSa66S2cjB8AUgEUJmZ37Xp`. The concert guide tracks focused checks, physical device verification and Google Sheets receiver setup. [Resume concert work](concert/README.md#handoff-for-the-next-review)
 
 ## Church Display: pictures, videos and study rooms (released November 13, 2026)
 

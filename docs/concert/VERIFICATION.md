@@ -1,16 +1,18 @@
-# November 20 concert release and review
+# Concert release and review
 
 ## Distinct scene update
 
-The registration draft gives all twelve destinations individual scenes. Small form pages, recipient changes and result pages use shorter cues. The opening artwork, Help size and Reduce Motion remain as documented in the concert guide.
+The registration update gives all twelve destinations individual scenes. Small form pages, recipient changes and result pages use shorter cues. The opening artwork, Help size and Reduce Motion remain as documented in the concert guide.
 
-Cloud Chromium passed all 20 focused concert browser checks before the last field-position refinement. The final implementation in `5b73477` passed the production build and the three affected checks covering distinct scenes, adaptive form pages, alternate invitations and verification. The cloud sampled three scenes at 390 × 844. The draft awaits publication approval. [Concert guide](README.md)
+Cloud Chromium passed all 20 focused concert browser checks before the last field-position refinement. The final implementation in `5b73477` passed the production build and the three affected checks covering distinct scenes, adaptive form pages, alternate invitations and verification. The cloud sampled three scenes at 390 × 844. Anthony approved publishing after the checks passed. Vercel built and published merge commit `48892292421ac9ce78849abf2268a2206fcc43aa` as `dpl_AuooTFSa66S2cjB8AUgEUJmZ37Xp`. [PR #92](https://github.com/lovelaceaml-hub/lvzion-official/pull/92)
+
+A live 390 × 844 Chromium check verified the opening sunrise, curtains, halo, reverse Back, horizon, heart arc, Help ripple and return, stationary fields and Reduce Motion. No registration was submitted. The invitation returned HTTP 200 and the signed-out member API returned HTTP 401. Physical phone checks remain open. [Live invitation](https://lvz.app/concert/rsvp)
 
 ## Full-screen registration motion
 
 Register makes two hops with a gold halo. The form rises from the invitation, and hearts, sparkles and leaves cross the viewport on opening, question changes, Back and ticket arrival. The effects clear after the scene, when a control takes focus, or when the form closes. Reduce Motion keeps Register still and skips both layers of the scene. The muted Help circle measures 28 × 28 px inside a 44 × 44 px button on both the invitation and the form.
 
-All 18 focused Chromium concert tests and 10 concert unit tests passed on `c40a892`. Vercel built the identical source tree from merge commit `674ddda945d6dda538ed87753b3f2e6a40a4960d` on Next.js 16.4.5 and is serving it on lvz.app from `dpl_AwrcaQJzMznqy2AbfSE7eUdGrdCN`. [Merged pull request](https://github.com/lovelaceaml-hub/lvzion-official/pull/91)
+All 18 focused Chromium concert tests and 10 concert unit tests passed on `c40a892`. Vercel built the identical source tree from merge commit `674ddda945d6dda538ed87753b3f2e6a40a4960d` on Next.js 16.4.5 and served it on lvz.app from `dpl_AwrcaQJzMznqy2AbfSE7eUdGrdCN`. [Merged pull request](https://github.com/lovelaceaml-hub/lvzion-official/pull/91)
 
 A read-only 390 × 844 Chromium check on the live invitation verified both Help sizes, Help return, Register motion, full-screen shapes, forward and Back sweeps, Escape and Reduce Motion. The invitation returned HTTP 200 and the signed-out member API returned HTTP 401. Physical phone checks remain open. [Live invitation](https://lvz.app/concert/rsvp)
 

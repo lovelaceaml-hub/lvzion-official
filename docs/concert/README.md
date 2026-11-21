@@ -34,7 +34,9 @@ An open event can enforce a seat limit. The server checks capacity and registrat
 
 ## Handoff for the next review
 
-The hopping Register button, full-screen effects and smaller Help circle are live from `674ddda945d6dda538ed87753b3f2e6a40a4960d` in Vercel deployment `dpl_AwrcaQJzMznqy2AbfSE7eUdGrdCN`. Help returns to the same draft. [Live invitation](https://lvz.app/concert/rsvp) · [Full-screen motion checks](VERIFICATION.md#full-screen-registration-motion)
+The page-specific scenes and stationary form fields are live from `48892292421ac9ce78849abf2268a2206fcc43aa` in Vercel deployment `dpl_AuooTFSa66S2cjB8AUgEUJmZ37Xp`. Register still hops and Help returns to the same draft. [Live invitation](https://lvz.app/concert/rsvp) · [Scene verification](VERIFICATION.md#distinct-scene-update)
+
+The hopping Register button, full-screen effects and smaller Help circle first shipped from `674ddda945d6dda538ed87753b3f2e6a40a4960d` in Vercel deployment `dpl_AwrcaQJzMznqy2AbfSE7eUdGrdCN`. [Full-screen motion checks](VERIFICATION.md#full-screen-registration-motion)
 
 The preceding celestial redesign and Next.js 16.4.5 patch shipped from `1229bb57e8df0319e2a047f9ca5a3ac7a3e9e8b7` in Vercel deployment `dpl_G2GnCMuDSwsizqG1q6G35eeAXsRr`. [Celestial redesign verification](VERIFICATION.md#celestial-registration-redesign)
 
