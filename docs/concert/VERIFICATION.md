@@ -8,6 +8,8 @@ The production build, 11 concert unit checks and 21 focused concert browser chec
 
 The final alignment review used the production build with fictional data. Shared, named and reusable invitations, the signed invitation status screen, and the direct ticket wallet fit at widths of 320, 390 and 768 px. The wallet, its actions and enlarged scan screen also fit in 568 × 320 landscape. QR codes from the on-screen ticket, saved pass and both email attachments decoded to their intended ticket URLs. The invitation, sender receipt, guest receipt, host receipt, verification and registration notice emails fit at all three check widths. Email layout was rendered in a browser with fictional attachment images. No live email or registration was submitted.
 
+The tested source tree merged in [PR #95](https://github.com/lovelaceaml-hub/lvzion-official/pull/95) as `de07495539e0012d6535292f91128c1731fa2950`. Vercel built and promoted `dpl_8rk1LC4LVvsS8QvGirBVUXJeE3hG` to lvz.app. The live phone-size check verified the one-minute Register cycle, opening and member and guest sweeps, the new fields, and the matching invalid invitation, status and ticket screens. [Live registration](https://lvz.app/concert/rsvp)
+
 ## iPhone keyboard stability follow-up
 
 The phone layout reserves space for text entry before focus. While the keyboard is visible, the form scrolls inside the card, page boundaries stay fixed and transition effects pause. Back and valid form navigation dismiss the keyboard while the viewport catches up. The poster and motion resume on the appropriate steps after the viewport recovers.

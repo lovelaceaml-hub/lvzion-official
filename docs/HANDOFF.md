@@ -10,7 +10,7 @@ Keep compact module headers and the prominent center Apps launcher. The launcher
 
 ## Event Invitation and Registration · November 21, 2026
 
-The approved registration revision gives Register a one-minute animation, adds distinct sweep paths and simplifies the member and guest questions. Named invitations prefill guest details when available. Ticket screens, the invitation status page, exported passes and concert emails share the registration design. The concert guide carries the behavior and test results. [Registration review](concert/README.md#handoff-for-the-next-review)
+The live registration revision gives Register a one-minute animation, adds distinct sweep paths and simplifies the member and guest questions. Named invitations prefill guest details when available. Ticket screens, the invitation status page, exported passes and concert emails share the registration design. The release merged in PR #95 and is live from source `de07495539e0012d6535292f91128c1731fa2950` on Vercel deployment `dpl_8rk1LC4LVvsS8QvGirBVUXJeE3hG`. The concert guide carries the behavior and test results. [Registration review](concert/README.md#handoff-for-the-next-review)
 
 The iPhone keyboard stability fix is live from [PR #94](https://github.com/lovelaceaml-hub/lvzion-official/pull/94), source `526b31b68c26bf7569d93078bf16143461815d16`, Vercel deployment `dpl_G1FpqyZktsx9cYzTFaPJYsY3MWdk`. A live phone-size check verified the sender form against a simulated keyboard. The card keeps its editing layout, the form scrolls internally when space shrinks, and Back dismisses the keyboard before showing another question. Verify on a physical iPhone before recording device acceptance. [Keyboard walkthrough](concert/README.md#handoff-for-the-next-review)
 
