@@ -9,6 +9,7 @@
 - At normal text size the opening view fits one phone screen. Keep the countdown (days, hours, minutes and seconds), playable film, event details and prominent Register action in view. The public landing omits the program list. The promo starts muted. Guests can enable audio themselves.
 - Use the supplied event artwork and its poster palette. The heart and musical lines move while the phone is still. Keep controls usable under Reduce Motion. Keep the top-right corner clear of a Pause button.
 - Register opens the form over the invitation with two hops, a gold glow and the original sunrise. In the draft for review, the original ten leaves sweep across the card while leaves, hearts and sparkles cross the screen. On alternating questions the leaves end a little higher. Back mirrors the path for the question being revisited. Opening and completion keep their original paths.
+- The draft uses the supplied greeting wave at opening, inclusiveness with coral and lilac hearts on the guest form, consideration with hearts following in pairs on invitation steps, and gratitude with honey and champagne hearts when registration or invitations succeed. Small gold glints accompany each expression. Completion opens the glints in a wider fan.
 - Form fields stay in place during the sweep. Keep the ornaments click-through, stop them on field or keyboard interaction, and respect Reduce Motion. The greeting, consideration and gratitude illustrations follow the [official Daily Check](https://heavenlymotherslove.org/en/checklist).
 - The card fits the visible phone screen. The poster has a stable footprint, and compact editing layouts use the campaign emblem. When fields exceed the available space, the form groups them into pages and validates each page as the guest advances. Additional party names stay together in the only scrolling list. Keep Help outside the card with a muted 28 × 28 px circle, a 44 × 44 px touch target and a visible keyboard focus ring. Returning from Help or Back preserves the draft. Closing a completed registration clears its ticket details.
 - On the shared page the first question is **Are you a member of the Church of God?** The equally prominent choices are **I am a member.** and **I am a guest.** On an invitation link the host appears inside **Tap here to register**. Named guests go directly to editable name, email and party size. A reusable host link starts with empty guest details.
@@ -34,7 +35,7 @@ An open event can enforce a seat limit. The server checks capacity and registrat
 
 ## Handoff for the next review
 
-The restored leaf sweep is a draft awaiting playable review and publication approval.
+The restored leaf sweep and its four expression variations are a draft awaiting playable review and publication approval.
 
 The page-specific scenes and stationary form fields are live from `48892292421ac9ce78849abf2268a2206fcc43aa` in Vercel deployment `dpl_AuooTFSa66S2cjB8AUgEUJmZ37Xp`. Register still hops and Help returns to the same draft. [Live invitation](https://lvz.app/concert/rsvp) · [Scene verification](VERIFICATION.md#distinct-scene-update)
 

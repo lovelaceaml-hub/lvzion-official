@@ -49,6 +49,11 @@
 .cc-festival-sky > [data-color="sage"] { color: #75a582; }
 .cc-festival-sky > [data-color="pearl"] { color: #ffedcf; }
 
+.cc-festival-sky > [data-color="coral"] { color: #e46e79; }
+.cc-festival-sky > [data-color="lilac"] { color: #9d80c6; }
+.cc-festival-sky > [data-color="honey"] { color: #db9843; }
+.cc-festival-sky > [data-color="champagne"] { color: #f0d195; }
+
 .cc-festival-sky > [data-shape="heart"] {
   --particle-turn: -59deg;
   --particle-turn-end: -33deg;
@@ -82,9 +87,75 @@
   background: linear-gradient(-23deg, currentColor 42%, #fff2bd 49% 51%, currentColor 57%);
 }
 
+.cc-festival-sky[data-accent="gratitude"] > [data-shape="star"],
+.cc-sky-glint {
+  background: linear-gradient(130deg, #fff9da 28%, #ffdf88 53%, #cd8737 85%);
+  clip-path: polygon(50% 0, 56% 35%, 78% 16%, 65% 44%, 100% 50%, 64% 56%, 79% 83%,
+    56% 66%, 50% 100%, 44% 65%, 19% 84%, 35% 56%, 0 50%, 35% 44%, 20% 17%, 44% 35%);
+}
+
+.cc-sky-expression {
+  --expression-dx: 5vw;
+  --expression-dy: -16dvh;
+  --expression-tip: -5deg;
+  position: absolute;
+  left: 4%;
+  top: 58%;
+  width: clamp(55px, 16vw, 72px);
+  aspect-ratio: 1;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.cc-sky-expression:is([data-expression="inclusiveness"], [data-expression="gratitude"]) {
+  --expression-dx: -4vw;
+  --expression-tip: 5deg;
+  right: 4%;
+  left: auto;
+  top: 51%;
+}
+
+.cc-sky-expression[data-expression="consideration"] {
+  --expression-dx: 3vw;
+  --expression-dy: -12dvh;
+  top: 62%;
+}
+
+.cc-sky-expression[data-expression="gratitude"] {
+  --expression-dy: -11dvh;
+  top: 61%;
+}
+
+.cc-sky-expression > :first-child {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+/* Mirror the path on Back while keeping the original illustration readable. */
+.cc-festival-sky[data-direction="back"] .cc-sky-expression > :first-child { scale: -1 1; }
+
+.cc-sky-glint {
+  position: absolute;
+  top: 22%;
+  left: 50%;
+  width: var(--glint-size);
+  aspect-ratio: 1;
+  opacity: 0;
+}
+
 @media (prefers-reduced-motion: no-preference) {
   .cc-festival-sky > i {
     animation: cc-sky-rise var(--particle-duration) var(--particle-delay) cubic-bezier(.22,.57,.35,1) both;
+  }
+
+  .cc-sky-expression {
+    animation: cc-sky-expression 1120ms 35ms cubic-bezier(.23,.65,.33,1) both;
+  }
+
+  .cc-sky-glint {
+    animation: cc-sky-glint 880ms var(--glint-delay) ease-out both;
   }
 
   .cc-festival-sky::before {
@@ -107,6 +178,18 @@
     --sky-x: 50%;
     --sky-y: 60%;
   }
+}
+
+@keyframes cc-sky-expression {
+  0% { opacity: 0; transform: translate3d(0, 2dvh, 0) rotate(var(--expression-tip)) scale(.86); }
+  17%, 64% { opacity: 1; }
+  100% { opacity: 0; transform: translate3d(var(--expression-dx), var(--expression-dy), 0) rotate(0) scale(.99); }
+}
+
+@keyframes cc-sky-glint {
+  0% { opacity: 0; transform: translate(-50%, -50%) scale(.35); }
+  28%, 59% { opacity: .96; }
+  100% { opacity: 0; transform: translate(calc(-50% + var(--glint-x)), calc(-50% + var(--glint-y))) scale(1); }
 }
 
 @keyframes cc-sky-rise {

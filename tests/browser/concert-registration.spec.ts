@@ -173,21 +173,37 @@ async function expectLeafSweep(dialog: Locator, direction: 'open' | 'forward' | 
     const card = sheet.querySelector<HTMLElement>('.cc-festival-leaves');
     const sky = sheet.querySelector<HTMLElement>('.cc-festival-sky');
     const flights = card?.querySelectorAll<HTMLElement>('.cc-leaf-flight');
-    const leaf = sky?.querySelector<HTMLElement>('[data-shape="leaf"]');
-    if (!card || !sky || flights?.length !== 10 || !leaf) return null;
+    const leaves = sky?.querySelectorAll<HTMLElement>('[data-shape="leaf"]');
+    if (!card || !sky || flights?.length !== 10 || leaves?.length !== 6) return null;
     return {
       directions:[card.dataset.direction, sky.dataset.direction],
       mirrored:[card, sky].map(layer => getComputedStyle(layer).transform === 'matrix(-1, 0, 0, 1, 0, 0)'),
-      firstFlight:[flights[0].style.getPropertyValue('--flight-from'), flights[0].style.getPropertyValue('--flight-to')],
-      firstSkyLeaf:leaf.style.getPropertyValue('--particle-dy'),
+      cardEnds:Array.from(flights, leaf => parseFloat(leaf.style.getPropertyValue('--flight-to'))),
+      skyRises:Array.from(leaves, leaf => parseFloat(leaf.style.getPropertyValue('--particle-dy'))),
       depths:[0, 4, 7].map(index => getComputedStyle(flights[index]).animationDuration),
-      ornaments:sky.children.length,
+      ornaments:sky.querySelectorAll(':scope > i').length,
     };
   })).toEqual({
     directions:[direction, direction], mirrored:[direction === 'back', direction === 'back'],
-    firstFlight:['76%', (25 - rise) + '%'], firstSkyLeaf:(-48 - rise) + 'dvh',
+    cardEnds:[25, 31, 12, 19, 3, 25, 43, 9, 12, 20].map(end => end - rise),
+    skyRises:[-48, -42, -47, -44, -56, -51].map(end => end - rise),
     depths:['0.44s', '0.66s', '0.93s'], ornaments:18,
   });
+}
+
+async function expectAccent(sky: Locator, kind: string, colors: string[], glintCount: number) {
+  await expect(sky).toHaveAttribute('data-accent', kind);
+  const expression = sky.locator(`[data-expression="${kind}"]`);
+  await expect(expression.locator('img')).toHaveAttribute('src', '/concert/festival-' + kind + '.webp');
+  await expect.poll(() => expression.evaluate(node => {
+    const art = node.querySelector('img')!;
+    return art.complete && art.naturalWidth > 0 && art.clientWidth <= art.naturalWidth;
+  })).toBe(true);
+  await expect(expression).toHaveCSS('animation-name', 'cc-sky-expression');
+  await expect(expression.locator('.cc-sky-glint')).toHaveCount(glintCount);
+  await expect(expression.locator('.cc-sky-glint').first()).toHaveCSS('animation-name', 'cc-sky-glint');
+  expect(await sky.locator('[data-shape="heart"]').evaluateAll(hearts =>
+    hearts.slice(0, 2).map(heart => heart.getAttribute('data-color')))).toEqual(colors);
 }
 
 async function sampleSkyFrame(dialog: Locator) {
@@ -222,9 +238,10 @@ test('original leaf sweeps alternate height, mirror Back and respect reduced mot
       shapes: [...new Set(Array.from(layer.children, child => child.getAttribute('data-shape')))].sort(),
     };
   });
-  expect(coverage).toEqual({fillsScreen:true, active:true, acceptsInput:false, shapes:['heart', 'leaf', 'star']});
+  expect(coverage).toEqual({fillsScreen:true, active:true, acceptsInput:false, shapes:['expression', 'heart', 'leaf', 'star']});
   await expect(sky).toHaveAttribute('aria-hidden', 'true');
   await expectLeafSweep(dialog, 'open', 0);
+  await expectAccent(sky, 'greeting', ['rose', 'blush'], 3);
   await expect(scene.locator('.cc-leaf-flight')).toHaveCount(10);
   await expect(scene).toHaveCSS('pointer-events', 'none');
   await expect(scene.locator('.cc-leaf-flight').first()).toHaveCSS('animation-duration', '0.44s');
@@ -263,6 +280,7 @@ test('original leaf sweeps alternate height, mirror Back and respect reduced mot
   await expect(sky).toHaveCount(0);
   await dialog.getByRole('button', {name:'I am a guest.'}).click();
   await expectLeafSweep(dialog, 'forward', 6);
+  await expectAccent(sky, 'inclusiveness', ['coral', 'lilac'], 3);
   const name = dialog.getByLabel('Your full name');
   const directlyTappable = await name.evaluate(field => {
     const box = field.getBoundingClientRect();
@@ -364,6 +382,7 @@ test('invitation, verification and paged results follow the same leaf sequence',
   await dialog.getByRole('button', {name:'Add recipients'}).click();
   await expectLeafSweep(dialog, 'forward', 0);
   await expect(sky.locator('[data-shape="leaf"]')).toHaveCount(6);
+  await expectAccent(sky, 'consideration', ['blush', 'lavender'], 3);
   await dialog.getByLabel('Guest’s full name').fill('Fictional First');
   await dialog.getByLabel('Relationship').fill('Friend');
   await dialog.getByRole('button', {name:'Next recipient'}).click();
@@ -372,6 +391,9 @@ test('invitation, verification and paged results follow the same leaf sequence',
   await dialog.getByLabel('Relationship').fill('Friend');
   await dialog.getByRole('button', {name:'Create invitations', exact:true}).click();
   await expectLeafSweep(dialog, 'success', 0);
+  await expectAccent(sky, 'gratitude', ['honey', 'champagne'], 5);
+  const star = sky.locator('[data-shape="star"]').first();
+  expect(await star.evaluate(node => getComputedStyle(node).clipPath)).toContain('78% 16%');
   await dialog.getByRole('button', {name:'Next invitation', exact:true}).click();
   await expectLeafSweep(dialog, 'forward', 6);
   await dialog.getByRole('button', {name:'Tickets & help'}).click();

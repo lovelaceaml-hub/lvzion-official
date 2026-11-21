@@ -1,4 +1,4 @@
-import {openFestivalSky, type FestivalDirection, type LeafRise} from './festival-sky';
+import {openFestivalSky, type FestivalAccent, type FestivalDirection, type LeafRise} from './festival-sky';
 import './festival-motion.css';
 import './register-attention.css';
 
@@ -84,7 +84,13 @@ export function playFestivalTransition(target: HTMLElement | null, stepDirection
   const scene = createFestivalLeaves(direction, rise);
   sheet.dataset.scene = direction;
   sheet.append(scene);
-  const sky = openFestivalSky(sheet, direction, rise);
+  const step = section.dataset.step;
+  let accent: FestivalAccent = 'original';
+  if (success) accent = 'gratitude';
+  else if (opening || step === 'start') accent = 'greeting';
+  else if (step === 'guest') accent = 'inclusiveness';
+  else if (step === 'invite' || step === 'sender') accent = 'consideration';
+  const sky = openFestivalSky(sheet, direction, rise, accent);
 
   const stopForFocus = (event: FocusEvent) => {
     if (!(event.target instanceof HTMLElement)) return;
