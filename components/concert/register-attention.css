@@ -1,0 +1,106 @@
+.ml-invitation .ml-actions > button.ui-button[data-admission][data-festival-action] {
+  --cc-register-lift: -12px;
+  animation: none;
+  transform: none;
+  translate: none;
+  scale: 1;
+  transition: transform 120ms ease-out;
+}
+
+.ml-invitation .ml-actions > button.ui-button[data-admission][data-festival-action]::after {
+  content: "";
+  position: absolute;
+  z-index: -2;
+  inset: 0;
+  width: auto;
+  height: auto;
+  border-radius: inherit;
+  clip-path: none;
+  background: none;
+  box-shadow: 0 0 14px 3px #ffe18380;
+  pointer-events: none;
+  opacity: 0;
+  transform: none;
+  animation: none;
+}
+
+@media (max-width: 360px), (orientation: landscape) and (max-height: 520px) {
+  .ml-invitation .ml-actions > button.ui-button[data-admission][data-festival-action] {
+    --cc-register-lift: -6px;
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .ml-invitation .ml-actions > button.ui-button[data-admission][data-festival-action] {
+    animation: cc-register-beckon 4s ease-in-out 1;
+  }
+
+  .ml-invitation .ml-actions > button.ui-button[data-admission][data-festival-action]::after {
+    animation: cc-register-halo 4s ease-in-out 1;
+  }
+
+  .ml-invitation .ml-actions > button.ui-button[data-admission][data-festival-action]:active {
+    animation: none;
+    transform: translateY(2px);
+    translate: none;
+    scale: 1;
+    transition-duration: 70ms;
+  }
+}
+
+/* Interaction stops the lift so focus and pointer activation stay steady. */
+.ml-invitation .ml-actions > button.ui-button[data-admission][data-festival-action]:focus-visible {
+  animation: none;
+  transform: none;
+  translate: none;
+  scale: 1;
+  transition: none;
+}
+
+.ml-invitation .ml-actions > button.ui-button[data-admission][data-festival-action]:is(:focus-visible, :active)::after {
+  animation: none;
+  opacity: .3;
+}
+
+@media (hover: hover) {
+  .ml-invitation .ml-actions > button.ui-button[data-admission][data-festival-action]:hover:not(:active) {
+    animation: none;
+    transform: none;
+    translate: none;
+    scale: 1;
+    transition: none;
+  }
+
+  .ml-invitation .ml-actions > button.ui-button[data-admission][data-festival-action]:hover::after {
+    animation: none;
+    opacity: .3;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ml-invitation .ml-actions > button.ui-button[data-admission][data-festival-action] {
+    animation: none;
+    transform: none;
+    translate: none;
+    scale: 1;
+    transition: none;
+  }
+
+  .ml-invitation .ml-actions > button.ui-button[data-admission][data-festival-action]::after {
+    animation: none;
+    opacity: .25;
+  }
+}
+
+@keyframes cc-register-beckon {
+  0%, 8%, 30%, 52%, 78%, 100% { transform: translateY(0); }
+  16%, 60% { transform: translateY(var(--cc-register-lift)); }
+  22%, 66% { transform: translateY(1px); }
+  26%, 72% { transform: translateY(calc(var(--cc-register-lift) * .3)); }
+}
+
+@keyframes cc-register-halo {
+  0%, 8%, 34%, 52%, 82%, 100% { opacity: 0; }
+  16%, 60% { opacity: .8; }
+  26%, 72% { opacity: .35; }
+}

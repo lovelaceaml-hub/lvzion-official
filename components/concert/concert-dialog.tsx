@@ -29,7 +29,14 @@ export default function ConcertDialog({label, title, primary = false, children, 
   function openDialog(button: HTMLButtonElement, fromHelp = false) {
     const sheet = dialog.current;
     if (!sheet || sheet.open) return;
+    const opensScene = themed && Boolean(help) && !fromHelp;
+    if (opensScene && matchMedia('(prefers-reduced-motion: no-preference)').matches) {
+      const bounds = button.getBoundingClientRect();
+      sheet.style.setProperty('--sky-x', bounds.left + bounds.width / 2 + 'px');
+      sheet.style.setProperty('--sky-y', bounds.top + bounds.height / 2 + 'px');
+    }
     button.focus({preventScroll:true});
+    sheet.toggleAttribute('data-opening-scene', opensScene);
     sheet.showModal();
     onOpen?.(fromHelp);
     corner.current?.showPopover?.();
@@ -71,7 +78,7 @@ export default function ConcertDialog({label, title, primary = false, children, 
       </> : <>{primary && invitedBy && <small>You’ve been invited by {invitedBy} · </small>}{label}</>}
     </button>}
     {themed && help && <button type="button" className="cc-corner-help cc-festival-help" aria-label="Tickets & help"
-      aria-haspopup="dialog" onClick={e => openDialog(e.currentTarget, true)}>?</button>}
+      aria-haspopup="dialog" onClick={e => openDialog(e.currentTarget, true)}><span className="cc-help-badge" aria-hidden="true">?</span></button>}
     <dialog className={themed ? 'ui-sheet cc-dialog cc-concert-stage cc-festival-stage' : 'ui-sheet cc-dialog'} data-presentation={presentation} data-has-footer={footer ? true : undefined} aria-labelledby={titleId} ref={dialog} data-ticket-sheet={opensTicket || undefined} data-corner-help={themed && help ? true : undefined}
       onClose={e => { if (e.target === e.currentTarget) { corner.current?.hidePopover?.(); onClose?.(); } }}
       onFocusCapture={e => { if (e.target instanceof HTMLInputElement) fieldAtFocus.current = e.target.value; }}
@@ -96,9 +103,6 @@ export default function ConcertDialog({label, title, primary = false, children, 
           <button className="cc-dialog-close" type="button" aria-label="Close" onClick={() => dialog.current?.close()}><X size={21} aria-hidden="true"/></button>
         </header>
         {showPoster ? <div className="cc-poster-stage">
-          {themed && <div className="cc-festival-foliage" aria-hidden="true">
-            <span/><span/>
-          </div>}
           <div className="cc-program-fan">
             <Image className="cc-registration-poster" src={PEACE_CONCERT_POSTER}
               alt={PEACE_CONCERT_TITLE + ' concert poster'} width={1280} height={720} unoptimized/>
@@ -110,7 +114,7 @@ export default function ConcertDialog({label, title, primary = false, children, 
       {themed && help && <button type="button" popover="manual" ref={corner} className="cc-corner-help cc-festival-help"
         aria-label={help.recoveryOnly ? 'Close ticket help' : help.active ? 'Back to registration' : 'Tickets & help'}
         onClick={() => help.recoveryOnly ? dialog.current?.close() : help.toggle()}>
-        {help.active ? '↶' : '?'}
+        <span className="cc-help-badge" aria-hidden="true">{help.active ? '↶' : '?'}</span>
       </button>}
     </dialog>
   </>;

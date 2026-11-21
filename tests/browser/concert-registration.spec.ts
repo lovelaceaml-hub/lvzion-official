@@ -76,6 +76,10 @@ test('corner help opens from the invitation, stays outside the card and returns 
   await page.emulateMedia({reducedMotion:'reduce'});
   await page.goto('/modules/concert');
   const landingHelp = page.getByRole('button', {name:'Tickets & help', exact:true});
+  expect(await landingHelp.evaluate(button => {
+    const target = button.getBoundingClientRect(), badge = button.querySelector('.cc-help-badge')!.getBoundingClientRect();
+    return {target:[target.width,target.height],badge:[badge.width,badge.height]};
+  })).toEqual({target:[44,44],badge:[28,28]});
   await landingHelp.click();
   const dialog = page.getByRole('dialog');
   await expect(dialog.getByLabel('Registration email')).toBeVisible();
@@ -85,6 +89,10 @@ test('corner help opens from the invitation, stays outside the card and returns 
     await page.setViewportSize(viewport);
     const help = dialog.getByRole('button', {name:'Tickets & help'});
     await expect(help).toBeInViewport({ratio:1});
+    expect(await help.evaluate(button => {
+      const target = button.getBoundingClientRect(), badge = button.querySelector('.cc-help-badge')!.getBoundingClientRect();
+      return {target:[target.width,target.height],badge:[badge.width,badge.height]};
+    })).toEqual({target:[44,44],badge:[28,28]});
     await expect.poll(async () => {
       const corner = await help.boundingBox(), card = await dialog.boundingBox();
       const visible = await page.evaluate(() => {
@@ -122,6 +130,94 @@ test('the festival Register button and its label stay centered with help visible
   await expect(guest).toBeInViewport({ratio:1});
   const greeting = page.locator('dialog[open] .cc-festival-welcome img');
   await expect.poll(() => greeting.evaluate(image => (image as HTMLImageElement).naturalWidth)).toBeGreaterThan(0);
+});
+
+test('Register hops twice and remains steady for keyboard and reduced motion', async ({page}) => {
+  await mockConcert(page);
+  await page.emulateMedia({reducedMotion:'no-preference'});
+  await page.goto('/modules/concert');
+  const register = page.getByRole('button', {name:'Tap here to register', exact:true});
+  await expect(register).toHaveCSS('animation-name', 'cc-register-beckon');
+  await expect(register).toHaveCSS('animation-iteration-count', '1');
+  const lifts = await register.evaluate(button => {
+    const hop = button.getAnimations().find(animation =>
+      animation instanceof CSSAnimation && animation.animationName === 'cc-register-beckon');
+    if (!hop) return [];
+    hop.pause();
+    return [640, 2400].map(time => {
+      hop.currentTime = time;
+      return new DOMMatrix(getComputedStyle(button).transform).m42;
+    });
+  });
+  expect(lifts).toEqual([-12, -12]);
+  await register.focus();
+  await expect(register).toBeFocused();
+  await expect(register).toHaveCSS('animation-name', 'none');
+  await expect.poll(() => register.evaluate(button => {
+    const transform = getComputedStyle(button).transform;
+    return transform === 'none' || new DOMMatrixReadOnly(transform).isIdentity;
+  })).toBe(true);
+  await register.press('Enter');
+  await expect(page.getByRole('dialog')).toBeVisible();
+  await page.keyboard.press('Escape');
+  await expect(page.getByRole('dialog')).toBeHidden();
+
+  await register.blur();
+  await expect(register).toHaveCSS('animation-name', 'cc-register-beckon');
+  await page.emulateMedia({reducedMotion:'reduce'});
+  await expect(register).toHaveCSS('animation-name', 'none');
+});
+
+test('registration scenes sweep forward and back across the viewport and respect reduced motion', async ({page}) => {
+  await page.emulateMedia({reducedMotion:'no-preference'});
+  const dialog = await openRegistration(page);
+  const scene = dialog.locator('.cc-festival-leaves');
+  const sky = dialog.locator('.cc-festival-sky');
+  await expect(scene).toHaveAttribute('data-direction', 'open');
+  await expect(sky).toHaveAttribute('data-direction', 'open');
+  const coverage = await sky.evaluate(layer => {
+    const bounds = layer.getBoundingClientRect();
+    return {
+      fillsScreen: bounds.left === 0 && bounds.top === 0 &&
+        bounds.width === window.innerWidth && bounds.height === window.innerHeight,
+      active: layer.matches(':popover-open'),
+      acceptsInput: getComputedStyle(layer).pointerEvents !== 'none',
+      shapes: [...new Set(Array.from(layer.children, child => child.getAttribute('data-shape')))].sort(),
+    };
+  });
+  expect(coverage).toEqual({fillsScreen:true, active:true, acceptsInput:false, shapes:['heart', 'leaf', 'star']});
+  await expect(sky).toHaveAttribute('aria-hidden', 'true');
+  await expect(scene.locator('.cc-leaf-flight')).toHaveCount(10);
+  await expect(scene).toHaveCSS('pointer-events', 'none');
+  await expect(scene.locator('.cc-leaf-flight').first()).toHaveCSS('animation-duration', '0.44s');
+  await expect(scene.locator('.cc-leaf-flight').last()).toHaveCSS('animation-duration', '0.93s');
+  await expect(scene).toHaveCount(0);
+  await expect(sky).toHaveCount(0);
+
+  await dialog.getByRole('button', {name:'Tickets & help'}).click();
+  await expect(scene).toHaveAttribute('data-direction', 'forward');
+  await dialog.getByRole('button', {name:'Back to registration'}).click();
+  await expect(scene).toHaveAttribute('data-direction', 'forward');
+  await expect(scene).toHaveCount(0);
+
+  await dialog.getByRole('button', {name:'I am a member.'}).click();
+  await expect(scene).toHaveAttribute('data-direction', 'forward');
+  await expect(sky).toHaveAttribute('data-direction', 'forward');
+  const heading = dialog.getByRole('heading', {level:3});
+  await expect(heading).toBeFocused();
+  await expect(heading).toHaveCSS('opacity', '1');
+  await expect(scene).toHaveCount(0);
+
+  await dialog.getByRole('button', {name:'Back', exact:true}).click();
+  await expect(scene).toHaveAttribute('data-direction', 'back');
+  await expect(scene).toHaveCSS('transform', 'matrix(-1, 0, 0, 1, 0, 0)');
+  await expect(sky).toHaveCSS('transform', 'matrix(-1, 0, 0, 1, 0, 0)');
+  await page.emulateMedia({reducedMotion:'reduce'});
+  await expect(scene).toHaveCount(0);
+  await expect(sky).toHaveCount(0);
+  await dialog.getByRole('button', {name:'I am a guest.'}).click();
+  await expect(dialog.getByLabel('Your full name')).toBeVisible();
+  await expect(dialog).not.toHaveAttribute('data-scene');
 });
 
 test('VIP details follow the recipient draft and disappear when that recipient is removed', async ({page}) => {
@@ -433,4 +529,5 @@ test('short phone keeps ordinary questions fixed and confines a large party to i
   await dialog.getByLabel('Attendee 10 full name').fill('Fictional Companion');
   await assertFit();
   await expect(dialog.getByRole('button',{name:'Get tickets'})).toBeInViewport({ratio:1});
+  await expect(dialog.getByRole('button',{name:'Get tickets'})).toHaveCSS('clip-path', 'none');
 });

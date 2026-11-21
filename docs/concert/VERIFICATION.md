@@ -1,5 +1,27 @@
 # November 20 concert release and review
 
+## Full-screen registration motion
+
+Register makes two hops with a gold halo. The form rises from the invitation, and hearts, sparkles and leaves cross the viewport on opening, question changes, Back and ticket arrival. The effects clear after the scene, when a control takes focus, or when the form closes. Reduce Motion keeps Register still and skips both layers of the scene. The Help circle is visually smaller, with a 44 × 44 px button on the invitation and the form.
+
+The cloud built the candidate on Next.js 16.4.5 and passed the focused Chromium concert checks. Seventeen of 18 passed on the first run. The Register focus assertion accepted only one CSS spelling for a stationary button. The corrected test verified both hops, keyboard focus and activation, Escape and Reduce Motion on its rerun. The viewport test confirmed the effects reach the screen edges and let input through. The 10 concert unit tests also passed. Physical phone checks remain open.
+
+At 390 × 844, the opening sample showed hearts, sparkles and leaves above and across the card. The member choice remained tappable and the next settled frame was clear.
+
+## Celestial registration redesign
+
+The design review covered `fcb6841` on the design branch. Anthony approved publication and the Next.js security patch. That release used Vercel production deployment `dpl_G2GnCMuDSwsizqG1q6G35eeAXsRr` from `1229bb57e8df0319e2a047f9ca5a3ac7a3e9e8b7`. [Live invitation](https://lvz.app/concert/rsvp)
+
+The Register button and form share the invitation’s artwork and dawn palette. An opening bloom leads into the campaign greeting. Near, middle and far leaves travel at different speeds across question changes and reverse direction on Back. Answers give brief visual feedback, Help uses a regular step change, and a warmer arrival reveals the ticket. Opus critiqued the concept. Fable’s first review prompted the visible horizon, different leaf speeds and warm ticket reveal. Fable approved the revised design from source, and Copilot’s final review found no actionable code issues.
+
+The motion uses staged reveals inspired by the public Apple product scripts and the interaction timing in OpenAI’s GPT-6.2 paper lamp builder. The concert uses its own artwork and the campaign’s greeting, consideration and gratitude themes. [Apple iPhone](https://www.apple.com/iphone-18-pro/) · [Apple MacBook Pro](https://www.apple.com/macbook-pro/) · [OpenAI interactive web examples](https://openai.com/index/introducing-gpt-6-2-astra-sol/#computer-use-and-interactive-web-design)
+
+On this design revision the cloud ran the production build and both focused Chromium concert specs. TypeScript and the build passed after a retry, and all 17 browser tests passed. Coverage included the Register button’s alignment, opening, leaf speeds, forward and reverse motion, keyboard focus, Help and draft restoration, Reduce Motion, a 320 × 568 form and synthetic QR issuance. The 10 focused concert unit tests also passed. The 390 × 844 and 320 × 568 visual inspection identified a legacy ribbon cut on the form action. Follow-up commit `61546d0` removed it. The cloud built that commit and passed the short-phone retest with a computed clip path of `none` on Get tickets. Physical iPhone, Android and VoiceOver checks remain open.
+
+Next.js 16.4.3 triggered the security guard during earlier builds. The 16.4.5 patch changes only the Next.js package, its environment package and its platform compiler packages. The cloud reproduced the lockfile exactly. TypeScript and the production build passed on the first attempt with no security guard. The patched build passed 17 focused Chromium tests and 10 concert unit tests. Vercel confirmed production was serving the approved source, and the invitation returned HTTP 200 with the new Register button and motion styles. [Next.js security release](https://github.com/vercel/next.js/releases/tag/v16.4.5)
+
+On the live invitation at 390 × 844, Chromium opened Register, played the forward and Back sweeps, and opened the same form with the scene suppressed under Reduce Motion. The live check stopped before submission. Signed-out requests to the member API returned HTTP 401.
+
 ## Festival registration redesign
 
 The release under review is commit `7a8911b`, Vercel deployment `dpl_9qKuBbbxNipxAL7d7sUmPwxpi3or`. The 390 × 844 walkthrough records a local guest registration from the shared entry through ticket options, using fictional details and a fixture QR. The promo player is empty in this fixture. [Phone walkthrough](qa/mobile-registration.mp4) · [Handoff and focused test commands](README.md#handoff-for-the-next-review)
