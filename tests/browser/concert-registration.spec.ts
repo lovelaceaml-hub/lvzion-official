@@ -1,4 +1,4 @@
-import {expect, test, type Page} from '@playwright/test';
+import {expect, test, type Locator, type Page} from '@playwright/test';
 import type {InviteDraft} from '../../lib/concert/registration';
 import {readFile} from 'node:fs/promises';
 import type {Workspace} from '../../lib/concert/domain';
@@ -168,7 +168,60 @@ test('Register hops twice and remains steady for keyboard and reduced motion', a
   await expect(register).toHaveCSS('animation-name', 'none');
 });
 
-test('registration scenes have distinct geometry, preserve opening and Help, and respect reduced motion', async ({page}) => {
+async function expectLeafSweep(dialog: Locator, direction: 'open' | 'forward' | 'back' | 'success', rise: 0 | 6) {
+  await expect.poll(() => dialog.evaluate(sheet => {
+    const card = sheet.querySelector<HTMLElement>('.cc-festival-leaves');
+    const sky = sheet.querySelector<HTMLElement>('.cc-festival-sky');
+    const flights = card?.querySelectorAll<HTMLElement>('.cc-leaf-flight');
+    const leaves = sky?.querySelectorAll<HTMLElement>('[data-shape="leaf"]');
+    if (!card || !sky || flights?.length !== 10 || leaves?.length !== 6) return null;
+    return {
+      directions:[card.dataset.direction, sky.dataset.direction],
+      mirrored:[card, sky].map(layer => getComputedStyle(layer).transform === 'matrix(-1, 0, 0, 1, 0, 0)'),
+      cardEnds:Array.from(flights, leaf => parseFloat(leaf.style.getPropertyValue('--flight-to'))),
+      skyRises:Array.from(leaves, leaf => parseFloat(leaf.style.getPropertyValue('--particle-dy'))),
+      depths:[0, 4, 7].map(index => getComputedStyle(flights[index]).animationDuration),
+      ornaments:sky.querySelectorAll(':scope > i').length,
+    };
+  })).toEqual({
+    directions:[direction, direction], mirrored:[direction === 'back', direction === 'back'],
+    cardEnds:[25, 31, 12, 19, 3, 25, 43, 9, 12, 20].map(end => end - rise),
+    skyRises:[-48, -42, -47, -44, -56, -51].map(end => end - rise),
+    depths:['0.44s', '0.66s', '0.93s'], ornaments:18,
+  });
+}
+
+async function expectAccent(sky: Locator, kind: string, colors: string[], glintCount: number) {
+  await expect(sky).toHaveAttribute('data-accent', kind);
+  const expression = sky.locator(`[data-expression="${kind}"]`);
+  await expect(expression.locator('img')).toHaveAttribute('src', '/concert/festival-' + kind + '.webp');
+  await expect.poll(() => expression.evaluate(node => {
+    const art = node.querySelector('img')!;
+    return art.complete && art.naturalWidth > 0 && art.clientWidth <= art.naturalWidth;
+  })).toBe(true);
+  await expect(expression).toHaveCSS('animation-name', 'cc-sky-expression');
+  await expect(expression.locator('.cc-sky-glint')).toHaveCount(glintCount);
+  await expect(expression.locator('.cc-sky-glint').first()).toHaveCSS('animation-name', 'cc-sky-glint');
+  expect(await sky.locator('[data-shape="heart"]').evaluateAll(hearts =>
+    hearts.slice(0, 2).map(heart => heart.getAttribute('data-color')))).toEqual(colors);
+}
+
+async function sampleSkyFrame(dialog: Locator) {
+  return dialog.locator('.cc-festival-sky').evaluate(sky => {
+    // Read both profiles at the same 360 ms instant, independent of rendering speed.
+    return ['leaf', 'heart', 'star'].map(shape => {
+      const element = sky.querySelector<HTMLElement>(`[data-shape="${shape}"]`)!;
+      const flight = element.getAnimations()[0];
+      const previous = flight.currentTime;
+      flight.currentTime = 360;
+      const matrix = new DOMMatrixReadOnly(getComputedStyle(element).transform);
+      flight.currentTime = previous;
+      return [matrix.m41, matrix.m42];
+    });
+  });
+}
+
+test('original leaf sweeps alternate height, mirror Back and respect reduced motion', async ({page}) => {
   await page.emulateMedia({reducedMotion:'no-preference'});
   const dialog = await openRegistration(page);
   const scene = dialog.locator('.cc-festival-leaves');
@@ -185,8 +238,10 @@ test('registration scenes have distinct geometry, preserve opening and Help, and
       shapes: [...new Set(Array.from(layer.children, child => child.getAttribute('data-shape')))].sort(),
     };
   });
-  expect(coverage).toEqual({fillsScreen:true, active:true, acceptsInput:false, shapes:['heart', 'leaf', 'star']});
+  expect(coverage).toEqual({fillsScreen:true, active:true, acceptsInput:false, shapes:['expression', 'heart', 'leaf', 'star']});
   await expect(sky).toHaveAttribute('aria-hidden', 'true');
+  await expectLeafSweep(dialog, 'open', 0);
+  await expectAccent(sky, 'greeting', ['rose', 'blush'], 3);
   await expect(scene.locator('.cc-leaf-flight')).toHaveCount(10);
   await expect(scene).toHaveCSS('pointer-events', 'none');
   await expect(scene.locator('.cc-leaf-flight').first()).toHaveCSS('animation-duration', '0.44s');
@@ -194,20 +249,15 @@ test('registration scenes have distinct geometry, preserve opening and Help, and
   await expect(scene).toHaveCount(0);
   await expect(sky).toHaveCount(0);
 
-  const geometry = sky.locator('b').first();
   await dialog.getByRole('button', {name:'Tickets & help'}).click();
-  await expect(geometry).toHaveCSS('animation-name', 'cc-scene-ripple');
+  await expectLeafSweep(dialog, 'forward', 0);
   await dialog.getByRole('button', {name:'Back to registration'}).click();
-  await expect(geometry).toHaveCSS('animation-name', 'cc-scene-return');
+  await expectLeafSweep(dialog, 'forward', 0);
   await expect(sky).toHaveCount(0);
 
   await dialog.getByRole('button', {name:'I am a member.'}).click();
-  await expect(geometry).toHaveCSS('animation-name', 'cc-scene-curtain');
-  const curtains = await sky.locator('b').evaluateAll(shapes => shapes.slice(0, 2).map(shape => ({
-    origin:getComputedStyle(shape).transformOrigin, left:getComputedStyle(shape).left,
-  })));
-  expect(curtains[0].origin).not.toEqual(curtains[1].origin);
-  expect(curtains[0].left).not.toEqual(curtains[1].left);
+  await expectLeafSweep(dialog, 'forward', 6);
+  const higherFrame = await sampleSkyFrame(dialog);
   const heading = dialog.getByRole('heading', {level:3});
   await expect(heading).toBeFocused();
   await expect(heading).toHaveCSS('opacity', '1');
@@ -215,27 +265,35 @@ test('registration scenes have distinct geometry, preserve opening and Help, and
   await expect(sky).toHaveCount(0);
 
   await dialog.getByRole('button', {name:'I am registering myself.'}).click();
-  await expect(geometry).toHaveCSS('animation-name', 'cc-scene-halo');
-  await expect(geometry).toHaveCSS('border-radius', '50%');
+  await expectLeafSweep(dialog, 'forward', 0);
+  const originalFrame = await sampleSkyFrame(dialog);
+  expect(higherFrame[0][0]).toEqual(originalFrame[0][0]);
+  expect(higherFrame[0][1]).toBeLessThan(originalFrame[0][1]);
+  expect(higherFrame.slice(1)).toEqual(originalFrame.slice(1));
   await expect(sky).toHaveCount(0);
   await dialog.getByRole('button', {name:'Back', exact:true}).click();
-  await expect(geometry).toHaveCSS('animation-name', 'cc-scene-curtain');
-  await expect(geometry).toHaveCSS('animation-direction', 'reverse');
+  await expectLeafSweep(dialog, 'back', 6);
   await expect(sky).toHaveCount(0);
 
   await dialog.getByRole('button', {name:'Back', exact:true}).click();
-  await expect(geometry).toHaveCSS('animation-name', 'cc-scene-horizon');
-  await expect(geometry).toHaveCSS('animation-direction', 'reverse');
+  await expectLeafSweep(dialog, 'back', 0);
   await expect(sky).toHaveCount(0);
   await dialog.getByRole('button', {name:'I am a guest.'}).click();
-  await expect(sky.locator('i').first()).toHaveCSS('animation-name', 'cc-scene-heart-arc');
-  await dialog.getByLabel('Your full name').fill('Fictional Visitor');
+  await expectLeafSweep(dialog, 'forward', 6);
+  await expectAccent(sky, 'inclusiveness', ['coral', 'lilac'], 3);
+  const name = dialog.getByLabel('Your full name');
+  const directlyTappable = await name.evaluate(field => {
+    const box = field.getBoundingClientRect();
+    return document.elementFromPoint(box.x + box.width / 2, box.y + box.height / 2) === field;
+  });
+  expect(directlyTappable).toBe(true);
+  await name.fill('Fictional Visitor');
   await expect(sky).toHaveCount(0);
   await dialog.getByRole('button', {name:'Tickets & help'}).click();
-  await expect(geometry).toHaveCSS('animation-name', 'cc-scene-ripple');
+  await expectLeafSweep(dialog, 'forward', 0);
   await dialog.getByRole('button', {name:'Back to registration'}).click();
-  await expect(geometry).toHaveCSS('animation-name', 'cc-scene-return');
-  await expect(dialog.getByLabel('Your full name')).toHaveValue('Fictional Visitor');
+  await expectLeafSweep(dialog, 'forward', 6);
+  await expect(name).toHaveValue('Fictional Visitor');
   await page.emulateMedia({reducedMotion:'reduce'});
   await expect(scene).toHaveCount(0);
   await expect(sky).toHaveCount(0);
@@ -256,18 +314,18 @@ test('registration scenes have distinct geometry, preserve opening and Help, and
   await expect(sky.locator('i').first()).toHaveCSS('animation-name', 'cc-sky-rise');
   await expect(sky).toHaveCount(0);
   await dialog.getByRole('button', {name:'Back', exact:true}).click();
-  await expect(geometry).toHaveCSS('animation-name', 'cc-scene-horizon');
+  await expectLeafSweep(dialog, 'back', 0);
   await page.keyboard.press('Escape');
   await expect(sky).toHaveCount(0);
 });
 
-test('adaptive form paging has a quiet scene and a restrained reverse without moving its focus', async ({page}) => {
+test('adaptive form paging alternates the leaves and preserves focus and field positions', async ({page}) => {
   await page.setViewportSize({width:390,height:844});
   await page.emulateMedia({reducedMotion:'no-preference'});
   const dialog = await openRegistration(page);
   await dialog.getByRole('button', {name:'I am a guest.'}).click();
   const sky = dialog.locator('.cc-festival-sky');
-  await expect(sky.locator('i').first()).toHaveCSS('animation-name', 'cc-scene-heart-arc');
+  await expectLeafSweep(dialog, 'forward', 6);
   await page.setViewportSize({width:320,height:360});
   const form = dialog.locator('.cc-reg-form:visible');
   await expect(form).toHaveAttribute('data-layout', 'paged');
@@ -276,24 +334,22 @@ test('adaptive form paging has a quiet scene and a restrained reverse without mo
     await input.fill(await input.getAttribute('type') === 'email' ? 'visitor@example.invalid' : 'Fictional Visitor');
   }
   await dialog.getByRole('button', {name:'Next', exact:true}).click();
-  const geometry = sky.locator('b').first();
-  await expect(geometry).toHaveCSS('animation-name', 'cc-scene-field-page');
+  await expectLeafSweep(dialog, 'forward', 0);
   const position = form.locator('.cc-page-nav span');
   await expect(position).toBeFocused();
   await expect(position).toHaveCSS('transform', 'none');
   const firstField = form.locator('[data-form-unit]:visible').first();
   await expect(firstField).toHaveCSS('transform', 'none');
   expect(await firstField.evaluate(unit =>
-    unit.getAnimations().some(animation => animation.id === 'festival-entry-field-page'))).toBe(true);
+    unit.getAnimations().some(animation => animation.id === 'festival-step'))).toBe(true);
   await form.getByRole('button', {name:'Previous page'}).click();
-  await expect(geometry).toHaveCSS('animation-name', 'cc-scene-field-page');
-  await expect(geometry).toHaveCSS('animation-direction', 'reverse');
+  await expectLeafSweep(dialog, 'back', 6);
   await expect(position).toBeFocused();
   await expect(sky).toHaveCount(0);
   await expect(dialog.getByLabel('Your full name')).toHaveValue('Fictional Visitor');
 });
 
-test('alternate invitation and verification steps use distinct scenes and quieter recipient and result paging', async ({page}) => {
+test('invitation, verification and paged results follow the same leaf sequence', async ({page}) => {
   await page.setViewportSize({width:390,height:844});
   await page.emulateMedia({reducedMotion:'no-preference'});
   await page.route('**/api/concert/registration', route => {
@@ -312,49 +368,49 @@ test('alternate invitation and verification steps use distinct scenes and quiete
   });
   const dialog = await openRegistration(page);
   const sky = dialog.locator('.cc-festival-sky');
-  const geometry = sky.locator('b').first();
   await expect(dialog).toBeVisible();
   await expect(sky).toHaveCount(0);
   await dialog.getByRole('button', {name:'I am a member.'}).click();
-  await expect(geometry).toHaveCSS('animation-name', 'cc-scene-curtain');
+  await expectLeafSweep(dialog, 'forward', 6);
   await dialog.getByRole('button', {name:'I am sending an invitation.'}).click();
-  await expect(geometry).toHaveCSS('animation-name', 'cc-scene-ribbon');
+  await expectLeafSweep(dialog, 'forward', 0);
   await dialog.getByLabel('Your full name').fill('Fictional Sender');
   await dialog.getByLabel('Your email address').fill('sender@example.invalid');
   await dialog.getByRole('button', {name:'Continue', exact:true}).click();
-  await expect(geometry).toHaveCSS('animation-name', 'cc-scene-sparkle');
-  const cadence = await sky.locator('b').evaluateAll(shapes => shapes.map(shape => getComputedStyle(shape).animationDelay));
-  expect(new Set(cadence).size).toBe(5);
+  await expectLeafSweep(dialog, 'forward', 6);
   await dialog.getByLabel('Number of invitations').selectOption('2');
   await dialog.getByRole('button', {name:'Add recipients'}).click();
-  await expect(geometry).toHaveCSS('animation-name', 'cc-scene-page-turn');
+  await expectLeafSweep(dialog, 'forward', 0);
   await expect(sky.locator('[data-shape="leaf"]')).toHaveCount(6);
+  await expectAccent(sky, 'consideration', ['blush', 'lavender'], 3);
   await dialog.getByLabel('Guest’s full name').fill('Fictional First');
   await dialog.getByLabel('Relationship').fill('Friend');
   await dialog.getByRole('button', {name:'Next recipient'}).click();
-  await expect(geometry).toHaveCSS('animation-name', 'cc-scene-recipient-page');
-  await expect(sky.locator('i')).toHaveCount(0);
+  await expectLeafSweep(dialog, 'forward', 6);
   await dialog.getByLabel('Guest’s full name').fill('Fictional Second');
   await dialog.getByLabel('Relationship').fill('Friend');
   await dialog.getByRole('button', {name:'Create invitations', exact:true}).click();
-  await expect(geometry).toHaveCSS('animation-name', 'cc-scene-pearl-fan');
+  await expectLeafSweep(dialog, 'success', 0);
+  await expectAccent(sky, 'gratitude', ['honey', 'champagne'], 5);
+  const star = sky.locator('[data-shape="star"]').first();
+  expect(await star.evaluate(node => getComputedStyle(node).clipPath)).toContain('78% 16%');
   await dialog.getByRole('button', {name:'Next invitation', exact:true}).click();
-  await expect(geometry).toHaveCSS('animation-name', 'cc-scene-result-page');
+  await expectLeafSweep(dialog, 'forward', 6);
   await dialog.getByRole('button', {name:'Tickets & help'}).click();
-  await expect(geometry).toHaveCSS('animation-name', 'cc-scene-ripple');
+  await expectLeafSweep(dialog, 'forward', 0);
   await dialog.getByRole('button', {name:'Manage invitations I sent'}).click();
-  await expect(geometry).toHaveCSS('animation-name', 'cc-scene-ribbon');
+  await expectLeafSweep(dialog, 'forward', 6);
   await dialog.getByLabel('Your email address').fill('sender@example.invalid');
   await dialog.getByRole('button', {name:'Send verification code'}).click();
-  await expect(geometry).toHaveCSS('animation-name', 'cc-scene-beam');
+  await expectLeafSweep(dialog, 'forward', 0);
   await dialog.getByRole('button', {name:'Back', exact:true}).click();
   await dialog.getByRole('button', {name:'Back', exact:true}).click();
   await dialog.getByLabel('Registration email').fill('guest@example.invalid');
   await dialog.getByRole('button', {name:'Send verification code'}).click();
-  await expect(geometry).toHaveCSS('animation-name', 'cc-scene-trail');
+  await expectLeafSweep(dialog, 'forward', 6);
   await dialog.getByLabel('Eight-digit email code').fill('12345678');
   await dialog.getByRole('button', {name:'Verify email'}).click();
-  await expect(geometry).toHaveCSS('animation-name', 'cc-scene-gold');
+  await expectLeafSweep(dialog, 'forward', 0);
   await page.keyboard.press('Escape');
   await expect(sky).toHaveCount(0);
   await page.getByRole('button', {name:'Tap here to register', exact:true}).click();
@@ -363,7 +419,7 @@ test('alternate invitation and verification steps use distinct scenes and quiete
   await dialog.getByLabel('Email for tickets').fill('guest@example.invalid');
   await dialog.getByLabel('Who invited you?').fill('Fictional Host');
   await dialog.getByRole('button', {name:'Get my ticket'}).click();
-  await expect(geometry).toHaveCSS('animation-name', 'cc-scene-ticket-burst');
+  await expectLeafSweep(dialog, 'success', 0);
   await expect(dialog.getByRole('heading', {level:3})).toBeFocused();
 });
 

@@ -12,6 +12,8 @@ Keep compact module headers and the prominent center Apps launcher. The launcher
 
 The concert invitation is live with a different scene for each registration destination, beginning with the original sunrise. Form fields stay steady during the scene. Register hops and the muted Help circle keeps its 44 px tap area. The update merged in [PR #92](https://github.com/lovelaceaml-hub/lvzion-official/pull/92) and deployed from `48892292421ac9ce78849abf2268a2206fcc43aa` in `dpl_AuooTFSa66S2cjB8AUgEUJmZ37Xp`. The concert guide tracks focused checks, physical device verification and Google Sheets receiver setup. [Resume concert work](concert/README.md#handoff-for-the-next-review)
 
+A local draft restores the original leaf sweep with a slightly higher path on alternating questions and adds four combinations of hearts, supplied expressions and gold sparkles. The draft passed focused checks and awaits visual review. [Draft verification](concert/VERIFICATION.md#heart-expression-and-gold-sparkle-draft)
+
 ## Church Display: pictures, videos and study rooms (released November 13, 2026)
 
 The Church Display TV (lvz.app/display) can now play four kinds of slide: text (as before), pictures, videos and a live "Study rooms today" board. Each slide is added with one tap, removed with one tap, and can have its own show-from and stop-showing dates inside the playlist's dates. Videos play without sound and move on when they end. The rooms board reads lvrooms.web.app's public lobby feed (Anthony's approved exception, 2026-11-13) and shows room and time only. Uploads go to a new private `display-media` bucket (50 MB per file).
