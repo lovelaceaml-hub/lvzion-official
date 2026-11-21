@@ -35,6 +35,8 @@ An open event can enforce a seat limit. The server checks capacity and registrat
 
 ## Handoff for the next review
 
+The phone keyboard stability fix is live. The sender form, Continue and Help fit above a simulated keyboard on the public invitation. [Keyboard verification](VERIFICATION.md#iphone-keyboard-stability-follow-up)
+
 The original leaf sweep and its four expression combinations are live from `dbea0dc7e5eae6d61dd4fc2a43578c80661eb7f6` in Vercel deployment `dpl_7jymMSmvLs8Ms5JV9NSci1ChZscS`. [Live invitation](https://lvz.app/concert/rsvp) · [Release checks](VERIFICATION.md#heart-expression-and-gold-sparkle-release)
 
 The earlier page-specific scenes and stationary form fields shipped from `48892292421ac9ce78849abf2268a2206fcc43aa` in Vercel deployment `dpl_AuooTFSa66S2cjB8AUgEUJmZ37Xp`. Register still hops and Help returns to the same draft. [Live invitation](https://lvz.app/concert/rsvp) · [Scene verification](VERIFICATION.md#distinct-scene-update)

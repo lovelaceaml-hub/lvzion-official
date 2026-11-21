@@ -10,7 +10,7 @@ Keep compact module headers and the prominent center Apps launcher. The launcher
 
 ## Event Invitation and Registration · November 21, 2026
 
-A follow-up refactor is prepared for the iPhone keyboard jump reported on the invitation sender form. The card keeps its editing layout, the form scrolls internally when space shrinks, and Back dismisses the keyboard before showing another question. Verify on a physical iPhone before recording device acceptance. [Keyboard walkthrough](concert/README.md#handoff-for-the-next-review)
+The iPhone keyboard stability fix is live from [PR #94](https://github.com/lovelaceaml-hub/lvzion-official/pull/94), source `526b31b68c26bf7569d93078bf16143461815d16`, Vercel deployment `dpl_G1FpqyZktsx9cYzTFaPJYsY3MWdk`. A live phone-size check verified the sender form against a simulated keyboard. The card keeps its editing layout, the form scrolls internally when space shrinks, and Back dismisses the keyboard before showing another question. Verify on a physical iPhone before recording device acceptance. [Keyboard walkthrough](concert/README.md#handoff-for-the-next-review)
 
 The concert invitation is live with the original leaf sweep, a slightly higher path on alternating questions, and four combinations of hearts, supplied expressions and gold sparkles. The update merged in [PR #93](https://github.com/lovelaceaml-hub/lvzion-official/pull/93) and deployed from `dbea0dc7e5eae6d61dd4fc2a43578c80661eb7f6` in `dpl_7jymMSmvLs8Ms5JV9NSci1ChZscS`. The console and public phone-size check verified the opening, guest and invitation accents. The concert guide tracks focused checks, physical device verification and Google Sheets receiver setup. [Resume concert work](concert/README.md#handoff-for-the-next-review)
 
