@@ -1,13 +1,13 @@
 import './festival-motion.css';
 
-export type FestivalDirection = 'open' | 'forward' | 'back' | 'success';
+type FestivalDirection = 'forward' | 'back' | 'success';
 
 const reducedMotion = '(prefers-reduced-motion: reduce)';
 const activeTransitions = new WeakMap<HTMLDialogElement, () => void>();
 
 const leafFlights = [
   // Start and end heights, size, delay, and color across three depth planes.
-  [76, 25, 27, 15, 'fern'], [84, 31, 21, 52, 'gold'],
+  [76, 25, 27, 15, 'rose'], [84, 31, 21, 52, 'gold'],
   [52, 12, 22, 54, 'sage'], [63, 19, 18, 86, 'fern'],
   [27, 3, 13, 62, 'gold'], [69, 25, 13, 97, 'sage'],
   [93, 43, 10, 117, 'rose'], [44, 9, 9, 128, 'gold'],
@@ -15,16 +15,18 @@ const leafFlights = [
 ] as const;
 
 // Shared by opening, route changes and the adaptive form pager.
-export function playFestivalTransition(target: HTMLElement | null, direction: FestivalDirection) {
+export function playFestivalTransition(target: HTMLElement | null, stepDirection: FestivalDirection) {
   const section = target?.closest<HTMLElement>('.cc-registration[data-festival]');
   const sheet = section?.closest<HTMLDialogElement>('.cc-concert-stage[open]');
   if (!section || !sheet || target?.closest('[hidden]')) return;
+  const success = stepDirection === 'success';
+  const opening = !success && sheet.hasAttribute('data-opening-scene');
+  sheet.removeAttribute('data-opening-scene');
   activeTransitions.get(sheet)?.();
   const preference = matchMedia(reducedMotion);
   if (!section.animate || preference.matches || document.hidden) return;
 
-  const success = direction === 'success';
-  const opening = direction === 'open';
+  const direction = opening ? 'open' : stepDirection;
   const pager = target?.closest<HTMLElement>('.cc-page-nav');
   const content = pager?.dataset.for === 'form'
     ? Array.from(section.querySelectorAll<HTMLElement>('[data-form-unit]:not([hidden])'))
@@ -77,7 +79,7 @@ export function playFestivalTransition(target: HTMLElement | null, direction: Fe
     sheet.removeEventListener('focusin', stopForFocus);
     if (activeTransitions.get(sheet) === clear) activeTransitions.delete(sheet);
   };
-  const timer = window.setTimeout(clear, opening ? 750 : 670);
+  const timer = window.setTimeout(clear, 1130);
   activeTransitions.set(sheet, clear);
   preference.addEventListener('change', clear);
   document.addEventListener('visibilitychange', clear);

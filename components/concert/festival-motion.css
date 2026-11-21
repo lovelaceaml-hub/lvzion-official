@@ -31,9 +31,27 @@ dialog.cc-festival-stage[open]::backdrop {
 .cc-festival-leaves[data-direction="back"] { transform: scaleX(-1); }
 
 .cc-leaf-flight {
+  --flight-duration: 440ms;
+  --flight-start: -64%;
+  --flight-finish: 67%;
   position: absolute;
+  z-index: 3;
   inset: 0;
   color: #4b765c;
+}
+
+.cc-leaf-flight:nth-child(n + 5) {
+  --flight-duration: 660ms;
+  --flight-start: -59%;
+  --flight-finish: 59%;
+  z-index: 2;
+}
+
+.cc-leaf-flight:nth-child(n + 8) {
+  --flight-duration: 930ms;
+  --flight-start: -55%;
+  --flight-finish: 48%;
+  z-index: 1;
 }
 
 .cc-leaf-flight[data-color="sage"] { color: #819b6d; }
@@ -67,6 +85,16 @@ dialog.cc-festival-stage[open]::backdrop {
     &:active { scale: .978; translate: 0 2px; transition-duration: 80ms; }
   }
 
+  button[data-admission][data-festival-action] .cc-admission-stamp::after {
+    content: "";
+    position: absolute;
+    inset: -.38rem;
+    opacity: 0;
+    pointer-events: none;
+    background: radial-gradient(ellipse at 50% 74%, #ffe5a893, transparent 66%);
+    animation: cc-heaven-rays 950ms 120ms ease-out both;
+  }
+
   .cc-festival-stage :is(.cc-festival-choice, .cc-party-size button, .cc-page-nav button):active {
     scale: .982;
   }
@@ -88,13 +116,12 @@ dialog.cc-festival-stage[open]::backdrop {
     animation: cc-heaven-wind 500ms cubic-bezier(.33,.06,.28,1) both;
   }
 
-  .cc-festival-leaves[data-direction="open"]::before,
-  .cc-festival-leaves[data-direction="success"]::before {
+  .cc-festival-leaves[data-direction="open"]::before {
     background: radial-gradient(ellipse at 50% 76%, #fff4cb, #e8b599 26%, #8f9dbf 60%, #344b7a 84%);
     animation: cc-heaven-bloom 640ms cubic-bezier(.22,.68,.32,1) both;
   }
 
-  .cc-festival-leaves[data-direction="open"]::after {
+  .cc-festival-leaves:is([data-direction="open"], [data-direction="success"])::after {
     inset: -20%;
     background: conic-gradient(from -70deg at 50% 76%, transparent, #fff0b244, transparent 25%,
       #fff4c388 30%, transparent 38%);
@@ -102,15 +129,16 @@ dialog.cc-festival-stage[open]::backdrop {
   }
 
   .cc-festival-leaves[data-direction="success"]::before {
-    animation-duration: 550ms;
+    background: radial-gradient(ellipse at 50% 76%, #fff5cc, #efd29d 35%, #f4d9af7a 63%, transparent 79%);
+    animation: cc-heaven-arrival 690ms ease-out both;
   }
 
   .cc-leaf-flight {
-    animation: cc-heaven-flight 475ms var(--leaf-delay) cubic-bezier(.37,.06,.27,1) both;
+    animation: cc-heaven-flight var(--flight-duration) var(--leaf-delay) cubic-bezier(.37,.06,.27,1) both;
   }
 
   .cc-leaf-flight > i {
-    animation: cc-heaven-turn 475ms var(--leaf-delay) ease-in-out both;
+    animation: cc-heaven-turn var(--flight-duration) var(--leaf-delay) ease-in-out both;
   }
 
   .cc-leaf-flight:nth-child(even) > i {
@@ -145,6 +173,12 @@ dialog.cc-festival-stage[open]::backdrop {
   100% { opacity: 0; transform: scale(1.26) translateY(-8%); }
 }
 
+@keyframes cc-heaven-arrival {
+  0% { opacity: 0; transform: scale(.82) translateY(10%); }
+  28% { opacity: .87; }
+  100% { opacity: 0; transform: scale(1.28) translateY(-8%); }
+}
+
 @keyframes cc-heaven-rays {
   0%, 100% { opacity: 0; }
   34% { opacity: .82; }
@@ -153,10 +187,10 @@ dialog.cc-festival-stage[open]::backdrop {
 }
 
 @keyframes cc-heaven-flight {
-  0% { opacity: 0; transform: translate3d(-64%, 5%, 0); }
+  0% { opacity: 0; transform: translate3d(var(--flight-start), 5%, 0); }
   26% { opacity: .86; }
   70% { opacity: .78; }
-  100% { opacity: 0; transform: translate3d(67%, calc(var(--flight-to) - var(--flight-from)), 0); }
+  100% { opacity: 0; transform: translate3d(var(--flight-finish), calc(var(--flight-to) - var(--flight-from)), 0); }
 }
 
 @keyframes cc-heaven-turn {

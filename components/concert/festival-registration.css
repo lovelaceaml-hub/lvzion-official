@@ -69,7 +69,8 @@ button.ui-button[data-admission][data-festival-action],
   }
 
   & .cc-admission-stamp {
-    width: 2.05rem;
+    position: relative;
+    width: 2.18rem;
     height: 2.3rem;
     padding: .18rem;
     border: 1px solid #e5c585;
@@ -106,13 +107,13 @@ button.cc-corner-help.cc-festival-help {
   font: 750 1.2rem/1 var(--lvz-font-sans);
 }
 button.cc-festival-help:focus-visible {
-  outline: 3px solid #4489c4;
+  outline: 3px solid var(--festival-gold);
   outline-offset: -4px;
 }
 
 .cc-dialog.cc-concert-stage.cc-festival-stage[open][data-presentation="registration"] {
   --scene-sky: #d7e5f7;
-  --scene-horizon: #fbe7d1;
+  --scene-horizon: #fbe7d18f;
   --lvz-ink: var(--festival-navy);
   --lvz-ink-quiet: #485c64;
   --lvz-focus: #315f89;
@@ -123,17 +124,21 @@ button.cc-festival-help:focus-visible {
   border: 1px solid #b8c5da;
   border-radius: 1.3rem;
   background:
-    linear-gradient(170deg, var(--scene-sky), #f7faff 32%, #fffaf3c9 62%, var(--scene-horizon)),
+    linear-gradient(170deg, var(--scene-sky), #f7faffdf 30%, #fffaf375 58%, var(--scene-horizon)),
     url('/concert/peace-horizon.webp') center bottom / cover no-repeat;
   box-shadow: 0 22px 55px #101e4270, 0 0 0 1px #ffedc147;
 
   &:has(.cc-dialog-inner > div:not([hidden]) [data-step="member"]) {
     --scene-sky: #e5d9f0;
-    --scene-horizon: #f6ddd0;
+    --scene-horizon: #f6ddd083;
   }
-  &:has(.cc-dialog-inner > div:not([hidden]) :is([data-step="guest"], [data-step="sender"], [data-step="invite"])) {
+  &:has(.cc-dialog-inner > div:not([hidden]) :is([data-step="guest"], [data-step="identity"], [data-step="sender"])) {
     --scene-sky: #cedfe9;
-    --scene-horizon: #f2e7bc;
+    --scene-horizon: #f2e7bc74;
+  }
+  &:has(.cc-dialog-inner > div:not([hidden]) :is([data-step="quantity"], [data-step="invite"])) {
+    --scene-sky: #e4deed;
+    --scene-horizon: #f7dd9497;
   }
   & .cc-dialog-heading {
     border-block-end: 1px solid #8195b341;

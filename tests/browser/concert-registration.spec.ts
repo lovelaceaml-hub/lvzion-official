@@ -131,6 +131,14 @@ test('registration scenes sweep forward and back, then clear and respect reduced
   await expect(scene).toHaveAttribute('data-direction', 'open');
   await expect(scene.locator('.cc-leaf-flight')).toHaveCount(10);
   await expect(scene).toHaveCSS('pointer-events', 'none');
+  await expect(scene.locator('.cc-leaf-flight').first()).toHaveCSS('animation-duration', '0.44s');
+  await expect(scene.locator('.cc-leaf-flight').last()).toHaveCSS('animation-duration', '0.93s');
+  await expect(scene).toHaveCount(0);
+
+  await dialog.getByRole('button', {name:'Tickets & help'}).click();
+  await expect(scene).toHaveAttribute('data-direction', 'forward');
+  await dialog.getByRole('button', {name:'Back to registration'}).click();
+  await expect(scene).toHaveAttribute('data-direction', 'forward');
   await expect(scene).toHaveCount(0);
 
   await dialog.getByRole('button', {name:'I am a member.'}).click();

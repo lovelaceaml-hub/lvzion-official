@@ -216,12 +216,9 @@ function RegistrationFlow({festival, eventId, event, hostToken, footerSlot, pers
   const success = (step === 'tickets' && !tools && !existing && tickets.length > 0) ||
     (step === 'manage' && !manageOnly && invitations.length > 0);
   const transition = festival && success ? 'success' : direction.current;
-  const wasActive = useRef(false);
   useLayoutEffect(() => {
-    const opening = active && !wasActive.current;
-    wasActive.current = active;
-    if (festival && active) return playFestivalTransition(formHeading.current, opening && !success ? 'open' : transition);
-  }, [festival, active, step, inviteIndex, transition, success]);
+    if (festival && active) return playFestivalTransition(formHeading.current, transition);
+  }, [festival, active, step, inviteIndex, transition]);
 
   const previousHeight = useRef(0);
   function rememberHeight() {

@@ -30,6 +30,7 @@ export default function ConcertDialog({label, title, primary = false, children, 
     const sheet = dialog.current;
     if (!sheet || sheet.open) return;
     button.focus({preventScroll:true});
+    sheet.toggleAttribute('data-opening-scene', themed && Boolean(help) && !fromHelp);
     sheet.showModal();
     onOpen?.(fromHelp);
     corner.current?.showPopover?.();
