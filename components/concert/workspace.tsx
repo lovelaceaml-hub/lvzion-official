@@ -11,9 +11,10 @@ import {ConcertHero,ConcertSectionHeading} from './event-design';
 import ConcertDialog from './concert-dialog';
 import ConcertInfo from './concert-info';
 import TicketWallet from './ticket-wallet';
+import InvitationTracker from './invitation-tracker';
 import './concert.css';
 
-type View='ticket'|'invite'|'guests'|'settings';
+type View='ticket'|'invite'|'guests'|'settings'|'tracker';
 type Data=Workspace&{email:string};
 class SessionError extends Error{}
 async function readJSON(response:Response){
@@ -240,7 +241,7 @@ function ProgramEditor({reload}:{reload:()=>Promise<void>}){
 export default function ConcertWorkspace({media,shared}:{media:PromoMedia;shared?:{event:PublicEvent;eventId:string;open:boolean;full:boolean}}){
  const [data,setData]=useState<Data|null>(null),[error,setError]=useState(''),[signedOut,setSignedOut]=useState(false),[notice,setNotice]=useState(''),[view,setView]=useState<View>('ticket');
  const load=useCallback(async()=>{try{setData(await readJSON(await fetch('/api/concert',{cache:'no-store'})) as Data);setError('');}catch(x){setSignedOut(x instanceof SessionError);setError(x instanceof Error?x.message:'Unable to load the concert.');}},[]);
- useEffect(()=>{void load();if(window.location.hash==='#guests')setView('guests');},[load]);
+ useEffect(()=>{void load();if(window.location.hash==='#guests')setView('guests');else if(window.location.hash==='#invitations')setView('tracker');},[load]);
  const manage=data?.canManage??false;
  const [canPlace,setCanPlace]=useState(false);
  useEffect(()=>{
@@ -250,7 +251,7 @@ export default function ConcertWorkspace({media,shared}:{media:PromoMedia;shared
     .then(r=>{if(!controller.signal.aborted)setCanPlace(r.ok);}).catch(()=>undefined);
   return()=>controller.abort();
  },[data]);
- const more=useMemo(()=>[...(manage?[{label:'Guest list',icon:'people' as const,onClick:()=>setView('guests'),active:view==='guests'},{label:'Scan tickets',icon:'clipboard' as const,href:'/modules/concert/scan'},{label:'Concert settings',icon:'calendar' as const,onClick:()=>setView('settings'),active:view==='settings'}]:[]),...(canPlace?[{label:'Group placements',icon:'people' as const,href:'/modules/concert/placement'}]:[])],[manage,view,canPlace]);
+ const more=useMemo(()=>[...(manage?[{label:'Guest list',icon:'people' as const,onClick:()=>setView('guests'),active:view==='guests'},{label:'Invitation Tracker',icon:'people' as const,onClick:()=>setView('tracker'),active:view==='tracker'},{label:'Scan tickets',icon:'clipboard' as const,href:'/modules/concert/scan'},{label:'Concert settings',icon:'calendar' as const,onClick:()=>setView('settings'),active:view==='settings'}]:[]),...(canPlace?[{label:'Group placements',icon:'people' as const,href:'/modules/concert/placement'}]:[])],[manage,view,canPlace]);
  const left=useMemo(()=>({label:'My ticket',short:'Ticket',icon:'music' as const,onClick:()=>setView('ticket'),active:view==='ticket'}),[view]);
  const right=useMemo(()=>({label:'Invite',icon:'people' as const,onClick:()=>setView('invite'),active:view==='invite'}),[view]);
  return <main className={'ui-main ui-narrow cc-page'+(view==='ticket'?' cc-attendee':'')} data-concert-view={view}>
@@ -269,6 +270,7 @@ export default function ConcertWorkspace({media,shared}:{media:PromoMedia;shared
     note="Create a personal invitation link for each guest."/> :
    data&&data.event&&view==='invite'?<InviteView key={data.inviteUrl} event={data.event} inviteUrl={data.inviteUrl} invitedCount={data.invitedCount}/>:null}
   {data&&manage&&view==='guests'?<GuestsView data={data}/>:null}
+  {data?.event&&manage&&view==='tracker'?<InvitationTracker key={data.event.id} event={data.event}/>:null}
   {data&&manage&&view==='settings'?<><ConcertSectionHeading title="Concert settings" event={data.event}/><SettingsView data={data} reload={load} onCreated={()=>{setView('ticket');setNotice('The concert is open for RSVPs.');}}/></>:null}
   {data&&manage&&view==='settings'&&data.event?<ProgramEditor key={data.event.id} reload={load}/>:null}
  </main>;
