@@ -25,6 +25,20 @@ export async function POST(request:Request){
     const id=identifier(input.id),eventId=identifier(input.eventId),action=input.action;
     if(action!=='markTest'&&action!=='resend')throw new ConcertError('Invalid tracker action.');
     if(action==='markTest'&&typeof input.test!=='boolean')throw new ConcertError('Invalid test flag.');
+    if(action==='resend'){
+      // Fetch only through the manager-authorized RPC. Existing accepted mail must
+      // have current provider evidence before a repeat send; never resend a known bounce/complaint.
+      const list=object(await call(client,'concert_invitation_tracker',{p:{action:'list'}}));
+      if(list.eventId!==eventId||!Array.isArray(list.rows))throw new ConcertError('The event changed. Refresh the tracker.',409);
+      const row=(list.rows as InvitationRow[]).find(r=>r.id===id);
+      if(!row?.canResend)throw new ConcertError('This invitation is not eligible for resend.',409);
+      if(row.attempts>0){
+        const lookup=await invitationDelivery([row]);
+        const state=lookup.rows[0]?.providerEvent;
+        if(!state||['bounced','complained','suppressed','failed'].includes(state))
+          throw new ConcertError('Safe repeat delivery could not be verified. Review the provider record before resending.',409);
+      }
+    }
     const result=object(await call(client,'concert_invitation_tracker',{p:{action,id,eventId,test:input.test}}));
     if(result.ok!==true)throw new ConcertError('The change could not be confirmed.',503);
     if(action==='resend'&&!await deliverConcertMail('invitation',id))
